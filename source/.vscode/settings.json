@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "./qtdesigner"
+    ],
+    "python.analysis.typeCheckingMode": "basic"
+}

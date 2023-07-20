@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MSql_win1</class>
+ <widget class="QMainWindow" name="MSql_win1">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1200</width>
+    <height>700</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MSql Editor v1.0</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="resource.qrc">
+    <normaloff>:/icons/icons/sql_editor.gif</normaloff>:/icons/icons/sql_editor.gif</iconset>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <layout class="QGridLayout" name="gridLayout">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item row="0" column="0">
+     <widget class="QMdiArea" name="mdiArea">
+      <property name="viewMode">
+       <enum>QMdiArea::TabbedView</enum>
+      </property>
+      <property name="documentMode">
+       <bool>true</bool>
+      </property>
+      <property name="tabsClosable">
+       <bool>true</bool>
+      </property>
+      <property name="tabsMovable">
+       <bool>true</bool>
+      </property>
+      <property name="tabShape">
+       <enum>QTabWidget::Triangular</enum>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1200</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFiles">
+    <property name="title">
+     <string>Files</string>
+    </property>
+    <addaction name="actionNew"/>
+    <addaction name="actionOpen"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionSave_as"/>
+    <addaction name="separator"/>
+    <addaction name="actionUTF_8_Coding"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuServer">
+    <property name="title">
+     <string>Server</string>
+    </property>
+    <addaction name="actionICOM_815"/>
+    <addaction name="actionBACKUP_815"/>
+    <addaction name="actionBACKUP_2_815"/>
+    <addaction name="separator"/>
+    <addaction name="actionUSER_SMILE"/>
+    <addaction name="actionUSER_SMI"/>
+   </widget>
+   <widget class="QMenu" name="menueDIT">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionFind"/>
+    <addaction name="actionFind_and_Replace"/>
+    <addaction name="separator"/>
+    <addaction name="actionFont_editor_selector"/>
+   </widget>
+   <widget class="QMenu" name="menuRun">
+    <property name="title">
+     <string>Run</string>
+    </property>
+    <addaction name="actionRun_selected_area"/>
+    <addaction name="actionCommit"/>
+    <addaction name="actionRollback"/>
+   </widget>
+   <widget class="QMenu" name="menuAdvanced">
+    <property name="title">
+     <string>Advanced</string>
+    </property>
+    <addaction name="actionMake_table_editable"/>
+    <addaction name="actionSave_modified_data"/>
+    <addaction name="actionAutoColumnResize"/>
+   </widget>
+   <widget class="QMenu" name="menuSql">
+    <property name="title">
+     <string>Output</string>
+    </property>
+    <addaction name="actionGo_to_Top"/>
+    <addaction name="actionGo_to_End"/>
+    <addaction name="actionExport_to_Excel"/>
+    <addaction name="separator"/>
+    <addaction name="actionClear_output"/>
+    <addaction name="separator"/>
+    <addaction name="actionFont_output_selector"/>
+   </widget>
+   <widget class="QMenu" name="menuWindow">
+    <property name="title">
+     <string>Window</string>
+    </property>
+    <addaction name="actionCascade"/>
+    <addaction name="actionTile"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionProgram_info"/>
+   </widget>
+   <addaction name="menuFiles"/>
+   <addaction name="menuServer"/>
+   <addaction name="menueDIT"/>
+   <addaction name="menuRun"/>
+   <addaction name="menuSql"/>
+   <addaction name="menuAdvanced"/>
+   <addaction name="menuWindow"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <action name="actionOpen">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/folder.gif</normaloff>:/icons/icons/folder.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Open</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/disk.gif</normaloff>:/icons/icons/disk.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/kill.gif</normaloff>:/icons/icons/kill.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionICOM_815">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>ICOM_815</string>
+   </property>
+  </action>
+  <action name="actionBACKUP_815">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>BACKUP_815</string>
+   </property>
+  </action>
+  <action name="actionBACKUP_2_815">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>BACKUP_2_815</string>
+   </property>
+  </action>
+  <action name="actionUSER_SMILE">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>USER_SMILE</string>
+   </property>
+  </action>
+  <action name="actionUSER_SMI">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>USER_SMI</string>
+   </property>
+  </action>
+  <action name="actionFind">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/search_file.gif</normaloff>:/icons/icons/search_file.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Find</string>
+   </property>
+   <property name="shortcut">
+    <string>F3</string>
+   </property>
+  </action>
+  <action name="actionFind_and_Replace">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/replace.gif</normaloff>:/icons/icons/replace.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Find and Replace</string>
+   </property>
+   <property name="shortcut">
+    <string>F4</string>
+   </property>
+  </action>
+  <action name="actionRun_selected_area">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/go.gif</normaloff>:/icons/icons/go.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Execute</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
+   </property>
+  </action>
+  <action name="actionMake_table_editable">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Make table editable</string>
+   </property>
+  </action>
+  <action name="actionSave_modified_data">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/table.gif</normaloff>:/icons/icons/table.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Script the changed data</string>
+   </property>
+  </action>
+  <action name="actionGo_to_Top">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/left.gif</normaloff>:/icons/icons/left.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Go to Top</string>
+   </property>
+   <property name="shortcut">
+    <string>F7</string>
+   </property>
+  </action>
+  <action name="actionGo_to_End">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/right.gif</normaloff>:/icons/icons/right.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Go to End</string>
+   </property>
+   <property name="shortcut">
+    <string>F6</string>
+   </property>
+  </action>
+  <action name="actionExport_to_Excel">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/csv.gif</normaloff>:/icons/icons/csv.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Export to Excel</string>
+   </property>
+  </action>
+  <action name="actionAutoColumnResize">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/fix_column.gif</normaloff>:/icons/icons/fix_column.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Auto Column Resize</string>
+   </property>
+  </action>
+  <action name="actionSave_as">
+   <property name="text">
+    <string>Save as</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionUTF_8_Coding">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>UTF-8 Coding</string>
+   </property>
+  </action>
+  <action name="actionFont_editor_selector">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/font_type.gif</normaloff>:/icons/icons/font_type.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Font editor selector</string>
+   </property>
+  </action>
+  <action name="actionFont_output_selector">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/font_type.gif</normaloff>:/icons/icons/font_type.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Font output selector</string>
+   </property>
+  </action>
+  <action name="actionCascade">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/window.gif</normaloff>:/icons/icons/window.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Cascade</string>
+   </property>
+  </action>
+  <action name="actionTile">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/window2.gif</normaloff>:/icons/icons/window2.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Tile</string>
+   </property>
+  </action>
+  <action name="actionNew">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/new.gif</normaloff>:/icons/icons/new.gif</iconset>
+   </property>
+   <property name="text">
+    <string>New</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionProgram_info">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/info.gif</normaloff>:/icons/icons/info.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Program info</string>
+   </property>
+  </action>
+  <action name="actionCommit">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/confirm.gif</normaloff>:/icons/icons/confirm.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Commit</string>
+   </property>
+  </action>
+  <action name="actionRollback">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/history.gif</normaloff>:/icons/icons/history.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Rollback</string>
+   </property>
+  </action>
+  <action name="actionClear_output">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/eraser.gif</normaloff>:/icons/icons/eraser.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Clear result,output</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="resource.qrc"/>
+ </resources>
+ <connections/>
+</ui>
