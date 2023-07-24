@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1200</width>
+    <width>1250</width>
     <height>700</height>
    </rect>
   </property>
@@ -63,7 +63,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1200</width>
+     <width>1250</width>
      <height>26</height>
     </rect>
    </property>
@@ -86,7 +86,6 @@
     </property>
     <addaction name="actionICOM_815"/>
     <addaction name="actionBACKUP_815"/>
-    <addaction name="actionBACKUP_2_815"/>
     <addaction name="separator"/>
     <addaction name="actionUSER_SMILE"/>
     <addaction name="actionUSER_SMI"/>
@@ -150,6 +149,159 @@
    <addaction name="menuWindow"/>
    <addaction name="menuHelp"/>
   </widget>
+  <widget class="QDockWidget" name="dockWidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>212</width>
+     <height>185</height>
+    </size>
+   </property>
+   <property name="features">
+    <set>QDockWidget::AllDockWidgetFeatures</set>
+   </property>
+   <property name="windowTitle">
+    <string>DB Objects</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_3">
+     <property name="leftMargin">
+      <number>7</number>
+     </property>
+     <property name="topMargin">
+      <number>7</number>
+     </property>
+     <property name="rightMargin">
+      <number>7</number>
+     </property>
+     <property name="bottomMargin">
+      <number>3</number>
+     </property>
+     <item>
+      <widget class="QWidget" name="widget" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="0" colspan="2">
+           <widget class="QComboBox" name="oggetti_db_scelta">
+            <item>
+             <property name="text">
+              <string/>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Tables</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Package</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Trigger</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Procedures</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Functions</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Views</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="oggetti_db_ricerca">
+            <property name="inputMethodHints">
+             <set>Qt::ImhNone</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QComboBox" name="oggetti_db_tipo_ricerca">
+            <item>
+             <property name="text">
+              <string>Start with</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Like</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QListView" name="oggetti_db_elenco">
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+          <property name="dragEnabled">
+           <bool>true</bool>
+          </property>
+          <property name="dragDropMode">
+           <enum>QAbstractItemView::DragOnly</enum>
+          </property>
+          <property name="alternatingRowColors">
+           <bool>true</bool>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::ExtendedSelection</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
    <property name="icon">
     <iconset resource="resource.qrc">
@@ -196,18 +348,10 @@
     <bool>true</bool>
    </property>
    <property name="checked">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>BACKUP_815</string>
-   </property>
-  </action>
-  <action name="actionBACKUP_2_815">
-   <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>BACKUP_2_815</string>
+    <string>BACKUP_815</string>
    </property>
   </action>
   <action name="actionUSER_SMILE">
@@ -215,7 +359,7 @@
     <bool>true</bool>
    </property>
    <property name="checked">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>USER_SMILE</string>
@@ -431,5 +575,74 @@
  <resources>
   <include location="resource.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>oggetti_db_elenco</sender>
+   <signal>doubleClicked(QModelIndex)</signal>
+   <receiver>MSql_win1</receiver>
+   <slot>slot_oggetti_db_doppio_click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1096</x>
+     <y>210</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>967</x>
+     <y>264</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>oggetti_db_scelta</sender>
+   <signal>currentTextChanged(QString)</signal>
+   <receiver>MSql_win1</receiver>
+   <slot>slot_oggetti_db_scelta()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1137</x>
+     <y>74</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1253</x>
+     <y>105</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>oggetti_db_tipo_ricerca</sender>
+   <signal>currentTextChanged(QString)</signal>
+   <receiver>MSql_win1</receiver>
+   <slot>slot_oggetti_db_scelta()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1022</x>
+     <y>104</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1055</x>
+     <y>-12</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>oggetti_db_ricerca</sender>
+   <signal>editingFinished()</signal>
+   <receiver>MSql_win1</receiver>
+   <slot>slot_oggetti_db_scelta()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1108</x>
+     <y>106</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>961</x>
+     <y>-11</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>slot_oggetti_db_doppio_click()</slot>
+  <slot>slot_oggetti_db_scelta()</slot>
+ </slots>
 </ui>

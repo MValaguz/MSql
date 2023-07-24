@@ -3,19 +3,15 @@
     <file>icons/window2.gif</file>
     <file>icons/window.gif</file>
     <file>icons/new.gif</file>
-    <file>icons/version_toggle.gif</file>
     <file>icons/font_type.gif</file>
     <file>icons/python.gif</file>
-    <file>icons/trace.gif</file>
     <file>icons/not_equal.gif</file>
-    <file>icons/version.gif</file>
     <file>icons/password.gif</file>
     <file>icons/replace.gif</file>
     <file>icons/user.gif</file>
     <file>icons/splitter.gif</file>
     <file>icons/sql_editor.gif</file>
     <file>icons/fkey.gif</file>
-    <file>icons/MGrep.gif</file>
     <file>icons/twins.gif</file>
     <file>icons/left.gif</file>
     <file>icons/right.gif</file>
@@ -32,7 +28,6 @@
     <file>icons/pie.gif</file>
     <file>icons/speedometer.gif</file>
     <file>icons/translate.png</file>
-    <file>icons/MGrep.ico</file>
     <file>icons/qt.gif</file>
     <file>icons/download.gif</file>
     <file>icons/add.gif</file>
@@ -79,15 +74,12 @@
     <file>icons/refresh.gif</file>
     <file>icons/search.gif</file>
     <file>icons/search_file.gif</file>
-    <file>icons/MGrep.ico</file>
     <file>icons/search_string.gif</file>
     <file>icons/smile_backup.gif</file>
     <file>icons/smile_backup_2.gif</file>
     <file>icons/sql.gif</file>
     <file>icons/table.gif</file>
     <file>icons/up.gif</file>
-    <file>icons/upload1.gif</file>
-    <file>icons/upload2.gif</file>
     <file>icons/zip.gif</file>
   </qresource>
 </RCC>

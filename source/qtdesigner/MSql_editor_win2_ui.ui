@@ -17,123 +17,37 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
-   <layout class="QGridLayout" name="gridLayout">
+   <layout class="QVBoxLayout" name="verticalLayout">
     <property name="leftMargin">
+     <number>7</number>
+    </property>
+    <property name="topMargin">
      <number>7</number>
     </property>
     <property name="rightMargin">
      <number>7</number>
     </property>
-    <item row="0" column="0">
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
-      <widget class="QSplitter" name="splitter_obj">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+      <widget class="code_editor" name="e_sql">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>100</height>
+        </size>
        </property>
-       <widget class="code_editor" name="e_sql">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>100</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Source Code Pro</family>
-          <pointsize>11</pointsize>
-         </font>
-        </property>
-       </widget>
-       <widget class="QWidget" name="layoutWidget">
-        <layout class="QVBoxLayout" name="verticalLayout">
-         <item>
-          <widget class="QComboBox" name="oggetti_db_scelta">
-           <item>
-            <property name="text">
-             <string/>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Tables</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Package</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Trigger</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Procedures</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Functions</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Views</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout">
-           <item>
-            <widget class="QComboBox" name="oggetti_db_tipo_ricerca">
-             <item>
-              <property name="text">
-               <string>Start with</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Like</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="oggetti_db_ricerca">
-             <property name="inputMethodHints">
-              <set>Qt::ImhNone</set>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <widget class="QListView" name="oggetti_db_elenco">
-           <property name="editTriggers">
-            <set>QAbstractItemView::NoEditTriggers</set>
-           </property>
-           <property name="dragEnabled">
-            <bool>true</bool>
-           </property>
-           <property name="dragDropMode">
-            <enum>QAbstractItemView::DragOnly</enum>
-           </property>
-           <property name="alternatingRowColors">
-            <bool>true</bool>
-           </property>
-           <property name="selectionMode">
-            <enum>QAbstractItemView::ExtendedSelection</enum>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
+       <property name="font">
+        <font>
+         <family>Source Code Pro</family>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
       </widget>
       <widget class="QTabWidget" name="o_tab_widget">
        <property name="tabShape">
@@ -214,7 +128,6 @@
     </item>
    </layout>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <customwidgets>
   <customwidget>
@@ -226,74 +139,5 @@
  <resources>
   <include location="resource.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>oggetti_db_scelta</sender>
-   <signal>currentTextChanged(QString)</signal>
-   <receiver>MSql_win2</receiver>
-   <slot>slot_oggetti_db_scelta()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>787</x>
-     <y>33</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>599</x>
-     <y>31</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>oggetti_db_tipo_ricerca</sender>
-   <signal>currentTextChanged(QString)</signal>
-   <receiver>MSql_win2</receiver>
-   <slot>slot_oggetti_db_scelta()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>488</x>
-     <y>63</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>795</x>
-     <y>150</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>oggetti_db_ricerca</sender>
-   <signal>editingFinished()</signal>
-   <receiver>MSql_win2</receiver>
-   <slot>slot_oggetti_db_scelta()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>786</x>
-     <y>63</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>792</x>
-     <y>103</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>oggetti_db_elenco</sender>
-   <signal>doubleClicked(QModelIndex)</signal>
-   <receiver>MSql_win2</receiver>
-   <slot>slot_oggetti_db_doppio_click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>664</x>
-     <y>132</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>797</x>
-     <y>225</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
- <slots>
-  <slot>slot_oggetti_db_scelta()</slot>
-  <slot>slot_oggetti_db_doppio_click()</slot>
- </slots>
+ <connections/>
 </ui>

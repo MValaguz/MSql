@@ -6,7 +6,7 @@ rmdir c:\MGrep\MSql10 /S /Q
 pyinstaller MSql.spec
 cd dist
 xcopy MSql o:\Install\MSql\MSql10\ /S /H /I
-xcopy MSql c:\MGrep\MSql10\ /S /H /I
+xcopy MSql c:\MSql\MSql10\ /S /H /I
 cd ..
 rmdir dist /S /Q
 rmdir build /S /Q
