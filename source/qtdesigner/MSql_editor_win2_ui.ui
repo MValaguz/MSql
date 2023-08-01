@@ -10,6 +10,10 @@
     <height>600</height>
    </rect>
   </property>
+  <property name="windowIcon">
+   <iconset resource="resource.qrc">
+    <normaloff>:/icons/icons/sql_editor.gif</normaloff>:/icons/icons/sql_editor.gif</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <property name="sizePolicy">
     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -54,13 +58,16 @@
         <enum>QTabWidget::Triangular</enum>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="t_result">
         <attribute name="title">
          <string>Result</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_2">
+         <property name="spacing">
+          <number>0</number>
+         </property>
          <property name="leftMargin">
           <number>0</number>
          </property>
@@ -96,6 +103,9 @@
          <string>Output</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_3">
+         <property name="spacing">
+          <number>0</number>
+         </property>
          <property name="leftMargin">
           <number>0</number>
          </property>
@@ -112,8 +122,8 @@
           <widget class="QPlainTextEdit" name="o_output">
            <property name="font">
             <font>
-             <family>Courier</family>
-             <pointsize>10</pointsize>
+             <family>Segoe UI</family>
+             <pointsize>9</pointsize>
             </font>
            </property>
            <property name="readOnly">

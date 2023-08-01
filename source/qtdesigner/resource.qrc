@@ -1,85 +1,36 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/table.gif</file>
+    <file>icons/fix_column.gif</file>
+    <file>icons/folder.gif</file>
+    <file>icons/kill.gif</file>
+    <file>icons/arrow_up.gif</file>
+    <file>icons/down.gif</file>
+    <file>icons/edit.gif</file>
+    <file>icons/uppercase.gif</file>
+    <file>icons/navigator.gif</file>
     <file>icons/window2.gif</file>
     <file>icons/window.gif</file>
     <file>icons/new.gif</file>
     <file>icons/font_type.gif</file>
     <file>icons/python.gif</file>
-    <file>icons/not_equal.gif</file>
-    <file>icons/password.gif</file>
     <file>icons/replace.gif</file>
-    <file>icons/user.gif</file>
     <file>icons/splitter.gif</file>
     <file>icons/sql_editor.gif</file>
-    <file>icons/fkey.gif</file>
-    <file>icons/twins.gif</file>
-    <file>icons/left.gif</file>
-    <file>icons/right.gif</file>
     <file>icons/notes.gif</file>
-    <file>icons/fix_column.gif</file>
-    <file>icons/device.gif</file>
-    <file>icons/trash.gif</file>
-    <file>icons/resume.gif</file>
-    <file>icons/pause.gif</file>
-    <file>icons/dbase.gif</file>
-    <file>icons/Stop.gif</file>
-    <file>icons/Play.gif</file>
     <file>icons/confirm.gif</file>
-    <file>icons/pie.gif</file>
-    <file>icons/speedometer.gif</file>
-    <file>icons/translate.png</file>
     <file>icons/qt.gif</file>
-    <file>icons/download.gif</file>
-    <file>icons/add.gif</file>
-    <file>icons/archives.gif</file>
-    <file>icons/arrow_up.gif</file>
-    <file>icons/book.gif</file>
-    <file>icons/car.gif</file>
-    <file>icons/centre.gif</file>
-    <file>icons/clear.gif</file>
-    <file>icons/clipboard.gif</file>
-    <file>icons/compile.gif</file>
-    <file>icons/console.gif</file>
     <file>icons/csv.gif</file>
-    <file>icons/db.gif</file>
-    <file>icons/delete.gif</file>
     <file>icons/disk.gif</file>
-    <file>icons/down.gif</file>
     <file>icons/eraser.gif</file>
     <file>icons/excel.gif</file>
-    <file>icons/factory.gif</file>
     <file>icons/failed.gif</file>
-    <file>icons/favorites_directories.gif</file>
-    <file>icons/favorites_files.gif</file>
-    <file>icons/folder.gif</file>
-    <file>icons/font.gif</file>
-    <file>icons/gears.gif</file>
-    <file>icons/gears2.gif</file>
-    <file>icons/globe.gif</file>
     <file>icons/go.gif</file>
     <file>icons/help.gif</file>
     <file>icons/history.gif</file>
-    <file>icons/icom.gif</file>
-    <file>icons/icom_backup.gif</file>
-    <file>icons/icom_backup_2.gif</file>
     <file>icons/info.gif</file>
-    <file>icons/kill.gif</file>
-    <file>icons/line.gif</file>
-    <file>icons/lock.gif</file>
-    <file>icons/mail.gif</file>
-    <file>icons/oracle.gif</file>
-    <file>icons/paint.gif</file>
-    <file>icons/phone.gif</file>
-    <file>icons/plane.gif</file>
     <file>icons/refresh.gif</file>
-    <file>icons/search.gif</file>
     <file>icons/search_file.gif</file>
     <file>icons/search_string.gif</file>
-    <file>icons/smile_backup.gif</file>
-    <file>icons/smile_backup_2.gif</file>
-    <file>icons/sql.gif</file>
-    <file>icons/table.gif</file>
-    <file>icons/up.gif</file>
-    <file>icons/zip.gif</file>
   </qresource>
 </RCC>

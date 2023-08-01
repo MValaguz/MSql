@@ -56,7 +56,7 @@ def message_error(p_message):
     msg.setText(p_message)    
     msg.setWindowTitle("Error")
     icon = QtGui.QIcon()
-    icon.addPixmap(QtGui.QPixmap(":/icons/icons/MGrep.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)    
+    icon.addPixmap(QtGui.QPixmap(":/icons/icons/sql_editor.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)    
     msg.setWindowIcon(icon)
     msg.exec_()
     
@@ -69,7 +69,7 @@ def message_info(p_message):
     msg.setText(p_message)    
     msg.setWindowTitle("Info")
     icon = QtGui.QIcon()
-    icon.addPixmap(QtGui.QPixmap(":/icons/icons/MGrep.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)    
+    icon.addPixmap(QtGui.QPixmap(":/icons/icons/sql_editor.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)    
     msg.setWindowIcon(icon)
     msg.exec_()    
     
@@ -82,7 +82,7 @@ def message_question_yes_no(p_message):
     msg.setText(p_message)
     msg.setWindowTitle("Question")    
     icon = QtGui.QIcon()
-    icon.addPixmap(QtGui.QPixmap(":/icons/icons/MGrep.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)        
+    icon.addPixmap(QtGui.QPixmap(":/icons/icons/sql_editor.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)        
     msg.setWindowIcon(icon)
     msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
     
@@ -102,7 +102,7 @@ def message_question_yes_no_cancel(p_message):
     msg.setText(p_message)
     msg.setWindowTitle("Question")    
     icon = QtGui.QIcon()
-    icon.addPixmap(QtGui.QPixmap(":/icons/icons/MGrep.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)        
+    icon.addPixmap(QtGui.QPixmap(":/icons/icons/sql_editor.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)        
     msg.setWindowIcon(icon)
     msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel)
     

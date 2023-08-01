@@ -15,6 +15,9 @@ class Ui_MSql_win2(object):
     def setupUi(self, MSql_win2):
         MSql_win2.setObjectName("MSql_win2")
         MSql_win2.resize(800, 600)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/icons/icons/sql_editor.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        MSql_win2.setWindowIcon(icon)
         self.centralwidget = QtWidgets.QWidget(MSql_win2)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
@@ -42,6 +45,7 @@ class Ui_MSql_win2(object):
         self.t_result.setObjectName("t_result")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.t_result)
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_2.setSpacing(0)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.o_table = QtWidgets.QTableWidget(self.t_result)
         self.o_table.setAlternatingRowColors(True)
@@ -56,11 +60,12 @@ class Ui_MSql_win2(object):
         self.t_output.setObjectName("t_output")
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.t_output)
         self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_3.setSpacing(0)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.o_output = QtWidgets.QPlainTextEdit(self.t_output)
         font = QtGui.QFont()
-        font.setFamily("Courier")
-        font.setPointSize(10)
+        font.setFamily("Segoe UI")
+        font.setPointSize(9)
         self.o_output.setFont(font)
         self.o_output.setReadOnly(True)
         self.o_output.setObjectName("o_output")
@@ -70,7 +75,7 @@ class Ui_MSql_win2(object):
         MSql_win2.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MSql_win2)
-        self.o_tab_widget.setCurrentIndex(1)
+        self.o_tab_widget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MSql_win2)
 
     def retranslateUi(self, MSql_win2):

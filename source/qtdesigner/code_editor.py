@@ -5,7 +5,7 @@
  Data..........: 18/11/2019
  Descrizione...: Questa classe può essere utilizzata per aggiungere al widget QPlainTextEdit, il numero di righe. 
                  Può essere usato all'interno di QtDesigner, promuovendo il widget QPlainTextEdit.
-				 Fare riferimento all'esempio "oracle_my_sql", oggetto "e_sql", si vedrà che anziché essere di tipo QPlainTextEdit, sarà del tipo "CodeEditor"
+				 Fare riferimento all'oggetto e_sql dove si vede che anziché essere di tipo QPlainTextEdit è del tipo "CodeEditor"
 """
 from PyQt5.QtWidgets import QWidget, QPlainTextEdit, QApplication, QTextEdit
 from PyQt5.QtGui import QColor, QTextFormat, QPainter
@@ -45,9 +45,7 @@ class code_editor(QPlainTextEdit):
 			if block.isVisible() and bottom >= event.rect().top():
 				number = str(blockNumber + 1)
 				painter.setPen(Qt.black)
-				painter.drawText(0, int(top), self.lineNumberArea.width(), 
-					self.fontMetrics().height(),
-					Qt.AlignRight, number)
+				painter.drawText(0, int(top), self.lineNumberArea.width(), self.fontMetrics().height(), Qt.AlignRight, number)
 			block = block.next()
 			top = bottom
 			bottom = top + self.blockBoundingRect(block).height()
