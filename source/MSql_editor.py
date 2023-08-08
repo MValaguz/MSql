@@ -108,6 +108,13 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         self.statusBar.addPermanentWidget(self.l_utf8_enabled)        
 
         ###
+        # definizione della dimensioni dei dock laterali (sono 3, vengono raggruppati e definite le proporzioni)
+        ###
+        self.docks = self.dockWidget, self.dockWidget_2, self.dockWidget_3
+        widths = 10, 10, 1
+        self.resizeDocks(self.docks, widths, Qt.Vertical)        
+
+        ###
         # Apertura di un primo editor con connessione al DB
         ###
 
@@ -573,34 +580,108 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
 
             # se l'oggetto selezionato è una tabella o una vista --> preparo select per estrarre i nomi dei campi
             if v_tipo_oggetto == 'TABLE' or v_tipo_oggetto == 'VIEW':
-                self.v_cursor_db_obj.execute("""SELECT A.COLUMN_NAME AS NOME,
-                                                       Decode(A.DATA_TYPE,'NUMBER',Lower(A.DATA_TYPE) || '(' || A.DATA_PRECISION || ',' || A.DATA_SCALE || ')',Lower(A.DATA_TYPE) || '(' || A.CHAR_LENGTH || ')')  AS TIPO,
-                                                       Decode(A.NULLABLE,'Y',' not null','') AS COLONNA_NULLA,
-                                                       B.COMMENTS AS COMMENTO
-                                                FROM   ALL_TAB_COLUMNS A, ALL_COL_COMMENTS B 
-                                                WHERE  A.OWNER='SMILE' AND 
-                                                       A.TABLE_NAME ='"""+v_nome_oggetto+"""' AND 
-                                                       A.OWNER=B.OWNER AND 
-                                                       A.TABLE_NAME=B.TABLE_NAME AND 
-                                                       A.COLUMN_NAME=B.COLUMN_NAME 
-                                                ORDER BY A.COLUMN_ID""")
+                # ricerco la descrizione dell'oggetto
+                self.v_cursor_db_obj.execute("SELECT COMMENTS FROM all_tab_comments WHERE owner='SMILE' AND TABLE_NAME='"+v_nome_oggetto+"'")
+                v_tipo_oggetto_commento = self.v_cursor_db_obj.fetchone()[0]
 
-                # creo un modello dati con 4 colonne
+                # creo un modello dati con 4 colonne (dove nell'intestazione ci metto il nome della tabella e la sua descrizione)
                 v_model = QStandardItemModel()
-                v_model.setHorizontalHeaderLabels(['NOME', 'TIPO', 'COLONNA_NULLA', 'COMMENTO'])
-                # siccome devo compilare un albero, alla radice ci metto il nome dell'oggetto
-                v_campi = QStandardItem(v_nome_oggetto)
-                        
+                v_model.setHorizontalHeaderLabels([v_nome_oggetto, '', '', v_tipo_oggetto_commento])
+
+                ###
+                # prima radice con il nome della tabella
+                ###
+                v_root_campi = QStandardItem('Fields')
+
+                self.v_cursor_db_obj.execute("""SELECT A.COLUMN_NAME AS NOME,
+                                        Decode(A.DATA_TYPE,'NUMBER',Lower(A.DATA_TYPE) || '(' || A.DATA_PRECISION || ',' || A.DATA_SCALE || ')',Lower(A.DATA_TYPE) || '(' || A.CHAR_LENGTH || ')')  AS TIPO,
+                                        Decode(A.NULLABLE,'Y',' not null','') AS COLONNA_NULLA,
+                                        B.COMMENTS AS COMMENTO
+                                FROM   ALL_TAB_COLUMNS A, ALL_COL_COMMENTS B 
+                                WHERE  A.OWNER='SMILE' AND 
+                                        A.TABLE_NAME ='"""+v_nome_oggetto+"""' AND 
+                                        A.OWNER=B.OWNER AND 
+                                        A.TABLE_NAME=B.TABLE_NAME AND 
+                                        A.COLUMN_NAME=B.COLUMN_NAME 
+                                ORDER BY A.COLUMN_ID""")
+        
                 # prendo i vari campi della tabella o vista e li carico nel modello di dati
                 for result in self.v_cursor_db_obj:                       
                     v_campo_col0 = QStandardItem(result[0])
                     v_campo_col1 = QStandardItem(result[1])
                     v_campo_col2 = QStandardItem(result[2])
                     v_campo_col3 = QStandardItem(result[3])
-                    v_campi.appendRow([v_campo_col0,v_campo_col1,v_campo_col2,v_campo_col3])                
-                v_model.appendRow(v_campi)
+                    v_root_campi.appendRow([v_campo_col0,v_campo_col1,v_campo_col2,v_campo_col3])                
+                v_model.appendRow(v_root_campi)
 
+                ###
+                # seconda radice con le fk
+                ###
+                v_root_fk = QStandardItem('Constraints')
+
+                self.v_cursor_db_obj.execute("""SELECT CONSTRAINT_NAME,
+                                                       (SELECT LISTAGG(COLUMN_NAME,',') WITHIN GROUP (ORDER BY POSITION) FROM ALL_CONS_COLUMNS WHERE OWNER=ALL_CONSTRAINTS.OWNER AND CONSTRAINT_NAME=ALL_CONSTRAINTS.CONSTRAINT_NAME) COLONNE 
+                                                FROM   ALL_CONSTRAINTS 
+                                                WHERE  OWNER='SMILE' AND 
+                                                       TABLE_NAME='"""+v_nome_oggetto+"""'""")
+
+                # carico elenco constraints
+                for result in self.v_cursor_db_obj:                       
+                    v_campo_col0 = QStandardItem(result[0])
+                    v_campo_col1 = None
+                    v_campo_col2 = None
+                    v_campo_col3 = QStandardItem(result[1])
+                    v_root_fk.appendRow([v_campo_col0,v_campo_col1,v_campo_col2,v_campo_col3])                
+                v_model.appendRow(v_root_fk)
+
+                ###
+                # terza radice con gli indici
+                ###
+                v_root_idx = QStandardItem('Indexes')
+
+                self.v_cursor_db_obj.execute("""SELECT INDEX_NAME,
+                                                       CASE WHEN InStr(INDEX_TYPE,'FUNCTION') != 0 THEN 'function' END TIPO, 
+                                                       CASE WHEN UNIQUENESS='UNIQUE' THEN 'unique' END UNICO, 
+                                                       (SELECT LISTAGG(COLUMN_NAME,',') WITHIN GROUP (ORDER BY COLUMN_POSITION) COLONNE FROM ALL_IND_COLUMNS WHERE INDEX_OWNER=ALL_INDEXES.OWNER AND INDEX_NAME=ALL_INDEXES.INDEX_NAME) COLONNE
+                                                FROM   ALL_INDEXES 
+                                                WHERE  OWNER='SMILE' AND 
+                                                       TABLE_NAME='"""+v_nome_oggetto+"""'
+                                                       ORDER BY INDEX_NAME""")
+
+                # carico elenco indici
+                for result in self.v_cursor_db_obj:                       
+                    v_campo_col0 = QStandardItem(result[0])
+                    v_campo_col1 = QStandardItem(result[1])
+                    v_campo_col2 = QStandardItem(result[2])
+                    v_campo_col3 = QStandardItem(result[3])
+                    v_root_idx.appendRow([v_campo_col0,v_campo_col1,v_campo_col2,v_campo_col3])                
+                v_model.appendRow(v_root_idx)                
+
+                ###
+                # quarta radice con i trigger
+                ###
+                v_root_trg = QStandardItem('Triggers')
+
+                self.v_cursor_db_obj.execute("""SELECT TRIGGER_NAME, 
+                                                       TRIGGER_TYPE, 
+                                                       TRIGGERING_EVENT 
+                                                FROM   ALL_TRIGGERS 
+                                                WHERE  OWNER='SMILE' AND 
+                                                       TABLE_NAME='"""+v_nome_oggetto+"""'
+                                                ORDER BY TRIGGER_NAME""")
+
+                # carico elenco indici
+                for result in self.v_cursor_db_obj:                       
+                    v_campo_col0 = QStandardItem(result[0])
+                    v_campo_col1 = QStandardItem(result[1])
+                    v_campo_col2 = QStandardItem(result[2])
+                    v_campo_col3 = None
+                    v_root_trg.appendRow([v_campo_col0,v_campo_col1,v_campo_col2,v_campo_col3])                
+                v_model.appendRow(v_root_trg)                
+
+                ###                
                 # attribuisco il modello dei dati all'albero
+                ###
                 self.db_oggetto_tree.setModel(v_model)
                 # forzo la larghezza delle colonne
                 self.db_oggetto_tree.setColumnWidth(0, 130)
@@ -608,7 +689,67 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 self.db_oggetto_tree.setColumnWidth(2, 80)
                 self.db_oggetto_tree.setColumnWidth(3, 1000)
                 # mi posiziono sulla prima riga ed espando l'albero
-                v_index = v_model.indexFromItem(v_campi)
+                v_index = v_model.indexFromItem(v_root_campi)
+                self.db_oggetto_tree.expand(v_index)
+
+            # se l'oggetto selezionato è una tabella o una vista --> preparo select per estrarre i nomi dei campi
+            elif v_tipo_oggetto in ('PACKAGE','FUNCTION','PROCEDURE') :
+                # creo un modello dati con 1 colonna (dove nell'intestazione ci metto il nome dell'oggetto)
+                v_model = QStandardItemModel()
+                v_model.setHorizontalHeaderLabels([v_nome_oggetto])
+
+                ###
+                # prima radice con il nome dell'oggetto
+                ###
+                v_root_codice = QStandardItem('Code')
+
+                self.v_cursor_db_obj.execute("""SELECT UPPER(TEXT) FROM ALL_SOURCE WHERE OWNER='SMILE' AND NAME='"""+v_nome_oggetto+"""' AND TYPE='"""+v_tipo_oggetto+"""' ORDER BY LINE""")
+        
+                # analizzo il sorgente e ne estraggo il nome di funzioni e procedure
+                v_start_sezione = False
+                v_text_sezione = ''
+                for result in self.v_cursor_db_obj:                       
+                    # dalla riga elimino gli spazi a sinistra e a destra
+                    v_riga_raw = result[0]
+                    v_riga = v_riga_raw.lstrip()
+                    v_riga = v_riga.rstrip()                    
+                    # individio riga di procedura-funzione
+                    if v_riga[0:9] == 'PROCEDURE' or v_riga[0:8] == 'FUNCTION':
+                        # il nome della procedura-funzione inizia dal primo carattere spazio fino ad apertura parentesi tonda                        
+                        if v_riga.find('(') != -1:
+                            v_nome = v_riga[v_riga.find(' ')+1:v_riga.find('(')]
+                        else:
+                            v_nome = v_riga[v_riga.find(' ')+1:len(v_riga)]
+                        # creo il nodo con il nome della procedura-funzione
+                        v_int_proc_func = QStandardItem(v_nome)                        
+                        v_root_codice.appendRow([v_int_proc_func])         
+                        # indico che sono all'interno di una nuova sezione, terminata la quale poi dovrò esplodere elenco parametri                       
+                        v_start_sezione = True
+                        v_text_sezione = v_riga
+                    # ...continua la sezione di parametri....
+                    elif v_start_sezione:
+                        v_text_sezione += v_riga
+
+                    # elaboro la sezione che contiene i parametri della procedura-funzione
+                    if v_start_sezione and v_riga.find(')') != -1:                        
+                        v_text_sezione = v_text_sezione[v_text_sezione.find('(')+1:v_text_sezione.find(')')]                        
+                        v_elenco_parametri = v_text_sezione.split(',')
+                        for v_txt_parametro in v_elenco_parametri:                            
+                            v_stringa = v_txt_parametro.lstrip()
+                            v_parametro = v_stringa[0:v_stringa.find(' ')]
+                            v_item_parametro = QStandardItem(v_parametro)                        
+                            v_int_proc_func.appendRow(v_item_parametro)                        
+                        v_text_sezione = ''
+                        v_start_sezione = False
+                
+                v_model.appendRow(v_root_codice)
+               
+                ###                
+                # attribuisco il modello dei dati all'albero
+                ###
+                self.db_oggetto_tree.setModel(v_model)                
+                # mi posiziono sulla prima riga ed espando l'albero
+                v_index = v_model.indexFromItem(v_root_codice)
                 self.db_oggetto_tree.expand(v_index)
                                         
             # Ripristino icona freccia del mouse
@@ -685,7 +826,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.e_sql.setPlainText(p_contenuto_file)
 
         # var che indica che il testo è stato modificato
-        self.v_testo_modificato = False        
+        #self.e_sql.insertPlainText('SELECT * FROM MS_UTN')
+        self.v_testo_modificato = False                
 
         ###
         # Definizione di eventi aggiuntivi
@@ -697,7 +839,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         # slot per controllare quando cambia il testo digitato dall'utente
         self.e_sql.textChanged.connect(self.slot_e_sql_modificato)        
             
-        # attivo il drop sulla parte di editor
+        # attivo il drop sulla parte di editor        
         self.e_sql.setAcceptDrops(True)    
         self.e_sql.installEventFilter(self)   
 
@@ -709,7 +851,11 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.v_cursor = v_global_connection.cursor()
         else:
             self.v_cursor = None
-        
+
+        # definizione del menu di ricerca sulle colonne dei risultati
+        self.o_table_hH = self.o_table.horizontalHeader()
+        self.o_table_hH.sectionClicked.connect(self.slot_click_colonna_risultati)        
+
     def eventFilter(self, source, event):
         """
            Gestione di eventi personalizzati sull'editor (overwrite, drag&drop)
@@ -760,6 +906,101 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         
         return False
         
+    def slot_click_colonna_risultati(self, index):       
+        """
+            Gestione menu popup all'interno dei risultati        
+            Al click su una delle intestazioni di colonna della sezione "risultati" viene presentato un menu popup che permette di
+            ordinare i risultati su quella colonna e di effettuare delle ricerche parziali
+        """ 
+        # creazione del menu popup
+        self.o_table_popup = QMenu(self)
+        self.o_table_popup_index = index        
+        
+        # creazione del campo di input per la where
+        self.e_popup_where = QLineEdit()
+        self.e_popup_where.setPlaceholderText('where...')
+        self.e_popup_where.editingFinished.connect(self.slot_where_popup)
+        v_action = QWidgetAction(self.o_table_popup)
+        v_action.setDefaultWidget(self.e_popup_where)        
+        self.o_table_popup.addAction(v_action)
+                
+        # bottone per ordinamento ascendente
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(":/icons/icons/order_a_z.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)        
+        v_sort_a_z = QPushButton()
+        v_sort_a_z.setText('Sort asc')
+        v_sort_a_z.setIcon(icon1)        
+        v_sort_a_z.clicked.connect(self.slot_order_asc_popup)
+        v_action = QWidgetAction(self.o_table_popup)
+        v_action.setDefaultWidget(v_sort_a_z)        
+        self.o_table_popup.addAction(v_action)
+
+        # bottone per ordinamento discendente
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap(":/icons/icons/order_z_a.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        v_sort_z_a = QPushButton()
+        v_sort_z_a.setText('Sort desc')
+        v_sort_z_a.setIcon(icon2)
+        v_sort_z_a.clicked.connect(self.slot_order_desc_popup)
+        v_action = QWidgetAction(self.o_table_popup)
+        v_action.setDefaultWidget(v_sort_z_a)        
+        self.o_table_popup.addAction(v_action)
+
+        # calcolo la posizione dove deve essere visualizzato il menu popup in base alle proprietà dell'header di tabella
+        headerPos = self.o_table.mapToGlobal(self.o_table_hH.pos())
+        posY = headerPos.y() + self.o_table_hH.height()
+        posX = headerPos.x() + self.o_table_hH.sectionPosition(index) - self.o_table_hH.offset()
+        self.o_table_popup.exec_(QPoint(posX, posY))        
+
+    def slot_where_popup(self):
+        """
+           Gestione menu popup all'interno dei risultati
+           Esecuzione della where specifica
+        """
+        if self.e_popup_where.text() != '':
+            # prendo l'item dell'header di tabella             
+            v_header_item = self.o_table.horizontalHeaderItem(self.o_table_popup_index)
+        
+            # wrap dell'attuale select con altra order by
+            v_new_select = "SELECT * FROM (" + self.v_select_corrente + ") WHERE (UPPER(" + v_header_item.text() + ") LIKE '%" + self.e_popup_where.text().upper() + "%')"
+        
+            # rieseguo la select
+            self.esegui_select(v_new_select, False)
+        
+        # chiudo il menu popup
+        self.o_table_popup.close()
+
+    def slot_order_asc_popup(self):
+        """
+           Gestione menu popup all'interno dei risultati
+           Ordinamento dei risultati sulla colonna attiva
+        """
+        self.select_corrente_order_by('ASC')
+
+    def slot_order_desc_popup(self):
+        """
+           Gestione menu popup all'interno dei risultati
+           Ordinamento dei risultati sulla colonna attiva
+        """
+        self.select_corrente_order_by('DESC')
+
+    def select_corrente_order_by(self, p_tipo_ordinamento):
+        """
+           Gestione menu popup all'interno dei risultati
+           Riesegue la select corrente con il tipo di ordinamento richiesto
+        """
+        # prendo l'item dell'header di tabella 
+        v_header_item = self.o_table.horizontalHeaderItem(self.o_table_popup_index)
+        
+        # wrap dell'attuale select con altra order by
+        v_new_select = 'SELECT * FROM (' + self.v_select_corrente + ') ORDER BY ' + v_header_item.text() + ' ' + p_tipo_ordinamento
+                
+        # rieseguo la select
+        self.esegui_select(v_new_select, False)
+        
+        # chiudo il menu popup
+        self.o_table_popup.close()
+
     def slot_clear(self, p_type):
         """
            Pulisce risultati e output se p_type = 'ALL'
@@ -904,7 +1145,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
            Esegue istruzione p_istruzione
         """
         if p_istruzione[0:6].upper() == 'SELECT':
-            self.esegui_select(p_istruzione)
+            self.esegui_select(p_istruzione, True)
         elif p_istruzione[0:6].upper() in ('INSERT','UPDATE','DELETE'):
             self.esegui_script(p_istruzione, True)
         else:            
@@ -924,9 +1165,10 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         else:
             message_error('No script!')
 
-    def esegui_select(self, p_select):
+    def esegui_select(self, p_select, p_corrente):
         """
            Esegue p_select (solo il parser con carico della prima serie di record)
+               se p_corrente è True la var v_select_corrente verrà rimpiazzata
         """
         global v_global_connesso
         global v_global_editable
@@ -946,15 +1188,16 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.y = 0
 
             # prendo solo il testo che eventualmente l'utente ha evidenziato a video
-            self.v_select_corrente = p_select
+            if p_corrente:
+                self.v_select_corrente = p_select
             
             # se la tabella deve essere editabile
             # all'sql scritto dall'utente aggiungo una parte che mi permette di avere la colonna id riga
             # questa colonna mi servirà per tutte le operazioni di aggiornamento
             if v_global_editable:
-                v_select = 'SELECT ROWID, MY_SQL.* FROM (' + self.v_select_corrente + ') MY_SQL'    
+                v_select = 'SELECT ROWID, MY_SQL.* FROM (' + p_select + ') MY_SQL'    
             else:
-                v_select = self.v_select_corrente
+                v_select = p_select
 
             # esegue sql contenuto nel campo a video                    
             try:                

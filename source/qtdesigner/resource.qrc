@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/order_a_z.gif</file>
+    <file>icons/order_z_a.gif</file>
     <file>icons/table.gif</file>
     <file>icons/fix_column.gif</file>
     <file>icons/folder.gif</file>

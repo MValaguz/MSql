@@ -163,9 +163,14 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>172</width>
-     <height>186</height>
+     <width>188</width>
+     <height>188</height>
     </size>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
    </property>
    <property name="features">
     <set>QDockWidget::AllDockWidgetFeatures</set>
@@ -247,6 +252,11 @@
         </item>
         <item row="2" column="0">
          <widget class="QListView" name="oggetti_db_elenco">
+          <property name="font">
+           <font>
+            <pointsize>8</pointsize>
+           </font>
+          </property>
           <property name="editTriggers">
            <set>QAbstractItemView::NoEditTriggers</set>
           </property>
@@ -340,9 +350,14 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>95</width>
-     <height>116</height>
+     <width>96</width>
+     <height>117</height>
     </size>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
    </property>
    <property name="windowTitle">
     <string>Object Viewer</string>
@@ -366,21 +381,28 @@
      </property>
      <item>
       <widget class="QTreeView" name="db_oggetto_tree">
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
        <property name="alternatingRowColors">
         <bool>true</bool>
        </property>
        <property name="indentation">
         <number>15</number>
        </property>
-       <attribute name="headerVisible">
-        <bool>false</bool>
-       </attribute>
       </widget>
      </item>
     </layout>
    </widget>
   </widget>
   <widget class="QDockWidget" name="dockWidget_3">
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
+   </property>
    <property name="windowTitle">
     <string>SQL History</string>
    </property>
@@ -403,6 +425,11 @@
      </property>
      <item>
       <widget class="QListView" name="o_history">
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
        <property name="dragEnabled">
         <bool>true</bool>
        </property>

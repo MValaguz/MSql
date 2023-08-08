@@ -53,7 +53,6 @@ class Ui_MSql_win2(object):
         self.o_table.setObjectName("o_table")
         self.o_table.setColumnCount(0)
         self.o_table.setRowCount(0)
-        self.o_table.horizontalHeader().setSortIndicatorShown(True)
         self.verticalLayout_2.addWidget(self.o_table)
         self.o_tab_widget.addTab(self.t_result, "")
         self.t_output = QtWidgets.QWidget()
@@ -80,7 +79,6 @@ class Ui_MSql_win2(object):
 
     def retranslateUi(self, MSql_win2):
         _translate = QtCore.QCoreApplication.translate
-        self.o_table.setSortingEnabled(True)
         self.o_tab_widget.setTabText(self.o_tab_widget.indexOf(self.t_result), _translate("MSql_win2", "Result"))
         self.o_tab_widget.setTabText(self.o_tab_widget.indexOf(self.t_output), _translate("MSql_win2", "Output"))
 from code_editor import code_editor
