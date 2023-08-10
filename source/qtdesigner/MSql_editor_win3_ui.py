@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MSql_win3(object):
     def setupUi(self, MSql_win3):
         MSql_win3.setObjectName("MSql_win3")
-        MSql_win3.resize(616, 408)
+        MSql_win3.resize(684, 226)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/icons/icons/qt.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MSql_win3.setWindowIcon(icon)

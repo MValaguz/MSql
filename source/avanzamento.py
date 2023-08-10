@@ -14,7 +14,6 @@ sys.path.append('qtdesigner')
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-import resource_rc
 
 # Classe per la visualizzazione della progressbar
 class avanzamento_infinito_class(QProgressDialog):

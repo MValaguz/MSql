@@ -9,15 +9,12 @@
                  In questo programma sono state sperimentate diverse tecniche!
 """
 
-# Librerie sistema
-import sys
-import os
-import datetime
+# Librerie di base
+import sys, os, datetime
 # Amplifico la pathname dell'applicazione in modo veda il contenuto della directory qtdesigner dove sono contenuti i layout
 sys.path.append('qtdesigner')
 # Librerie di data base
-import cx_Oracle
-import oracle_my_lib
+import cx_Oracle, oracle_my_lib
 # Librerie grafiche QT
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -28,13 +25,15 @@ from xlsxwriter.workbook import Workbook
 from MSql_editor_win1_ui import Ui_MSql_win1
 from MSql_editor_win2_ui import Ui_MSql_win2
 from MSql_editor_win3_ui import Ui_MSql_win3
-# Classi qtdesigner per la ricerca e la sostituzione di stringhe di testo
+# Classi qtdesigner per la ricerca e la sostituzione di stringhe di testo, e per il posizionamento
 from find_ui import Ui_FindWindow
 from find_e_replace_ui import Ui_Find_e_Replace_Window
+from goto_line_ui import Ui_GotoLineWindow
 # Classe per visualizzare la barra di avanzamento 
 from avanzamento import avanzamento_infinito_class
-# Classe per evidenziare il codice 
+# Classe per evidenziare il codice nella sezione di editor di testo
 import highlighting_words_in_text_editor
+# Utilità varie
 from utilita import *
 from utilita_database import *
 
@@ -55,6 +54,8 @@ v_global_connesso = False
 v_global_utf_8 = False 
 # Siccome la voce di menu uppercase è globale, con una variabile globale deve essere gestita
 v_global_uppercase = False 
+# Siccome la voce di menu overwrite è globale, con una variabile globale deve essere gestita
+v_global_overwrite = False
 # Siccome la voce di menu editable è globale, con una variabile globale deve essere gestita
 v_global_editable = False 
                    
@@ -89,6 +90,11 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         self.l_tabella_editabile.setFrameStyle(QFrame.Panel | QFrame.Sunken)
         self.l_tabella_editabile.setStyleSheet('color: black;')
         self.statusBar.addPermanentWidget(self.l_tabella_editabile)                
+
+        self.l_numero_righe = QLabel()
+        self.l_numero_righe.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        self.statusBar.addPermanentWidget(self.l_numero_righe)                
+        self.l_numero_righe.setText("Lines: 0")
 
         self.l_numero_caratteri = QLabel()
         self.l_numero_caratteri.setFrameStyle(QFrame.Panel | QFrame.Sunken)
@@ -156,7 +162,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         v_global_utf_8 = False        
         self.slot_utf8()
         v_global_uppercase = True        
-        self.slot_uppercase()
+        self.slot_uppercase()        
         v_global_editable = False
         self.slot_editable()
                         
@@ -187,6 +193,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         """
         global v_global_utf_8
         global v_global_uppercase
+        global v_global_overwrite
         global v_global_editable
 
         #print('Voce di menù --> ' + p_slot.text())    
@@ -219,6 +226,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             # creo una nuovo oggetto editor (gli passo il titolo e eventuale contenuto del file e gli oggetti della statusbar)
             o_MSql_win2 = MSql_win2_class(v_titolo, 
                                           v_contenuto_file, 
+                                          self.l_numero_righe,
                                           self.l_numero_caratteri, 
                                           self.l_overwrite_enabled, 
                                           self.l_tabella_editabile,
@@ -247,6 +255,15 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 v_global_uppercase = False
             # aggiorno status bar e aggiorno oggetti
             self.slot_uppercase()
+        
+        # scrittura overwrite
+        elif p_slot.text() == 'Overwrite':
+            if self.actionOverwrite.isChecked():
+                v_global_overwrite = True
+            else:
+                v_global_overwrite = False
+            # aggiorno status bar e aggiorno oggetti
+            self.slot_overwrite()
 
         # Rendo l'output dell'sql editabile
         elif p_slot.text() == 'Make table editable':
@@ -268,6 +285,9 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         # Riorganizzo le window in modalità piastrelle
         elif p_slot.text() == 'Tile':
             self.mdiArea.tileSubWindows()           
+        # Apro file di help
+        elif p_slot.text() == 'Help':
+            os.system("start help\\MSql_help.html")
         # Visualizzo program info
         elif p_slot.text() == 'Program info':            
             self.program_info = MSql_win3_class()
@@ -312,6 +332,33 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             # Sostituzione di testo
             elif p_slot.text() == 'Find and Replace':
                 o_MSql_win2.slot_find_e_replace()
+            # Zoom In del testo
+            elif p_slot.text() == 'Zoom In':
+                o_MSql_win2.e_sql.zoomIn()
+            # Zoom Out del testo
+            elif p_slot.text() == 'Zoom Out':
+                o_MSql_win2.e_sql.zoomOut()
+            # Annulla il testo
+            elif p_slot.text() == 'Undo':
+                o_MSql_win2.e_sql.undo()
+            # Ripristina il testo
+            elif p_slot.text() == 'Redo':
+                o_MSql_win2.e_sql.redo()
+            # Taglia il testo
+            elif p_slot.text() == 'Cut':
+                o_MSql_win2.e_sql.cut()
+            # Copia il testo
+            elif p_slot.text() == 'Copy':
+                o_MSql_win2.e_sql.copy()
+            # Incolla il testo
+            elif p_slot.text() == 'Paste':
+                o_MSql_win2.e_sql.paste()
+            # Seleziona tutto
+            elif p_slot.text() == 'Select All':
+                o_MSql_win2.e_sql.selectAll()
+            # Vai alla riga numero
+            elif p_slot.text() == 'Go To Line':
+                o_MSql_win2.slot_goto_line()
             # Esecuzione dell'sql
             elif p_slot.text() == 'Execute':
                 o_MSql_win2.slot_esegui()
@@ -369,6 +416,27 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             self.l_uppercase_enabled.setText('UPP')
         else:
             self.l_uppercase_enabled.setText("low")
+
+    def slot_overwrite(self):
+        """
+           Gestione della modalità di sovrascrittura
+        """
+        global v_global_overwrite
+        global v_global_uppercase
+
+        # se overwrite abilitato, la evidenzio
+        if v_global_overwrite:            
+            self.l_overwrite_enabled.setText('OVR')            
+            # se abilitata la scrittura maiuscola --> avverto che l'overwrite non funzionerà
+            if v_global_uppercase:
+                message_info('The overwrite not working when uppercase is active!')
+        else:
+            self.l_overwrite_enabled.setText("INS")
+
+        # scorro la lista-oggetti-editor e modifico lo stato uppercase di ognuno
+        for obj_win2 in self.o_lst_window2:
+            if not obj_win2.v_editor_chiuso:
+                obj_win2.e_sql.setOverwriteMode(v_global_overwrite)        
 
     def slot_editable(self):
         """
@@ -769,6 +837,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
     def __init__(self, 
                  p_titolo, # Titolo della window-editor
                  p_contenuto_file,  # Eventuale contenuto da inserire direttamente nella parte di editor
+                 o_l_numero_righe, # Puntatore all'oggetto label numero di righe della statusbar
                  o_l_numero_caratteri,  # Puntatore all'oggetto label numero di caratteri della statusbar
                  o_l_overwrite_enabled,  # Puntatore all'oggetto label di overwrite della statusbar
                  o_l_tabella_editabile,  # Puntatore all'oggetto label editable della statusbar
@@ -784,6 +853,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.setWindowTitle(self.v_titolo_window)
 
         # mi salvo il link agli oggetti della status bar che l'editor va ad aggiornare (es. num. caratteri, ecc.)
+        self.l_numero_righe = o_l_numero_righe
         self.l_numero_caratteri = o_l_numero_caratteri
         self.l_overwrite_enabled = o_l_overwrite_enabled
         self.l_tabella_editabile = o_l_tabella_editabile
@@ -793,7 +863,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.m_history = o_m_history
 
         # splitter che separa l'editor dall'output: imposto l'immagine per indicare lo splitter e il relativo rapporto tra il widget di editor e quello di output
-        self.splitter.setStyleSheet("QSplitter::handle {image: url(':/icons/icons/splitter.gif')}")
+        #self.splitter.setStyleSheet("QSplitter::handle {text: url(':/icons/icons/splitter.gif')}")
         self.splitter.setStretchFactor(0,1)
     
         ###
@@ -860,22 +930,12 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         """
            Gestione di eventi personalizzati sull'editor (overwrite, drag&drop)
         """      
-        global v_global_uppercase
+        global v_global_uppercase    
 
         # individuo la pressione di un tasto sulla parte di editor
-        if event.type() == QEvent.KeyPress and source is self.e_sql:
-            # individuo la pressione del stato Insert da parte dell'utente e attivo o meno l'overwrite sull'editor
-            if event.key() == Qt.Key_Insert:
-                if self.v_overwrite_enabled:
-                    self.v_overwrite_enabled = False
-                    self.l_overwrite_enabled.setText('INS')
-                    self.e_sql.setOverwriteMode(False)
-                else:
-                    self.v_overwrite_enabled = True
-                    self.l_overwrite_enabled.setText('OVR')
-                    self.e_sql.setOverwriteMode(True)
+        if event.type() == QEvent.KeyPress and source is self.e_sql:            
             # utente ha richiesto di scrivere in maiuscolo
-            elif v_global_uppercase:
+            if v_global_uppercase:
                 v_reg = QRegExp('[A-Za-z]')
                 if v_reg.indexIn(event.text(),0) != -1:
                     self.e_sql.insertPlainText(event.text().upper())         
@@ -887,7 +947,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             event.accept()            
             return True
         
-        # idividuo il drop
+        # individuo il drop
         if event.type() == QEvent.Drop and source is self.e_sql:
             if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
                 data = event.mimeData()
@@ -903,7 +963,13 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                 self.e_sql.insertPlainText(v_stringa)
             
             return True        
-        
+
+        # individuo l'attivazione della window e...
+        if event.type() == QEvent.WindowActivate:            
+            # aggiorno i dati della statusbar
+            self.aggiorna_lines_and_length()
+
+        # fine senza alcuna elaborazione        
         return False
         
     def slot_click_colonna_risultati(self, index):       
@@ -1020,7 +1086,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
            Viene richiamato quando si modifica del testo dentro la parte di istruzione sql
         """                
         self.v_testo_modificato = True
-        self.l_numero_caratteri.setText("Length: " + str(len(self.e_sql.toPlainText())))
+        # aggiorno i dati della statusbar
+        self.aggiorna_lines_and_length()
 
     def slot_menu_auto_column_resize(self):
         """
@@ -1482,12 +1549,12 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                 # eseguo la commit
                 v_global_connection.commit()
                 # emetto messaggio e mi sposto sul tab dei messaggi
-                self.scrive_output('Commit!','I')            
+                self.scrive_output('COMMIT!','S')            
             elif p_azione == 'Rollback':
                 # eseguo la rollback
                 v_global_connection.rollback()
                 # emetto messaggio e mi sposto sul tab dei messaggi
-                self.scrive_output('Rollback!','I')            
+                self.scrive_output('ROLLBACK!','I')            
 
     def slot_o_table_item_modificato(self, x, y):
         """
@@ -1750,6 +1817,49 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
 
         self.v_testo_modificato = True        
 
+    def slot_goto_line(self):
+        """
+           Visualizza window per richiedere a che riga dell'editor posizionarsi e poi si posiziona
+        """
+        try:
+            # visualizzo la finestra di richiesta numero riga
+            self.dialog_goto_line.show()
+        except:
+            # inizializzo le strutture grafiche e visualizzo la dialog per chiedere i dati
+            self.dialog_goto_line = QtWidgets.QDialog()
+            self.win_goto_line = Ui_GotoLineWindow()        
+            self.win_goto_line.setupUi(self.dialog_goto_line)                
+            # da notare come il collegamento delle funzioni venga fatto in questo punto e non nella ui            
+            self.win_goto_line.b_goto_line.clicked.connect(self.slot_goto_line_exec)                
+            # visualizzo la finestra di ricerca
+            self.dialog_goto_line.show()
+
+    def slot_goto_line_exec(self):
+        """
+           Esegue il posizionamento sull'editor, alla riga richiesta
+        """
+        # converto in numero il campo inserito dall'utente
+        try:
+            v_line = int( self.win_goto_line.e_goto_line.currentText() )
+        except:
+            message_error('Insert a valid number!')
+            return 'ko'
+        
+        # normalizzo il numero di riga a inizio o fine documento
+        if v_line == 0 or v_line < 0:
+            v_line = 1
+        elif v_line > self.e_sql.blockCount():
+            v_line = self.e_sql.blockCount()
+
+        # mi posiziono alla riga richiesta sull'editor
+        v_doc = self.e_sql.document()
+        self.e_sql.setFocus()
+        v_cursor = QTextCursor(v_doc.findBlockByLineNumber(v_line - 1))        
+        self.e_sql.setTextCursor(v_cursor)
+
+        # nascondo la window di posizionamento cursore
+        self.dialog_goto_line.close()
+
     def scrive_output(self, p_messaggio, p_tipo_messaggio):
         """
            Scrive p_messaggio nella sezione "output" precedendolo dall'ora di sistema
@@ -1761,6 +1871,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         v_pennello_blu.setForeground(Qt.blue)
         v_pennello_nero = QtGui.QTextCharFormat()
         v_pennello_nero.setForeground(Qt.black)
+        v_pennello_verde = QtGui.QTextCharFormat()
+        v_pennello_verde.setForeground(Qt.darkGreen)
 
         # stampo in blu l'ora di sistema
         v_time = datetime.datetime.now()        
@@ -1769,6 +1881,9 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         # in base al tipo di messaggio stampo messaaggio di colore nero o di colore rosso
         if p_tipo_messaggio == 'E':
             self.o_output.setCurrentCharFormat(v_pennello_rosso)        
+            self.o_output.appendPlainText(p_messaggio)                 
+        elif p_tipo_messaggio == 'S':
+            self.o_output.setCurrentCharFormat(v_pennello_verde)        
             self.o_output.appendPlainText(p_messaggio)                 
         else:
             self.o_output.setCurrentCharFormat(v_pennello_nero)        
@@ -1806,6 +1921,14 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         # se testo non trovato, aggiungo come nuovo elemento
         if not v_found:        
             self.m_history.appendRow(QtGui.QStandardItem(p_testo))        
+
+    def aggiorna_lines_and_length(self):
+        """
+           Aggiorna i dati di numero linee e lunghezza dell'editor, sulla statusbar
+        """
+        self.l_numero_righe.setText("Lines: " + str(self.e_sql.blockCount()))
+        self.l_numero_caratteri.setText("Length: " + str(len(self.e_sql.toPlainText())))
+
 #
 #  ___ _   _ _____ ___  
 # |_ _| \ | |  ___/ _ \ 

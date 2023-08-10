@@ -52,6 +52,9 @@
          <pointsize>11</pointsize>
         </font>
        </property>
+       <property name="lineWrapMode">
+        <enum>QPlainTextEdit::NoWrap</enum>
+       </property>
       </widget>
       <widget class="QTabWidget" name="o_tab_widget">
        <property name="tabShape">
@@ -82,6 +85,15 @@
          </property>
          <item>
           <widget class="QTableWidget" name="o_table">
+           <property name="dragEnabled">
+            <bool>true</bool>
+           </property>
+           <property name="dragDropMode">
+            <enum>QAbstractItemView::DragOnly</enum>
+           </property>
+           <property name="defaultDropAction">
+            <enum>Qt::CopyAction</enum>
+           </property>
            <property name="alternatingRowColors">
             <bool>true</bool>
            </property>

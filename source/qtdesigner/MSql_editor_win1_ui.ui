@@ -69,7 +69,7 @@
    </property>
    <widget class="QMenu" name="menuFiles">
     <property name="title">
-     <string>Files</string>
+     <string>File</string>
     </property>
     <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
@@ -97,8 +97,22 @@
     <addaction name="actionFind"/>
     <addaction name="actionFind_and_Replace"/>
     <addaction name="separator"/>
+    <addaction name="actionOverwrite"/>
     <addaction name="actionUppercase"/>
     <addaction name="actionFont_editor_selector"/>
+    <addaction name="separator"/>
+    <addaction name="actionZoom_In"/>
+    <addaction name="actionZoom_Out"/>
+    <addaction name="separator"/>
+    <addaction name="actionUndo"/>
+    <addaction name="actionRedo"/>
+    <addaction name="separator"/>
+    <addaction name="actionCut"/>
+    <addaction name="actionCopy"/>
+    <addaction name="actionPaste"/>
+    <addaction name="actionSelectAll"/>
+    <addaction name="separator"/>
+    <addaction name="actionGo_To_Line"/>
    </widget>
    <widget class="QMenu" name="menuRun">
     <property name="title">
@@ -110,11 +124,10 @@
    </widget>
    <widget class="QMenu" name="menuAdvanced">
     <property name="title">
-     <string>Advanced</string>
+     <string>Table</string>
     </property>
     <addaction name="actionMake_table_editable"/>
     <addaction name="actionSave_modified_data"/>
-    <addaction name="actionAutoColumnResize"/>
    </widget>
    <widget class="QMenu" name="menuSql">
     <property name="title">
@@ -123,6 +136,8 @@
     <addaction name="actionGo_to_Top"/>
     <addaction name="actionGo_to_End"/>
     <addaction name="actionExport_to_Excel"/>
+    <addaction name="separator"/>
+    <addaction name="actionAutoColumnResize"/>
     <addaction name="separator"/>
     <addaction name="actionClear_output"/>
     <addaction name="separator"/>
@@ -143,6 +158,7 @@
     <property name="title">
      <string>Help</string>
     </property>
+    <addaction name="actionHelp"/>
     <addaction name="actionProgram_info"/>
    </widget>
    <addaction name="menuFiles"/>
@@ -386,8 +402,17 @@
          <pointsize>8</pointsize>
         </font>
        </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
+       <property name="dragEnabled">
+        <bool>true</bool>
+       </property>
        <property name="alternatingRowColors">
         <bool>true</bool>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::ExtendedSelection</enum>
        </property>
        <property name="indentation">
         <number>15</number>
@@ -536,7 +561,7 @@
     <string>Find</string>
    </property>
    <property name="shortcut">
-    <string>F3</string>
+    <string>Ctrl+F</string>
    </property>
   </action>
   <action name="actionFind_and_Replace">
@@ -548,7 +573,7 @@
     <string>Find and Replace</string>
    </property>
    <property name="shortcut">
-    <string>F4</string>
+    <string>Ctrl+H</string>
    </property>
   </action>
   <action name="actionRun_selected_area">
@@ -775,6 +800,138 @@
    </property>
    <property name="text">
     <string>History</string>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/help.gif</normaloff>:/icons/icons/help.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Help</string>
+   </property>
+  </action>
+  <action name="actionZoom_In">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/zoom.gif</normaloff>:/icons/icons/zoom.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom In</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl++</string>
+   </property>
+  </action>
+  <action name="actionZoom_Out">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/zoom.gif</normaloff>:/icons/icons/zoom.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom Out</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+-</string>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/undo.gif</normaloff>:/icons/icons/undo.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Undo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/redo.gif</normaloff>:/icons/icons/redo.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Redo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Y</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/copy.gif</normaloff>:/icons/icons/copy.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Copy</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/paste.gif</normaloff>:/icons/icons/paste.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Paste</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="actionCut">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/cut.gif</normaloff>:/icons/icons/cut.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Cut</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
+   </property>
+  </action>
+  <action name="actionSelectAll">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/select_all.gif</normaloff>:/icons/icons/select_all.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Select All</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
+   </property>
+  </action>
+  <action name="actionOverwrite">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/overwrite.gif</normaloff>:/icons/icons/overwrite.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Overwrite</string>
+   </property>
+   <property name="shortcut">
+    <string>Ins</string>
+   </property>
+  </action>
+  <action name="actionGo_To_Line">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/right.gif</normaloff>:/icons/icons/right.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Go To Line</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
    </property>
   </action>
  </widget>

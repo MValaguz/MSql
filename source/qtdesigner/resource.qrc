@@ -1,5 +1,14 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/right.gif</file>
+    <file>icons/overwrite.gif</file>
+    <file>icons/cut.gif</file>
+    <file>icons/copy.gif</file>
+    <file>icons/paste.gif</file>
+    <file>icons/select_all.gif</file>
+    <file>icons/undo.gif</file>
+    <file>icons/redo.gif</file>
+    <file>icons/zoom.gif</file>
     <file>icons/order_a_z.gif</file>
     <file>icons/order_z_a.gif</file>
     <file>icons/table.gif</file>
