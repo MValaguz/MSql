@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1250</width>
-    <height>700</height>
+    <height>881</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -82,13 +82,22 @@
    </widget>
    <widget class="QMenu" name="menuServer">
     <property name="title">
-     <string>Server</string>
+     <string>Connection</string>
     </property>
     <addaction name="actionICOM_815"/>
     <addaction name="actionBACKUP_815"/>
     <addaction name="separator"/>
     <addaction name="actionUSER_SMILE"/>
     <addaction name="actionUSER_SMI"/>
+    <addaction name="actionUSER_SMIPACK"/>
+    <addaction name="actionUSER_TEC"/>
+    <addaction name="actionUSER_SMIMEC"/>
+    <addaction name="actionUSER_SMIWRAP"/>
+    <addaction name="actionUSER_ENOBERG"/>
+    <addaction name="actionUSER_SMIFORM"/>
+    <addaction name="actionUSER_SARCO"/>
+    <addaction name="separator"/>
+    <addaction name="actionConnect"/>
    </widget>
    <widget class="QMenu" name="menueDIT">
     <property name="title">
@@ -96,10 +105,13 @@
     </property>
     <addaction name="actionFind"/>
     <addaction name="actionFind_and_Replace"/>
+    <addaction name="actionGo_To_Line"/>
     <addaction name="separator"/>
-    <addaction name="actionOverwrite"/>
-    <addaction name="actionUppercase"/>
-    <addaction name="actionFont_editor_selector"/>
+    <addaction name="actionRect_selection"/>
+    <addaction name="actionUppercase_current_selection"/>
+    <addaction name="actionLowercase"/>
+    <addaction name="separator"/>
+    <addaction name="actionFold_All"/>
     <addaction name="separator"/>
     <addaction name="actionZoom_In"/>
     <addaction name="actionZoom_Out"/>
@@ -112,15 +124,17 @@
     <addaction name="actionPaste"/>
     <addaction name="actionSelectAll"/>
     <addaction name="separator"/>
-    <addaction name="actionGo_To_Line"/>
+    <addaction name="actionFont_editor_selector"/>
    </widget>
    <widget class="QMenu" name="menuRun">
     <property name="title">
-     <string>Run</string>
+     <string>Script</string>
     </property>
     <addaction name="actionRun_selected_area"/>
     <addaction name="actionCommit"/>
     <addaction name="actionRollback"/>
+    <addaction name="separator"/>
+    <addaction name="actionFind_object"/>
    </widget>
    <widget class="QMenu" name="menuAdvanced">
     <property name="title">
@@ -250,6 +264,11 @@
             <item>
              <property name="text">
               <string>Like</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Only invalid</string>
              </property>
             </item>
            </widget>
@@ -787,7 +806,7 @@
      <normaloff>:/icons/icons/uppercase.gif</normaloff>:/icons/icons/uppercase.gif</iconset>
    </property>
    <property name="text">
-    <string>Uppercase</string>
+    <string>Fold All</string>
    </property>
    <property name="shortcut">
     <string>F12</string>
@@ -934,6 +953,134 @@
     <string>Ctrl+G</string>
    </property>
   </action>
+  <action name="actionFold_All">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/minus.gif</normaloff>:/icons/icons/minus.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Fold/Unfold All</string>
+   </property>
+  </action>
+  <action name="actionUnFold_All">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/plus.gif</normaloff>:/icons/icons/plus.gif</iconset>
+   </property>
+   <property name="text">
+    <string>UnFold All</string>
+   </property>
+  </action>
+  <action name="actionRect_selection">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/columns.gif</normaloff>:/icons/icons/columns.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Rect selection</string>
+   </property>
+  </action>
+  <action name="actionUSER_SMIPACK">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>USER_SMIPACK</string>
+   </property>
+  </action>
+  <action name="actionUSER_TEC">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>USER_SMITEC</string>
+   </property>
+  </action>
+  <action name="actionUSER_SMIMEC">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>USER_SMIMEC</string>
+   </property>
+  </action>
+  <action name="actionUSER_SMIWRAP">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>USER_SMIWRAP (SmiEnergia)</string>
+   </property>
+  </action>
+  <action name="actionUSER_ENOBERG">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>USER_ENOBERG</string>
+   </property>
+  </action>
+  <action name="actionUSER_SMIFORM">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>USER_FORM (SmiLab)</string>
+   </property>
+  </action>
+  <action name="actionUSER_SARCO">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>USER_SARCO</string>
+   </property>
+  </action>
+  <action name="actionConnect">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/sql_editor.gif</normaloff>:/icons/icons/sql_editor.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Connect to specific database</string>
+   </property>
+   <property name="shortcut">
+    <string>F4</string>
+   </property>
+  </action>
+  <action name="actionUppercase_current_selection">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/uppercase.gif</normaloff>:/icons/icons/uppercase.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Uppercase</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+Up</string>
+   </property>
+  </action>
+  <action name="actionLowercase">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/lowercase.gif</normaloff>:/icons/icons/lowercase.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Lowercase</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+Down</string>
+   </property>
+  </action>
+  <action name="actionFind_object">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/navigator.gif</normaloff>:/icons/icons/navigator.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Find object</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>oggetti_db_scelta</tabstop>
@@ -1042,10 +1189,28 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>db_oggetto_tree</sender>
+   <signal>expanded(QModelIndex)</signal>
+   <receiver>MSql_win1</receiver>
+   <slot>slot_db_oggetto_tree_expand()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1121</x>
+     <y>452</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>995</x>
+     <y>-5</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>slot_oggetti_db_doppio_click()</slot>
   <slot>slot_oggetti_db_scelta()</slot>
   <slot>slot_oggetti_db_click()</slot>
+  <slot>slot_resize_MSql_win1()</slot>
+  <slot>slot_db_oggetto_tree_expand()</slot>
  </slots>
 </ui>

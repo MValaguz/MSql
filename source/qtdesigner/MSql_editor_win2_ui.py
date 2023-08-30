@@ -31,13 +31,12 @@ class Ui_MSql_win2(object):
         self.splitter = QtWidgets.QSplitter(self.centralwidget)
         self.splitter.setOrientation(QtCore.Qt.Vertical)
         self.splitter.setObjectName("splitter")
-        self.e_sql = code_editor(self.splitter)
+        self.e_sql = Qsci.QsciScintilla(self.splitter)
         self.e_sql.setMinimumSize(QtCore.QSize(0, 100))
         font = QtGui.QFont()
         font.setFamily("Source Code Pro")
         font.setPointSize(11)
         self.e_sql.setFont(font)
-        self.e_sql.setLineWrapMode(QtWidgets.QPlainTextEdit.NoWrap)
         self.e_sql.setObjectName("e_sql")
         self.o_tab_widget = QtWidgets.QTabWidget(self.splitter)
         self.o_tab_widget.setTabShape(QtWidgets.QTabWidget.Triangular)
@@ -85,7 +84,7 @@ class Ui_MSql_win2(object):
         _translate = QtCore.QCoreApplication.translate
         self.o_tab_widget.setTabText(self.o_tab_widget.indexOf(self.t_result), _translate("MSql_win2", "Result"))
         self.o_tab_widget.setTabText(self.o_tab_widget.indexOf(self.t_output), _translate("MSql_win2", "Output"))
-from code_editor import code_editor
+from PyQt5 import Qsci
 import resource_rc
 
 

@@ -1,5 +1,10 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/lowercase.gif</file>
+    <file>icons/SciTEIco.gif</file>
+    <file>icons/columns.gif</file>
+    <file>icons/minus.gif</file>
+    <file>icons/plus.gif</file>
     <file>icons/right.gif</file>
     <file>icons/overwrite.gif</file>
     <file>icons/cut.gif</file>

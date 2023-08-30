@@ -19,6 +19,7 @@ import cx_Oracle, oracle_my_lib
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+from PyQt5 import Qsci
 # Libreria per export in excel
 from xlsxwriter.workbook import Workbook
 # Classi qtdesigner (win1 è la window principale, win2 la window dell'editor e win3 quella delle info di programma)
@@ -29,10 +30,10 @@ from MSql_editor_win3_ui import Ui_MSql_win3
 from find_ui import Ui_FindWindow
 from find_e_replace_ui import Ui_Find_e_Replace_Window
 from goto_line_ui import Ui_GotoLineWindow
+# Classe qtdesigner per la richiesta di connessione
+from connect_ui import Ui_connect_window
 # Classe per visualizzare la barra di avanzamento 
 from avanzamento import avanzamento_infinito_class
-# Classe per evidenziare il codice nella sezione di editor di testo
-import highlighting_words_in_text_editor
 # Utilità varie
 from utilita import *
 from utilita_database import *
@@ -52,13 +53,41 @@ v_global_connection = cx_Oracle
 v_global_connesso = False
 # Siccome la voce di menu utf-8 è globale, con una variabile globale deve essere gestita
 v_global_utf_8 = False 
-# Siccome la voce di menu uppercase è globale, con una variabile globale deve essere gestita
-v_global_uppercase = False 
-# Siccome la voce di menu overwrite è globale, con una variabile globale deve essere gestita
-v_global_overwrite = False
 # Siccome la voce di menu editable è globale, con una variabile globale deve essere gestita
 v_global_editable = False 
-                   
+# Var che contiene le coordinate della main window
+v_global_main_geometry = object
+
+def salvataggio_editor(p_nome, p_testo):
+    """
+        Salvataggio di p_testo dentro il file p_nome
+    """
+    global v_global_utf_8
+
+    # se non passato il nome del file, lo richiedo
+    if p_nome == "" or p_nome[0:8] == 'Untitled':     
+        p_nome = QtWidgets.QFileDialog.getSaveFileName(None, "Save a SQL file","","SQL (*.sql)") [0]                          
+        if not p_nome:
+            message_error('Error saving')
+            return 'ko'
+        if not p_nome.endswith('.sql'):
+            p_nome += '.sql'
+
+    # procedo con il salvataggio
+    try:
+        if v_global_utf_8:
+            # scrittura usando utf-8                     
+            v_file = open(p_nome,'w',encoding='utf-8')
+        else:
+            # scrittura usando ansi
+            v_file = open(p_nome,'w')
+        v_file.write(p_testo)
+        v_file.close()            
+        return 'ok', p_nome
+    except Exception as err:
+        message_error('Error to write the file: ' + str(err))
+        return 'ko', None
+                       
 #
 #  __  __    _    ___ _   _  __        _____ _   _ ____   _____        __
 # |  \/  |  / \  |_ _| \ | | \ \      / /_ _| \ | |  _ \ / _ \ \      / /
@@ -72,8 +101,8 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         Classe di gestione MDI
     """       
     def __init__(self):
-        global v_global_utf_8
-        global v_global_uppercase
+        global v_global_utf_8    
+        global v_global_main_geometry    
 
         # incapsulo la classe grafica da qtdesigner
         super(MSql_win1_class, self).__init__()        
@@ -84,7 +113,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         self.showNormal()        
 
         ###
-        # Aggiunta di windget alla statusbar con: flag editabilità, numero di caratteri, indicatore uppercase, indicatore di overwrite
+        # Aggiunta di windget alla statusbar con: flag editabilità, numero di caratteri, indicatore di overwrite, ecc..
         ###                                
         self.l_tabella_editabile = QLabel("Editable table: Disabled")
         self.l_tabella_editabile.setFrameStyle(QFrame.Panel | QFrame.Sunken)
@@ -101,10 +130,6 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         self.statusBar.addPermanentWidget(self.l_numero_caratteri)                
         self.l_numero_caratteri.setText("Length: 0")
 
-        self.l_uppercase_enabled = QLabel()
-        self.l_uppercase_enabled.setFrameStyle(QFrame.Panel | QFrame.Sunken)
-        self.statusBar.addPermanentWidget(self.l_uppercase_enabled)
-                
         self.l_overwrite_enabled = QLabel("INS")
         self.l_overwrite_enabled.setFrameStyle(QFrame.Panel | QFrame.Sunken)
         self.statusBar.addPermanentWidget(self.l_overwrite_enabled)
@@ -112,6 +137,11 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         self.l_utf8_enabled = QLabel()
         self.l_utf8_enabled.setFrameStyle(QFrame.Panel | QFrame.Sunken)
         self.statusBar.addPermanentWidget(self.l_utf8_enabled)        
+
+        self.l_connection = QLabel("Connection:")
+        self.l_connection.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        self.l_connection.setStyleSheet('color: black;')
+        self.statusBar.addPermanentWidget(self.l_connection)                
 
         ###
         # definizione della dimensioni dei dock laterali (sono 3, vengono raggruppati e definite le proporzioni)
@@ -143,9 +173,30 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         v_azione.setText('New')
         self.smistamento_voci_menu(v_azione)        
         
+        """
+        #######
+        # apro un file
+        v_titolo = 'C:\\Users\\MValaguz\\Desktop\\test_pkg.sql'
+        v_file = open(v_titolo,'r')
+        v_contenuto_file = v_file.read()                    
+        # creo una nuovo oggetto editor (gli passo il titolo e eventuale contenuto del file e gli oggetti della statusbar)
+        o_MSql_win2 = MSql_win2_class(v_titolo, 
+                                      v_contenuto_file, 
+                                      self)
+        # l'oggetto editor lo salvo all'interno di una lista in modo sia reperibile quando necessario
+        self.o_lst_window2.append(o_MSql_win2)        
+        # collego l'oggetto editor ad una nuova finestra del gestore mdi e la visualizzo, massimizzandola
+        sub_window = self.mdiArea.addSubWindow(o_MSql_win2)                                    
+        sub_window.show()  
+        sub_window.showMaximized()                          
+        #######
+        """
+        
         # eseguo la connessione 
-        self.e_server_name = 'BACKUP_815'
         self.e_user_name = 'SMILE'
+        self.e_password = 'SMILE'
+        self.e_server_name = 'BACKUP_815'
+        self.e_user_mode = 'Normal'        
         self.slot_connetti()   
 
         ###
@@ -160,12 +211,15 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         # Imposto default
         ###
         v_global_utf_8 = False        
-        self.slot_utf8()
-        v_global_uppercase = True        
-        self.slot_uppercase()        
+        self.slot_utf8()                
         v_global_editable = False
         self.slot_editable()
-                        
+
+        ###
+        # Imposto var con la geometria della window principale
+        ###
+        v_global_main_geometry = self.frameGeometry()
+
     def oggetto_win2_attivo(self):
         """
             Restituisce l'oggetto di classe MSql_win2_class riferito alla window di editor attiva
@@ -191,10 +245,9 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                        p_oggetto_titolo_db = Serve solo quando si vuole aprire un oggetto di testo db (titolo della window)
                        p_oggetto_testo_db = Serve solo quando si vuole aprire un oggetto di testo db (contenuto dell'editor)
         """
-        global v_global_utf_8
-        global v_global_uppercase
-        global v_global_overwrite
+        global v_global_utf_8        
         global v_global_editable
+        global v_global_main_geometry
 
         #print('Voce di menù --> ' + p_slot.text())    
 
@@ -226,11 +279,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             # creo una nuovo oggetto editor (gli passo il titolo e eventuale contenuto del file e gli oggetti della statusbar)
             o_MSql_win2 = MSql_win2_class(v_titolo, 
                                           v_contenuto_file, 
-                                          self.l_numero_righe,
-                                          self.l_numero_caratteri, 
-                                          self.l_overwrite_enabled, 
-                                          self.l_tabella_editabile,
-                                          self.m_history)
+                                          self)
             # l'oggetto editor lo salvo all'interno di una lista in modo sia reperibile quando necessario
             self.o_lst_window2.append(o_MSql_win2)        
             # collego l'oggetto editor ad una nuova finestra del gestore mdi e la visualizzo, massimizzandola
@@ -246,24 +295,6 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 v_global_utf_8 = False
             # aggiorno la label sulla statusbar
             self.slot_utf8()
-
-        # scrittura uppercase
-        elif p_slot.text() == 'Uppercase':
-            if self.actionUppercase.isChecked():
-                v_global_uppercase = True
-            else:
-                v_global_uppercase = False
-            # aggiorno status bar e aggiorno oggetti
-            self.slot_uppercase()
-        
-        # scrittura overwrite
-        elif p_slot.text() == 'Overwrite':
-            if self.actionOverwrite.isChecked():
-                v_global_overwrite = True
-            else:
-                v_global_overwrite = False
-            # aggiorno status bar e aggiorno oggetti
-            self.slot_overwrite()
 
         # Rendo l'output dell'sql editabile
         elif p_slot.text() == 'Make table editable':
@@ -306,10 +337,16 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         if o_MSql_win2 is not None:
             # Salvataggio del file
             if p_slot.text() == 'Save':
-                o_MSql_win2.slot_savefile()
-            # Salvataggio del file come...
+                v_ok, v_nome_file = salvataggio_editor(o_MSql_win2.v_titolo_window, o_MSql_win2.e_sql.text())
+                if v_ok == 'ok':
+                    o_MSql_win2.v_testo_modificato = False
+            # Salvataggio del file come... (semplicemente non gli passo il titolo)
             elif p_slot.text() == 'Save as':
-                o_MSql_win2.slot_savefile_as()
+                v_ok, v_nome_file = salvataggio_editor("", o_MSql_win2.e_sql.text())
+                if v_ok == 'ok':
+                    o_MSql_win2.v_testo_modificato = False
+                    o_MSql_win2.v_titolo_window = v_nome_file
+                    o_MSql_win2.setWindowTitle(v_nome_file)
             # Cambio server in ICOM_815
             elif p_slot.text() == 'ICOM_815':
                 self.e_server_name = 'ICOM_815'
@@ -320,18 +357,63 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 self.slot_connetti()
             # Cambio user in SMILE
             elif p_slot.text() == 'USER_SMILE':  
-                self.e_user_name = 'SMILE'              
+                self.e_user_name, self.e_password, self.e_user_mode = 'SMILE','SMILE','Normal'
                 self.slot_connetti()
             # Cambio user in SMI
             elif p_slot.text() == 'USER_SMI':
-                self.e_user_name = 'SMI'              
+                self.e_user_name, self.e_password, self.e_user_mode = 'SMI','SMI','Normal'                
                 self.slot_connetti()
+            # Cambio user in SMIPACK
+            elif p_slot.text() == 'USER_SMIPACK':
+                self.e_user_name, self.e_password, self.e_user_mode = 'SMIPACK','SMIPACK','Normal'                                
+                self.slot_connetti()
+            # Cambio user in SMITEC
+            elif p_slot.text() == 'USER_SMITEC':                
+                self.e_user_name, self.e_password, self.e_user_mode = 'SMITEC','SMITEC','Normal'                
+                self.slot_connetti()
+            # Cambio user in SMIMEC
+            elif p_slot.text() == 'USER_SMIMEC':
+                self.e_user_name, self.e_password, self.e_user_mode = 'SMIMEC','SMIMEC','Normal'                
+                self.slot_connetti()
+            # Cambio user in SMIWRAP
+            elif p_slot.text() == 'USER_SMIWRAP (SmiEnergia)':
+                self.e_user_name, self.e_password, self.e_user_mode = 'SMIWRAP','SMIWRAP','Normal'                
+                self.slot_connetti()
+            # Cambio user in ENOBERG
+            elif p_slot.text() == 'USER_ENOBERG':
+                self.e_user_name, self.e_password, self.e_user_mode = 'ENOBERG','ENOBERG','Normal'                
+                self.slot_connetti()
+            # Cambio user in SMIFORM
+            elif p_slot.text() == 'USER_FORM (SmiLab)':
+                self.e_user_name, self.e_password, self.e_user_mode = 'SMIBLOW','SMIBLOW','Normal'                
+                self.slot_connetti()
+            # Cambio user in SARCO
+            elif p_slot.text() == 'USER_SARCO':
+                self.e_user_name, self.e_password, self.e_user_mode = 'SARCO','SARCO','Normal'                
+                self.slot_connetti()
+            # Cambio user specificato da utente
+            elif p_slot.text() == 'Connect to specific database':
+                self.richiesta_connessione_specifica()
             # Ricerca di testo
             elif p_slot.text() == 'Find':
+                v_global_main_geometry = self.frameGeometry()                                
                 o_MSql_win2.slot_find()
             # Sostituzione di testo
             elif p_slot.text() == 'Find and Replace':
+                v_global_main_geometry = self.frameGeometry()
                 o_MSql_win2.slot_find_e_replace()
+            # Selezione del testo rettangolare
+            elif p_slot.text() == 'Rect selection':                
+                message_info('Press the Alt key for the rectangular selection ;-)')                                
+            # Uppercase del testo selezionato
+            elif p_slot.text() == 'Uppercase':                
+                o_MSql_win2.e_sql.SendScintilla(Qsci.QsciScintilla.SCI_UPPERCASE)
+            # Lowercase del testo selezionato
+            elif p_slot.text() == 'Lowercase':                
+                o_MSql_win2.e_sql.SendScintilla(Qsci.QsciScintilla.SCI_LOWERCASE)
+            # Compressione di tutti i livelli
+            elif p_slot.text() == 'Fold/Unfold All':
+                o_MSql_win2.e_sql.foldAll()
             # Zoom In del testo
             elif p_slot.text() == 'Zoom In':
                 o_MSql_win2.e_sql.zoomIn()
@@ -405,46 +487,13 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         else:
             self.l_utf8_enabled.setText("ANSI")
 
-    def slot_uppercase(self):
-        """
-           Gestione della modalità di scrittura uppercase
-        """
-        global v_global_uppercase
-
-        # se uppercase abilitato, la evidenzio
-        if v_global_uppercase:
-            self.l_uppercase_enabled.setText('UPP')
-        else:
-            self.l_uppercase_enabled.setText("low")
-
-    def slot_overwrite(self):
-        """
-           Gestione della modalità di sovrascrittura
-        """
-        global v_global_overwrite
-        global v_global_uppercase
-
-        # se overwrite abilitato, la evidenzio
-        if v_global_overwrite:            
-            self.l_overwrite_enabled.setText('OVR')            
-            # se abilitata la scrittura maiuscola --> avverto che l'overwrite non funzionerà
-            if v_global_uppercase:
-                message_info('The overwrite not working when uppercase is active!')
-        else:
-            self.l_overwrite_enabled.setText("INS")
-
-        # scorro la lista-oggetti-editor e modifico lo stato uppercase di ognuno
-        for obj_win2 in self.o_lst_window2:
-            if not obj_win2.v_editor_chiuso:
-                obj_win2.e_sql.setOverwriteMode(v_global_overwrite)        
-
     def slot_editable(self):
         """
            Gestione della modifica dei risultati di una query
         """
         global v_global_editable
         
-        # se uppercase abilitato, la evidenzio
+        # se edit abilitato, la evidenzio
         if v_global_editable:            
             self.l_tabella_editabile.setText("Editable table: Enabled")            
             self.l_tabella_editabile.setStyleSheet('color: red;')      
@@ -452,7 +501,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             self.l_tabella_editabile.setText("Editable table: Disabled")            
             self.l_tabella_editabile.setStyleSheet('color: black;')      
 
-        # scorro la lista-oggetti-editor e modifico lo stato uppercase di ognuno
+        # scorro la lista-oggetti-editor e modifico lo stato edit di ognuno
         for obj_win2 in self.o_lst_window2:
             if not obj_win2.v_editor_chiuso:
                 obj_win2.set_editable()
@@ -512,23 +561,48 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         global v_global_connesso   
         global v_global_connection
 
-        # aggiorno le voce di menu
-        if self.e_server_name == 'ICOM_815':            
-            self.actionICOM_815.setChecked(True)
-            self.actionBACKUP_815.setChecked(False)
-        if self.e_server_name == 'BACKUP_815':            
-            self.actionICOM_815.setChecked(False)
-            self.actionBACKUP_815.setChecked(True)
-        if self.e_user_name == 'SMILE':            
-            self.actionUSER_SMILE.setChecked(True)
-            self.actionUSER_SMI.setChecked(False)
-        if self.e_user_name == 'SMI':            
-            self.actionUSER_SMILE.setChecked(False)
-            self.actionUSER_SMI.setChecked(True)
+        # aggiorno le voce di menu (schema)        
+        self.actionICOM_815.setChecked(False)
+        self.actionBACKUP_815.setChecked(False)
 
+        if self.e_server_name == 'ICOM_815':            
+            self.actionICOM_815.setChecked(True)            
+        if self.e_server_name == 'BACKUP_815':                        
+            self.actionBACKUP_815.setChecked(True)
+        
+        # aggiorno le voce di menu (user)        
+        self.actionUSER_SMILE.setChecked(False)
+        self.actionUSER_SMI.setChecked(False)
+        self.actionUSER_SMIPACK.setChecked(False)
+        self.actionUSER_TEC.setChecked(False)
+        self.actionUSER_SMIMEC.setChecked(False)
+        self.actionUSER_SMIWRAP.setChecked(False)
+        self.actionUSER_ENOBERG.setChecked(False)
+        self.actionUSER_SMIFORM.setChecked(False)
+        self.actionUSER_SARCO.setChecked(False)        
+        
+        if self.e_user_name == 'SMILE':            
+            self.actionUSER_SMILE.setChecked(True)        
+        if self.e_user_name == 'SMI':                        
+            self.actionUSER_SMI.setChecked(True)            
+        if self.e_user_name == 'SMIPACK':      
+            self.actionUSER_SMIPACK.setChecked(True)
+        if self.e_user_name == 'SMITEC':           
+            self.actionUSER_TEC.setChecked(True)
+        if self.e_user_name == 'SMIMEC':       
+            self.actionUSER_SMIMEC.setChecked(True)
+        if self.e_user_name == 'SMIWRAP':         
+            self.actionUSER_SMIWRAP.setChecked(True)
+        if self.e_user_name == 'ENOBERG':          
+            self.actionUSER_ENOBERG.setChecked(True)
+        if self.e_user_name == 'SMIBLOW':          
+            self.actionUSER_SMIFORM.setChecked(True)
+        if self.e_user_name == 'SARCO':            
+            self.actionUSER_SARCO.setChecked(True)        
+            
         # scorro la lista-oggetti-editor...
         for obj_win2 in self.o_lst_window2:
-            if not obj_win2.v_editor_chiuso:        
+            if not obj_win2.v_editor_chiuso and v_global_connesso:        
                 # ...e chiudo eventuale cursore attualmente presente
                 if obj_win2.v_cursor is not None:
                     obj_win2.v_cursor.close()
@@ -539,28 +613,41 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             if v_global_connesso:
                 v_global_connection.close()
             # inizializzo libreria oracle    
-            oracle_my_lib.inizializzo_client()  
-            # connessione al DB come smile
-            v_global_connection = cx_Oracle.connect(user=self.e_user_name, password=self.e_user_name, dsn=self.e_server_name)                        
+            oracle_my_lib.inizializzo_client()              
+            # connessione al DB (eventualmente come dba)
+            if self.e_user_mode == 'SYSDBA':               
+                v_global_connection = cx_Oracle.connect(user=self.e_user_name, password=self.e_password, dsn=self.e_server_name, mode=cx_Oracle.SYSDBA)                        
+            else:
+                v_global_connection = cx_Oracle.connect(user=self.e_user_name, password=self.e_password, dsn=self.e_server_name)                        
             # imposto var che indica la connessione a oracle
             v_global_connesso = True
             # apro un cursore finalizzato alla gestione degli oggettiDB
             self.v_cursor_db_obj = v_global_connection.cursor()            
         except:
-            message_error('Error to oracle connection!')                                             
+            message_error('Error to oracle connection!')    
+            v_global_connesso = False
+
+        # In base al tipo di connessione cambio il colore di sfondo dell'editor (azzurro=sistema reale, bianco=sistema di test)        
+        if self.e_server_name == 'ICOM_815':            
+            v_color = '#aaffff'            
+            v_background = 'black'
+        else:
+            v_color = '#ffffff'
+            v_background = 'gray'
+        if self.e_user_mode == 'SYSDBA':
+            v_background = 'red'
+
+        # sulla statusbar, aggiorno la label della connessione        
+        self.l_connection.setText("Connection: " + self.e_server_name + "/" + self.e_user_name)                            
+        self.l_connection.setStyleSheet('background-color: ' + v_background + ';color: "' + v_color + '";')              
 
         # scorro la lista-oggetti-editor...
         for obj_win2 in self.o_lst_window2:
-            if not obj_win2.v_editor_chiuso:        
+            if not obj_win2.v_editor_chiuso and v_global_connesso:        
                 # ...e apro un cursore ad uso di quell'oggetto-editor                
                 obj_win2.v_cursor = v_global_connection.cursor()
-                # In base al tipo di connessione cambio il colore di sfondo dell'editor (azzurro=sistema reale, bianco=sistema di test)
-                if self.e_server_name == 'ICOM_815':            
-                    v_color = '#aaffff'            
-                else:
-                    v_color = '#ffffff'
-                # Imposto il colore di sfondo su tutti gli oggetti principali
-                obj_win2.e_sql.setStyleSheet("QPlainTextEdit {background-color: " + v_color + ";}")
+                # Imposto il colore di sfondo su tutti gli oggetti principali (l'editor è stato tolto volutamente per un effetto grafico non piacevole)               
+                #obj_win2.v_lexer.setDefaultPaper(QColor(v_color))
                 obj_win2.o_table.setStyleSheet("QTableWidget {background-color: " + v_color + ";}")
                 obj_win2.o_output.setStyleSheet("QPlainTextEdit {background-color: " + v_color + ";}")
                 self.oggetti_db_elenco.setStyleSheet("QListView {background-color: " + v_color + ";}")
@@ -575,21 +662,33 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
 
         # prendo il tipo di oggetto scelto dall'utente
         try:            
-            v_tipo_oggetto = Tipi_Oggetti_DB[self.oggetti_db_scelta.currentText()]                
+            self.tipo_oggetto = Tipi_Oggetti_DB[self.oggetti_db_scelta.currentText()]                
         except:
-            v_tipo_oggetto = ''
+            self.tipo_oggetto = ''
         # pulisco elenco
         self.oggetti_db_lista.clear()
         # se utente ha scelto un oggetto e si è connessi, procedo con il carico dell'elenco 
-        if v_tipo_oggetto != '' and v_global_connesso:
+        if self.tipo_oggetto != '' and v_global_connesso:
             # leggo elenco degli oggetti indicati
-            v_select = "SELECT OBJECT_NAME FROM ALL_OBJECTS WHERE OWNER='" + self.e_user_name + "' AND OBJECT_TYPE='" + v_tipo_oggetto + "'"
+            v_select = """SELECT *
+                          FROM (SELECT OBJECT_NAME,
+                                       (SELECT COUNT(*) 
+	                                    FROM   DBA_OBJECTS 
+		                                WHERE  DBA_OBJECTS.OWNER=ALL_OBJECTS.OWNER AND 
+		                                        DBA_OBJECTS.OBJECT_NAME=ALL_OBJECTS.OBJECT_NAME AND 
+			                                    DBA_OBJECTS.STATUS != 'VALID') INVALID 
+                                FROM   ALL_OBJECTS 
+                                WHERE  OWNER='""" + self.e_user_name + """' AND 
+                                       OBJECT_TYPE='""" + self.tipo_oggetto + """'
+                               )"""
             # se necessario applico il filtro di ricerca
-            if self.oggetti_db_ricerca.text() != '':
+            if self.oggetti_db_ricerca.text() != '' or self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid':
                 if self.oggetti_db_tipo_ricerca.currentText() == 'Start with':
-                    v_select += " AND OBJECT_NAME LIKE '" + self.oggetti_db_ricerca.text().upper() + "%'"
-                if self.oggetti_db_tipo_ricerca.currentText() == 'Like':
-                    v_select += " AND OBJECT_NAME LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%'"
+                    v_select += " WHERE OBJECT_NAME LIKE '" + self.oggetti_db_ricerca.text().upper() + "%'"
+                elif self.oggetti_db_tipo_ricerca.currentText() == 'Like':
+                    v_select += " WHERE OBJECT_NAME LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%'"
+                elif self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid': 
+                    v_select += " WHERE OBJECT_NAME LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%' AND INVALID > 0"
             # aggiungo order by
             v_select += " ORDER BY OBJECT_NAME"            
             # eseguo la select
@@ -597,7 +696,11 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             v_righe = self.v_cursor_db_obj.fetchall()            
             # carico elenco nel modello che è collegato alla lista
             for v_riga in v_righe:
-                self.oggetti_db_lista.appendRow(QtGui.QStandardItem(v_riga[0]))        
+                v_item = QtGui.QStandardItem()
+                v_item.setText(v_riga[0]) 
+                if v_riga[1] != 0: 
+                    v_item.setBackground(QColor(Qt.red))
+                self.oggetti_db_lista.appendRow(v_item)                        
 
     def slot_oggetti_db_doppio_click(self, p_index):
         """
@@ -605,27 +708,27 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         """                
         # prendo il tipo di oggetto scelto dall'utente
         try:            
-            v_tipo_oggetto = Tipi_Oggetti_DB[self.oggetti_db_scelta.currentText()]                
+            self.tipo_oggetto = Tipi_Oggetti_DB[self.oggetti_db_scelta.currentText()]                
         except:
-            v_tipo_oggetto = ''
+            self.tipo_oggetto = ''
         # prendo il nome dell'oggetto scelto dall'utente
         v_selindex = self.oggetti_db_lista.itemFromIndex(p_index)
-        v_nome_oggetto = v_selindex.text()               
-        if v_nome_oggetto != '':
+        self.nome_oggetto = v_selindex.text()               
+        if self.nome_oggetto != '':
             # imposto var che conterrà il testo dell'oggetto DB 
             v_testo_oggetto_db = ''
             # sostituisce la freccia del mouse con icona "clessidra"
             QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))        
 
             # richiamo la procedura di oracle che mi restituisce la ddl dell'oggetto
-            self.v_cursor_db_obj.execute("SELECT DBMS_METADATA.GET_DDL('"+v_tipo_oggetto+"','"+v_nome_oggetto+"') FROM DUAL")
+            self.v_cursor_db_obj.execute("SELECT DBMS_METADATA.GET_DDL('"+self.tipo_oggetto+"','"+self.nome_oggetto+"') FROM DUAL")
             # prendo il primo campo, del primo record e lo trasformo in stringa
             v_testo_oggetto_db = str(self.v_cursor_db_obj.fetchone()[0])
 
             # apro una nuova finestra di editor simulando il segnale che scatta quando utente sceglie "Open", passando il sorgente ddl
             v_azione = QtWidgets.QAction()
             v_azione.setText('Open_db_obj')
-            self.smistamento_voci_menu(v_azione, v_nome_oggetto, v_testo_oggetto_db)        
+            self.smistamento_voci_menu(v_azione, self.nome_oggetto, v_testo_oggetto_db)        
                                         
             # Ripristino icona freccia del mouse
             QApplication.restoreOverrideCursor()    
@@ -643,185 +746,269 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         v_selindex = self.oggetti_db_lista.itemFromIndex(p_index)
         v_nome_oggetto = v_selindex.text()               
         if v_nome_oggetto != '':
+            self.carica_object_viewer(v_tipo_oggetto, v_nome_oggetto)
+
+    def carica_object_viewer(self, p_tipo_oggetto, p_nome_oggetto):
+        """
+           Funzione che si occupa di caricare i dati dell'object viewer
+        """        
+        self.tipo_oggetto = p_tipo_oggetto
+        self.nome_oggetto = p_nome_oggetto        
+        # sostituisce la freccia del mouse con icona "clessidra"
+        QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))        
+
+        # se l'oggetto selezionato è una tabella o una vista --> preparo select per estrarre i nomi dei campi
+        if self.tipo_oggetto == 'TABLE' or self.tipo_oggetto == 'VIEW':
+            print('ciao!' + self.tipo_oggetto)
+            # ricerco la descrizione dell'oggetto
+            self.v_cursor_db_obj.execute("SELECT COMMENTS FROM all_tab_comments WHERE owner='SMILE' AND TABLE_NAME='"+self.nome_oggetto+"'")
+            self.tipo_oggetto_commento = self.v_cursor_db_obj.fetchone()[0]
+
+            # creo un modello dati con 4 colonne (dove nell'intestazione ci metto il nome della tabella e la sua descrizione)
+            self.db_oggetto_tree_model = QStandardItemModel()
+            self.db_oggetto_tree_model.setHorizontalHeaderLabels([self.nome_oggetto, '', '', self.tipo_oggetto_commento])
+
+            ###
+            # prima radice con il nome della tabella
+            ###
+            v_root_campi = QStandardItem('Fields')
+
+            self.v_cursor_db_obj.execute("""SELECT A.COLUMN_NAME AS NOME,
+                                    Decode(A.DATA_TYPE,'NUMBER',Lower(A.DATA_TYPE) || '(' || A.DATA_PRECISION || ',' || A.DATA_SCALE || ')',Lower(A.DATA_TYPE) || '(' || A.CHAR_LENGTH || ')')  AS TIPO,
+                                    Decode(A.NULLABLE,'Y',' not null','') AS COLONNA_NULLA,
+                                    B.COMMENTS AS COMMENTO
+                            FROM   ALL_TAB_COLUMNS A, ALL_COL_COMMENTS B 
+                            WHERE  A.OWNER='SMILE' AND 
+                                    A.TABLE_NAME ='"""+self.nome_oggetto+"""' AND 
+                                    A.OWNER=B.OWNER AND 
+                                    A.TABLE_NAME=B.TABLE_NAME AND 
+                                    A.COLUMN_NAME=B.COLUMN_NAME 
+                            ORDER BY A.COLUMN_ID""")
+    
+            # prendo i vari campi della tabella o vista e li carico nel modello di dati
+            for result in self.v_cursor_db_obj:                       
+                v_campo_col0 = QStandardItem(result[0])
+                v_campo_col1 = QStandardItem(result[1])
+                v_campo_col2 = QStandardItem(result[2])
+                v_campo_col3 = QStandardItem(result[3])
+                v_root_campi.appendRow([v_campo_col0,v_campo_col1,v_campo_col2,v_campo_col3])                
+            self.db_oggetto_tree_model.appendRow(v_root_campi)
+
+            ###
+            # seconda radice con le fk
+            ###
+            v_root_fk = QStandardItem('Constraints')
+
+            self.v_cursor_db_obj.execute("""SELECT CONSTRAINT_NAME,
+                                                    (SELECT LISTAGG(COLUMN_NAME,',') WITHIN GROUP (ORDER BY POSITION) FROM ALL_CONS_COLUMNS WHERE OWNER=ALL_CONSTRAINTS.OWNER AND CONSTRAINT_NAME=ALL_CONSTRAINTS.CONSTRAINT_NAME) COLONNE 
+                                            FROM   ALL_CONSTRAINTS 
+                                            WHERE  OWNER='SMILE' AND 
+                                                    TABLE_NAME='"""+self.nome_oggetto+"""'""")
+
+            # carico elenco constraints
+            for result in self.v_cursor_db_obj:                       
+                v_campo_col0 = QStandardItem(result[0])
+                v_campo_col1 = None
+                v_campo_col2 = None
+                v_campo_col3 = QStandardItem(result[1])
+                v_root_fk.appendRow([v_campo_col0,v_campo_col1,v_campo_col2,v_campo_col3])                
+            self.db_oggetto_tree_model.appendRow(v_root_fk)
+
+            ###
+            # terza radice con gli indici
+            ###
+            v_root_idx = QStandardItem('Indexes')
+
+            self.v_cursor_db_obj.execute("""SELECT INDEX_NAME,
+                                                    CASE WHEN InStr(INDEX_TYPE,'FUNCTION') != 0 THEN 'function' END TIPO, 
+                                                    CASE WHEN UNIQUENESS='UNIQUE' THEN 'unique' END UNICO, 
+                                                    (SELECT LISTAGG(COLUMN_NAME,',') WITHIN GROUP (ORDER BY COLUMN_POSITION) COLONNE FROM ALL_IND_COLUMNS WHERE INDEX_OWNER=ALL_INDEXES.OWNER AND INDEX_NAME=ALL_INDEXES.INDEX_NAME) COLONNE
+                                            FROM   ALL_INDEXES 
+                                            WHERE  OWNER='SMILE' AND 
+                                                    TABLE_NAME='"""+self.nome_oggetto+"""'
+                                                    ORDER BY INDEX_NAME""")
+
+            # carico elenco indici
+            for result in self.v_cursor_db_obj:                       
+                v_campo_col0 = QStandardItem(result[0])
+                v_campo_col1 = QStandardItem(result[1])
+                v_campo_col2 = QStandardItem(result[2])
+                v_campo_col3 = QStandardItem(result[3])
+                v_root_idx.appendRow([v_campo_col0,v_campo_col1,v_campo_col2,v_campo_col3])                
+            self.db_oggetto_tree_model.appendRow(v_root_idx)                
+
+            ###
+            # quarta radice con i trigger
+            ###
+            v_root_trg = QStandardItem('Triggers')
+
+            self.v_cursor_db_obj.execute("""SELECT TRIGGER_NAME, 
+                                                    TRIGGER_TYPE, 
+                                                    TRIGGERING_EVENT 
+                                            FROM   ALL_TRIGGERS 
+                                            WHERE  OWNER='SMILE' AND 
+                                                    TABLE_NAME='"""+self.nome_oggetto+"""'
+                                            ORDER BY TRIGGER_NAME""")
+
+            # carico elenco indici
+            for result in self.v_cursor_db_obj:                       
+                v_campo_col0 = QStandardItem(result[0])
+                v_campo_col1 = QStandardItem(result[1])
+                v_campo_col2 = QStandardItem(result[2])
+                v_campo_col3 = None
+                v_root_trg.appendRow([v_campo_col0,v_campo_col1,v_campo_col2,v_campo_col3])                
+            self.db_oggetto_tree_model.appendRow(v_root_trg)                
+
+            ###
+            # quinta radice con le tabelle referenziate (non viene caricato nulla fino a quando l'utente non clicca sulla relativa voce)
+            # il caricamento verrà eseguito dalla procedura slot_db_oggetto_tree_expand
+            ###
+            v_root_ref = QStandardItem('Referenced By')
+            v_root_ref.appendRow([None,None,None,None])                
+            self.db_oggetto_tree_model.appendRow(v_root_ref)   
+    
+            ###                
+            # attribuisco il modello dei dati all'albero
+            ###
+            self.db_oggetto_tree.setModel(self.db_oggetto_tree_model)
+            # forzo la larghezza delle colonne
+            self.db_oggetto_tree.setColumnWidth(0, 130)
+            self.db_oggetto_tree.setColumnWidth(1, 110)
+            self.db_oggetto_tree.setColumnWidth(2, 80)
+            self.db_oggetto_tree.setColumnWidth(3, 1000)
+            # mi posiziono sulla prima riga ed espando l'albero
+            v_index = self.db_oggetto_tree_model.indexFromItem(v_root_campi)
+            self.db_oggetto_tree.expand(v_index)
+
+        # se l'oggetto selezionato è una tabella o una vista --> preparo select per estrarre i nomi dei campi
+        elif self.tipo_oggetto in ('PACKAGE','FUNCTION','PROCEDURE') :
+            # creo un modello dati con 1 colonna (dove nell'intestazione ci metto il nome dell'oggetto)
+            self.db_oggetto_tree_model = QStandardItemModel()
+            self.db_oggetto_tree_model.setHorizontalHeaderLabels([self.nome_oggetto])
+
+            ###
+            # prima radice con il nome dell'oggetto
+            ###
+            v_root_codice = QStandardItem('Code')
+
+            self.v_cursor_db_obj.execute("""SELECT UPPER(TEXT) FROM ALL_SOURCE WHERE OWNER='SMILE' AND NAME='"""+self.nome_oggetto+"""' AND TYPE='"""+self.tipo_oggetto+"""' ORDER BY LINE""")
+    
+            # analizzo il sorgente e ne estraggo il nome di funzioni e procedure
+            v_start_sezione = False
+            v_text_sezione = ''
+            for result in self.v_cursor_db_obj:                       
+                # dalla riga elimino gli spazi a sinistra e a destra
+                v_riga_raw = result[0]
+                v_riga = v_riga_raw.lstrip()
+                v_riga = v_riga.rstrip()                    
+                # individio riga di procedura-funzione
+                if v_riga[0:9] == 'PROCEDURE' or v_riga[0:8] == 'FUNCTION':
+                    # il nome della procedura-funzione inizia dal primo carattere spazio fino ad apertura parentesi tonda                        
+                    if v_riga.find('(') != -1:
+                        v_nome = v_riga[v_riga.find(' ')+1:v_riga.find('(')]
+                    else:
+                        v_nome = v_riga[v_riga.find(' ')+1:len(v_riga)]
+                    # creo il nodo con il nome della procedura-funzione
+                    v_int_proc_func = QStandardItem(v_nome)                        
+                    v_root_codice.appendRow([v_int_proc_func])         
+                    # indico che sono all'interno di una nuova sezione, terminata la quale poi dovrò esplodere elenco parametri                       
+                    v_start_sezione = True
+                    v_text_sezione = v_riga
+                # ...continua la sezione di parametri....
+                elif v_start_sezione:
+                    v_text_sezione += v_riga
+
+                # elaboro la sezione che contiene i parametri della procedura-funzione
+                if v_start_sezione and v_riga.find(')') != -1:                        
+                    v_text_sezione = v_text_sezione[v_text_sezione.find('(')+1:v_text_sezione.find(')')]                        
+                    v_elenco_parametri = v_text_sezione.split(',')
+                    for v_txt_parametro in v_elenco_parametri:                            
+                        v_stringa = v_txt_parametro.lstrip()
+                        v_parametro = v_stringa[0:v_stringa.find(' ')]
+                        v_item_parametro = QStandardItem(v_parametro)                        
+                        v_int_proc_func.appendRow(v_item_parametro)                        
+                    v_text_sezione = ''
+                    v_start_sezione = False
+            
+            self.db_oggetto_tree_model.appendRow(v_root_codice)
+            
+            ###                
+            # attribuisco il modello dei dati all'albero
+            ###
+            self.db_oggetto_tree.setModel(self.db_oggetto_tree_model)                
+            # mi posiziono sulla prima riga ed espando l'albero
+            v_index = self.db_oggetto_tree_model.indexFromItem(v_root_codice)
+            self.db_oggetto_tree.expand(v_index)
+                                    
+        # Ripristino icona freccia del mouse
+        QApplication.restoreOverrideCursor()          
+
+    def slot_db_oggetto_tree_expand(self, p_model):
+        """
+            Evento che si scatena quando viene selezionato un elemento sull'albero dell'object viever
+            E' stato creato in quanto la ricerca della reference by è un po' lenta...
+            p_model è del tipo QModelIndex
+        """
+        if p_model.data() == 'Referenced By':
             # sostituisce la freccia del mouse con icona "clessidra"
             QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))        
 
-            # se l'oggetto selezionato è una tabella o una vista --> preparo select per estrarre i nomi dei campi
-            if v_tipo_oggetto == 'TABLE' or v_tipo_oggetto == 'VIEW':
-                # ricerco la descrizione dell'oggetto
-                self.v_cursor_db_obj.execute("SELECT COMMENTS FROM all_tab_comments WHERE owner='SMILE' AND TABLE_NAME='"+v_nome_oggetto+"'")
-                v_tipo_oggetto_commento = self.v_cursor_db_obj.fetchone()[0]
+            # preparo la select per ricerca tutte le tabelle referenziate
+            self.v_cursor_db_obj.execute("""SELECT DISTINCT TABLE_NAME
+                                            FROM   ALL_CONSTRAINTS
+                                            WHERE  OWNER = 'SMILE' AND
+                                                    CONSTRAINT_TYPE='R' AND 
+                                                    R_CONSTRAINT_NAME IN (SELECT CONSTRAINT_NAME
+                                                                            FROM   ALL_CONSTRAINTS
+                                                                            WHERE  TABLE_NAME='"""+self.nome_oggetto+"""' AND 
+                                                                                CONSTRAINT_TYPE IN ('U', 'P') )
+                                            ORDER BY TABLE_NAME""")
 
-                # creo un modello dati con 4 colonne (dove nell'intestazione ci metto il nome della tabella e la sua descrizione)
-                v_model = QStandardItemModel()
-                v_model.setHorizontalHeaderLabels([v_nome_oggetto, '', '', v_tipo_oggetto_commento])
+            # prendo la posizione dell'oggetto corrente nell'albero
+            v_root_ref = self.db_oggetto_tree_model.itemFromIndex(p_model)                               
+            # pulisco tutti i figli sottostanti            
+            v_root_ref.removeRows(0,v_root_ref.rowCount())
+            # carico sotto il ramo "Referenced By" tutti gli elementi
+            for result in self.v_cursor_db_obj:                       
+                v_campo_col0 = QStandardItem(result[0])
+                v_campo_col1 = None
+                v_campo_col2 = None
+                v_campo_col3 = None
+                v_root_ref.appendRow([v_campo_col0,v_campo_col1,v_campo_col2,v_campo_col3])                            
 
-                ###
-                # prima radice con il nome della tabella
-                ###
-                v_root_campi = QStandardItem('Fields')
-
-                self.v_cursor_db_obj.execute("""SELECT A.COLUMN_NAME AS NOME,
-                                        Decode(A.DATA_TYPE,'NUMBER',Lower(A.DATA_TYPE) || '(' || A.DATA_PRECISION || ',' || A.DATA_SCALE || ')',Lower(A.DATA_TYPE) || '(' || A.CHAR_LENGTH || ')')  AS TIPO,
-                                        Decode(A.NULLABLE,'Y',' not null','') AS COLONNA_NULLA,
-                                        B.COMMENTS AS COMMENTO
-                                FROM   ALL_TAB_COLUMNS A, ALL_COL_COMMENTS B 
-                                WHERE  A.OWNER='SMILE' AND 
-                                        A.TABLE_NAME ='"""+v_nome_oggetto+"""' AND 
-                                        A.OWNER=B.OWNER AND 
-                                        A.TABLE_NAME=B.TABLE_NAME AND 
-                                        A.COLUMN_NAME=B.COLUMN_NAME 
-                                ORDER BY A.COLUMN_ID""")
-        
-                # prendo i vari campi della tabella o vista e li carico nel modello di dati
-                for result in self.v_cursor_db_obj:                       
-                    v_campo_col0 = QStandardItem(result[0])
-                    v_campo_col1 = QStandardItem(result[1])
-                    v_campo_col2 = QStandardItem(result[2])
-                    v_campo_col3 = QStandardItem(result[3])
-                    v_root_campi.appendRow([v_campo_col0,v_campo_col1,v_campo_col2,v_campo_col3])                
-                v_model.appendRow(v_root_campi)
-
-                ###
-                # seconda radice con le fk
-                ###
-                v_root_fk = QStandardItem('Constraints')
-
-                self.v_cursor_db_obj.execute("""SELECT CONSTRAINT_NAME,
-                                                       (SELECT LISTAGG(COLUMN_NAME,',') WITHIN GROUP (ORDER BY POSITION) FROM ALL_CONS_COLUMNS WHERE OWNER=ALL_CONSTRAINTS.OWNER AND CONSTRAINT_NAME=ALL_CONSTRAINTS.CONSTRAINT_NAME) COLONNE 
-                                                FROM   ALL_CONSTRAINTS 
-                                                WHERE  OWNER='SMILE' AND 
-                                                       TABLE_NAME='"""+v_nome_oggetto+"""'""")
-
-                # carico elenco constraints
-                for result in self.v_cursor_db_obj:                       
-                    v_campo_col0 = QStandardItem(result[0])
-                    v_campo_col1 = None
-                    v_campo_col2 = None
-                    v_campo_col3 = QStandardItem(result[1])
-                    v_root_fk.appendRow([v_campo_col0,v_campo_col1,v_campo_col2,v_campo_col3])                
-                v_model.appendRow(v_root_fk)
-
-                ###
-                # terza radice con gli indici
-                ###
-                v_root_idx = QStandardItem('Indexes')
-
-                self.v_cursor_db_obj.execute("""SELECT INDEX_NAME,
-                                                       CASE WHEN InStr(INDEX_TYPE,'FUNCTION') != 0 THEN 'function' END TIPO, 
-                                                       CASE WHEN UNIQUENESS='UNIQUE' THEN 'unique' END UNICO, 
-                                                       (SELECT LISTAGG(COLUMN_NAME,',') WITHIN GROUP (ORDER BY COLUMN_POSITION) COLONNE FROM ALL_IND_COLUMNS WHERE INDEX_OWNER=ALL_INDEXES.OWNER AND INDEX_NAME=ALL_INDEXES.INDEX_NAME) COLONNE
-                                                FROM   ALL_INDEXES 
-                                                WHERE  OWNER='SMILE' AND 
-                                                       TABLE_NAME='"""+v_nome_oggetto+"""'
-                                                       ORDER BY INDEX_NAME""")
-
-                # carico elenco indici
-                for result in self.v_cursor_db_obj:                       
-                    v_campo_col0 = QStandardItem(result[0])
-                    v_campo_col1 = QStandardItem(result[1])
-                    v_campo_col2 = QStandardItem(result[2])
-                    v_campo_col3 = QStandardItem(result[3])
-                    v_root_idx.appendRow([v_campo_col0,v_campo_col1,v_campo_col2,v_campo_col3])                
-                v_model.appendRow(v_root_idx)                
-
-                ###
-                # quarta radice con i trigger
-                ###
-                v_root_trg = QStandardItem('Triggers')
-
-                self.v_cursor_db_obj.execute("""SELECT TRIGGER_NAME, 
-                                                       TRIGGER_TYPE, 
-                                                       TRIGGERING_EVENT 
-                                                FROM   ALL_TRIGGERS 
-                                                WHERE  OWNER='SMILE' AND 
-                                                       TABLE_NAME='"""+v_nome_oggetto+"""'
-                                                ORDER BY TRIGGER_NAME""")
-
-                # carico elenco indici
-                for result in self.v_cursor_db_obj:                       
-                    v_campo_col0 = QStandardItem(result[0])
-                    v_campo_col1 = QStandardItem(result[1])
-                    v_campo_col2 = QStandardItem(result[2])
-                    v_campo_col3 = None
-                    v_root_trg.appendRow([v_campo_col0,v_campo_col1,v_campo_col2,v_campo_col3])                
-                v_model.appendRow(v_root_trg)                
-
-                ###                
-                # attribuisco il modello dei dati all'albero
-                ###
-                self.db_oggetto_tree.setModel(v_model)
-                # forzo la larghezza delle colonne
-                self.db_oggetto_tree.setColumnWidth(0, 130)
-                self.db_oggetto_tree.setColumnWidth(1, 110)
-                self.db_oggetto_tree.setColumnWidth(2, 80)
-                self.db_oggetto_tree.setColumnWidth(3, 1000)
-                # mi posiziono sulla prima riga ed espando l'albero
-                v_index = v_model.indexFromItem(v_root_campi)
-                self.db_oggetto_tree.expand(v_index)
-
-            # se l'oggetto selezionato è una tabella o una vista --> preparo select per estrarre i nomi dei campi
-            elif v_tipo_oggetto in ('PACKAGE','FUNCTION','PROCEDURE') :
-                # creo un modello dati con 1 colonna (dove nell'intestazione ci metto il nome dell'oggetto)
-                v_model = QStandardItemModel()
-                v_model.setHorizontalHeaderLabels([v_nome_oggetto])
-
-                ###
-                # prima radice con il nome dell'oggetto
-                ###
-                v_root_codice = QStandardItem('Code')
-
-                self.v_cursor_db_obj.execute("""SELECT UPPER(TEXT) FROM ALL_SOURCE WHERE OWNER='SMILE' AND NAME='"""+v_nome_oggetto+"""' AND TYPE='"""+v_tipo_oggetto+"""' ORDER BY LINE""")
-        
-                # analizzo il sorgente e ne estraggo il nome di funzioni e procedure
-                v_start_sezione = False
-                v_text_sezione = ''
-                for result in self.v_cursor_db_obj:                       
-                    # dalla riga elimino gli spazi a sinistra e a destra
-                    v_riga_raw = result[0]
-                    v_riga = v_riga_raw.lstrip()
-                    v_riga = v_riga.rstrip()                    
-                    # individio riga di procedura-funzione
-                    if v_riga[0:9] == 'PROCEDURE' or v_riga[0:8] == 'FUNCTION':
-                        # il nome della procedura-funzione inizia dal primo carattere spazio fino ad apertura parentesi tonda                        
-                        if v_riga.find('(') != -1:
-                            v_nome = v_riga[v_riga.find(' ')+1:v_riga.find('(')]
-                        else:
-                            v_nome = v_riga[v_riga.find(' ')+1:len(v_riga)]
-                        # creo il nodo con il nome della procedura-funzione
-                        v_int_proc_func = QStandardItem(v_nome)                        
-                        v_root_codice.appendRow([v_int_proc_func])         
-                        # indico che sono all'interno di una nuova sezione, terminata la quale poi dovrò esplodere elenco parametri                       
-                        v_start_sezione = True
-                        v_text_sezione = v_riga
-                    # ...continua la sezione di parametri....
-                    elif v_start_sezione:
-                        v_text_sezione += v_riga
-
-                    # elaboro la sezione che contiene i parametri della procedura-funzione
-                    if v_start_sezione and v_riga.find(')') != -1:                        
-                        v_text_sezione = v_text_sezione[v_text_sezione.find('(')+1:v_text_sezione.find(')')]                        
-                        v_elenco_parametri = v_text_sezione.split(',')
-                        for v_txt_parametro in v_elenco_parametri:                            
-                            v_stringa = v_txt_parametro.lstrip()
-                            v_parametro = v_stringa[0:v_stringa.find(' ')]
-                            v_item_parametro = QStandardItem(v_parametro)                        
-                            v_int_proc_func.appendRow(v_item_parametro)                        
-                        v_text_sezione = ''
-                        v_start_sezione = False
-                
-                v_model.appendRow(v_root_codice)
-               
-                ###                
-                # attribuisco il modello dei dati all'albero
-                ###
-                self.db_oggetto_tree.setModel(v_model)                
-                # mi posiziono sulla prima riga ed espando l'albero
-                v_index = v_model.indexFromItem(v_root_codice)
-                self.db_oggetto_tree.expand(v_index)
-                                        
             # Ripristino icona freccia del mouse
             QApplication.restoreOverrideCursor()          
+
+    def richiesta_connessione_specifica(self):    
+        """
+            Apre finestra per richiedere una connessione specifica
+        """            
+        # inizializzo le strutture grafice e visualizzo la dialog per richiedere una password di conferma prima di procedere
+        self.dialog_connect = QtWidgets.QDialog()
+        self.win_dialog_connect = Ui_connect_window()
+        self.win_dialog_connect.setupUi(self.dialog_connect)        
+        self.win_dialog_connect.b_connect.clicked.connect(self.richiesta_connessione_specifica_accept)                
+        self.dialog_connect.show()        
+
+    def richiesta_connessione_specifica_accept(self):
+        """
+           Eseguo connessione specifica
+        """           
+        # controllo che tutte le info siano state inserite
+        if self.win_dialog_connect.e_user.displayText() == '' or self.win_dialog_connect.e_password.displayText() == '' or self.win_dialog_connect.e_tns.displayText() == '':
+            message_error('Not all the requested data has been entered!')            
+            return 'ko'
+
+        # eseguo la connessione
+        self.e_user_name = self.win_dialog_connect.e_user.displayText()
+        self.e_password = self.win_dialog_connect.e_password.text()
+        self.e_server_name = self.win_dialog_connect.e_tns.displayText()
+        self.e_user_mode = self.win_dialog_connect.e_mode.currentText()
+
+        self.slot_connetti()
+                
+        # chiudo window di connessione
+        self.dialog_connect.close()
 #
 #  _____ ____ ___ _____ ___  ____  
 # | ____|  _ \_ _|_   _/ _ \|  _ \ 
@@ -837,11 +1024,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
     def __init__(self, 
                  p_titolo, # Titolo della window-editor
                  p_contenuto_file,  # Eventuale contenuto da inserire direttamente nella parte di editor
-                 o_l_numero_righe, # Puntatore all'oggetto label numero di righe della statusbar
-                 o_l_numero_caratteri,  # Puntatore all'oggetto label numero di caratteri della statusbar
-                 o_l_overwrite_enabled,  # Puntatore all'oggetto label di overwrite della statusbar
-                 o_l_tabella_editabile,  # Puntatore all'oggetto label editable della statusbar
-                 o_m_history): # Puntatore all'oggetto model lista per elenco dei comandi di history
+                 o_MSql_win1_class): # Puntatore alla classe principale (window1)                                  
         global v_global_utf_8        
 
         # incapsulo la classe grafica da qtdesigner
@@ -852,25 +1035,49 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.v_titolo_window = p_titolo
         self.setWindowTitle(self.v_titolo_window)
 
-        # mi salvo il link agli oggetti della status bar che l'editor va ad aggiornare (es. num. caratteri, ecc.)
-        self.l_numero_righe = o_l_numero_righe
-        self.l_numero_caratteri = o_l_numero_caratteri
-        self.l_overwrite_enabled = o_l_overwrite_enabled
-        self.l_tabella_editabile = o_l_tabella_editabile
         # var che indica che è attiva-disattiva la sovrascrittura (tasto insert della tastiera)
         self.v_overwrite_enabled = False
-        # mi salvo il puntatore al model lista dell'oggetto history
-        self.m_history = o_m_history
+        # mi salvo il puntatore alla classe principale (in questo modo posso accedere ai suoi oggetti e metodi)
+        self.link_to_MSql_win1_class = o_MSql_win1_class
 
         # splitter che separa l'editor dall'output: imposto l'immagine per indicare lo splitter e il relativo rapporto tra il widget di editor e quello di output
         #self.splitter.setStyleSheet("QSplitter::handle {text: url(':/icons/icons/splitter.gif')}")
         self.splitter.setStretchFactor(0,1)
-    
+
         ###
-        # Aggiunta della classe che permette all'editor di evidenziare le parole chiavi di PLSQL
+        # IMPOSTAZIONI DELL'EDITOR SCINTILLA
         ###
-        self.highlight = highlighting_words_in_text_editor.PLSQL_Highlighter(self.e_sql.document())
-                                
+        # evidenzia l'intera riga dove posizionato il cursore
+        self.e_sql.setCaretLineVisible(True)
+        self.e_sql.setCaretLineBackgroundColor(QColor("#FFFF99"))
+        # attivo il margine 0 con la numerazione delle righe
+        self.e_sql.setMarginType(0, Qsci.QsciScintilla.NumberMargin)        
+        self.e_sql.setMarginsFont(QFont("Courier New",9))   
+        # attivo il lexer per evidenziare il codice
+        self.v_lexer = Qsci.QsciLexerSQL(self.e_sql)
+        # imposto carattere di default
+        self.v_lexer.setDefaultFont(QFont("Cascadia Code SemiBold",11))    
+        self.v_lexer.setFoldCompact(False)
+        self.v_lexer.setFoldComments(True)
+        self.v_lexer.setFoldAtElse(True)                
+        # attivo il lexer sull'editor
+        self.e_sql.setLexer(self.v_lexer)
+        # attivo le righe verticali che segnano le indentazioni
+        self.e_sql.setIndentationGuides(True)                
+        # attivo i margini con + e - 
+        self.e_sql.setFolding(self.e_sql.BoxedTreeFoldStyle, 2)
+        # indentazione
+        self.e_sql.setIndentationWidth(4)
+        self.e_sql.setAutoIndent(True)
+        # tabulatore a 4 caratteri
+        self.e_sql.setTabWidth(4)
+        # auto completamento
+        self.e_sql.setAutoCompletionSource(Qsci.QsciScintilla.AcsDocument)
+        self.e_sql.setAutoCompletionThreshold(1)
+        # attivo UTF-8 (se richiesto)
+        if v_global_utf_8:
+            self.e_sql.setUtf8(True)                                                
+        
         ###
         # DICHIARAZIONE VAR GENERALI
         ###
@@ -893,7 +1100,9 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         ###
         if p_contenuto_file is not None:        
             # imposto editor con quello ricevuto in ingresso
-            self.e_sql.setPlainText(p_contenuto_file)
+            self.e_sql.setText(p_contenuto_file)
+            # mi posiziono sulla prima riga
+            self.e_sql.setCursorPosition(0,0)
 
         # var che indica che il testo è stato modificato
         #self.e_sql.insertPlainText('SELECT * FROM MS_UTN')
@@ -911,6 +1120,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             
         # attivo il drop sulla parte di editor        
         self.e_sql.setAcceptDrops(True)    
+        # attivo il filtro di eventi; ogni evento passerà dalla funzion eventFilter
         self.e_sql.installEventFilter(self)   
 
         # var che si attiva quando l'oggetto viene chiuso
@@ -928,20 +1138,42 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
 
     def eventFilter(self, source, event):
         """
-           Gestione di eventi personalizzati sull'editor (overwrite, drag&drop)
+           Gestione di eventi personalizzati sull'editor (overwrite, drag&drop, F12)
         """      
-        global v_global_uppercase    
+        global v_global_connection
 
-        # individuo la pressione di un tasto sulla parte di editor
-        if event.type() == QEvent.KeyPress and source is self.e_sql:            
-            # utente ha richiesto di scrivere in maiuscolo
-            if v_global_uppercase:
-                v_reg = QRegExp('[A-Za-z]')
-                if v_reg.indexIn(event.text(),0) != -1:
-                    self.e_sql.insertPlainText(event.text().upper())         
-                    event.ignore()
-                    return True                               
-        
+        # individuo la pressione di un testo sull'editor
+        if event.type() == QEvent.KeyPress and source is self.e_sql:
+            # tasto Insert premuto da parte dell'utente --> cambio la label sulla statusbar
+            if event.key() == Qt.Key_Insert:
+                if self.v_overwrite_enabled:
+                    self.v_overwrite_enabled = False                
+                else:
+                    self.v_overwrite_enabled = True                
+                # aggiorno la status bar con relative label
+                self.aggiorna_statusbar()
+            # tasto F12 premuto dall'utente --> richiamo l'object viewer
+            # ho provato a vedere se esiste possibilità di chiedere a qscintilla se mi può dare la parola su cui il cursore è posizionato
+            # ma no trovato. Quindi l'utente deve evidenziare lui la parola dell'oggetto che vuole ispezionare...                
+            if event.key() == Qt.Key_F12:                                
+                # ricavo la riga e la posizione del cursore corrente sulla riga
+                v_num_line, v_num_pos = self.e_sql.getCursorPosition()
+                self.e_sql.setSelection(v_num_line, 0, v_num_line+1, -1)
+                v_line = self.e_sql.selectedText()
+                print('ciao' + v_line)
+                v_oggetto = ''
+                # richiamo la procedura di oracle che mi restituisce la ddl dell'oggetto (apro un cursore locale a questa funzione)
+                v_temp_cursor = v_global_connection.cursor()
+                v_temp_cursor.execute("SELECT OBJECT_NAME, OBJECT_TYPE FROM ALL_OBJECTS WHERE OBJECT_NAME = '" + v_oggetto.upper() + "' AND OBJECT_TYPE IN ('TABLE','VIEW','PACKAGE','PROCEDURE','FUNCTION')")
+                # prendo il risultato
+                v_record = v_temp_cursor.fetchone()
+                # se il risultato è presente ottengo nome e tipo dell'oggetto che dovrò passare all'object viewer
+                if v_record != None:                    
+                    v_nome_oggetto = v_record[0]
+                    v_tipo_oggetto = v_record[1]                                        
+                    # carico l'object viewer usando passando come parametro iniziale il puntatore all'oggetto main
+                    MSql_win1_class.carica_object_viewer(self.link_to_MSql_win1_class,v_tipo_oggetto,v_nome_oggetto)                                        
+                  
         # individuo il drag 
         if event.type() == QEvent.DragEnter and source is self.e_sql:
             event.accept()            
@@ -960,14 +1192,14 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                     else:
                         v_stringa = source_item.item(v_indice, 0).text()                
                 # inserisco nell'editor quanto selezionato dall'utente                
-                self.e_sql.insertPlainText(v_stringa)
+                self.e_sql.insert(v_stringa)
             
             return True        
 
         # individuo l'attivazione della window e...
-        if event.type() == QEvent.WindowActivate:            
+        if event.type() == QEvent.FocusIn:                  
             # aggiorno i dati della statusbar
-            self.aggiorna_lines_and_length()
+            self.aggiorna_statusbar()
 
         # fine senza alcuna elaborazione        
         return False
@@ -1087,7 +1319,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         """                
         self.v_testo_modificato = True
         # aggiorno i dati della statusbar
-        self.aggiorna_lines_and_length()
+        self.aggiorna_statusbar()
 
     def slot_menu_auto_column_resize(self):
         """
@@ -1113,16 +1345,15 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.v_select_corrente = ''
 
         # prendo tutto il testo o solo quello evidenziato dall'utente
-        o_cursore = self.e_sql.textCursor()
-        if o_cursore.selectedText() != '':                
-            v_testo = o_cursore.selection().toPlainText()                
-        else:
-            v_testo = self.e_sql.toPlainText()            
+        if self.e_sql.hasSelectedText():
+            v_testo = self.e_sql.selectedText()            
+        else:            
+            v_testo = self.e_sql.text()
         if v_testo == '':
             # emetto errore sulla barra di stato 
             message_error('No instruction!')                                 
             return 'ko'
-
+        
         # prendo il testo e inizio ad eseguire le istruzioni
         # divido il testo ricevuto in input riga per riga (ritorno a capo è il divisore)
         v_righe_testo = v_testo.split(chr(10))
@@ -1232,70 +1463,6 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         else:
             message_error('No script!')
 
-    def esegui_select(self, p_select, p_corrente):
-        """
-           Esegue p_select (solo il parser con carico della prima serie di record)
-               se p_corrente è True la var v_select_corrente verrà rimpiazzata
-        """
-        global v_global_connesso
-        global v_global_editable
-
-        if v_global_connesso:
-            # pulisco elenco
-            self.slot_clear('RES')            
-            # pulisco la matrice che conterrà elenco delle celle modificate
-            self.v_matrice_dati_modificati = []
-            
-            # sostituisce la freccia del mouse con icona "clessidra"
-            QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))                    
-
-            # imposto indicatore di esecuzione a false --> nessuna esecuzione
-            self.v_esecuzione_ok = False
-            # azzero le var di riga e colonna (serviranno per il carico della pagina)            
-            self.y = 0
-
-            # prendo solo il testo che eventualmente l'utente ha evidenziato a video
-            if p_corrente:
-                self.v_select_corrente = p_select
-            
-            # se la tabella deve essere editabile
-            # all'sql scritto dall'utente aggiungo una parte che mi permette di avere la colonna id riga
-            # questa colonna mi servirà per tutte le operazioni di aggiornamento
-            if v_global_editable:
-                v_select = 'SELECT ROWID, MY_SQL.* FROM (' + p_select + ') MY_SQL'    
-            else:
-                v_select = p_select
-
-            # esegue sql contenuto nel campo a video                    
-            try:                
-                self.v_cursor.execute(v_select)                            
-                self.v_esecuzione_ok = True
-            # se riscontrato errore --> emetto sia codice che messaggio
-            except cx_Oracle.Error as e:                                                
-                # ripristino icona freccia del mouse
-                QApplication.restoreOverrideCursor()                        
-                # emetto errore sulla barra di stato 
-                errorObj, = e.args    
-                self.scrive_output("Error: " + errorObj.message, "E")                                            
-                return 'ko'
-                        
-            # lista contenente le intestazioni (tramite apposita funzione si ricavano i nomi delle colonne dall'sql che si intende eseguire)
-            self.nomi_intestazioni = nomi_colonne_istruzione_sql(self.v_cursor)                                    
-            self.o_table.setColumnCount(len(self.nomi_intestazioni))                                        
-            # lista contenente i tipi delle colonne 
-            self.tipi_intestazioni = self.v_cursor.description
-            # setto le intestazioni e imposto il numero di righe a 1
-            self.o_table.setHorizontalHeaderLabels(self.nomi_intestazioni)                        
-
-            # se tutto ok, posso procedere con il caricare la prima pagina
-            self.carica_pagina()   
-
-            # posizionamento sulla parte di output risultati select
-            self.o_tab_widget.setCurrentIndex(0) 
-
-            # Ripristino icona freccia del mouse
-            QApplication.restoreOverrideCursor()                        
-
     def esegui_plsql(self, p_plsql, p_rowcount):
         """
             Eseguo il plsql che è stato passato 
@@ -1403,6 +1570,70 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             # Ripristino icona freccia del mouse
             QApplication.restoreOverrideCursor()                        
                 
+    def esegui_select(self, p_select, p_corrente):
+        """
+           Esegue p_select (solo il parser con carico della prima serie di record)
+               se p_corrente è True la var v_select_corrente verrà rimpiazzata
+        """
+        global v_global_connesso
+        global v_global_editable
+
+        if v_global_connesso:            
+            # pulisco elenco
+            self.slot_clear('RES')            
+            # pulisco la matrice che conterrà elenco delle celle modificate
+            self.v_matrice_dati_modificati = []
+            
+            # sostituisce la freccia del mouse con icona "clessidra"
+            QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))                    
+
+            # imposto indicatore di esecuzione a false --> nessuna esecuzione
+            self.v_esecuzione_ok = False
+            # azzero le var di riga e colonna (serviranno per il carico della pagina)            
+            self.y = 0
+
+            # prendo solo il testo che eventualmente l'utente ha evidenziato a video
+            if p_corrente:
+                self.v_select_corrente = p_select
+            
+            # se la tabella deve essere editabile
+            # all'sql scritto dall'utente aggiungo una parte che mi permette di avere la colonna id riga
+            # questa colonna mi servirà per tutte le operazioni di aggiornamento
+            if v_global_editable:
+                v_select = 'SELECT ROWID, MY_SQL.* FROM (' + p_select + ') MY_SQL'    
+            else:
+                v_select = p_select
+
+            # esegue sql contenuto nel campo a video                    
+            try:                
+                self.v_cursor.execute(v_select)                            
+                self.v_esecuzione_ok = True
+            # se riscontrato errore --> emetto sia codice che messaggio
+            except cx_Oracle.Error as e:                                                
+                # ripristino icona freccia del mouse
+                QApplication.restoreOverrideCursor()                        
+                # emetto errore sulla barra di stato 
+                errorObj, = e.args    
+                self.scrive_output("Error: " + errorObj.message, "E")                                            
+                return 'ko'
+                        
+            # lista contenente le intestazioni (tramite apposita funzione si ricavano i nomi delle colonne dall'sql che si intende eseguire)
+            self.nomi_intestazioni = nomi_colonne_istruzione_sql(self.v_cursor)                                    
+            self.o_table.setColumnCount(len(self.nomi_intestazioni))                                                    
+            # lista contenente i tipi delle colonne 
+            self.tipi_intestazioni = self.v_cursor.description                        
+            # setto le intestazioni e imposto il numero di righe a 1
+            self.o_table.setHorizontalHeaderLabels(self.nomi_intestazioni)                                    
+
+            # se tutto ok, posso procedere con il caricare la prima pagina            
+            self.carica_pagina()   
+
+            # posizionamento sulla parte di output risultati select
+            self.o_tab_widget.setCurrentIndex(0) 
+
+            # Ripristino icona freccia del mouse
+            QApplication.restoreOverrideCursor()                        
+
     def carica_pagina(self):
         """
            Carica i dati del flusso record preparato da esegui_select
@@ -1415,7 +1646,11 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.v_carico_pagina_in_corso = True
 
             # carico la prossima riga del flusso dati
-            v_riga_dati = self.v_cursor.fetchone()
+            try:
+                v_riga_dati = self.v_cursor.fetchone()
+            except:
+                message_error('Error to fetch data!')
+                return 'ko'
             # se ero a fine flusso --> esco
             if v_riga_dati == None:
                 return 'ko'
@@ -1491,8 +1726,12 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         """
             Controllo avanzamento della scrollbar per tenere sotto controllo elenchi di grandi dimensioni
         """
+        # se esecuzione ok
+        if not self.v_esecuzione_ok:
+            return 'ko'
+
         # se sono arrivato alla punto più basso della scrollbar, vuol dire che posso caricare gli altri dati
-        if posizione == self.o_table.verticalScrollBar().maximum():            
+        if posizione == self.o_table.verticalScrollBar().maximum() and self.y > 0:            
             # sostituisce la freccia del mouse con icona "clessidra"
             QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))        
 
@@ -1505,7 +1744,11 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
     def slot_go_to_end(self):
         """
            Scorro fino alla fine della tabella           
-        """    
+        """            
+        # se esecuzione ok
+        if not self.v_esecuzione_ok:
+            return 'ko'
+
         # creo una barra di avanzamento infinita
         v_progress = avanzamento_infinito_class("sql_editor.gif")
 
@@ -1590,7 +1833,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             v_valore_cella = self.o_table.item(yx[0],yx[1]).text()
             v_rowid = self.o_table.item(yx[0],0).text()
             v_update = "UPDATE " + v_table_name + " SET " + self.nomi_intestazioni[yx[1]] + "='" + v_valore_cella + "' WHERE ROWID = '" + v_rowid + "'"
-            self.e_sql.appendPlainText(v_update + ';')                
+            self.e_sql.append(chr(10) + v_update + ';')                
 
     def slot_export_to_excel(self):
         """
@@ -1642,54 +1885,12 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         except:
             message_error('Error in file creation or file !')
       
-    def slot_savefile(self):
-        """
-           Salvataggio del testo in un file
-        """
-        global v_global_utf_8
-
-        if self.v_titolo_window != "" and self.v_titolo_window[0:8] != 'Untitled':     
-            try:
-                if v_global_utf_8:
-                    # scrittura usando utf-8                     
-                    v_file = open(self.v_titolo_window,'w',encoding='utf-8')
-                else:
-                    # scrittura usando ansi
-                    v_file = open(self.v_titolo_window,'w')
-                v_file.write(self.e_sql.toPlainText())
-                v_file.close()
-                self.v_testo_modificato = False
-                return 'ok'
-            except Exception as err:
-                message_error('Error to write the file: ' + str(err))
-                return 'ko'
-        # se il file è nuovo allora viene aperta la finestra di "salva come"
-        else:
-            self.slot_savefile_as()
-        
-    def slot_savefile_as(self):
-        """
-           Salva con nome (al termine richiama il salvataggio normale)
-        """        
-        filename = QtWidgets.QFileDialog.getSaveFileName(self, "Save a SQL file","","SQL (*.sql)") [0]                          
-        if not filename:
-            message_error('Error saving')
-            return False        
-        if not filename.endswith('.sql'):
-            filename += '.sql'
-
-        self.v_titolo_window = filename
-        self.setWindowTitle(self.v_titolo_window)
-
-        # richiamo il salvataggio        
-        return self.slot_savefile()        
-
     def closeEvent(self, e):
         """
            Intercetto l'evento di chiusura del form e controllo se devo chiedere di salvare o meno
            Questa funzione sovrascrive quella nativa di QT            
         """
-        v_salvare = self.check_to_save_file()            
+        v_salvare = self.check_to_save_file()                    
         # richiesto di salvare e poi di chiudere
         if v_salvare == 'Yes':        
             self.v_editor_chiuso = True            
@@ -1718,16 +1919,18 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         # utente chiede di salvare
         elif v_scelta == 'Yes':
             if self.v_titolo_window == "":                
-                v_ok = self.slot_savefile_as()
+                v_ok, v_nome_file = salvataggio_editor("",self.e_sql.text())
                 if v_ok != 'ok':
                     return 'Cancel'
                 else:
+                    self.v_testo_modificato = False
                     return 'Yes'
             else:                      
-                v_ok = self.slot_savefile()          
+                v_ok, v_nome_file = salvataggio_editor(self.v_titolo_window, self.e_sql.text())                          
                 if v_ok != 'ok':
                     return 'Cancel'
                 else:
+                    self.v_testo_modificato = False
                     return 'Yes'
         # utente chiede di non salvare
         else:
@@ -1739,7 +1942,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         """
         font, ok = QFontDialog.getFont(QtGui.QFont("Courier New"))
         if ok:
-            self.e_sql.setFont(font)            
+            self.v_lexer.setFont(font)            
 
     def slot_font_output_selector(self):
         """
@@ -1752,70 +1955,189 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             # imposto var generale che indica l'altezza del font
             self.v_altezza_font_output = font.pointSize()
 
+    def calcola_pos_win(self, p_QDialog):
+        """
+           Restituisce un oggetto QRect con la posizione e la dimensione della window ricevuta in input
+           rispetto alla main window. Viene usata per le funzioni di trova e trova-sostituisci per posizionare
+           la finestra a lato della main window.
+           Il parametro p_QDialog è l'oggetto window che si vuole modificare
+        """
+        global v_global_main_geometry    
+        
+        v_dialog_dimension = p_QDialog.frameGeometry()                    
+        o_rect = QRect()
+        o_rect.setRect( v_global_main_geometry.x() + v_global_main_geometry.width() - v_dialog_dimension.width(), 
+                        (v_global_main_geometry.y() + v_global_main_geometry.height() - v_dialog_dimension.height())//2, 
+                        v_dialog_dimension.width(),
+                        v_dialog_dimension.height())
+
+        return o_rect                
+    
     def slot_find(self):
         """
-           Apre la window per la ricerca del testo (se già inizializzata la visualizzo e basta)
-        """        
+           Apre la window per la ricerca del testo (se già inizializzata la visualizzo e basta)           
+        """            
         try:
             # visualizzo la finestra di ricerca
             self.dialog_find.show()
         except:
             # inizializzo le strutture grafiche e visualizzo la dialog per la ricerca del testo
-            self.dialog_find = QtWidgets.QDialog()
+            self.dialog_find = QtWidgets.QDialog(self)
             self.win_find = Ui_FindWindow()        
-            self.win_find.setupUi(self.dialog_find)                
+            self.win_find.setupUi(self.dialog_find)                            
             # da notare come il collegamento delle funzioni venga fatto in questo punto e non nella ui            
             self.win_find.b_next.clicked.connect(self.slot_find_next)                
+            self.win_find.b_find_all.clicked.connect(self.slot_find_all)                
+            self.win_find.o_find_all_result.doubleClicked.connect(self.slot_find_all_doppio_click)
             # visualizzo la finestra di ricerca
             self.dialog_find.show()
+            # definizione della struttura per elenco dei risultati (valido solo per find all)       
+            self.find_all_model = QtGui.QStandardItemModel()        
+            self.win_find.o_find_all_result.setModel(self.find_all_model)
 
+        # reimposto la posizione e le dimensioni della window 
+        self.dialog_find.setGeometry(self.calcola_pos_win(self.dialog_find))                
+
+    def slot_find_all(self):
+        """
+           Ricerca della stringa in tutto il testo
+        """
+        # pulisco elenco
+        self.find_all_model.clear()
+
+        # prelevo la stringa da ricercare
+        v_string_to_search = self.win_find.e_find.currentText()
+        # se inserito una stringa di ricerca...
+        if v_string_to_search != '':                        
+            # lancio la ricerca su tutto e senza effetti a video (da notare come findFirst è un metodo di QScintilla)...
+            v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, 0, 0, False, False, False)
+            # ciclo alla ricerca di tutte le ricorrenze            
+            v_num = 1
+            while v_found:
+                # ricavo la posizione in coordinate dove è stata trovata la stringa
+                v_start_line, v_start_pos, v_end_line, v_end_pos = self.e_sql.getSelection()
+                # inizio a costruire la riga di risultato che riporta il numero della riga dove stringa trovata + il suo testo 
+                v_risultato = str(v_start_line + 1) + ' - '
+                # per prendere la riga devo fare una selezione di tutta riga... (fino all'inizio della riga successiva visto che non conosco il fine riga...)
+                self.e_sql.setSelection(v_start_line, 0, v_start_line + 1, -1)
+                # aggiungo al numero di riga il testo completo della riga (vado ad eliminare spazi a sinistra e ritorni a capo)
+                v_risultato = v_risultato + self.e_sql.selectedText().lstrip()
+                v_risultato = v_risultato.replace('\n','')
+                # aggiungo il risultato all'elenco
+                self.find_all_model.appendRow(QtGui.QStandardItem(v_risultato))        
+                # lancio la ricerca alla riga successiva
+                v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, v_start_line + 1, -1, False, False, False)                        
+                # conto le ricorrenze
+                v_num += 1
+            # se trovate più ricorrenze ... mi posiziono sulla prima rilanciando la ricerca dall'inizio...
+            if v_num > 1:
+                # lancio la ricerca su tutto e senza effetti a video (da notare come findFirst è un metodo di QScintilla)...
+                v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, 0, 0, False, False, False)
+        
+    def slot_find_all_doppio_click(self, p_index):
+        """
+           Partendo dalla selezione di find_all, si posiziona sulla specifica riga di testo dell'editor
+        """
+        # prelevo la stringa da ricercare
+        v_string_to_search = self.win_find.e_find.currentText()
+        # prendo elemento dell'elenco selezionato
+        v_selindex = self.find_all_model.itemFromIndex(p_index)
+        v_stringa = v_selindex.text()               
+        if v_stringa != '':
+            # dalla stringa dell'elenco, estraggo il numero di riga e mi posiziono sull'editor
+            v_goto_line = v_stringa[0:v_stringa.find('-')]
+            if v_goto_line != '':
+                # mi posiziono alla riga richiesta sull'editor
+                self.e_sql.setCursorPosition(int(v_goto_line)-1,0)    
+                # eseguo la ricerca in modo da evidenziare il contenuto            
+                v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, int(v_goto_line)-1, 0, True, False, False)
+                                
     def slot_find_next(self):
         """
            Ricerca la prossima ricorrenza verso il basso
         """        
-        ft = self.win_find.e_find.currentText()
-        if self.e_sql.find(ft):
-            return
-        else:
-            self.e_sql.moveCursor(1)
-            if self.e_sql.find(ft):
-                self.e_sql.moveCursor(QTextCursor.Start, QTextCursor.MoveAnchor)
+        v_string_to_search = self.win_find.e_find.currentText()
+        # se inserito una stringa di ricerca...
+        if v_string_to_search != '':                       
+            # lancio la ricerca dicendo di posizionarsi sulla prossima ricorrenza 
+            v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, -1, -1, True, False, False)
 
     def slot_find_e_replace(self):
         """
            Ricerca e sostituisci
         """
+        global v_global_main_geometry
+
         try:
             # visualizzo la finestra di ricerca
             self.dialog_find_e_replace.show()
         except:
             # inizializzo le strutture grafiche e visualizzo la dialog per la ricerca del testo
-            self.dialog_find_e_replace = QtWidgets.QDialog()
+            self.dialog_find_e_replace = QtWidgets.QDialog(self)
             self.win_find_e_replace = Ui_Find_e_Replace_Window()        
             self.win_find_e_replace.setupUi(self.dialog_find_e_replace)                
             # da notare come il collegamento delle funzioni venga fatto in questo punto e non nella ui                                    
-            self.win_find_e_replace.b_replace_all.clicked.connect(self.slot_find_e_replace_all)                
+            self.win_find_e_replace.b_find_next.clicked.connect(self.slot_find_e_replace_find)                
+            self.win_find_e_replace.b_replace_next.clicked.connect(self.slot_find_e_replace_next)                
+            self.win_find_e_replace.b_replace_all.clicked.connect(self.slot_find_e_replace_all)                            
             # visualizzo la finestra di ricerca
             self.dialog_find_e_replace.show()
+        
+        # reimposto la posizione e le dimensioni della window 
+        self.dialog_find_e_replace.setGeometry(self.calcola_pos_win(self.dialog_find_e_replace))                
+
+    def slot_find_e_replace_find(self):
+        """
+           Ricerca la prossima ricorrenza verso il basso
+        """        
+        v_string_to_search = self.win_find_e_replace.e_find.currentText()
+        # se inserito una stringa di ricerca...
+        if v_string_to_search != '':                       
+            # lancio la ricerca dicendo di posizionarsi sulla prossima ricorrenza 
+            v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, -1, -1, True, False, False)
+    
+    def slot_find_e_replace_next(self):        
+        """
+           Sostituisce la ricorrenza attuale (ignora differenze tra maiuscole e minuscole)
+        """
+        # testo da ricercare
+        v_string_to_search = self.win_find_e_replace.e_find.currentText().upper()
+        # nuovo testo
+        v_string_to_replace = self.win_find_e_replace.e_replace.currentText()
+
+        # se inserito una stringa di ricerca...
+        if v_string_to_search != '' and v_string_to_replace != '':    
+            # se il testo selezionato è esattamente ciò che si sta cercando, faccio la replace 
+            if self.e_sql.selectedText() == v_string_to_search:                    
+                # eseguo la replace
+                self.e_sql.replace(v_string_to_replace)                
+            # ... altrimenti continuo come se fosse una ricerca next
+            else:
+                # ricavo la posizione dove è posizionato il cursore 
+                v_start_line, v_start_pos = self.e_sql.getCursorPosition()
+                # lancio la ricerca a partire da quella posizione
+                v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, v_start_line, v_start_pos, False, False, False)            
 
     def slot_find_e_replace_all(self):        
         """
            Sostituisce tutte le ricorrenze (ignora differenze tra maiuscole e minuscole)
         """
-        import re
-        
         # testo da ricercare
-        subString = self.win_find_e_replace.e_find.currentText().upper()
+        v_string_to_search = self.win_find_e_replace.e_find.currentText().upper()
         # nuovo testo
-        replaceString = self.win_find_e_replace.e_replace.currentText()
-        # compilation step to escape the word for all cases
-        # the re.IGNORECASE is used to ignore cases
-        compileObj = re.compile(re.escape(subString), re.IGNORECASE)
-        # substitute the substring with replacing a string using the regex sub() function
-        resultantStr = compileObj.sub(replaceString, self.e_sql.document().toPlainText())        
-        self.e_sql.setPlainText(resultantStr)
+        v_string_to_replace = self.win_find_e_replace.e_replace.currentText()
 
-        self.v_testo_modificato = True        
+        # se inserito una stringa di ricerca...
+        if v_string_to_search != '' and v_string_to_replace != '':                        
+            # lancio la ricerca su tutto e senza effetti a video (da notare come findFirst è un metodo di QScintilla)...
+            v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, 0, 0, False, False, False)
+            while v_found:
+                # ricavo la posizione in coordinate dove è stata trovata la stringa
+                v_start_line, v_start_pos, v_end_line, v_end_pos = self.e_sql.getSelection()
+                # eseguo la replace
+                self.e_sql.replace(v_string_to_replace)
+                # proseguo la ricerca alla posizione successiva
+                v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, v_start_line, v_start_pos + 1, False, False, False)                        
 
     def slot_goto_line(self):
         """
@@ -1847,15 +2169,14 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         
         # normalizzo il numero di riga a inizio o fine documento
         if v_line == 0 or v_line < 0:
-            v_line = 1
-        elif v_line > self.e_sql.blockCount():
-            v_line = self.e_sql.blockCount()
+            v_line = 0
+        elif v_line > self.e_sql.lines():
+            v_line = self.e_sql.lines() - 1
+        else:
+            v_line -= 1 
 
         # mi posiziono alla riga richiesta sull'editor
-        v_doc = self.e_sql.document()
-        self.e_sql.setFocus()
-        v_cursor = QTextCursor(v_doc.findBlockByLineNumber(v_line - 1))        
-        self.e_sql.setTextCursor(v_cursor)
+        self.e_sql.setCursorPosition(v_line,0)
 
         # nascondo la window di posizionamento cursore
         self.dialog_goto_line.close()
@@ -1914,20 +2235,30 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         """
         v_found = False
         # scorro la lista e controllo se elemento già inserito
-        for v_index in range( self.m_history.rowCount() ):
-            v_item = self.m_history.item(v_index)
+        for v_index in range( self.link_to_MSql_win1_class.m_history.rowCount() ):
+            v_item = self.link_to_MSql_win1_class.m_history.item(v_index)
             if p_testo == v_item.text():
                 v_found = True
         # se testo non trovato, aggiungo come nuovo elemento
         if not v_found:        
-            self.m_history.appendRow(QtGui.QStandardItem(p_testo))        
+            self.link_to_MSql_win1_class.m_history.appendRow(QtGui.QStandardItem(p_testo))        
 
-    def aggiorna_lines_and_length(self):
+    def aggiorna_statusbar(self):
         """
-           Aggiorna i dati di numero linee e lunghezza dell'editor, sulla statusbar
+           Aggiorna i dati della statusbar 
         """
-        self.l_numero_righe.setText("Lines: " + str(self.e_sql.blockCount()))
-        self.l_numero_caratteri.setText("Length: " + str(len(self.e_sql.toPlainText())))
+        v_totale_righe = str(self.e_sql.lines())
+        self.link_to_MSql_win1_class.l_numero_righe.setText("Lines: " + str(v_totale_righe))
+        self.link_to_MSql_win1_class.l_numero_caratteri.setText("Length: " + str(self.e_sql.length()))
+
+        # reimposta larghezza del margine numeri di riga...
+        self.e_sql.setMarginWidth(0, '0' + v_totale_righe)        
+
+        # label indicatore di overwrite
+        if self.v_overwrite_enabled:
+            self.link_to_MSql_win1_class.l_overwrite_enabled.setText('OVR')
+        else:                
+            self.link_to_MSql_win1_class.l_overwrite_enabled.setText('INS')
 
 #
 #  ___ _   _ _____ ___  

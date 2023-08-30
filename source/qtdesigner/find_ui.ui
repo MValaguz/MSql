@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>382</width>
-    <height>51</height>
+    <width>259</width>
+    <height>267</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,40 +17,77 @@
    <iconset resource="resource.qrc">
     <normaloff>:/icons/icons/search_file.gif</normaloff>:/icons/icons/search_file.gif</iconset>
   </property>
-  <layout class="QGridLayout" name="gridLayout" columnstretch="0,1,0">
+  <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>Text to find:</string>
-     </property>
-     <property name="buddy">
-      <cstring>e_find</cstring>
-     </property>
-    </widget>
+    <layout class="QGridLayout" name="gridLayout" columnstretch="0,1">
+     <item row="0" column="1">
+      <widget class="QComboBox" name="e_find">
+       <property name="editable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Text to find:</string>
+       </property>
+       <property name="buddy">
+        <cstring>e_find</cstring>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
-   <item row="0" column="2">
-    <widget class="QPushButton" name="b_next">
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="resource.qrc">
-       <normaloff>:/icons/icons/right.gif</normaloff>:/icons/icons/right.gif</iconset>
-     </property>
-    </widget>
+   <item row="1" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="b_next">
+       <property name="text">
+        <string>Find next (F3)</string>
+       </property>
+       <property name="shortcut">
+        <string>F3</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="b_find_all">
+       <property name="text">
+        <string>Find all</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
-   <item row="0" column="1">
-    <widget class="QComboBox" name="e_find">
-     <property name="editable">
-      <bool>true</bool>
-     </property>
-    </widget>
+   <item row="2" column="0">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Search result:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QListView" name="o_find_all_result">
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
  <tabstops>
   <tabstop>e_find</tabstop>
   <tabstop>b_next</tabstop>
+  <tabstop>b_find_all</tabstop>
+  <tabstop>o_find_all_result</tabstop>
  </tabstops>
  <resources>
   <include location="resource.qrc"/>

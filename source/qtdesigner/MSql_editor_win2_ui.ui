@@ -39,7 +39,7 @@
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
-      <widget class="code_editor" name="e_sql">
+      <widget class="QsciScintilla" name="e_sql">
        <property name="minimumSize">
         <size>
          <width>0</width>
@@ -51,9 +51,6 @@
          <family>Source Code Pro</family>
          <pointsize>11</pointsize>
         </font>
-       </property>
-       <property name="lineWrapMode">
-        <enum>QPlainTextEdit::NoWrap</enum>
        </property>
       </widget>
       <widget class="QTabWidget" name="o_tab_widget">
@@ -147,9 +144,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>code_editor</class>
+   <class>QsciScintilla</class>
    <extends>QPlainTextEdit</extends>
-   <header>code_editor.h</header>
+   <header>qsciscintilla.h</header>
   </customwidget>
  </customwidgets>
  <resources>
