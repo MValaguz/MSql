@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="resource.qrc">
-    <normaloff>:/icons/icons/sql_editor.gif</normaloff>:/icons/icons/sql_editor.gif</iconset>
+    <normaloff>:/icons/icons/MSql.ico</normaloff>:/icons/icons/MSql.ico</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="sizePolicy">
@@ -71,12 +71,21 @@
     <property name="title">
      <string>File</string>
     </property>
+    <widget class="QMenu" name="menuRecent_file">
+     <property name="title">
+      <string>Recent file</string>
+     </property>
+    </widget>
     <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
+    <addaction name="menuRecent_file"/>
+    <addaction name="separator"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_as"/>
     <addaction name="separator"/>
     <addaction name="actionUTF_8_Coding"/>
+    <addaction name="separator"/>
+    <addaction name="actionPreferences"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
@@ -322,30 +331,72 @@
              <property name="text">
               <string>Tables</string>
              </property>
+             <property name="icon">
+              <iconset resource="resource.qrc">
+               <normaloff>:/icons/icons/table.gif</normaloff>:/icons/icons/table.gif</iconset>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Package body</string>
+             </property>
+             <property name="icon">
+              <iconset resource="resource.qrc">
+               <normaloff>:/icons/icons/package_body.gif</normaloff>:/icons/icons/package_body.gif</iconset>
+             </property>
             </item>
             <item>
              <property name="text">
               <string>Package</string>
              </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Trigger</string>
+             <property name="icon">
+              <iconset resource="resource.qrc">
+               <normaloff>:/icons/icons/package.gif</normaloff>:/icons/icons/package.gif</iconset>
              </property>
             </item>
             <item>
              <property name="text">
               <string>Procedures</string>
              </property>
+             <property name="icon">
+              <iconset resource="resource.qrc">
+               <normaloff>:/icons/icons/procedure.gif</normaloff>:/icons/icons/procedure.gif</iconset>
+             </property>
             </item>
             <item>
              <property name="text">
               <string>Functions</string>
              </property>
+             <property name="icon">
+              <iconset resource="resource.qrc">
+               <normaloff>:/icons/icons/function.gif</normaloff>:/icons/icons/function.gif</iconset>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Trigger</string>
+             </property>
+             <property name="icon">
+              <iconset resource="resource.qrc">
+               <normaloff>:/icons/icons/trigger.gif</normaloff>:/icons/icons/trigger.gif</iconset>
+             </property>
             </item>
             <item>
              <property name="text">
               <string>Views</string>
+             </property>
+             <property name="icon">
+              <iconset resource="resource.qrc">
+               <normaloff>:/icons/icons/view.gif</normaloff>:/icons/icons/view.gif</iconset>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Sequences</string>
+             </property>
+             <property name="icon">
+              <iconset resource="resource.qrc">
+               <normaloff>:/icons/icons/sequences.gif</normaloff>:/icons/icons/sequences.gif</iconset>
              </property>
             </item>
            </widget>
@@ -1079,6 +1130,20 @@
    </property>
    <property name="text">
     <string>Find object</string>
+   </property>
+  </action>
+  <action name="actionPreferences">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/gears.gif</normaloff>:/icons/icons/gears.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Preferences</string>
+   </property>
+  </action>
+  <action name="actionaaaaaaa">
+   <property name="text">
+    <string>aaaaaaa</string>
    </property>
   </action>
  </widget>

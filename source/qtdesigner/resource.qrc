@@ -1,5 +1,15 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/group.gif</file>
+    <file>icons/sequences.gif</file>
+    <file>icons/trigger.gif</file>
+    <file>icons/package_body.gif</file>
+    <file>icons/view.gif</file>
+    <file>icons/package.gif</file>
+    <file>icons/function.gif</file>
+    <file>icons/procedure.gif</file>
+    <file>icons/gears.gif</file>
+    <file>icons/MSql.ico</file>
     <file>icons/lowercase.gif</file>
     <file>icons/SciTEIco.gif</file>
     <file>icons/columns.gif</file>

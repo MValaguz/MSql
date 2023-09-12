@@ -7,45 +7,50 @@
 """
 
 from PyQt5 import QtGui,QtWidgets
-import qtdesigner.resource_rc
 import os
-import sys
 
-class my_console(object):
-    '''
-       Reindirizza i messaggi della console direttamente su un file
-    '''
-    def __init__(self, filename):
-         self.out = open(filename, "w")
-
-    def flush(self, s):
-        self.out.write(s)
-
-    def write(self,s):
-        self.out.write(s)
-        
-def file_in_directory(p_node):
-    '''
-       Restituisce tupla con elenco dei file contenuti nella dir p_node e nelle sue sottodir
-    '''
-    v_file = []
-    for root, dirs, files in os.walk(p_node):
-        # scorro le tuple dei nomi dentro tupla dei files
-        for name in files:
-            # stesso discorso istruzione precedente per quanto riguarda la directory (viene poi salvata nel file risultato)
-            v_dir_name = os.path.join(root)
-            # stesso discorso istruzione precedente per quanto riguarda il file (viene poi salvata nel file risultato)
-            v_file_name = os.path.join(name)
-            v_file.append(v_dir_name + '\\' + v_file_name)        
-    # restituosco la tupla con l'elenco
-    return v_file
-    
-def delete_files_in_dir(p_dir):
+def extract_word_from_cursor_pos(p_string, p_pos):
     """
-       Elimina tutti i files della directory p_dir
+       Data una stringa completa p_stringa e una posizione di cursore su di essa, 
+       estrae la parola che sta "sotto" la posizione del cursore
+       Es. p_string = CIAO A TUTTI QUANTI VOI 
+           p_pos = 10
+           restituisce TUTTI
     """
-    for files in os.listdir(p_dir):        
-        os.remove(p_dir + '\\' + files)
+    # se posizione cursore è oltre la stringa...esco    
+    if p_pos >= len(p_string):
+        return ''
+
+    # inizio a comporre la parola partendo dalla posizione del cursore (se non trovo nulla esco)
+    v_word=p_string[p_pos]    
+    if v_word is None or v_word in ('',' ','=',':','.','(',')'):
+        return ''
+
+    # mi sposto a sinistra rispetto al cursore e compongo la parola    
+    v_index = p_pos
+    while True and v_index > 0:
+        v_index -= 1
+        if v_index < len(p_string):
+            if p_string[v_index] not in (' ','=',':','.','(',')'):
+                v_word = p_string[v_index] + v_word
+            else:
+                break
+        else:
+            break
+
+    # mi sposto a destra rispetto al cursore e compongo la parola
+    v_index = p_pos
+    while True:
+        v_index += 1
+        if v_index < len(p_string):
+            if p_string[v_index] not in (' ','=',':','\n','\r','.','(',')'):
+                v_word += p_string[v_index]
+            else:
+                break
+        else:
+            break
+
+    return v_word
 
 def message_error(p_message):
     """
@@ -113,3 +118,22 @@ def message_question_yes_no_cancel(p_message):
         return 'No'
     else:
         return 'Cancel'
+
+def message_warning_yes_no(p_message):
+    """
+       Visualizza messaggio con pulsanti Yes, No e restituisce Yes se pulsante OK è stato premuto
+    """
+    msg = QtWidgets.QMessageBox()
+    msg.setIcon(QtWidgets.QMessageBox.Warning)
+    msg.setText(p_message)
+    msg.setWindowTitle("Warning")    
+    icon = QtGui.QIcon()
+    icon.addPixmap(QtGui.QPixmap(":/icons/icons/sql_editor.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)        
+    msg.setWindowIcon(icon)
+    msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+    
+    valore_di_ritorno = msg.exec()
+    if valore_di_ritorno == QtWidgets.QMessageBox.Yes:
+        return 'Yes'
+    else:
+        return 'No'

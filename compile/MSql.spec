@@ -1,5 +1,9 @@
 # -*- mode: python -*-
 
+#
+# da notare come ('..\\source\\qtdesigner\\*.py','qtdesigner') sia stata sostituita da ('..\\source\\qtdesigner\\*.py','.') per funzionamento eseguibile dopo passaggio da Inno Setup
+#
+
 block_cipher = None
 
 
@@ -8,7 +12,7 @@ a = Analysis(['..\\source\\MSql_editor.py'],
              binaries=[],
              datas=[					
 					('..\\source\\help\\*.*','help'),										
-					('..\\source\\qtdesigner\\*.py','qtdesigner')
+					('..\\source\\qtdesigner\\*.py','.')
 			       ],
              hiddenimports=[],             
              hookspath=[],
