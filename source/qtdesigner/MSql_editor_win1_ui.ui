@@ -106,6 +106,7 @@
     <addaction name="actionUSER_SMIFORM"/>
     <addaction name="actionUSER_SARCO"/>
     <addaction name="separator"/>
+    <addaction name="separator"/>
     <addaction name="actionConnect"/>
    </widget>
    <widget class="QMenu" name="menueDIT">
@@ -121,6 +122,9 @@
     <addaction name="actionLowercase"/>
     <addaction name="separator"/>
     <addaction name="actionFold_All"/>
+    <addaction name="actionShow_end_of_line"/>
+    <addaction name="actionFont_editor_selector"/>
+    <addaction name="actionCreate_autocompletation_dictionary"/>
     <addaction name="separator"/>
     <addaction name="actionZoom_In"/>
     <addaction name="actionZoom_Out"/>
@@ -133,7 +137,6 @@
     <addaction name="actionPaste"/>
     <addaction name="actionSelectAll"/>
     <addaction name="separator"/>
-    <addaction name="actionFont_editor_selector"/>
    </widget>
    <widget class="QMenu" name="menuRun">
     <property name="title">
@@ -580,7 +583,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>ICOM_815</string>
+    <string>Server Prod (ICOM_815)</string>
    </property>
    <property name="shortcut">
     <string>F1</string>
@@ -594,7 +597,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>BACKUP_815</string>
+    <string>Server Dev (BACKUP_815)</string>
    </property>
    <property name="shortcut">
     <string>F2</string>
@@ -1090,7 +1093,7 @@
   <action name="actionConnect">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/sql_editor.gif</normaloff>:/icons/icons/sql_editor.gif</iconset>
+     <normaloff>:/icons/icons/connect.gif</normaloff>:/icons/icons/connect.gif</iconset>
    </property>
    <property name="text">
     <string>Connect to specific database</string>
@@ -1144,6 +1147,58 @@
   <action name="actionaaaaaaa">
    <property name="text">
     <string>aaaaaaa</string>
+   </property>
+  </action>
+  <action name="actionCreate_dictionary">
+   <property name="text">
+    <string>Create dictionary</string>
+   </property>
+  </action>
+  <action name="actionCreate_autocompletation_dictionary">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/overwrite.gif</normaloff>:/icons/icons/overwrite.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Autocomplete dictionary</string>
+   </property>
+  </action>
+  <action name="actionShow_end_of_line">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/end_of_line.gif</normaloff>:/icons/icons/end_of_line.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Show end of line</string>
+   </property>
+  </action>
+  <action name="actionWindows">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Windows</string>
+   </property>
+  </action>
+  <action name="actionUnix">
+   <property name="text">
+    <string>Unix</string>
+   </property>
+  </action>
+  <action name="actionOld_Mac">
+   <property name="text">
+    <string>Old Mac</string>
+   </property>
+  </action>
+  <action name="actionClear_recent_file">
+   <property name="text">
+    <string>Clear recent file</string>
    </property>
   </action>
  </widget>

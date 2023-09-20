@@ -96,7 +96,7 @@
      </property>
      <property name="icon">
       <iconset resource="resource.qrc">
-       <normaloff>:/icons/icons/sql_editor.gif</normaloff>:/icons/icons/sql_editor.gif</iconset>
+       <normaloff>:/icons/icons/connect.gif</normaloff>:/icons/icons/connect.gif</iconset>
      </property>
     </widget>
    </item>

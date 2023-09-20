@@ -1,5 +1,8 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/end_of_line.gif</file>
+    <file>icons/color.gif</file>
+    <file>icons/connect.gif</file>
     <file>icons/group.gif</file>
     <file>icons/sequences.gif</file>
     <file>icons/trigger.gif</file>

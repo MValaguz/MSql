@@ -50,7 +50,7 @@ class Ui_connect_window(object):
         self.gridLayout.addWidget(self.e_mode, 3, 2, 1, 1)
         self.b_connect = QtWidgets.QPushButton(connect_window)
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/icons/icons/sql_editor.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap(":/icons/icons/connect.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.b_connect.setIcon(icon1)
         self.b_connect.setObjectName("b_connect")
         self.gridLayout.addWidget(self.b_connect, 4, 2, 1, 1)

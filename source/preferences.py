@@ -24,7 +24,7 @@ from PyQt5.QtWidgets import *
 #Definizioni interfaccia
 from preferences_ui import Ui_preferences_window
 #Librerie aggiuntive interne
-from utilita import message_info
+from utilita import message_info, message_question_yes_no
 
 class preferences_class():
     """
@@ -44,20 +44,29 @@ class preferences_class():
                 self.utf_8 = True
             else:
                 self.utf_8 = False
+            if v_json['eol'] == 1:            
+                self.end_of_line = True
+            else:
+                self.end_of_line = False
             self.font_editor = v_json['font_editor']
             self.font_result = v_json['font_result']
             if v_json['editable'] == 1:
                 self.editable = True
             else:
                 self.editable = False
+            self.color_dev = v_json['color_dev']
+            self.color_prod = v_json['color_prod']
         # imposto valori di default senza presenza dello specifico file
         else:
             self.open_dir = 'W:/SQL'
             self.save_dir = 'W:/SQL'
             self.utf_8 = False
+            self.end_of_line = False
             self.font_editor = 'Cascadia Code SemiBold, 11'
-            self.font_result = 'Segoe UI, 9'
+            self.font_result = 'Segoe UI, 8'
             self.editable = False
+            self.color_prod = '#aaffff'
+            self.color_dev = '#ffffff'
        
 class win_preferences_class(QMainWindow, Ui_preferences_window):
     """
@@ -75,10 +84,27 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         self.e_default_open_dir.setText(self.preferences.open_dir)
         self.e_default_save_dir.setText(self.preferences.save_dir)        
         self.e_default_utf_8.setChecked(self.preferences.utf_8)        
+        self.e_default_end_of_line.setChecked(self.preferences.end_of_line)        
         self.e_default_font_editor.setText(self.preferences.font_editor)
         self.e_default_font_result.setText(self.preferences.font_result)
-        self.e_default_editable.setChecked(self.preferences.editable)        
+        self.e_default_editable.setChecked(self.preferences.editable)   
+        self.e_default_color_prod.setText(self.preferences.color_prod)
+        self.e_default_color_dev.setText(self.preferences.color_dev)     
 
+    def slot_b_restore(self):
+        """
+           Ripristina tutte preferenze di default
+        """
+        if message_question_yes_no('Do you want to restore default preferences?') == 'Yes':
+            # cancello il file delle preferenze
+            if os.path.isfile(self.nome_file_preferences):
+                os.remove(self.nome_file_preferences)
+
+            # emetto messaggio di fine
+            message_info('Preferences restored! Restart MSql to see the changes ;-)')
+            # esco dal programma delle preferenze
+            self.close()
+    
     def slot_b_default_open_dir(self):
         """
            Scelta della dir 
@@ -119,6 +145,20 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         if ok:
             self.e_default_font_result.setText(font.family() + ','+ str(font.pointSize()))            
 
+    def slot_b_default_color_prod(self):
+        """
+           Scelta del colore di base per server Prod (indicato da shortcut di tastiera F1)
+        """
+        color = QColorDialog.getColor()                
+        self.e_default_color_prod.setText(color.name())            
+
+    def slot_b_default_color_dev(self):
+        """
+           Scelta del colore di base per server Dev (indicato da shortcut di tastiera F2)
+        """
+        color = QColorDialog.getColor()                
+        self.e_default_color_dev.setText(color.name())            
+
     def slot_b_save(self):
         """
            Salvataggio
@@ -134,14 +174,23 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
             v_editable = 1
         else:
             v_editable = 0
+
+        # il default per end of line va convertito
+        if self.e_default_end_of_line.isChecked():
+            v_eol = 1
+        else:
+            v_eol = 0
 		
 		# scrivo nel file un elemento json contenente le informazioni inseriti dell'utente
         v_json ={'open_dir': self.e_default_open_dir.text(),
 		         'save_dir': self.e_default_save_dir.text(),
                  'utf_8': v_utf_8,
+                 'eol': v_eol,
 		         'font_editor' :self.e_default_font_editor.text(),
 		         'font_result' : self.e_default_font_result.text(),
-                 'editable' : v_editable}
+                 'editable' : v_editable,
+                 'color_prod': self.e_default_color_prod.text(),
+                 'color_dev': self.e_default_color_dev.text()}
 		# scrittura nel file dell'oggetto json
         with open(self.nome_file_preferences, 'w') as outfile:json.dump(v_json, outfile)
         

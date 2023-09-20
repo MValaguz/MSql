@@ -12,6 +12,9 @@
 # Librerie di base
 import sys, os, datetime
 # Amplifico la pathname dell'applicazione in modo veda il contenuto della directory qtdesigner dove sono contenuti i layout
+# Nota bene! Quando tramite pyinstaller verrà creato l'eseguibile, tutti i file della cartella qtdesigner verranno messi 
+#            nella cartella principale e questa istruzione di cambio path di fatto non avrà alcun senso. Serve dunque solo
+#            in fase di sviluppo. 
 sys.path.append('qtdesigner')
 # Librerie di data base
 import cx_Oracle, oracle_my_lib
@@ -72,11 +75,7 @@ class My_MSql_Lexer(Qsci.QsciLexerSQL):
         In pratica aggiunge tutti i nomi di tabelle, viste, procedure, ecc. in modo vengano evidenziati
         Si base sulla lista v_global_my_lexer_keywords che viene caricata quando ci si connette al DB
         In base al valore di index è possibile settare parole chiave di una determinata categoria
-        1 = parole primarie
-        2 = parole secondarie
-        3 = commenti
-        4 = classi
-        ...
+        1 = parole primarie ,2 = parole secondarie, 3 = commenti, 4 = classi, ecc.. usato 8 (boh!) 
     """
     def keywords(self, index):
         global v_global_my_lexer_keywords        
@@ -160,30 +159,36 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
 
         ###
         # Aggiunta di windget alla statusbar con: flag editabilità, numero di caratteri, indicatore di overwrite, ecc..
-        ###                                
+        ###                                        
+        # Coordinate cursore dell'editor di testo
+        self.l_cursor_pos = QLabel()
+        self.l_cursor_pos.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        self.statusBar.addPermanentWidget(self.l_cursor_pos)                
+        self.l_cursor_pos.setText("Ln: 1  Col: 1")
+        # Indicatore editabilità
         self.l_tabella_editabile = QLabel("Editable table: Disabled")
         self.l_tabella_editabile.setFrameStyle(QFrame.Panel | QFrame.Sunken)
         self.l_tabella_editabile.setStyleSheet('color: black;')
         self.statusBar.addPermanentWidget(self.l_tabella_editabile)                
-
+        # Numero totale di righe di testo
         self.l_numero_righe = QLabel()
         self.l_numero_righe.setFrameStyle(QFrame.Panel | QFrame.Sunken)
         self.statusBar.addPermanentWidget(self.l_numero_righe)                
         self.l_numero_righe.setText("Lines: 0")
-
+        # Numero totale di caratteri di testo
         self.l_numero_caratteri = QLabel()
         self.l_numero_caratteri.setFrameStyle(QFrame.Panel | QFrame.Sunken)
         self.statusBar.addPermanentWidget(self.l_numero_caratteri)                
         self.l_numero_caratteri.setText("Length: 0")
-
+        # Stato attivazione inserito di testo o overwrite
         self.l_overwrite_enabled = QLabel("INS")
         self.l_overwrite_enabled.setFrameStyle(QFrame.Panel | QFrame.Sunken)
         self.statusBar.addPermanentWidget(self.l_overwrite_enabled)
-                
+        # Stato attivazione codifica utf-8
         self.l_utf8_enabled = QLabel()
         self.l_utf8_enabled.setFrameStyle(QFrame.Panel | QFrame.Sunken)
         self.statusBar.addPermanentWidget(self.l_utf8_enabled)        
-
+        # Informazioni sulla connessione
         self.l_connection = QLabel("Connection:")
         self.l_connection.setFrameStyle(QFrame.Panel | QFrame.Sunken)
         self.l_connection.setStyleSheet('color: black;')
@@ -216,23 +221,6 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         self.m_history = QtGui.QStandardItemModel()        
         self.o_history.setModel(self.m_history)        
             
-        ###
-        # Se è stato indicato un nome di file da caricare all'avvio
-        ###
-        if p_nome_file_da_caricare != '':        
-            # apro un file            
-            v_titolo, v_contenuto_file = self.openfile(p_nome_file_da_caricare)        
-            v_azione = QtWidgets.QAction()
-            v_azione.setText('Open_db_obj')            
-            self.smistamento_voci_menu(v_azione, v_titolo, v_contenuto_file)        
-        ###        
-        # Altrimenti apro una nuova finestra di editor simulando il segnale che scatta quando utente sceglie "New"
-        ###
-        else:
-            v_azione = QtWidgets.QAction()
-            v_azione.setText('New')
-            self.smistamento_voci_menu(v_azione)        
-
         ###        
         # eseguo la connessione 
         ###
@@ -257,7 +245,9 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         self.slot_utf8()                
         self.actionMake_table_editable.setChecked(o_global_preferences.editable)
         self.slot_editable()
-
+        self.actionShow_end_of_line.setChecked(o_global_preferences.end_of_line)
+        self.slot_end_of_file()
+        
         ###
         # Imposto var con la geometria della window principale
         ###
@@ -267,6 +257,26 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         # Carico elenco dei file recenti
         ###
         self.aggiorna_elenco_file_recenti(None)
+        
+        ###
+        # Se è stato indicato un nome di file da caricare all'avvio
+        ###
+        if p_nome_file_da_caricare != '':        
+            # apro un file            
+            v_titolo, v_contenuto_file = self.openfile(p_nome_file_da_caricare)        
+            v_azione = QtWidgets.QAction()
+            v_azione.setText('Open_db_obj')            
+            self.smistamento_voci_menu(v_azione, v_titolo, v_contenuto_file)        
+        ###        
+        # Altrimenti apro una nuova finestra di editor simulando il segnale che scatta quando utente sceglie "New"
+        # Attenzione! L'apertura dell'editor è stata posta alla fine di tutto il procedimento di carico del main
+        #             in quanto non veniva caricata elenco autocompletamento dell'editor. La cosa strana è che se
+        #             dopo l'apertura si apriva un nuovo file, da quel momento l'autocompletamento partiva.
+        ### 
+        else:
+            v_azione = QtWidgets.QAction()
+            v_azione.setText('New')
+            self.smistamento_voci_menu(v_azione)                
 
     def oggetto_win2_attivo(self):
         """
@@ -405,11 +415,11 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                     o_MSql_win2.v_titolo_window = v_nome_file
                     o_MSql_win2.setWindowTitle(v_nome_file)
             # Cambio server in ICOM_815
-            elif p_slot.text() == 'ICOM_815':
+            elif p_slot.text() == 'Server Prod (ICOM_815)':
                 self.e_server_name = 'ICOM_815'
                 self.slot_connetti()                        
             # Cambio server in BACKUP_815
-            elif p_slot.text() == 'BACKUP_815':
+            elif p_slot.text() == 'Server Dev (BACKUP_815)':
                 self.e_server_name = 'BACKUP_815'
                 self.slot_connetti()
             # Cambio user in SMILE
@@ -451,6 +461,18 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             # Cambio user specificato da utente
             elif p_slot.text() == 'Connect to specific database':
                 self.richiesta_connessione_specifica()
+            # Creazione del dizionario termini per autocompletamento dell'editor
+            elif p_slot.text() == 'Autocomplete dictionary':
+                self.crea_dizionario_per_autocompletamento()
+            # Visualizza il carattere di end of line, ritorno a capo
+            elif p_slot.text() == 'Show end of line':
+                # riporto la preferenza di menu dentro l'oggetto delle preferenze 
+                if self.actionShow_end_of_line.isChecked():
+                    o_global_preferences.end_of_line = True
+                else:
+                    o_global_preferences.end_of_line = False
+                # attivo la scelta su tutti gli editor aperti
+                self.slot_end_of_file()
             # Ricerca di testo
             elif p_slot.text() == 'Find':
                 v_global_main_geometry = self.frameGeometry()                                
@@ -566,6 +588,17 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             if not obj_win2.v_editor_chiuso:
                 obj_win2.set_editable()
 
+    def slot_end_of_file(self):
+        """
+           Gestione visualizzazione del carattere di fine riga
+        """
+        global o_global_preferences
+
+        # scorro la lista-oggetti-editor e modifico tutti gli editor aperti
+        for obj_win2 in self.o_lst_window2:
+            if not obj_win2.v_editor_chiuso:
+                obj_win2.set_show_end_of_line()
+
     def aggiorna_elenco_file_recenti(self, p_elemento):
         """
            Carica elenco dei file recenti all'interno dell'apposito menu
@@ -584,15 +617,17 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         if p_elemento is None:
             if os.path.isfile(v_global_work_dir + 'recent_files.ini'):
                 with open(v_global_work_dir + 'recent_files.ini','r') as file:
-                    for v_nome_file in file:                
+                    for v_nome_file in file:                                        
                         v_nome_file = v_nome_file.rstrip('\n')
-                        v_action = QAction(self)
-                        v_action.setText(v_nome_file)
-                        v_action.setData('FILE_RECENTI')
-                        # aggiungo a video la voce di menu
-                        self.menuRecent_file.addAction(v_action)
-                        # allineo array interno con quanto presente a video
-                        self.elenco_file_recenti.append(v_nome_file)
+                        # il file viene aggiunto all'elenco solo se esiste!
+                        if os.path.isfile(v_nome_file):                            
+                            v_action = QAction(self)
+                            v_action.setText(v_nome_file)
+                            v_action.setData('FILE_RECENTI')
+                            # aggiungo a video la voce di menu
+                            self.menuRecent_file.addAction(v_action)
+                            # allineo array interno con quanto presente a video
+                            self.elenco_file_recenti.append(v_nome_file)
         # se elemento passato e non presente tra i files recenti...
         elif p_elemento not in self.elenco_file_recenti:
             # elimino tutte le voci dal menu dei recenti
@@ -656,15 +691,24 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                     v_file = open(v_fileName[0],'r')
                 # aggiungo il nome del file ai file recenti                
                 self.aggiorna_elenco_file_recenti(v_fileName[0])
+                # leggo il file. Da notare come venga letto riga per riga in quanto (e non so perché) su Windows viene 
+                #                caricato avendo come ritorno a capo LF, quando invece dovrebbe essere CR-LF
+                v_contenuto_file = ''
+                while True:
+                    v_line = v_file.readline()
+                    if not v_line:
+                        break
+                    # leggo le righe del file e sostituisco LF con CR-LF
+                    v_contenuto_file += v_line.replace('\n','\r\n')
                 # restituisco il nome e il contenuto del file
-                return v_fileName[0], v_file.read()                
+                return v_fileName[0], v_contenuto_file
             except Exception as err:
                 message_error('Error to opened the file: ' + str(err))
                 return None, None
         else:
             return None, None
     
-    def closeEvent(self, e):
+    def closeEvent(self, event):
         """
            Intercetto l'evento di chiusura e chiudo tutte le istanze del/i editor aperto/i
            Questa funzione sovrascrive quella nativa di QT 
@@ -676,13 +720,16 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 obj_win2.closeEvent(v_event_close)        
         # controllo se tutte le window sono state chiuse
         v_chiudi_app = True
-        for obj_win2 in self.o_lst_window2:
-            if not obj_win2.v_editor_chiuso:
+        for obj_win2 in self.o_lst_window2:        
+            if not obj_win2.v_editor_chiuso:                
                 v_chiudi_app = False
-        # se tutte le window sono chiuse, controlla se ci sono ancora transazioni aperte e poi chiude il programma
-        if v_chiudi_app:
+        # se tutte le window sono chiuse, controllo se ci sono ancora transazioni aperte e poi chiudo il programma
+        if v_chiudi_app:            
             self.controllo_transazioni_aperte()            
             self.close()
+        # altrimenti ignoro l'evento di chiusura
+        else:
+            event.ignore()
 
     def controllo_transazioni_aperte(self):
         """
@@ -714,6 +761,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         global v_global_connesso   
         global v_global_connection
         global v_global_my_lexer_keywords
+        global o_global_preferences        
 
         # aggiorno le voce di menu (schema)        
         self.actionICOM_815.setChecked(False)
@@ -787,10 +835,10 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
 
         # In base al tipo di connessione cambio il colore di sfondo dell'editor (azzurro=sistema reale, bianco=sistema di test)        
         if self.e_server_name == 'ICOM_815':            
-            v_color = '#aaffff'            
+            v_color = o_global_preferences.color_prod            
             v_background = 'black'
         else:
-            v_color = '#ffffff'
+            v_color = o_global_preferences.color_dev
             v_background = 'gray'
         if self.e_user_mode == 'SYSDBA':
             v_background = 'red'
@@ -1222,6 +1270,83 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         from preferences import win_preferences_class
         self.my_app = win_preferences_class(v_global_work_dir + 'MSql.ini')        
         self.my_app.show()   
+
+    def crea_dizionario_per_autocompletamento(self):
+        """
+           Partendo dai sorgenti presenti nel DB, riferiti a package, funzioni e procedure, crea il file MSql_autocompletion.txt
+           dove vengono riportati tutti i termini che poi verranno caricati all'avvio dell'editor per l'autocompletamento durante
+           la digitazione delle parole
+        """
+        global v_global_connesso
+        global v_global_work_dir
+        
+        if v_global_connesso and message_question_yes_no('Do you want create autocompletion dictionary?') == 'Yes':
+            # creo una barra di avanzamento infinita
+            v_progress = avanzamento_infinito_class("sql_editor.gif")            
+            v_counter = 0
+            # apro il file di testo che conterrà il risultato con tutti i nomi delle funzioni, procedure e package, ecc
+            v_file = open(v_global_work_dir + 'MSql_autocompletion.txt','w')
+            # elenco di tutti gli oggetti funzioni, procedure e package
+            self.v_cursor_db_obj.execute("SELECT OBJECT_NAME, OBJECT_TYPE FROM ALL_OBJECTS WHERE OWNER='" + self.e_user_name + "' AND OBJECT_TYPE IN ('PACKAGE','PROCEDURE','FUNCTION') ORDER BY OBJECT_NAME")
+            v_elenco_oggetti = self.v_cursor_db_obj.fetchall()
+            # leggo il sorgente di ogni oggetto di cui sopra...
+            for v_record in v_elenco_oggetti:                                
+                # visualizzo barra di avanzamento e se richiesto interrompo
+                v_counter += 1
+                v_progress.avanza('Analizing ' + v_record[0] ,v_counter)
+                if v_progress.richiesta_cancellazione:                        
+                    break
+                # leggo il sorgente
+                self.v_cursor_db_obj.execute("""SELECT UPPER(TEXT) FROM ALL_SOURCE WHERE OWNER='"""+self.e_user_name+"""' AND NAME='"""+v_record[0]+"""' AND TYPE='"""+v_record[1]+"""' ORDER BY LINE""")                
+                v_start_sezione = False
+                v_text_sezione = ''
+                v_risultato = ''
+                # processo tutte le righe del sorgente
+                for result in self.v_cursor_db_obj:                       
+                    # dalla riga elimino gli spazi a sinistra e a destra
+                    v_riga_raw = result[0]
+                    v_riga = v_riga_raw.lstrip()
+                    v_riga = v_riga.rstrip()                                        
+                    v_riga = v_riga.replace('"','')
+                    # individio riga di procedura-funzione
+                    if v_riga[0:9] == 'PROCEDURE' or v_riga[0:8] == 'FUNCTION':
+                        # il nome della procedura-funzione inizia dal primo carattere spazio fino ad apertura parentesi tonda                        
+                        if v_riga.find('(') != -1:
+                            v_nome = v_riga[v_riga.find(' ')+1:v_riga.find('(')]
+                        else:
+                            v_nome = v_riga[v_riga.find(' ')+1:len(v_riga)]
+                        v_risultato = v_nome + '('    
+                        # indico che sono all'interno di una nuova sezione, terminata la quale poi dovrò esplodere elenco parametri                       
+                        v_start_sezione = True
+                        v_text_sezione = v_riga
+                    # ...continua la sezione di parametri....
+                    elif v_start_sezione:
+                        v_text_sezione += v_riga
+
+                    # elaboro la sezione che contiene i parametri della procedura-funzione
+                    if v_start_sezione and v_riga.find(')') != -1:                        
+                        v_text_sezione = v_text_sezione[v_text_sezione.find('(')+1:v_text_sezione.find(')')]                        
+                        v_elenco_parametri = v_text_sezione.split(',')                        
+                        v_indice = 0                        
+                        for v_txt_parametro in v_elenco_parametri:                                                        
+                            v_stringa = v_txt_parametro.lstrip()
+                            v_parametro = v_stringa[0:v_stringa.find(' ')]
+                            # aggiungo la virgola tra un parametro e l'altro
+                            v_indice += 1
+                            if v_indice != len(v_elenco_parametri):
+                                v_risultato += v_parametro + ','
+                            else:
+                                v_risultato += v_parametro
+                            
+                        v_text_sezione = ''
+                        v_start_sezione = False
+                        v_risultato += ')'
+                        if v_record[1] == 'PACKAGE':
+                            v_risultato = v_record[0] + '.' + v_risultato
+                        v_file.write(v_risultato.lstrip() +'\n')
+                    
+            v_file.close()
+            message_info('The autocompletion dictionary has been created! Restart MSql to see the changes ;-)')
 #
 #  _____ ____ ___ _____ ___  ____  
 # | ____|  _ \_ _|_   _/ _ \|  _ \ 
@@ -1260,6 +1385,9 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         ###
         # IMPOSTAZIONI DELL'EDITOR SCINTILLA
         ###
+        # attivo UTF-8 (se richiesto)
+        if o_global_preferences.utf_8:
+            self.e_sql.setUtf8(True)                                                        
         # evidenzia l'intera riga dove posizionato il cursore
         self.e_sql.setCaretLineVisible(True)
         self.e_sql.setCaretLineBackgroundColor(QColor("#FFFF99"))
@@ -1268,14 +1396,12 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.e_sql.setMarginsFont(QFont("Courier New",9))           
         # attivo il lexer per evidenziare il codice del linguaggio SQL. Notare come faccia riferimento ad un oggetto che a sua volta personalizza il 
         # dizionario del lexer SQL, aggiungendo (se sono state caricate) le parole chiave di: tabelle, viste, package, ecc.
-        self.v_lexer = My_MSql_Lexer(self.e_sql)        
+        self.v_lexer = My_MSql_Lexer(self.e_sql)                
         # imposto carattere di default
         self.v_lexer.setDefaultFont(QFont("Cascadia Code SemiBold",11))    
         self.v_lexer.setFoldCompact(False)
         self.v_lexer.setFoldComments(True)
-        self.v_lexer.setFoldAtElse(True)                
-        # attivo il lexer sull'editor
-        self.e_sql.setLexer(self.v_lexer)
+        self.v_lexer.setFoldAtElse(True)                                
         # attivo le righe verticali che segnano le indentazioni
         self.e_sql.setIndentationGuides(True)                
         # attivo i margini con + e - 
@@ -1284,14 +1410,34 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.e_sql.setIndentationWidth(4)
         self.e_sql.setAutoIndent(True)
         # tabulatore a 4 caratteri
-        self.e_sql.setTabWidth(4)
-        # auto completamento
-        self.e_sql.setAutoCompletionSource(Qsci.QsciScintilla.AcsDocument)
-        self.e_sql.setAutoCompletionThreshold(1)
-        # attivo UTF-8 (se richiesto)
-        if o_global_preferences.utf_8:
-            self.e_sql.setUtf8(True)                                                
+        self.e_sql.setTabWidth(4)   
+                        
+        # attivo autocompletamento durante la digitazione 
+        # (comprende sia le parole del documento corrente che quelle aggiunte da un elenco specifico)
+        # attenzione! Da quanto ho capito, il fatto di avere attivo il lexer con linguaggio specifico (sql) questo prevale
+        # sul funzionamento di alcuni aspetti dell'autocompletamento....quindi ad un certo punto mi sono arreso con quello che
+        # sono riuscito a fare
+        self.v_api_lexer = Qsci.QsciAPIs(self.v_lexer)            
+        # aggiungo tutti i termini di autocompletamento (si trovanon all'interno di una tabella che viene generata a comando)
+        self.e_sql.setAutoCompletionSource(Qsci.QsciScintilla.AcsAll)                
+        self.carica_dizionario_per_autocompletamento()                
+        # indico dopo quanti caratteri che sono stati digitati dall'utente, si deve attivare l'autocompletamento
+        self.e_sql.setAutoCompletionThreshold(2)  
+        # attivo autocompletamento sia per la parte del contenuto del documento che per la parte di parole chiave specifiche
+        self.e_sql.autoCompleteFromAll()
+
+        # attivo il lexer sull'editor
+        self.e_sql.setLexer(self.v_lexer)
         
+        # imposto il ritorno a capo in formato Windows (CR-LF)
+        # Attenzione! Questa impostazione non converte eventuale testo che viene caricato da file con eol diverso
+        #             da quello considerato di default (Windows). Quindi, quando viene caricato un file, viene 
+        #             fatta la conversione dei eol LF con CR-LF (vedi caricamento file)
+        self.e_sql.setEolMode(Qsci.QsciScintilla.EolWindows)        
+
+        # visualizzo o meno il carattere di end of line in base alla preferenza
+        self.set_show_end_of_line()        
+
         ###
         # DICHIARAZIONE VAR GENERALI
         ###
@@ -1341,7 +1487,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         # attivo il filtro di eventi sull'oggetto dei risultati, in modo da visualizzare il menu contestuale sulle celle
         self.o_table.viewport().installEventFilter(self)   
         # slot per controllare quando cambia il testo digitato dall'utente
-        self.e_sql.textChanged.connect(self.slot_e_sql_modificato)                
+        self.e_sql.textChanged.connect(self.slot_e_sql_modificato)    
+        self.e_sql.cursorPositionChanged.connect(self.slot_e_sql_spostamento_cursore)            
             
         # attivo il drop sulla parte di editor        
         self.e_sql.setAcceptDrops(True)    
@@ -1364,12 +1511,14 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
     def eventFilter(self, source, event):
         """
            Gestione di eventi personalizzati sull'editor (overwrite, drag&drop, F12) e sulla tabella dei risultati
+           Da notare come un'istruzione di return False indirizza l'evento verso il suo svolgimento classico
         """      
         global v_global_connection
 
         # individuo tasto destro del muose sulla tabella dei risultati        
         if event.type() == QEvent.MouseButtonPress and event.buttons() == Qt.RightButton and source is self.o_table.viewport():
-            self.tasto_desto_o_table(event)            
+            self.tasto_desto_o_table(event)      
+            return True      
 
         # individuo la pressione di un tasto sull'editor
         if event.type() == QEvent.KeyPress and source is self.e_sql:
@@ -1383,28 +1532,37 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                 self.aggiorna_statusbar()
             # tasto F12 premuto dall'utente --> richiamo l'object viewer            
             if event.key() == Qt.Key_F12:                 
-                self.slot_f12()                                               
-                  
-        # individuo il drag sull'editor
-        if event.type() == QEvent.DragEnter and source is self.e_sql:
-            event.accept()            
-            return True
-        
-        # individuo il drop sull'editor       
-        if event.type() == QEvent.Drop and source is self.e_sql:
+                self.slot_f12()   
+                return True
+
+        # individuo il drag sull'editor e...
+        if event.type() == QEvent.DragEnter and source is self.e_sql:                  
+            # il drag contiene elenco di item...
+            # se il drag non contiene elenco di item, quindi ad esempio del semplice testo, lascio le cose cosi come sono            
             if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
-                data = event.mimeData()
+                # estraggo gli item e li trasformo in stringa
+                v_mime_data = event.mimeData()
                 source_item = QtGui.QStandardItemModel()
-                source_item.dropMimeData(data, Qt.CopyAction, 0,0, QModelIndex())                                                
+                source_item.dropMimeData(v_mime_data, Qt.CopyAction, 0,0, QModelIndex())                                                
                 v_stringa = ''
                 for v_indice in range(0,source_item.rowCount()):
                     if v_stringa != '':
                         v_stringa += ',' + source_item.item(v_indice, 0).text()
                     else:
-                        v_stringa = source_item.item(v_indice, 0).text()                
-                # inserisco nell'editor quanto selezionato dall'utente                
-                self.e_sql.insert(v_stringa)
-            
+                        v_stringa = source_item.item(v_indice, 0).text()                                
+                # reimposto la stringa dentro l'oggetto mimedata
+                # da notare come l'oggetto v_mime_data punta direttamente all'oggetto event.mimeData!
+                v_mime_data.setText(v_stringa)                
+            # accetto il drag
+            event.accept()                        
+            return True                                            
+        
+        # individuo il drop sull'editor               
+        if event.type() == QEvent.Drop and source is self.e_sql:            
+            # e richiamo direttamente la funzione che accetta il drop di QScintilla
+            # da notare come durante il drag siano stato cambiato il contenuto dei dati nel caso 
+            # la sorgente fossero degli item (in questo caso l'object viewer)
+            self.e_sql.dropEvent(event)                
             return True        
         
         # individuo l'attivazione della subwindow dell'editor...
@@ -1412,9 +1570,32 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             # aggiorno i dati della statusbar
             self.aggiorna_statusbar()
                 
-        # fine senza alcuna elaborazione        
+        # fine senza alcuna elaborazione e quindi si procede con esecuzione dei segnali nativi del framework       
         return False
         
+    def carica_dizionario_per_autocompletamento(self):
+        """
+           Partendo dal file che contiene elenco termini di autocompletamento, ne leggo il contenuto e lo aggiungo all'editor
+           Da notare come viene caricato di fatto un elenco sia con caratteri minuscoli che maiuscoli perché non sono riuscito
+           a far funzionare la sua preferenza 
+        """
+        global v_global_my_lexer_keywords
+                
+        # come termini di autocompletamento prendo tutti gli oggetti che ho nella lista usata a sua volta per evidenziare le parole
+        for v_keywords in v_global_my_lexer_keywords:
+            self.v_api_lexer.add(v_keywords.upper())                                    
+            self.v_api_lexer.add(v_keywords.lower())                                    
+
+        # Se esiste il file delle preferenze...le carico nell'oggetto
+        if os.path.isfile(v_global_work_dir + 'MSql_autocompletion.txt'):
+            # carico i dati presenti nel file di testo (questo è stato creato con la voce di menu dello stesso MSql che si chiama "Create autocomplete dictonary")
+            with open(v_global_work_dir + 'MSql_autocompletion.txt','r') as file:
+                for v_riga in file:                
+                    self.v_api_lexer.add(v_riga.upper())                                    
+                    self.v_api_lexer.add(v_riga.lower())                                    
+        
+        self.v_api_lexer.prepare()        
+   
     def tasto_desto_o_table(self, event):
         """
            Gestione del menu contestuale con tasto destro su tabella dei risultati
@@ -1656,6 +1837,13 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         # aggiorno i dati della statusbar
         self.aggiorna_statusbar()
 
+    def slot_e_sql_spostamento_cursore(self):
+        """
+           Individia spostamenti del cursore nell'editor e aggiorna la label che riporta le coordinate sulla status bar
+        """        
+        v_y, v_x = self.e_sql.getCursorPosition()
+        self.link_to_MSql_win1_class.l_cursor_pos.setText("Ln: " + str(v_y+1) + "  Col: " + str(v_x+1))
+    
     def slot_menu_auto_column_resize(self):
         """
            Imposta la var che indica se la tabella del risultato ha attiva la formattazione automatica della larghezza delle colonne
@@ -1925,7 +2113,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             # imposto indicatore di esecuzione a false --> nessuna esecuzione
             self.v_esecuzione_ok = False
             # azzero le var di riga e colonna (serviranno per il carico della pagina)            
-            self.y = 0
+            self.v_pos_y = 0
 
             # prendo solo il testo che eventualmente l'utente ha evidenziato a video
             if p_corrente:
@@ -1991,26 +2179,26 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                 return 'ko'
 
             # imposto la riga a 1 (inizio caricamento prima riga del flusso dati)
-            if self.y == 0:
+            if self.v_pos_y == 0:
                 self.o_table.setRowCount(1)                        
             # carico i dati presi dal db dentro il modello                        
             while True:
                 x = 0   
                 # imposto altezza della riga (sotto un certo numero non va)
-                self.o_table.setRowHeight(self.y, self.v_altezza_font_output)                                         
+                self.o_table.setRowHeight(self.v_pos_y, self.v_altezza_font_output)                                         
                 for field in v_riga_dati:                                                                                                                        
                     # campo stringa
                     if isinstance(field, str):                                                 
-                        self.o_table.setItem(self.y, x, QTableWidgetItem( field ) )                                                                
+                        self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( field ) )                                                                
                     # campo numerico (se non funziona provare con i cx_Oracle type
                     elif isinstance(field, float) or isinstance(field, int):                           
-                        self.o_table.setItem(self.y, x, QTableWidgetItem( '{:10.0f}'.format(field) ) )                    
+                        self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( '{:10.0f}'.format(field) ) )                    
                     # campo nullo
                     elif field == None:                                 
-                        self.o_table.setItem(self.y, x, QTableWidgetItem( "" ) )                
+                        self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( "" ) )                
                     # campo data
                     elif self.tipi_intestazioni[x][1] == cx_Oracle.DATETIME:                                                                            
-                        self.o_table.setItem(self.y, x, QTableWidgetItem( str(field) ) )       
+                        self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( str(field) ) )       
                     # se il contenuto è un blob...utilizzo il metodo read sul campo field, poi lo inserisco in una immagine
                     # che poi carico una label e finisce dentro la cella a video
                     elif self.tipi_intestazioni[x][1] == cx_Oracle.BLOB:
@@ -2018,26 +2206,26 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                         pixmap = QPixmap.fromImage(qimg)   
                         label = QLabel()
                         label.setPixmap(pixmap)                        
-                        self.o_table.setCellWidget(self.y, x, label )                
+                        self.o_table.setCellWidget(self.v_pos_y, x, label )                
                     # se il contenuto è un clob...leggo sempre tramite metodo read e lo carico in un widget di testo largo
                     elif self.tipi_intestazioni[x][1] == cx_Oracle.CLOB:                        
                         qtext = QtWidgets.QTextEdit(field.read())    
                         # da notare come prendeno qtext e trasformandolo in plaintext le prestazioni migliorino di molto                    
-                        self.o_table.setItem(self.y, x, QTableWidgetItem( qtext.toPlainText() ) )                                                                                                                
+                        self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( qtext.toPlainText() ) )                                                                                                                
                     x += 1
                 # conto le righe (il numeratore è partito da 0, quindi è corretto che venga incrementato a questo punto)
-                self.y += 1                
+                self.v_pos_y += 1                
                 # aumento il numero di righe nella tabella a video
-                self.o_table.setRowCount(self.y+1)                   
+                self.o_table.setRowCount(self.v_pos_y + 1)                   
                 # se raggiunto il numero di righe per pagina (100) --> esco dal ciclo
-                if self.y % 100 == 0:                
+                if self.v_pos_y % 100 == 0:                
                     break
                 # carico la prossima riga del flusso dati
                 v_riga_dati = self.v_cursor.fetchone()
                 # se raggiunta ultima riga del flusso di dati --> esco dal ciclo
                 if v_riga_dati == None:
                     # tolgo la riga che avevo aggiunto
-                    self.o_table.setRowCount(self.y)                        
+                    self.o_table.setRowCount(self.v_pos_y)                        
                     break
             
             # indico di calcolare automaticamente la larghezza delle colonne
@@ -2066,7 +2254,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             return 'ko'
 
         # se sono arrivato alla punto più basso della scrollbar, vuol dire che posso caricare gli altri dati
-        if posizione == self.o_table.verticalScrollBar().maximum() and self.y > 0:            
+        if posizione == self.o_table.verticalScrollBar().maximum() and self.v_pos_y > 0:            
             # sostituisce la freccia del mouse con icona "clessidra"
             QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))        
 
@@ -2099,21 +2287,15 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         # chiudo la barra di avanzamento
         v_progress.chiudi()
 
-        # mi posiziono in fondo (la var y contiene numero di righe...a cui tolgo 1 in quanto il widget parte da 0)
-        v_item = QtWidgets.QTableWidgetItem()        
-        v_item = self.o_table.item(self.y-1,1)        
-        self.o_table.scrollToItem(v_item)
-        self.o_table.selectRow(self.y-1)
+        # mi posiziono ultimo record di tabella
+        self.o_table.scrollToBottom()
 
     def slot_go_to_top(self):
         """
            Scorro fino all'inizio della tabella
         """        
         # mi posiziono in cima
-        v_item = QtWidgets.QTableWidgetItem()        
-        v_item = self.o_table.item(0,1)        
-        self.o_table.scrollToItem(v_item)
-        self.o_table.selectRow(0)
+        self.o_table.scrollToTop()
 
     def slot_commit_rollback(self, p_azione):
         """
@@ -2231,8 +2413,9 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.v_editor_chiuso = True            
             e.accept() 
         # interrompere la chiusura
-        elif v_salvare == 'Cancel':
-            e.ignore()
+        elif v_salvare == 'Cancel':            
+            self.v_editor_chiuso = False            
+            e.ignore()            
         # chiudere
         else:            
             self.v_editor_chiuso = True            
@@ -2580,6 +2763,15 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             # disattivo le modifiche sulla tabella
             self.o_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)            
 
+    def set_show_end_of_line(self):
+        """
+           Rende visibile o meno il carattere di end of line
+        """
+        global o_global_preferences                
+        
+        # visualizzo il segnale di ritorno a capo in base alle preferenze
+        self.e_sql.setEolVisibility(o_global_preferences.end_of_line)        
+
     def add_history(self, p_testo):
         """
            Aggiunge alla lista di history, il testo p_testo, solo se non già presente
@@ -2607,9 +2799,9 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
 
         # label indicatore di overwrite
         if self.v_overwrite_enabled:
-            self.link_to_MSql_win1_class.l_overwrite_enabled.setText('OVR')
+            self.link_to_MSql_win1_class.l_overwrite_enabled.setText('Overwrite')
         else:                
-            self.link_to_MSql_win1_class.l_overwrite_enabled.setText('INS')
+            self.link_to_MSql_win1_class.l_overwrite_enabled.setText('Insert')
 
 #
 #  ___ _   _ _____ ___  
@@ -2637,7 +2829,11 @@ if __name__ == "__main__":
         if sys.argv[1] != '':                
             v_nome_file_da_caricare = sys.argv[1]    
     except:
-        pass            
+        pass    
+
+    # controllo se esiste dir di lavoro (servirà per salvare le preferenze...)        
+    if not os.path.isdir(v_global_work_dir):
+        os.makedirs(v_global_work_dir)
     
     # avvio del programma (aprendo eventuale file indicato su linea di comando)   
     app = QtWidgets.QApplication([])    
