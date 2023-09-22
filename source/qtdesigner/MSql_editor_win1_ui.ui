@@ -69,7 +69,7 @@
    </property>
    <widget class="QMenu" name="menuFiles">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <widget class="QMenu" name="menuRecent_file">
      <property name="title">
@@ -91,7 +91,7 @@
    </widget>
    <widget class="QMenu" name="menuServer">
     <property name="title">
-     <string>Connection</string>
+     <string>&amp;Connection</string>
     </property>
     <addaction name="actionICOM_815"/>
     <addaction name="actionBACKUP_815"/>
@@ -109,9 +109,9 @@
     <addaction name="separator"/>
     <addaction name="actionConnect"/>
    </widget>
-   <widget class="QMenu" name="menueDIT">
+   <widget class="QMenu" name="menuEdit">
     <property name="title">
-     <string>Edit</string>
+     <string>&amp;Edit</string>
     </property>
     <addaction name="actionFind"/>
     <addaction name="actionFind_and_Replace"/>
@@ -140,7 +140,7 @@
    </widget>
    <widget class="QMenu" name="menuRun">
     <property name="title">
-     <string>Script</string>
+     <string>&amp;Script</string>
     </property>
     <addaction name="actionRun_selected_area"/>
     <addaction name="actionCommit"/>
@@ -150,14 +150,14 @@
    </widget>
    <widget class="QMenu" name="menuAdvanced">
     <property name="title">
-     <string>Table</string>
+     <string>&amp;Table</string>
     </property>
     <addaction name="actionMake_table_editable"/>
     <addaction name="actionSave_modified_data"/>
    </widget>
    <widget class="QMenu" name="menuSql">
     <property name="title">
-     <string>Output</string>
+     <string>&amp;Output</string>
     </property>
     <addaction name="actionGo_to_Top"/>
     <addaction name="actionGo_to_End"/>
@@ -171,7 +171,7 @@
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
-     <string>Window</string>
+     <string>&amp;Window</string>
     </property>
     <addaction name="actionCascade"/>
     <addaction name="actionTile"/>
@@ -182,14 +182,14 @@
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
-     <string>Help</string>
+     <string>&amp;Help</string>
     </property>
     <addaction name="actionHelp"/>
     <addaction name="actionProgram_info"/>
    </widget>
    <addaction name="menuFiles"/>
    <addaction name="menuServer"/>
-   <addaction name="menueDIT"/>
+   <addaction name="menuEdit"/>
    <addaction name="menuRun"/>
    <addaction name="menuSql"/>
    <addaction name="menuAdvanced"/>
@@ -848,24 +848,6 @@
     <string>Object Viewer</string>
    </property>
   </action>
-  <action name="actionUppercase">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/uppercase.gif</normaloff>:/icons/icons/uppercase.gif</iconset>
-   </property>
-   <property name="text">
-    <string>Fold All</string>
-   </property>
-   <property name="shortcut">
-    <string>F12</string>
-   </property>
-  </action>
   <action name="actionHistory">
    <property name="icon">
     <iconset resource="resource.qrc">
@@ -980,21 +962,6 @@
     <string>Ctrl+A</string>
    </property>
   </action>
-  <action name="actionOverwrite">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/overwrite.gif</normaloff>:/icons/icons/overwrite.gif</iconset>
-   </property>
-   <property name="text">
-    <string>Overwrite</string>
-   </property>
-   <property name="shortcut">
-    <string>Ins</string>
-   </property>
-  </action>
   <action name="actionGo_To_Line">
    <property name="icon">
     <iconset resource="resource.qrc">
@@ -1014,15 +981,6 @@
    </property>
    <property name="text">
     <string>Fold/Unfold All</string>
-   </property>
-  </action>
-  <action name="actionUnFold_All">
-   <property name="icon">
-    <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/plus.gif</normaloff>:/icons/icons/plus.gif</iconset>
-   </property>
-   <property name="text">
-    <string>UnFold All</string>
    </property>
   </action>
   <action name="actionRect_selection">
@@ -1144,16 +1102,6 @@
     <string>Preferences</string>
    </property>
   </action>
-  <action name="actionaaaaaaa">
-   <property name="text">
-    <string>aaaaaaa</string>
-   </property>
-  </action>
-  <action name="actionCreate_dictionary">
-   <property name="text">
-    <string>Create dictionary</string>
-   </property>
-  </action>
   <action name="actionCreate_autocompletation_dictionary">
    <property name="icon">
     <iconset resource="resource.qrc">
@@ -1176,29 +1124,6 @@
    </property>
    <property name="text">
     <string>Show end of line</string>
-   </property>
-  </action>
-  <action name="actionWindows">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Windows</string>
-   </property>
-  </action>
-  <action name="actionUnix">
-   <property name="text">
-    <string>Unix</string>
-   </property>
-  </action>
-  <action name="actionOld_Mac">
-   <property name="text">
-    <string>Old Mac</string>
-   </property>
-  </action>
-  <action name="actionClear_recent_file">
-   <property name="text">
-    <string>Clear recent file</string>
    </property>
   </action>
  </widget>

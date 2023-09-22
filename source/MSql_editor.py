@@ -61,7 +61,7 @@ v_global_connection = cx_Oracle
 # Indica se si è connessi al DB
 v_global_connesso = False
 # Directory di lavoro del programma
-v_global_work_dir = 'C:/MSql/'
+v_global_work_dir = 'C:\\MSql\\'
 # Lista di parole aggiuntive al lexer che evidenzia le parole nell'editor
 v_global_my_lexer_keywords = []
 # Oggetto che carica le preferenze tramite l'apposita classe
@@ -98,16 +98,16 @@ def salvataggio_editor(p_save_as, p_nome, p_testo):
     """
     global o_global_preferences
 
-    # se indicato, richiedo un nuovo nome di file
-    if p_save_as:
+    # se indicato il save as, oppure il file è nuovo e non è mai stato salvato --> richiedo un nuovo nome di file    
+    if p_save_as or (not p_save_as and p_nome[0:8]=='Untitled'):
         # la dir di default è quella richiesta dall'utente o la Documenti        
         if o_global_preferences.save_dir == '':
-            v_default_save_dir = QDir.homePath() + "/Documents/"
+            v_default_save_dir = QDir.homePath() + "\\Documents\\"
         else:
             v_default_save_dir = o_global_preferences.save_dir
 
         # propongo un nuovo nome di file dato dalla dir di default + il titolo ricevuto in input
-        v_file_save_as = v_default_save_dir + '/' + p_nome
+        v_file_save_as = v_default_save_dir + '\\' + p_nome        
      
         p_nome = QtWidgets.QFileDialog.getSaveFileName(None, "Save a SQL file",v_file_save_as,"MSql files (*.msql);;SQL files (*.sql *.pls *.plb *.trg);;All files (*.*)") [0]                                  
         if not p_nome:
@@ -120,11 +120,11 @@ def salvataggio_editor(p_save_as, p_nome, p_testo):
     # procedo con il salvataggio
     try:
         if o_global_preferences.utf_8:
-            # scrittura usando utf-8                     
-            v_file = open(p_nome,'w',encoding='utf-8')
+            # scrittura usando utf-8 (il newline come parametro è molto importante per la gestione corretta degli end of line)                                                            
+            v_file = open(p_nome,'w',encoding='utf-8', newline='')
         else:
-            # scrittura usando ansi
-            v_file = open(p_nome,'w')
+            # scrittura usando ansi (il newline come parametro è molto importante per la gestione corretta degli end of line)                                        
+            v_file = open(p_nome,'w', newline='')
         v_file.write(p_testo)
         v_file.close()            
         return 'ok', p_nome
@@ -287,7 +287,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         if v_window_attiva is not None:                                             
             # scorro la lista-oggetti-editor fino a quando non trovo l'oggetto che ha lo stesso titolo della window attiva
             for i in range(0,len(self.o_lst_window2)):
-                if self.o_lst_window2[i].v_titolo_window == v_window_attiva.windowTitle():
+                if self.o_lst_window2[i].v_titolo_window == v_window_attiva.windowTitle() and not self.o_lst_window2[i].v_editor_chiuso:
                     return self.o_lst_window2[i]
         return None                    
 
@@ -407,6 +407,8 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 v_ok, v_nome_file = salvataggio_editor(False, o_MSql_win2.v_titolo_window, o_MSql_win2.e_sql.text())
                 if v_ok == 'ok':
                     o_MSql_win2.v_testo_modificato = False
+                    o_MSql_win2.v_titolo_window = v_nome_file
+                    o_MSql_win2.setWindowTitle(v_nome_file)
             # Salvataggio del file come... (semplicemente non gli passo il titolo)
             elif p_slot.text() == 'Save as':
                 v_ok, v_nome_file = salvataggio_editor(True, o_MSql_win2.v_titolo_window, o_MSql_win2.e_sql.text())
@@ -663,7 +665,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         if p_nome_file is None:
             # la dir di default è quella richiesta dall'utente o la Documenti        
             if o_global_preferences.open_dir == '':
-                v_default_open_dir = QDir.homePath() + "/Documents/"
+                v_default_open_dir = QDir.homePath() + "\\Documents\\"
             else:
                 v_default_open_dir = o_global_preferences.open_dir
 
@@ -683,25 +685,16 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                     return None,None
             # procedo con apertura
             try:
-                # apertura usando utf-8                                         
+                # apertura usando utf-8 (il newline come parametro è molto importante per la gestione corretta degli end of line)                                        
                 if o_global_preferences.utf_8 :                    
-                    v_file = open(v_fileName[0],'r',encoding='utf-8')
-                # apertura usando ansi
+                    v_file = open(v_fileName[0],'r',encoding='utf-8',newline='')
+                # apertura usando ansi (il newline come parametro è molto importante per la gestione corretta degli end of line)                                        
                 else:                    
-                    v_file = open(v_fileName[0],'r')
+                    v_file = open(v_fileName[0],'r',newline='')
                 # aggiungo il nome del file ai file recenti                
                 self.aggiorna_elenco_file_recenti(v_fileName[0])
-                # leggo il file. Da notare come venga letto riga per riga in quanto (e non so perché) su Windows viene 
-                #                caricato avendo come ritorno a capo LF, quando invece dovrebbe essere CR-LF
-                v_contenuto_file = ''
-                while True:
-                    v_line = v_file.readline()
-                    if not v_line:
-                        break
-                    # leggo le righe del file e sostituisco LF con CR-LF
-                    v_contenuto_file += v_line.replace('\n','\r\n')
                 # restituisco il nome e il contenuto del file
-                return v_fileName[0], v_contenuto_file
+                return v_fileName[0], v_file.read()
             except Exception as err:
                 message_error('Error to opened the file: ' + str(err))
                 return None, None
@@ -958,6 +951,8 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 self.v_cursor_db_obj.execute("SELECT DBMS_METADATA.GET_DDL('"+self.tipo_oggetto+"','"+self.nome_oggetto+"') FROM DUAL")
             # prendo il primo campo, del primo record e lo trasformo in stringa
             v_testo_oggetto_db = str(self.v_cursor_db_obj.fetchone()[0])
+            # sostituisco eol (end of line) da LF a CR-LF
+            v_testo_oggetto_db = v_testo_oggetto_db.replace('\n','\r\n')
 
             # apro una nuova finestra di editor simulando il segnale che scatta quando utente sceglie "Open", passando il sorgente ddl
             v_azione = QtWidgets.QAction()
@@ -1273,7 +1268,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
 
     def crea_dizionario_per_autocompletamento(self):
         """
-           Partendo dai sorgenti presenti nel DB, riferiti a package, funzioni e procedure, crea il file MSql_autocompletion.txt
+           Partendo dai sorgenti presenti nel DB, riferiti a package, funzioni e procedure, crea il file MSql_autocompletion.ini
            dove vengono riportati tutti i termini che poi verranno caricati all'avvio dell'editor per l'autocompletamento durante
            la digitazione delle parole
         """
@@ -1285,7 +1280,9 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             v_progress = avanzamento_infinito_class("sql_editor.gif")            
             v_counter = 0
             # apro il file di testo che conterrà il risultato con tutti i nomi delle funzioni, procedure e package, ecc
-            v_file = open(v_global_work_dir + 'MSql_autocompletion.txt','w')
+            v_file = open(v_global_work_dir + 'MSql_autocompletion.ini','w')
+            # la funzione put_line viene inserita di default 
+            v_file.write('dbms_output.put_line(text)' +'\n')
             # elenco di tutti gli oggetti funzioni, procedure e package
             self.v_cursor_db_obj.execute("SELECT OBJECT_NAME, OBJECT_TYPE FROM ALL_OBJECTS WHERE OWNER='" + self.e_user_name + "' AND OBJECT_TYPE IN ('PACKAGE','PROCEDURE','FUNCTION') ORDER BY OBJECT_NAME")
             v_elenco_oggetti = self.v_cursor_db_obj.fetchall()
@@ -1587,9 +1584,9 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.v_api_lexer.add(v_keywords.lower())                                    
 
         # Se esiste il file delle preferenze...le carico nell'oggetto
-        if os.path.isfile(v_global_work_dir + 'MSql_autocompletion.txt'):
+        if os.path.isfile(v_global_work_dir + 'MSql_autocompletion.ini'):
             # carico i dati presenti nel file di testo (questo è stato creato con la voce di menu dello stesso MSql che si chiama "Create autocomplete dictonary")
-            with open(v_global_work_dir + 'MSql_autocompletion.txt','r') as file:
+            with open(v_global_work_dir + 'MSql_autocompletion.ini','r') as file:
                 for v_riga in file:                
                     self.v_api_lexer.add(v_riga.upper())                                    
                     self.v_api_lexer.add(v_riga.lower())                                    
@@ -2007,8 +2004,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             # imposto indicatore di esecuzione a false --> nessuna esecuzione
             self.v_esecuzione_ok = False
 
-            # attivo output tramite dbms_output
-            self.v_cursor.callproc("dbms_output.enable")
+            # attivo output tramite dbms_output (1000000 è la dimensione del buffer)
+            self.v_cursor.callproc("dbms_output.enable", [1000000])
 
             # eseguo lo script
             v_tot_record = 0
@@ -2017,12 +2014,15 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                 v_tot_record = self.v_cursor.rowcount
                 self.v_esecuzione_ok = True
             # se riscontrato errore di primo livello --> emetto sia codice che messaggio ed esco
-            except cx_Oracle.Error as e:                                                
+            except cx_Oracle.Error as e:                                                                
                 # ripristino icona freccia del mouse
                 QApplication.restoreOverrideCursor()                        
                 # emetto errore sulla barra di stato 
-                errorObj, = e.args                                
+                errorObj, = e.args                                       
                 self.scrive_output("Error: " + errorObj.message, "E")                 
+                # per posizionarmi alla riga in errore ho solo la variabile offset che riporta il numero di carattere a cui l'errore si è verificato
+                v_riga, v_colonna = x_y_from_offset_text(p_plsql, errorObj.offset)                
+                self.e_sql.setCursorPosition(v_riga,v_colonna)
                 return 'ko'
 
             # var che indica se siamo in uno script di "CREATE"
@@ -2054,10 +2054,16 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                 # con questa select dico a Oracle di darmi eventuali errori presenti su un oggetto           
                 self.v_cursor.execute("SELECT LINE,POSITION,TEXT FROM USER_ERRORS WHERE NAME = '" + v_nome_script + "' and TYPE = '" + v_tipo_script + "' ORDER BY NAME, TYPE, LINE, POSITION")
                 v_errori = self.v_cursor.fetchall()
-                # errori riscontrati --> li emetto
+                # errori riscontrati --> li emetto nella parte di output e mi posiziono sull'editor alla riga e colonna indicate
                 if v_errori:
+                    v_1a_volta = True
                     for info in v_errori:
-                        self.scrive_output("Error at line " + str(info[0]) + " position " + str(info[1]) + " " + info[2], 'E')
+                        # emetto gli errori riscontrati
+                        self.scrive_output("Error at line " + str(info[0]) + " position " + str(info[1]) + " " + info[2], 'E')                        
+                        # solo per il primo errore mi posiziono sull'editor alle coordinate indicate
+                        if v_1a_volta:
+                            self.e_sql.setCursorPosition(info[0]-1,info[1]-1)
+                            v_1a_volta = False
                 # tutto ok!
                 else:
                     self.scrive_output('Created successfully','I')
@@ -2076,7 +2082,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                     v_num_lines = int(v_m_num_lines.getvalue())
                     v_lines = v_m_line.getvalue()[:v_num_lines]
                     for line in v_lines:
-                        v_dbms_ret += line + '\n'
+                        v_dbms_ret += str(line) + '\n'
                     if v_num_lines < v_chunk:
                         break
                 
@@ -2091,7 +2097,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                         self.scrive_output('Script executed!', 'I')
 
             # Ripristino icona freccia del mouse
-            QApplication.restoreOverrideCursor()                        
+            QApplication.restoreOverrideCursor()                            
                 
     def esegui_select(self, p_select, p_corrente):
         """

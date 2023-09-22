@@ -52,6 +52,24 @@ def extract_word_from_cursor_pos(p_string, p_pos):
 
     return v_word
 
+def x_y_from_offset_text(p_text, p_offset):
+    """
+       Analizzando il testo presente in p_text, restituisce il numero riga e colonna
+       della posizione p_offset
+    """
+    # spezzo il testo in righe (in ambiente Windows l'eol end of line è indicato tramite LF-CR)    
+    v_riga = 0    
+    v_prog = 0
+    for v_testo in p_text.split('\r\n'):        
+        v_prog += len(v_testo) + 2 # si sommano i due caratteri di fine riga        
+        if v_prog >= p_offset:            
+            # --> esco con il risultato (il numero di colonna viene ricavato incrociando offset e posizione raggiunta)
+            return v_riga, (len(v_testo)+2) - (v_prog-p_offset) 
+        v_riga += 1
+    
+    # se arrivo qui vuol dire che non ho trovato il punto di ricerca
+    return 0,0
+
 def message_error(p_message):
     """
        Visualizza messaggio di errore usando interfaccia qt

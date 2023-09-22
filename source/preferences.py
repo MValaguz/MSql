@@ -58,8 +58,8 @@ class preferences_class():
             self.color_prod = v_json['color_prod']
         # imposto valori di default senza presenza dello specifico file
         else:
-            self.open_dir = 'W:/SQL'
-            self.save_dir = 'W:/SQL'
+            self.open_dir = 'W:\\SQL'
+            self.save_dir = 'W:\\SQL'
             self.utf_8 = False
             self.end_of_line = False
             self.font_editor = 'Cascadia Code SemiBold, 11'
