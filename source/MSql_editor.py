@@ -45,11 +45,11 @@ from utilita_database import *
 
 # Tipi oggetti di database
 Tipi_Oggetti_DB = { 'Tables':'TABLE',                    
-                    'Package body':'PACKAGE BODY',
-                    'Package': 'PACKAGE',                    
+                    'Packages body':'PACKAGE BODY',
+                    'Packages': 'PACKAGE',                    
                     'Procedures':'PROCEDURE',
                     'Functions':'FUNCTION',
-                    'Trigger':'TRIGGER',
+                    'Triggers':'TRIGGER',
                     'Views':'VIEW',
                     'Sequences':'SEQUENCE' }
 
@@ -131,7 +131,15 @@ def salvataggio_editor(p_save_as, p_nome, p_testo):
     except Exception as err:
         message_error('Error to write the file: ' + str(err))
         return 'ko', None
-                       
+
+def titolo_window(p_titolo_file):
+    """
+       Partendo da p_titolo_file restituisce solo la parte di nome file da mettere come titolo della window
+    """                       
+    v_solo_nome_file = os.path.split(p_titolo_file)[1]
+    v_solo_nome_file_senza_suffisso = os.path.splitext(v_solo_nome_file)[0]
+
+    return v_solo_nome_file_senza_suffisso
 #
 #  __  __    _    ___ _   _  __        _____ _   _ ____   _____        __
 # |  \/  |  / \  |_ _| \ | | \ \      / /_ _| \ | |  _ \ / _ \ \      / /
@@ -143,7 +151,7 @@ def salvataggio_editor(p_save_as, p_nome, p_testo):
 class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):    
     """
         Classe di gestione MDI principale 
-        p_nome_file_da_caricare indica eventuale da aprire all'avvio
+        p_nome_file_da_caricare indica eventuale file da aprire all'avvio
     """       
     def __init__(self, p_nome_file_da_caricare):
         global o_global_preferences    
@@ -155,7 +163,9 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         # forzo la dimensione della finestra. Mi sono accorto che questa funzione, nella gestione MDI
         # è importante in quanto permette poi al connettore dello smistamento menu di funzionare sulla
         # prima finestra aperta....rimane comunque un mistero questa cosa.....
-        self.showNormal()        
+        self.showNormal()      
+        # se richiesto reimposto nuovamente la window con le dimensioni dell'utente
+        self.carico_posizione_window()  
 
         ###
         # Aggiunta di windget alla statusbar con: flag editabilità, numero di caratteri, indicatore di overwrite, ecc..
@@ -276,7 +286,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         else:
             v_azione = QtWidgets.QAction()
             v_azione.setText('New')
-            self.smistamento_voci_menu(v_azione)                
+            self.smistamento_voci_menu(v_azione)                    
 
     def oggetto_win2_attivo(self):
         """
@@ -287,8 +297,9 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         if v_window_attiva is not None:                                             
             # scorro la lista-oggetti-editor fino a quando non trovo l'oggetto che ha lo stesso titolo della window attiva
             for i in range(0,len(self.o_lst_window2)):
-                if self.o_lst_window2[i].v_titolo_window == v_window_attiva.windowTitle() and not self.o_lst_window2[i].v_editor_chiuso:
-                    return self.o_lst_window2[i]
+                if not self.o_lst_window2[i].v_editor_chiuso:
+                    if self.o_lst_window2[i].objectName() == v_window_attiva.objectName():
+                        return self.o_lst_window2[i]
         return None                    
 
     def smistamento_voci_menu(self, p_slot, p_oggetto_titolo_db=None, p_oggetto_testo_db=None):
@@ -318,10 +329,13 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             if str(p_slot.data()) == 'FILE_RECENTI':
                 # apro il file richiesto
                 v_titolo, v_contenuto_file = self.openfile(p_slot.text())
+                # se non è stato scelto alcun file --> esco da tutto!
+                if v_titolo is None:
+                    return None
             # se richiesto Open...
             elif p_slot.text() == 'Open':
                 # apro un file tramite dialog box
-                v_titolo, v_contenuto_file = self.openfile(None)
+                v_titolo, v_contenuto_file = self.openfile(None)                
                 # se non è stato scelto alcun file --> esco da tutto!
                 if v_titolo is None:
                     return None
@@ -345,7 +359,9 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             # l'oggetto editor lo salvo all'interno di una lista in modo sia reperibile quando necessario
             self.o_lst_window2.append(o_MSql_win2)        
             # collego l'oggetto editor ad una nuova finestra del gestore mdi e la visualizzo, massimizzandola (imposto icona vuota!)
+            # da notare come il nome di file completo di fatto viaggia all'interno del nome degli oggetti
             sub_window = self.mdiArea.addSubWindow(o_MSql_win2)                  
+            sub_window.setObjectName(o_MSql_win2.objectName())
             sub_window.setWindowIcon(QtGui.QIcon())                              
             sub_window.show()  
             sub_window.showMaximized()  
@@ -404,18 +420,20 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         if o_MSql_win2 is not None:
             # Salvataggio del file
             if p_slot.text() == 'Save':
-                v_ok, v_nome_file = salvataggio_editor(False, o_MSql_win2.v_titolo_window, o_MSql_win2.e_sql.text())
+                v_ok, v_nome_file = salvataggio_editor(False, o_MSql_win2.objectName(), o_MSql_win2.e_sql.text())
                 if v_ok == 'ok':
                     o_MSql_win2.v_testo_modificato = False
-                    o_MSql_win2.v_titolo_window = v_nome_file
-                    o_MSql_win2.setWindowTitle(v_nome_file)
+                    o_MSql_win2.setObjectName(v_nome_file)
+                    o_MSql_win2.setWindowTitle(titolo_window(v_nome_file))
+                    self.aggiorna_elenco_file_recenti(v_nome_file)
             # Salvataggio del file come... (semplicemente non gli passo il titolo)
             elif p_slot.text() == 'Save as':
-                v_ok, v_nome_file = salvataggio_editor(True, o_MSql_win2.v_titolo_window, o_MSql_win2.e_sql.text())
+                v_ok, v_nome_file = salvataggio_editor(True, o_MSql_win2.objectName(), o_MSql_win2.e_sql.text())
                 if v_ok == 'ok':
                     o_MSql_win2.v_testo_modificato = False
-                    o_MSql_win2.v_titolo_window = v_nome_file
-                    o_MSql_win2.setWindowTitle(v_nome_file)
+                    o_MSql_win2.setObjectName(v_nome_file)
+                    o_MSql_win2.setWindowTitle(titolo_window(v_nome_file))
+                    self.aggiorna_elenco_file_recenti(v_nome_file)
             # Cambio server in ICOM_815
             elif p_slot.text() == 'Server Prod (ICOM_815)':
                 self.e_server_name = 'ICOM_815'
@@ -524,7 +542,9 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 o_MSql_win2.slot_goto_line()
             # Esecuzione dell'sql
             elif p_slot.text() == 'Execute':
-                o_MSql_win2.slot_esegui()
+                v_ok = o_MSql_win2.slot_esegui()
+                if v_ok == 'ko':
+                    message_error('Script stopped for error!')
             # Commit
             elif p_slot.text() == 'Commit':
                 o_MSql_win2.slot_commit_rollback('Commit')
@@ -615,10 +635,11 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         """
         global v_global_work_dir
 
-        # se elemento non passato --> carico elenco dei files recenti da disco
+        # se elemento non passato --> carico elenco dei files recenti da disco        
         if p_elemento is None:
             if os.path.isfile(v_global_work_dir + 'recent_files.ini'):
                 with open(v_global_work_dir + 'recent_files.ini','r') as file:
+                    v_elenco_file_recenti = []
                     for v_nome_file in file:                                        
                         v_nome_file = v_nome_file.rstrip('\n')
                         # il file viene aggiunto all'elenco solo se esiste!
@@ -628,30 +649,37 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                             v_action.setData('FILE_RECENTI')
                             # aggiungo a video la voce di menu
                             self.menuRecent_file.addAction(v_action)
-                            # allineo array interno con quanto presente a video
-                            self.elenco_file_recenti.append(v_nome_file)
-        # se elemento passato e non presente tra i files recenti...
-        elif p_elemento not in self.elenco_file_recenti:
-            # elimino tutte le voci dal menu dei recenti
-            self.menuRecent_file.clear()
-            # aggiungo nuova voce all'array interno
+                            # carico array
+                            v_elenco_file_recenti.append(v_nome_file)
+                    
+                    # prendo la lista con elenco appena caricato e lo inserisco al contrario nella struttura effettiva dei file recenti
+                    for v_index in range(len(v_elenco_file_recenti),0,-1):                           
+                            self.elenco_file_recenti.append(v_elenco_file_recenti[v_index-1])        
+        # se elemento passato ...        
+        else:
+            # elemento è presente in elenco...
+            if p_elemento in self.elenco_file_recenti:                            
+                # lo elimino dalla posizione attuale in quanto deve andare in fondo alla lista
+                self.elenco_file_recenti.remove(p_elemento)
+            
+            # aggiungo nuova voce all'array interno (viene posto in fondo!)
             self.elenco_file_recenti.append(p_elemento)
+            
+            # elimino tutte le voci dal menu dei recenti
+            self.menuRecent_file.clear()            
             # apro il file che contiene i recenti per salvare i dati (salverò solo gli ultimi 10 files)
-            v_file_recenti = open(v_global_work_dir + 'recent_files.ini','w')
-            v_num_file = 0
+            v_file_recenti = open(v_global_work_dir + 'recent_files.ini','w')            
             # scorro array al contrario (così tengo il più recente in cima alla lista) e ricarico il menu a video            
             for v_index in range(len(self.elenco_file_recenti),0,-1):
-                v_voce_menu = self.elenco_file_recenti[v_index-1]
-                v_action = QAction(self)
-                v_action.setText(v_voce_menu)
-                v_action.setData('FILE_RECENTI')
-                self.menuRecent_file.addAction(v_action)
-                if v_num_file <= 10:
-                    v_file_recenti.write(v_voce_menu+'\n')            
-                    v_num_file += 1
+                if v_index > 0 and v_index <= 10:                    
+                    v_action = QAction(self)
+                    v_action.setText(self.elenco_file_recenti[v_index-1])
+                    v_action.setData('FILE_RECENTI')
+                    self.menuRecent_file.addAction(v_action)                                    
+                    v_file_recenti.write(self.elenco_file_recenti[v_index-1]+'\n')                                            
             # chiudo il file
             v_file_recenti.close()    
- 
+                     
     def openfile(self, p_nome_file):
         """
            Apertura di un file...restituisce il nome del file e il suo contenuto
@@ -680,7 +708,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         if v_fileName[0] != "":
             # controllo se il file è già aperto in altra finestra di editor
             for obj_win2 in self.o_lst_window2:
-                if not obj_win2.v_editor_chiuso and  obj_win2.v_titolo_window == v_fileName[0]:
+                if not obj_win2.v_editor_chiuso and  obj_win2.objectName() == v_fileName[0]:
                     message_error('This file is already open!')
                     return None,None
             # procedo con apertura
@@ -719,11 +747,45 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         # se tutte le window sono chiuse, controllo se ci sono ancora transazioni aperte e poi chiudo il programma
         if v_chiudi_app:            
             self.controllo_transazioni_aperte()            
+            self.salvo_posizione_window()
             self.close()
         # altrimenti ignoro l'evento di chiusura
         else:
             event.ignore()
 
+    def carico_posizione_window(self):
+        """
+           Leggo dal file la posizione della window (se richiesto dalle preferenze)
+        """
+        global o_global_preferences
+        global v_global_work_dir
+
+        # se utente ha richiesto di salvare la posizione della window...
+        if o_global_preferences.remember_window_pos:
+            if os.path.isfile(v_global_work_dir + 'Msql_window_pos.ini'):
+                v_file = open(v_global_work_dir + 'Msql_window_pos.ini','r')
+                # al momento leggo solo la prima riga che contiene la dimensione della mainwindow
+                v_my_window_pos = v_file.readline().rstrip('\n').split()                                
+                if v_my_window_pos[0] == 'MainWindow':
+                    self.setGeometry(int(v_my_window_pos[1]), int(v_my_window_pos[2]), int(v_my_window_pos[3]), int(v_my_window_pos[4]))    
+                v_file.close()
+            
+    def salvo_posizione_window(self):
+        """
+           Salvo in un file la posizione della window (se richiesto dalle preferenze)
+           Questo salvataggio avviene automaticamente alla chiusura di MSql
+        """
+        global o_global_preferences
+        global v_global_work_dir
+
+        # se utente ha richiesto di salvare la posizione della window...
+        if o_global_preferences.remember_window_pos:
+            v_file = open(v_global_work_dir + 'Msql_window_pos.ini','w')
+            o_pos = self.geometry()            
+            o_rect = o_pos.getRect()                        
+            v_file.write("MainWindow " + str(o_rect[0]) + " " + str(o_rect[1]) + " " +  str(o_rect[2]) + " " + str(o_rect[3]))
+            v_file.close()
+    
     def controllo_transazioni_aperte(self):
         """
            Controllo se per la connessione corrente ci sono delle transazioni aperte 
@@ -883,6 +945,10 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         """                        
         global v_global_connesso
 
+        # se non connesso --> esco
+        if not v_global_connesso:
+            return 'ko'
+
         # prendo il tipo di oggetto scelto dall'utente
         try:            
             self.tipo_oggetto = Tipi_Oggetti_DB[self.oggetti_db_scelta.currentText()]                
@@ -890,40 +956,74 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             self.tipo_oggetto = ''
         # pulisco elenco
         self.oggetti_db_lista.clear()
-        # se utente ha scelto un oggetto e si è connessi, procedo con il carico dell'elenco 
-        if self.tipo_oggetto != '' and v_global_connesso:
-            # leggo elenco degli oggetti indicati
+        # se utente ha scelto un oggetto e si è connessi, procedo con il carico dell'elenco         
+        if self.tipo_oggetto != '':            
+            # leggo elenco degli oggetti indicati (con o senza descrizione)
+            if self.e_view_description.isChecked():
+                v_select = """SELECT *
+                              FROM  (SELECT OBJECT_NAME || 
+                                            CASE WHEN OBJECT_TYPE IN ('TABLE','VIEW') THEN
+                                                ' - ' || (SELECT COMMENTS FROM ALL_TAB_COMMENTS WHERE ALL_TAB_COMMENTS.OWNER=ALL_OBJECTS.OWNER AND ALL_TAB_COMMENTS.TABLE_NAME=ALL_OBJECTS.OBJECT_NAME)                                
+                                            ELSE NULL
+                                            END AS OBJECT_NAME,
+                                            (SELECT COUNT(*) 
+                                            FROM   DBA_OBJECTS 
+                                            WHERE  DBA_OBJECTS.OWNER=ALL_OBJECTS.OWNER AND 
+                                                   DBA_OBJECTS.OBJECT_NAME=ALL_OBJECTS.OBJECT_NAME AND 
+                                                   DBA_OBJECTS.STATUS != 'VALID') INVALID                                            
+                                    FROM   ALL_OBJECTS 
+                                    WHERE  OWNER='""" + self.e_user_name + """' AND 
+                                           OBJECT_TYPE='""" + self.tipo_oggetto + """' AND
+                                           SECONDARY = 'N'
+                                )"""
+            else:
+                v_select = """SELECT *
+                            FROM  (SELECT OBJECT_NAME,
+                                          (SELECT COUNT(*) 
+                                           FROM   DBA_OBJECTS 
+                                           WHERE  DBA_OBJECTS.OWNER=ALL_OBJECTS.OWNER AND 
+                                                  DBA_OBJECTS.OBJECT_NAME=ALL_OBJECTS.OBJECT_NAME AND 
+                                                  DBA_OBJECTS.STATUS != 'VALID') INVALID                                          
+                                    FROM   ALL_OBJECTS 
+                                    WHERE  OWNER='""" + self.e_user_name + """' AND 
+                                           OBJECT_TYPE='""" + self.tipo_oggetto + """' AND
+                                           SECONDARY = 'N'
+                                )"""
+        else:
             v_select = """SELECT *
-                          FROM (SELECT OBJECT_NAME,
-                                       (SELECT COUNT(*) 
-	                                    FROM   DBA_OBJECTS 
-		                                WHERE  DBA_OBJECTS.OWNER=ALL_OBJECTS.OWNER AND 
-		                                        DBA_OBJECTS.OBJECT_NAME=ALL_OBJECTS.OBJECT_NAME AND 
-			                                    DBA_OBJECTS.STATUS != 'VALID') INVALID 
-                                FROM   ALL_OBJECTS 
-                                WHERE  OWNER='""" + self.e_user_name + """' AND 
-                                       OBJECT_TYPE='""" + self.tipo_oggetto + """'
-                               )"""
-            # se necessario applico il filtro di ricerca
-            if self.oggetti_db_ricerca.text() != '' or self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid':
-                if self.oggetti_db_tipo_ricerca.currentText() == 'Start with':
-                    v_select += " WHERE OBJECT_NAME LIKE '" + self.oggetti_db_ricerca.text().upper() + "%'"
-                elif self.oggetti_db_tipo_ricerca.currentText() == 'Like':
-                    v_select += " WHERE OBJECT_NAME LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%'"
-                elif self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid': 
-                    v_select += " WHERE OBJECT_NAME LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%' AND INVALID > 0"
-            # aggiungo order by
-            v_select += " ORDER BY OBJECT_NAME"            
-            # eseguo la select
-            self.v_cursor_db_obj.execute(v_select)            
-            v_righe = self.v_cursor_db_obj.fetchall()            
-            # carico elenco nel modello che è collegato alla lista
-            for v_riga in v_righe:
-                v_item = QtGui.QStandardItem()
-                v_item.setText(v_riga[0]) 
-                if v_riga[1] != 0: 
-                    v_item.setBackground(QColor(Qt.red))
-                self.oggetti_db_lista.appendRow(v_item)                        
+                          FROM  (SELECT OBJECT_NAME || ' - ' || OBJECT_TYPE AS OBJECT_NAME,                                        
+                                        (SELECT COUNT(*) 
+                                         FROM   DBA_OBJECTS 
+                                         WHERE  DBA_OBJECTS.OWNER=ALL_OBJECTS.OWNER AND 
+                                                DBA_OBJECTS.OBJECT_NAME=ALL_OBJECTS.OBJECT_NAME AND 
+                                                DBA_OBJECTS.STATUS != 'VALID') INVALID                                        
+                                 FROM   ALL_OBJECTS 
+                                 WHERE  OWNER='""" + self.e_user_name + """' AND
+                                        OBJECT_TYPE IN ('TABLE','VIEW','PACKAGE','PROCEDURE','FUNCTION','TRIGGER','SEQUENCE') AND                                      
+                                        SECONDARY = 'N'
+                                )"""
+
+        # se necessario applico il filtro di ricerca
+        if self.oggetti_db_ricerca.text() != '' or self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid':
+            if self.oggetti_db_tipo_ricerca.currentText() == 'Start with':
+                v_select += " WHERE UPPER(OBJECT_NAME) LIKE '" + self.oggetti_db_ricerca.text().upper() + "%'"
+            elif self.oggetti_db_tipo_ricerca.currentText() == 'Like':
+                v_select += " WHERE UPPER(OBJECT_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%'"
+            elif self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid': 
+                v_select += " WHERE UPPER(OBJECT_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%' AND INVALID > 0"
+        # aggiungo order by
+        v_select += " ORDER BY OBJECT_NAME"                        
+        # eseguo la select
+        self.v_cursor_db_obj.execute(v_select)            
+        v_righe = self.v_cursor_db_obj.fetchall()            
+        # carico elenco nel modello che è collegato alla lista
+        for v_riga in v_righe:
+            v_item = QtGui.QStandardItem()
+            # nell'item inserisco nome oggetto e commento
+            v_item.setText(v_riga[0]) 
+            if v_riga[1] != 0: 
+                v_item.setBackground(QColor(Qt.red))
+            self.oggetti_db_lista.appendRow(v_item)                        
 
     def slot_oggetti_db_doppio_click(self, p_index):
         """
@@ -937,21 +1037,80 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         # prendo il nome dell'oggetto scelto dall'utente
         v_selindex = self.oggetti_db_lista.itemFromIndex(p_index)
         self.nome_oggetto = v_selindex.text()               
-        if self.nome_oggetto != '':
+        if self.nome_oggetto != '' and self.tipo_oggetto != '':
             # imposto var che conterrà il testo dell'oggetto DB 
             v_testo_oggetto_db = ''
             # sostituisce la freccia del mouse con icona "clessidra"
             QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))        
 
             # richiamo la procedura di oracle che mi restituisce la ddl dell'oggetto
-            # se richiesto di aprire il package body, allora devo fare una chiamata specifica
-            if self.tipo_oggetto == 'PACKAGE BODY':
+            # se richiesto di aprire il o il package body, allora devo fare una chiamata specifica
+            if self.tipo_oggetto == 'PACKAGE BODY': 
                 self.v_cursor_db_obj.execute("SELECT DBMS_METADATA.GET_DDL('PACKAGE_BODY','"+self.nome_oggetto+"') FROM DUAL")
-            else:
+            elif self.tipo_oggetto == 'PACKAGE':
+                self.v_cursor_db_obj.execute("""SELECT DBMS_METADATA.GET_DDL('PACKAGE_SPEC','"""+self.nome_oggetto+"""') FROM DUAL 
+                                                UNION ALL
+                                                SELECT TO_CLOB('\n/\n') FROM DUAL
+                                                UNION ALL
+                                                SELECT DBMS_METADATA.GET_DDL('PACKAGE_BODY','"""+self.nome_oggetto+"""') FROM DUAL
+                                              """)                
+            elif self.tipo_oggetto == 'TABLE':
+                self.v_cursor_db_obj.execute("""SELECT DBMS_METADATA.GET_DDL('"""+self.tipo_oggetto+"""','"""+self.nome_oggetto+"""') FROM DUAL
+                                                UNION ALL
+                                                SELECT TO_CLOB('\n/\n') FROM DUAL
+                                                UNION ALL
+                                                SELECT DBMS_METADATA.GET_DEPENDENT_DDL('INDEX','"""+self.nome_oggetto+"""') FROM DUAL
+                                                WHERE (SELECT COUNT(*) FROM ALL_INDEXES WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+self.nome_oggetto+"""') > 0													   
+                                                UNION ALL
+                                                SELECT TO_CLOB('\n/\n') FROM DUAL
+                                                UNION ALL                                                
+                                                SELECT DBMS_METADATA.GET_DEPENDENT_DDL('CONSTRAINT','"""+self.nome_oggetto+"""') FROM DUAL
+                                                WHERE (SELECT COUNT(*) FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+self.nome_oggetto+"""' AND R_CONSTRAINT_NAME IS NULL) > 0													   
+                                                UNION ALL
+                                                SELECT TO_CLOB('\n/\n') FROM DUAL
+                                                UNION ALL
+                                                /*
+                                                SELECT DBMS_METADATA.GET_DEPENDENT_DDL('REF_CONSTRAINT','"""+self.nome_oggetto+"""') FROM DUAL
+                                                WHERE (SELECT COUNT(*) FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+self.nome_oggetto+"""' AND R_CONSTRAINT_NAME IS NOT NULL) > 0													   
+                                                UNION ALL
+                                                SELECT TO_CLOB('\n/\n') FROM DUAL
+                                                UNION ALL*/
+                                                SELECT DBMS_METADATA.GET_DEPENDENT_DDL('TRIGGER','"""+self.nome_oggetto+"""') FROM DUAL
+                                                WHERE (SELECT COUNT(*) FROM ALL_TRIGGERS WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+self.nome_oggetto+"""') > 0													   
+                                             """)
+            else:    
                 self.v_cursor_db_obj.execute("SELECT DBMS_METADATA.GET_DDL('"+self.tipo_oggetto+"','"+self.nome_oggetto+"') FROM DUAL")
             # prendo il primo campo, del primo record e lo trasformo in stringa
-            v_testo_oggetto_db = str(self.v_cursor_db_obj.fetchone()[0])
-            # sostituisco eol (end of line) da LF a CR-LF
+            v_testo_oggetto_db = ''
+            for v_record in self.v_cursor_db_obj:
+                v_testo_oggetto_db += str(v_record[0])
+
+            ###
+            # aggiungo la parte dei grant
+            ###
+            self.v_cursor_db_obj.execute("""SELECT GRANTEE, 
+                                                   LISTAGG(PRIVILEGE, ',') WITHIN GROUP (ORDER BY PRIVILEGE) AS PRIVILEGE,
+                                                   GRANTABLE
+                                            FROM   DBA_TAB_PRIVS 
+                                            WHERE  TABLE_NAME = '"""+self.nome_oggetto+"""' AND OWNER='"""+self.e_user_name+"""'
+                                            GROUP BY GRANTEE, GRANTABLE
+                                            ORDER BY GRANTEE
+                                         """)
+            # aggiungo la parte di grant solo se presente
+            v_testo_grant_db = ''
+            for v_record in self.v_cursor_db_obj:
+                v_testo_grant_db += 'GRANT ' + str(v_record[1]) + ' ON ' + self.nome_oggetto + ' TO ' + str(v_record[0]) 
+                if v_record[2] == 'YES':
+                    v_testo_grant_db += ' WITH GRANT OPTION; \n'
+                else:
+                    v_testo_grant_db += ';\n'
+            # aggiungo al testo la parte dei grant    
+            if v_testo_grant_db != '':
+                v_testo_oggetto_db += '\n' + '/\n' + v_testo_grant_db    
+
+            ###
+            # finalizzo: sostituisco eol (end of line) da LF a CR-LF
+            ###
             v_testo_oggetto_db = v_testo_oggetto_db.replace('\n','\r\n')
 
             # apro una nuova finestra di editor simulando il segnale che scatta quando utente sceglie "Open", passando il sorgente ddl
@@ -973,7 +1132,11 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             v_tipo_oggetto = ''
         # prendo il nome dell'oggetto scelto dall'utente
         v_selindex = self.oggetti_db_lista.itemFromIndex(p_index)
-        v_nome_oggetto = v_selindex.text()               
+        v_nome_oggetto = v_selindex.text()  
+        # se ho attivato la descrizione degli oggi, la devo nettificare
+        if self.e_view_description.isChecked():
+            v_nome_oggetto = v_nome_oggetto.split(' - ')[0]
+        # se tutto ok, richiamo la visualizzazione
         if v_nome_oggetto != '':
             self.carica_object_viewer(v_tipo_oggetto, v_nome_oggetto)
 
@@ -997,7 +1160,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             else:
                 self.owner_oggetto = ''
             # ricerco la descrizione dell'oggetto
-            self.v_cursor_db_obj.execute("SELECT COMMENTS FROM all_tab_comments WHERE owner='"+self.owner_oggetto+"' AND TABLE_NAME='"+self.nome_oggetto+"'")
+            self.v_cursor_db_obj.execute("SELECT COMMENTS FROM ALL_TAB_COMMENTS WHERE owner='"+self.owner_oggetto+"' AND TABLE_NAME='"+self.nome_oggetto+"'")
             v_record = self.v_cursor_db_obj.fetchone()
             if v_record is not None:
                 self.tipo_oggetto_commento = v_record[0]
@@ -1366,9 +1529,9 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         super(MSql_win2_class, self).__init__()        
         self.setupUi(self)
                 
-        # imposto il titolo della nuova window
-        self.v_titolo_window = p_titolo
-        self.setWindowTitle(self.v_titolo_window)
+        # imposto il titolo della nuova window (da notare come il nome completo dal file-editor sia annegato nel nome dell'oggetto!)
+        self.setObjectName(p_titolo)
+        self.setWindowTitle(titolo_window(self.objectName()))
 
         # var che indica che è attiva-disattiva la sovrascrittura (tasto insert della tastiera)
         self.v_overwrite_enabled = False
@@ -1460,6 +1623,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             v_split = o_global_preferences.font_result.split(',')
             v_font = QFont(str(v_split[0]),int(v_split[1]))
             self.slot_font_result_selector(v_font)
+        # imposto editabile o meno sulla parte di risultato
+        self.set_editable()            
 
         ###
         # Precaricamento (se passato un contenuto di file) 
@@ -1856,13 +2021,16 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
            Se si attiva v_debug, variabile interna, verrà eseguito l'output di tutte le righe processate
         """
         # se metto a true v_debug usciranno tutti i messaggi di diagnostica della ricerca delle istruzioni
-        v_debug = True
+        v_debug = False
         def debug_interno(p_message):
             if v_debug:
                 print(p_message)        
 
         # imposto la var di select corrente che serve in altre funzioni
         self.v_select_corrente = ''
+        # imposto la var che in caso di script che contiene più istruzioni separate da / tenga conto delle righe
+        # delle sezioni precedenti
+        self.v_offset_numero_di_riga = 0
 
         # prendo tutto il testo o solo quello evidenziato dall'utente
         if self.e_sql.selectedText():
@@ -1882,62 +2050,70 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         v_istruzione = False
         v_plsql = False
         v_plsql_idx = 0
+        v_ok = ""
         for v_riga_raw in v_righe_testo:
             # dalla riga elimino gli spazi a sinistra e a destra
             v_riga = v_riga_raw.lstrip()
-            v_riga = v_riga.rstrip()
-            # riga vuota
-            if v_riga == '':
-                debug_interno('Riga vuota')
-                pass            
-            # continuazione riga plsql (da notare come lo script verrà composto con v_riga_raw)
-            elif v_plsql:
+            v_riga = v_riga.rstrip()            
+            # continuazione plsql (da notare come lo script verrà composto con v_riga_raw)
+            if v_plsql:            
                 debug_interno('Continuo con script plsql ' + v_riga)
-                # se trovo "aperture" aumento indice
-                if v_riga.split()[0].upper() in ('DECLARE','BEGIN','CREATE','REPLACE','FUNCTION','PROCEDURE') != -1:
-                    v_plsql_idx += 1
-                # se trovo chiusure diminuisco indice
-                elif v_riga.split()[0].upper() == 'END;' != -1:
-                    v_plsql_idx -= 1
+                if v_riga != '':
+                    # se trovo "aperture" aumento indice
+                    if v_riga.split()[0].upper() in ('DECLARE','BEGIN','CREATE','REPLACE','FUNCTION','PROCEDURE') != -1:
+                        v_plsql_idx += 1
+                    # se trovo chiusure diminuisco indice
+                    elif v_riga.split()[0].upper() == 'END;' != -1:
+                        v_plsql_idx -= 1
                 # aggiungo riga
-                v_plsql_str += chr(10) + v_riga_raw
-                # la chiusura trovata era l'ultima --> quindi eseguo lo script
-                if v_plsql_idx <= 0:                
-                    self.esegui_script(v_plsql_str, False)
+                if v_riga != '/':
+                    v_plsql_str += chr(10) + v_riga_raw
+                else:
+                    self.v_offset_numero_di_riga += 1
+                # la chiusura trovata era l'ultima (oppure trovato chiusura dello script tramite slash) --> quindi eseguo lo script
+                if v_plsql_idx <= 0 or v_riga == '/':                           
+                    v_ok = self.esegui_script(v_plsql_str, False)
+                    if v_ok == 'ko':                        
+                        return 'ko'
                     v_plsql = False
                     v_plsql_str = ''
                     v_plsql_idx = 0
+            # riga vuota (ma esterna a plsql)
+            elif v_riga == '':            
+                self.v_offset_numero_di_riga += 1
             # se siamo all'interno di un commento multiplo, controllo se abbiamo raggiunto la fine
             elif v_commento_multi and v_riga.find('*/') == -1:
-                pass
+                self.v_offset_numero_di_riga += 1
             elif v_commento_multi and v_riga.find('*/') != -1:        
+                self.v_offset_numero_di_riga += 1
                 v_commento_multi = False
-            # commento monoriga
-            elif v_riga[0:2] == '--' or v_riga[0:6] == 'PROMPT':
-                debug_interno('Commento! ' + v_riga)
-            # commento multi ma monoriga
-            elif v_riga[0:2] == '/*' and v_riga.find('*/') != -1:
-                debug_interno('Commento multi monoriga ! ' + v_riga)
+            # commenti monoriga
+            elif v_riga[0:2] == '--' or v_riga[0:6] == 'PROMPT' or v_riga[0:2] == '/*' and v_riga.find('*/') != -1:                
+                self.v_offset_numero_di_riga += 1
             # commento multi multiriga
             elif v_riga[0:2] == '/*':
-                debug_interno('Commento multi multiriga ! ' + v_riga)
+                self.v_offset_numero_di_riga += 1
                 v_commento_multi = True            
             # continuazione di una select, insert, update, delete....
             elif v_istruzione and v_riga.find(';') == -1:
-                v_istruzione_str += chr(10) + v_riga
+                 v_istruzione_str += chr(10) + v_riga
             # fine di una select, insert, update, delete.... con punto e virgola
             elif v_istruzione and v_riga[-1] == ';':
                 v_istruzione = False
                 v_istruzione_str += chr(10) + v_riga[0:len(v_riga)-1]
-                self.esegui_istruzione(v_istruzione_str)
+                v_ok = self.esegui_istruzione(v_istruzione_str)
+                if v_ok == 'ko':
+                    return 'ko'
                 v_istruzione_str = ''
             # inizio select, insert, update, delete.... monoriga
-            elif not v_istruzione and v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE') and v_riga[-1] == ';':
+            elif not v_istruzione and v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','GRANT','ALTER') and v_riga[-1] == ';':
                 v_istruzione_str = v_riga[0:len(v_riga)-1]
-                self.esegui_istruzione(v_istruzione_str)
+                v_ok = self.esegui_istruzione(v_istruzione_str)
+                if v_ok == 'ko':
+                    return 'ko'
                 v_istruzione_str = ''
             # inizio select, insert, update, delete.... multiriga
-            elif v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE'):
+            elif v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','GRANT','ALTER'):
                 v_istruzione = True
                 v_istruzione_str = v_riga
             # riga di codice pl-sql (da notare come lo script verrà composto con v_riga_raw)       
@@ -1948,40 +2124,43 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                 v_plsql_str = v_riga_raw
             else:
                 message_error('Unknown command type: ' + v_riga_raw + '.....')
-                return "ko"                
+                return 'ko'                
 
         # se a fine scansione mi ritrovo che v_plsql è ancora attiva, vuol dire che ho ancora un'istruzione in canna, e quindi la eseguo
         if v_plsql and v_plsql_str != '':
-            self.esegui_script(v_plsql_str, False)
+            v_ok = self.esegui_script(v_plsql_str, False)            
         
         # se a fine scansione mi ritrovo che v_istruzione è ancora attiva, vuol dire che ho ancora un'istruzione in canna, e quindi la eseguo          
         if v_istruzione and v_istruzione_str != '':
-            self.esegui_istruzione(v_istruzione_str)  
+            v_ok = self.esegui_istruzione(v_istruzione_str)  
+
+        return v_ok
 
     def esegui_istruzione(self, p_istruzione):
         """
            Esegue istruzione p_istruzione
         """
+        v_ok = ''                
+        # se trovo select eseguo select
         if p_istruzione[0:6].upper() == 'SELECT':
-            self.esegui_select(p_istruzione, True)
-        elif p_istruzione[0:6].upper() in ('INSERT','UPDATE','DELETE'):
-            self.esegui_script(p_istruzione, True)
-        else:            
-            message_error('No supported instruction!')                                 
-            return "ko"
+            v_ok = self.esegui_select(p_istruzione, True)
+        # ..altrimenti esegue come script
+        else: 
+            v_ok = self.esegui_script(p_istruzione, True)        
                 
         # aggiungo l'istruzione all'history
         self.add_history(p_istruzione)            
-        return None
+        return v_ok
 
     def esegui_script(self, p_plsql, p_rowcount):
         """
            Esegue script p_plsql. Se p_rowcount è true allora vengono conteggiate le righe processate (es. update)
-        """
+        """              
         if p_plsql != '':
-            self.esegui_plsql(p_plsql, p_rowcount)
+            return self.esegui_plsql(p_plsql, p_rowcount)
         else:
             message_error('No script!')
+            return None
 
     def esegui_plsql(self, p_plsql, p_rowcount):
         """
@@ -2007,7 +2186,9 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             # attivo output tramite dbms_output (1000000 è la dimensione del buffer)
             self.v_cursor.callproc("dbms_output.enable", [1000000])
 
-            # eseguo lo script
+            ###
+            # eseguo lo script così come è stato indicato!
+            ###
             v_tot_record = 0
             try:                
                 self.v_cursor.execute(p_plsql)
@@ -2022,36 +2203,59 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                 self.scrive_output("Error: " + errorObj.message, "E")                 
                 # per posizionarmi alla riga in errore ho solo la variabile offset che riporta il numero di carattere a cui l'errore si è verificato
                 v_riga, v_colonna = x_y_from_offset_text(p_plsql, errorObj.offset)                
-                self.e_sql.setCursorPosition(v_riga,v_colonna)
+                v_riga += self.v_offset_numero_di_riga
+                self.e_sql.setCursorPosition(v_riga,v_colonna)                
+                # ripristino icona freccia del mouse    
+                QApplication.restoreOverrideCursor()                            
+                # esco con errore
                 return 'ko'
 
+            ###
+            # da qui in poi vado alla ricerca di eventuali errori 
             # var che indica se siamo in uno script di "CREATE"
             v_create = False
-            # controllo se eravamo di fronte ad uno script di "CREATE"...inizio con il cercare una parentesi tonda aperta
-            v_pos = p_plsql.find('(')            
-            # parentesi tonda aperta trovata!
-            if v_pos != -1:
-                # estraggo tutto il testo fino alla parentesi e lo nettifico, togliendo spazi e ritorni a capo
-                v_testo = p_plsql[0:v_pos]
-                v_testo = v_testo.upper().lstrip().replace('\n',' ')
-                # prendo il testo fino alla parentesi tonda e ne estreggo le singole parole
+            # controllo se eravamo di fronte ad uno script di "CREATE"...inizio con il prendere i primi 500 caratteri (è una cifra aleatoria!)
+            v_testo = p_plsql[0:500].upper()            
+            if 'CREATE' in v_testo or 'REPLACE' in v_testo or 'ALTER' in v_testo:
+                v_create = True
+                # nettifica del testo, togliendo spazi e ritorni a capo
+                v_testo = v_testo.upper().lstrip().replace('\n',' ')                
+                # cerco che tipo di oggetto è stato richiesto di creare                
+                if 'PACKAGEBODY' in v_testo.replace(' ',''):
+                    v_tipo_script = 'PACKAGE BODY' 
+                elif 'PACKAGE' in v_testo:
+                    v_tipo_script = 'PACKAGE' 
+                elif 'PROCEDURE' in v_testo:
+                    v_tipo_script = 'PROCEDURE' 
+                elif 'FUNCTION' in v_testo:
+                    v_tipo_script = 'FUNCTION' 
+                elif 'TABLE' in v_testo:
+                    v_tipo_script = 'TABLE'
+                elif 'VIEW' in v_testo:
+                    v_tipo_script = 'VIEW' 
+                elif 'TRIGGER' in v_testo:
+                    v_tipo_script = 'TRIGGER' 
+                elif 'SEQUENCE' in v_testo:
+                    v_tipo_script = 'SEQUENCE' 
+                else:
+                    v_tipo_script = ''                        
+                # ora devo cercare il nome del testo che è stato richiesto di creare....e quindi splitto il testo in parole
                 v_split = v_testo.split()
-                # inizio a controllare se ci sono le parole che di solito so usano per creare oggetti di databse (procedure, view, ecc.)
-                if v_split[0] == 'CREATE' and v_split[1] == 'OR' and v_split[2] == 'REPLACE':
-                    v_tipo_script = v_split[3]
-                    v_nome_script = v_split[4]
-                    # trovato!
-                    v_create = True 
-                elif v_split[0] == 'CREATE' or v_split[0] == 'REPLACE':
-                    v_tipo_script = v_split[1]
-                    v_nome_script = v_split[2]
-                    # trovato!
-                    v_create = True
+                v_nome_script = ''
+                # inizio a scorrere le parole presenti in questa parte di testo...
+                for v_parola in v_split:                                        
+                    if v_parola not in ('CREATE','OR','REPLACE','ALTER','PACKAGE','BODY','EDITIONABLE','NONEDITIONABLE','TABLE','PROCEDURE','FUNCTION','TRIGGER','VIEW','SEQUENCE','PUBLIC','SYNONYM','TYPE'):
+                        v_nome_script = v_parola
+                        break
+                # nettifico il nome dell'oggetto che potrebbe essere nel formato "SMILE"."NOME_OGGETTO"                
+                v_nome_script = v_nome_script.replace('"','')
+                if '.' in v_nome_script:
+                    v_nome_script = v_nome_script.split('.')[1]
 
             # quindi...se lo script era di "CREATE"...controllo se in compilazione ci sono stati errori...
             if v_create:
-                print('CREAZIONE DELLO SCRIPT --> ' + v_tipo_script + ' ' + v_nome_script)
-                # con questa select dico a Oracle di darmi eventuali errori presenti su un oggetto           
+                print('CREAZIONE DELLO SCRIPT --> Tipo: ' + v_tipo_script + ' Nome: ' + v_nome_script)
+                # con questa select dico a Oracle di darmi eventuali errori presenti su un oggetto                  
                 self.v_cursor.execute("SELECT LINE,POSITION,TEXT FROM USER_ERRORS WHERE NAME = '" + v_nome_script + "' and TYPE = '" + v_tipo_script + "' ORDER BY NAME, TYPE, LINE, POSITION")
                 v_errori = self.v_cursor.fetchall()
                 # errori riscontrati --> li emetto nella parte di output e mi posiziono sull'editor alla riga e colonna indicate
@@ -2061,13 +2265,20 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                         # emetto gli errori riscontrati
                         self.scrive_output("Error at line " + str(info[0]) + " position " + str(info[1]) + " " + info[2], 'E')                        
                         # solo per il primo errore mi posiziono sull'editor alle coordinate indicate
-                        if v_1a_volta:
-                            self.e_sql.setCursorPosition(info[0]-1,info[1]-1)
+                        if v_1a_volta:                            
+                            v_riga = info[0]-1 + self.v_offset_numero_di_riga
+                            v_colonna = info[1]-1                            
+                            self.e_sql.setCursorPosition(v_riga,v_colonna)
                             v_1a_volta = False
+                    # ripristino icona freccia del mouse    
+                    QApplication.restoreOverrideCursor()                            
+                    # esco con errore
+                    return 'ko'
                 # tutto ok!
                 else:
-                    self.scrive_output('Created successfully','I')
-            # altrimenti siamo di fronte ad uno script di pl-sql interno o di insert,update,delete che vanno gestiti con apposito output
+                    self.scrive_output('Created ' + v_tipo_script + ' ' + v_nome_script + ' successfully','I')
+            
+            # altrimenti siamo di fronte ad uno script di pl-sql interno o di insert,update,delete,grant che vanno gestiti con apposito output
             else:
                 # preparo le var per leggere l'output dello script
                 v_chunk = 100
@@ -2096,8 +2307,13 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                     else:
                         self.scrive_output('Script executed!', 'I')
 
-            # Ripristino icona freccia del mouse
+            # ripristino icona freccia del mouse
             QApplication.restoreOverrideCursor()                            
+            # aumento il numero di riga di offset (serve per eventuale script successivo di questo gruppo di esecuzione)            
+            self.v_offset_numero_di_riga += len(p_plsql.split(chr(10)))
+        
+        # esco con tutto ok
+        return None
                 
     def esegui_select(self, p_select, p_corrente):
         """
@@ -2161,7 +2377,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.o_tab_widget.setCurrentIndex(0) 
 
             # Ripristino icona freccia del mouse
-            QApplication.restoreOverrideCursor()                        
+            QApplication.restoreOverrideCursor()   
+            return None                     
 
     def carica_pagina(self):
         """
@@ -2177,9 +2394,14 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             # carico la prossima riga del flusso dati
             try:
                 v_riga_dati = self.v_cursor.fetchone()
-            except:
-                message_error('Error to fetch data!')
+            except cx_Oracle.DatabaseError as e: 
+                 # ripristino icona freccia del mouse
+                QApplication.restoreOverrideCursor()                        
+                # emetto errore sulla barra di stato 
+                errorObj, = e.args    
+                message_error("Error to fetch data: " + errorObj.message)                                            
                 return 'ko'
+            
             # se ero a fine flusso --> esco
             if v_riga_dati == None:
                 return 'ko'
@@ -2436,21 +2658,21 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             return 'No'
 
         # ci sono dati modificati e quindi chiedo come procedere ...
-        v_scelta = message_question_yes_no_cancel("The document " + self.v_titolo_window + " was modified." + chr(13) + "Do you want to save changes?")        
+        v_scelta = message_question_yes_no_cancel("The document " + self.objectName() + " was modified." + chr(13) + "Do you want to save changes?")        
         # utente richiede di interrompere 
         if v_scelta == 'Cancel':
             return 'Cancel'
         # utente chiede di salvare
         elif v_scelta == 'Yes':            
-            if self.v_titolo_window == "":                
-                v_ok, v_nome_file = salvataggio_editor(True, self.v_titolo_window, self.e_sql.text())
+            if self.objectName() == "":                
+                v_ok, v_nome_file = salvataggio_editor(True, self.objectName(), self.e_sql.text())
                 if v_ok != 'ok':
                     return 'Cancel'
                 else:
                     self.v_testo_modificato = False
                     return 'Yes'
             else:                      
-                v_ok, v_nome_file = salvataggio_editor(False, self.v_titolo_window, self.e_sql.text())                          
+                v_ok, v_nome_file = salvataggio_editor(False, self.objectName(), self.e_sql.text())                          
                 if v_ok != 'ok':
                     return 'Cancel'
                 else:
@@ -2522,7 +2744,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.win_find = Ui_FindWindow()        
             self.win_find.setupUi(self.dialog_find)                                        
             # reimposto il titolo perché nel caso di più editor aperti non si capisce a chi faccia riferimento la window
-            self.dialog_find.setWindowTitle('Find (' + self.v_titolo_window + ')')
+            self.dialog_find.setWindowTitle('Find (' + self.objectName() + ')')
             # da notare come il collegamento delle funzioni venga fatto in questo punto e non nella ui            
             self.win_find.b_next.clicked.connect(self.slot_find_next)                
             self.win_find.b_find_all.clicked.connect(self.slot_find_all)                
@@ -2615,7 +2837,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.win_find_e_replace = Ui_Find_e_Replace_Window()        
             self.win_find_e_replace.setupUi(self.dialog_find_e_replace)                
             # reimposto il titolo perché nel caso di più editor aperti non si capisce a chi faccia riferimento la window
-            self.dialog_find_e_replace.setWindowTitle('Find and Replace (' + self.v_titolo_window + ')')
+            self.dialog_find_e_replace.setWindowTitle('Find and Replace (' + self.objectName() + ')')
             # da notare come il collegamento delle funzioni venga fatto in questo punto e non nella ui                                    
             self.win_find_e_replace.b_find_next.clicked.connect(self.slot_find_e_replace_find)                
             self.win_find_e_replace.b_replace_next.clicked.connect(self.slot_find_e_replace_next)                
@@ -2739,7 +2961,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         v_time = datetime.datetime.now()        
         self.o_output.setCurrentCharFormat(v_pennello_blu)        
         self.o_output.appendPlainText(str(v_time.hour).rjust(2,'0') + ':' + str(v_time.minute).rjust(2,'0') + ':' + str(v_time.second).rjust(2,'0'))         
-        # in base al tipo di messaggio stampo messaaggio di colore nero o di colore rosso
+        # in base al tipo di messaggio stampo messaggio di colore nero o di colore rosso
         if p_tipo_messaggio == 'E':
             self.o_output.setCurrentCharFormat(v_pennello_rosso)        
             self.o_output.appendPlainText(p_messaggio)                 
@@ -2748,10 +2970,12 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.o_output.appendPlainText(p_messaggio)                 
         else:
             self.o_output.setCurrentCharFormat(v_pennello_nero)        
-            self.o_output.appendPlainText(p_messaggio)                 
+            self.o_output.appendPlainText(p_messaggio)                         
+        # forzo il posizionamento in fondo all'item di risultato
+        self.o_output.moveCursor(QTextCursor.End)                
         # porto in primo piano la visualizzazione del tab di output
         self.o_tab_widget.setCurrentIndex(1)                         
-
+        
     def set_editable(self):
         """
            Questa funzione viene richiamata quando si agisce sulla checkbox di editing

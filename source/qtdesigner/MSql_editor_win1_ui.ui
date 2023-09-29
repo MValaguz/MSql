@@ -205,7 +205,7 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>188</width>
+     <width>286</width>
      <height>188</height>
     </size>
    </property>
@@ -270,12 +270,12 @@
            <widget class="QComboBox" name="oggetti_db_tipo_ricerca">
             <item>
              <property name="text">
-              <string>Start with</string>
+              <string>Like</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Like</string>
+              <string>Start with</string>
              </property>
             </item>
             <item>
@@ -283,6 +283,16 @@
               <string>Only invalid</string>
              </property>
             </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="e_view_description">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load object description&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
            </widget>
           </item>
           <item>
@@ -296,30 +306,6 @@
            </widget>
           </item>
          </layout>
-        </item>
-        <item row="2" column="0">
-         <widget class="QListView" name="oggetti_db_elenco">
-          <property name="font">
-           <font>
-            <pointsize>8</pointsize>
-           </font>
-          </property>
-          <property name="editTriggers">
-           <set>QAbstractItemView::NoEditTriggers</set>
-          </property>
-          <property name="dragEnabled">
-           <bool>true</bool>
-          </property>
-          <property name="dragDropMode">
-           <enum>QAbstractItemView::DragOnly</enum>
-          </property>
-          <property name="alternatingRowColors">
-           <bool>true</bool>
-          </property>
-          <property name="selectionMode">
-           <enum>QAbstractItemView::ExtendedSelection</enum>
-          </property>
-         </widget>
         </item>
         <item row="0" column="0">
          <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0">
@@ -341,7 +327,7 @@
             </item>
             <item>
              <property name="text">
-              <string>Package body</string>
+              <string>Packages body</string>
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
@@ -350,7 +336,7 @@
             </item>
             <item>
              <property name="text">
-              <string>Package</string>
+              <string>Packages</string>
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
@@ -377,7 +363,7 @@
             </item>
             <item>
              <property name="text">
-              <string>Trigger</string>
+              <string>Triggers</string>
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
@@ -422,6 +408,30 @@
            </widget>
           </item>
          </layout>
+        </item>
+        <item row="2" column="0">
+         <widget class="QListView" name="oggetti_db_elenco">
+          <property name="font">
+           <font>
+            <pointsize>8</pointsize>
+           </font>
+          </property>
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+          <property name="dragEnabled">
+           <bool>true</bool>
+          </property>
+          <property name="dragDropMode">
+           <enum>QAbstractItemView::DragOnly</enum>
+          </property>
+          <property name="alternatingRowColors">
+           <bool>true</bool>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::ContiguousSelection</enum>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -1131,29 +1141,16 @@
   <tabstop>oggetti_db_scelta</tabstop>
   <tabstop>oggetti_db_refresh</tabstop>
   <tabstop>oggetti_db_tipo_ricerca</tabstop>
+  <tabstop>e_view_description</tabstop>
   <tabstop>oggetti_db_ricerca</tabstop>
   <tabstop>oggetti_db_elenco</tabstop>
+  <tabstop>db_oggetto_tree</tabstop>
+  <tabstop>o_history</tabstop>
  </tabstops>
  <resources>
   <include location="resource.qrc"/>
  </resources>
  <connections>
-  <connection>
-   <sender>oggetti_db_elenco</sender>
-   <signal>doubleClicked(QModelIndex)</signal>
-   <receiver>MSql_win1</receiver>
-   <slot>slot_oggetti_db_doppio_click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>1096</x>
-     <y>210</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>967</x>
-     <y>264</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>oggetti_db_scelta</sender>
    <signal>currentTextChanged(QString)</signal>
@@ -1219,22 +1216,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>oggetti_db_elenco</sender>
-   <signal>clicked(QModelIndex)</signal>
-   <receiver>MSql_win1</receiver>
-   <slot>slot_oggetti_db_click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>1171</x>
-     <y>194</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>876</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>db_oggetto_tree</sender>
    <signal>expanded(QModelIndex)</signal>
    <receiver>MSql_win1</receiver>
@@ -1247,6 +1228,54 @@
     <hint type="destinationlabel">
      <x>995</x>
      <y>-5</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>e_view_description</sender>
+   <signal>clicked()</signal>
+   <receiver>MSql_win1</receiver>
+   <slot>slot_oggetti_db_scelta()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1075</x>
+     <y>106</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1219</x>
+     <y>-5</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>oggetti_db_elenco</sender>
+   <signal>clicked(QModelIndex)</signal>
+   <receiver>MSql_win1</receiver>
+   <slot>slot_oggetti_db_click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1184</x>
+     <y>176</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>783</x>
+     <y>-14</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>oggetti_db_elenco</sender>
+   <signal>doubleClicked(QModelIndex)</signal>
+   <receiver>MSql_win1</receiver>
+   <slot>slot_oggetti_db_doppio_click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1066</x>
+     <y>246</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>733</x>
+     <y>-1</y>
     </hint>
    </hints>
   </connection>

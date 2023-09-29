@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MSql_win3(object):
     def setupUi(self, MSql_win3):
         MSql_win3.setObjectName("MSql_win3")
-        MSql_win3.resize(684, 237)
+        MSql_win3.resize(684, 332)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/icons/icons/MSql.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MSql_win3.setWindowIcon(icon)
@@ -37,7 +37,7 @@ class Ui_MSql_win3(object):
     def retranslateUi(self, MSql_win3):
         _translate = QtCore.QCoreApplication.translate
         MSql_win3.setWindowTitle(_translate("MSql_win3", "About MSql Editor"))
-        self.label.setText(_translate("MSql_win3", "<html><head/><body><p align=\"center\"><img src=\":/icons/icons/python.gif\"/><img src=\":/icons/icons/qt.gif\"/></p><p align=\"center\"><img src=\":/icons/icons/SciTEIco.gif\"/></p></body></html>"))
+        self.label.setText(_translate("MSql_win3", "<html><head/><body><p align=\"center\"><img src=\":/icons/icons/MSql.ico\"/></p><p align=\"center\"><img src=\":/icons/icons/python.gif\"/><img src=\":/icons/icons/qt.gif\"/></p><p align=\"center\"><img src=\":/icons/icons/SciTEIco.gif\"/></p></body></html>"))
         self.label_2.setText(_translate("MSql_win3", "<html><head/><body><p align=\"center\"><br/></p><p align=\"center\"><span style=\" font-size:10pt; font-weight:600;\">MSql Editor </span><span style=\" font-size:10pt;\">© 2023</span></p><p align=\"center\"><span style=\" font-size:10pt;\">MSql Editor is a simple sql text editor for oracle environment.</span></p><p align=\"center\"><span style=\" font-size:10pt;\">Developed by </span><span style=\" font-size:10pt; font-weight:600;\">Marco Valaguzza</span></p><p align=\"center\"><span style=\" font-size:10pt;\">with Python 3.11, QT library 5 and Scintilla</span></p><p align=\"center\"><span style=\" font-size:10pt;\"><br/></span></p></body></html>"))
 import resource_rc
 
