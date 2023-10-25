@@ -176,9 +176,6 @@
     <addaction name="actionCascade"/>
     <addaction name="actionTile"/>
     <addaction name="separator"/>
-    <addaction name="actionObjects_Navigator"/>
-    <addaction name="actionObject_Viewer"/>
-    <addaction name="actionHistory"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -187,12 +184,22 @@
     <addaction name="actionHelp"/>
     <addaction name="actionProgram_info"/>
    </widget>
+   <widget class="QMenu" name="menutOOLS">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="actionMaps_procedure_function"/>
+    <addaction name="actionObjects_Navigator"/>
+    <addaction name="actionObject_Viewer"/>
+    <addaction name="actionHistory"/>
+   </widget>
    <addaction name="menuFiles"/>
    <addaction name="menuServer"/>
    <addaction name="menuEdit"/>
    <addaction name="menuRun"/>
    <addaction name="menuSql"/>
    <addaction name="menuAdvanced"/>
+   <addaction name="menutOOLS"/>
    <addaction name="menuWindow"/>
    <addaction name="menuHelp"/>
   </widget>
@@ -205,7 +212,7 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>286</width>
+     <width>260</width>
      <height>188</height>
     </size>
    </property>
@@ -286,16 +293,6 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="e_view_description">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load object description&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QLineEdit" name="oggetti_db_ricerca">
             <property name="inputMethodHints">
              <set>Qt::ImhNone</set>
@@ -308,7 +305,7 @@
          </layout>
         </item>
         <item row="0" column="0">
-         <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0">
+         <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0">
           <item>
            <widget class="QComboBox" name="oggetti_db_scelta">
             <item>
@@ -388,6 +385,61 @@
                <normaloff>:/icons/icons/sequences.gif</normaloff>:/icons/icons/sequences.gif</iconset>
              </property>
             </item>
+            <item>
+             <property name="text">
+              <string>Primary keys</string>
+             </property>
+             <property name="icon">
+              <iconset resource="resource.qrc">
+               <normaloff>:/icons/icons/primary_key.gif</normaloff>:/icons/icons/primary_key.gif</iconset>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Unique keys</string>
+             </property>
+             <property name="icon">
+              <iconset resource="resource.qrc">
+               <normaloff>:/icons/icons/unique_key.gif</normaloff>:/icons/icons/unique_key.gif</iconset>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Foreign keys</string>
+             </property>
+             <property name="icon">
+              <iconset resource="resource.qrc">
+               <normaloff>:/icons/icons/foreign_key.gif</normaloff>:/icons/icons/foreign_key.gif</iconset>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Check keys</string>
+             </property>
+             <property name="icon">
+              <iconset resource="resource.qrc">
+               <normaloff>:/icons/icons/check_key.gif</normaloff>:/icons/icons/check_key.gif</iconset>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Synonyms</string>
+             </property>
+             <property name="icon">
+              <iconset resource="resource.qrc">
+               <normaloff>:/icons/icons/synonym.gif</normaloff>:/icons/icons/synonym.gif</iconset>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="e_view_description">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load object description&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
            </widget>
           </item>
           <item>
@@ -725,7 +777,7 @@
      <normaloff>:/icons/icons/csv.gif</normaloff>:/icons/icons/csv.gif</iconset>
    </property>
    <property name="text">
-    <string>Export to Excel</string>
+    <string>Export to Excel-CSV</string>
    </property>
   </action>
   <action name="actionAutoColumnResize">
@@ -852,7 +904,7 @@
   <action name="actionObject_Viewer">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/navigator.gif</normaloff>:/icons/icons/navigator.gif</iconset>
+     <normaloff>:/icons/icons/trigger.gif</normaloff>:/icons/icons/trigger.gif</iconset>
    </property>
    <property name="text">
     <string>Object Viewer</string>
@@ -1136,12 +1188,23 @@
     <string>Show end of line</string>
    </property>
   </action>
+  <action name="actionMaps_procedure_function">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/map.gif</normaloff>:/icons/icons/map.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Map procedure/function</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+M</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>oggetti_db_scelta</tabstop>
   <tabstop>oggetti_db_refresh</tabstop>
   <tabstop>oggetti_db_tipo_ricerca</tabstop>
-  <tabstop>e_view_description</tabstop>
   <tabstop>oggetti_db_ricerca</tabstop>
   <tabstop>oggetti_db_elenco</tabstop>
   <tabstop>db_oggetto_tree</tabstop>
@@ -1279,6 +1342,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>db_oggetto_tree</sender>
+   <signal>doubleClicked(QModelIndex)</signal>
+   <receiver>MSql_win1</receiver>
+   <slot>slot_db_oggetto_tree_doppio_click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1028</x>
+     <y>418</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>547</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>slot_oggetti_db_doppio_click()</slot>
@@ -1286,5 +1365,6 @@
   <slot>slot_oggetti_db_click()</slot>
   <slot>slot_resize_MSql_win1()</slot>
   <slot>slot_db_oggetto_tree_expand()</slot>
+  <slot>slot_db_oggetto_tree_doppio_click()</slot>
  </slots>
 </ui>

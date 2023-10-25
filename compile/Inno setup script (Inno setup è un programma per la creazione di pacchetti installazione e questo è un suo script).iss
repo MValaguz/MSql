@@ -28,8 +28,8 @@ WizardImageFile=MSql.bmp
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-Source: "C:\MSql\MSql.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\MSql\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\MSql_exe\MSql.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\MSql_exe\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Registry]

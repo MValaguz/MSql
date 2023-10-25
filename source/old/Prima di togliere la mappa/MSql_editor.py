@@ -10,11 +10,12 @@
 """
 
 # Librerie di base
-import sys 
-import os 
-import datetime 
-import locale
-import base64
+import sys, os, datetime, locale
+# Amplifico la pathname dell'applicazione in modo veda il contenuto della directory qtdesigner dove sono contenuti i layout
+# Nota bene! Quando tramite pyinstaller verrà creato l'eseguibile, tutti i file della cartella qtdesigner verranno messi 
+#            nella cartella principale e questa istruzione di cambio path di fatto non avrà alcun senso. Serve dunque solo
+#            in fase di sviluppo. 
+sys.path.append('qtdesigner')
 # Librerie di data base
 import cx_Oracle, oracle_my_lib
 # Librerie grafiche QT
@@ -22,16 +23,19 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5 import Qsci
+# Libreria per export in excel
+from xlsxwriter.workbook import Workbook
 # Classe per la gestione delle preferenze
 from preferences import preferences_class
 # Classi qtdesigner (win1 è la window principale, win2 la window dell'editor e win3 quella delle info di programma)
 from MSql_editor_win1_ui import Ui_MSql_win1
 from MSql_editor_win2_ui import Ui_MSql_win2
 from MSql_editor_win3_ui import Ui_MSql_win3
-# Classi qtdesigner per la ricerca e la sostituzione di stringhe di testo, per il posizionamento...
+# Classi qtdesigner per la ricerca e la sostituzione di stringhe di testo, per il posizionamento, la mappa...
 from find_ui import Ui_FindWindow
 from find_e_replace_ui import Ui_Find_e_Replace_Window
 from goto_line_ui import Ui_GotoLineWindow
+from map_ui import Ui_MapWindow
 # Classe qtdesigner per la richiesta di connessione
 from connect_ui import Ui_connect_window
 # Classe per visualizzare la barra di avanzamento 
@@ -49,12 +53,7 @@ Tipi_Oggetti_DB = { 'Tables':'TABLE',
                     'Functions':'FUNCTION',
                     'Triggers':'TRIGGER',
                     'Views':'VIEW',
-                    'Sequences':'SEQUENCE',
-                    'Primary keys': 'PRIMARY_KEY',
-                    'Unique keys': 'UNIQUE_KEY',
-                    'Foreign keys': 'FOREIGN_KEY',
-                    'Check keys': 'CHECK_KEY',
-                    'Synonyms': 'SYNONYM' }
+                    'Sequences':'SEQUENCE' }
 
 ###
 # Var globali
@@ -80,50 +79,7 @@ class My_MSql_Lexer(Qsci.QsciLexerSQL):
         In base al valore di index è possibile settare parole chiave di una determinata categoria
         1 = parole primarie ,2 = parole secondarie, 3 = commenti, 4 = classi, ecc.. usato 8 (boh!) 
     """
-    def __init__(self, p_editor):        
-        super(My_MSql_Lexer, self).__init__()        
-
-        # attivo le righe verticali che segnano le indentazioni
-        p_editor.setIndentationGuides(True)                
-        # attivo i margini con + e - 
-        p_editor.setFolding(p_editor.BoxedTreeFoldStyle, 2)
-        # indentazione
-        p_editor.setIndentationWidth(4)
-        p_editor.setAutoIndent(True)
-        # tabulatore a 4 caratteri
-        p_editor.setTabWidth(4)   
-                        
-        # attivo autocompletamento durante la digitazione 
-        # (comprende sia le parole del documento corrente che quelle aggiunte da un elenco specifico)
-        # attenzione! Da quanto ho capito, il fatto di avere attivo il lexer con linguaggio specifico (sql) questo prevale
-        # sul funzionamento di alcuni aspetti dell'autocompletamento....quindi ad un certo punto mi sono arreso con quello che
-        # sono riuscito a fare
-        self.v_api_lexer = Qsci.QsciAPIs(self)            
-        # aggiungo tutti i termini di autocompletamento (si trovanon all'interno di una tabella che viene generata a comando)
-        p_editor.setAutoCompletionSource(Qsci.QsciScintilla.AcsAll)                
-        self.carica_dizionario_per_autocompletamento()                
-        # indico dopo quanti caratteri che sono stati digitati dall'utente, si deve attivare l'autocompletamento
-        p_editor.setAutoCompletionThreshold(2)  
-        # attivo autocompletamento sia per la parte del contenuto del documento che per la parte di parole chiave specifiche
-        p_editor.autoCompleteFromAll()
-
-        # imposto il font dell'editor in base alle preferenze 
-        if o_global_preferences.font_editor != '':
-            v_split = o_global_preferences.font_editor.split(',')            
-            v_font = QFont(str(v_split[0]),int(v_split[1]))
-            if len(v_split) > 2 and v_split[2] == ' BOLD':
-                v_font.setBold(True)
-            self.setFont(v_font)    
-
-        self.setFoldCompact(False)
-        self.setFoldComments(True)
-        self.setFoldAtElse(True)                                
-
     def keywords(self, index):
-        """
-           Funzione interna di QScintilla che viene automaticamente richiamata e carica le keyword di primo livello
-           queste keyword sono le parole che QScintilla evidenzia con un colore specifico
-        """
         global v_global_my_lexer_keywords        
 
         keywords = Qsci.QsciLexerSQL.keywords(self, index) or ''
@@ -137,41 +93,12 @@ class My_MSql_Lexer(Qsci.QsciLexerSQL):
         
         return keywords
 
-    def carica_dizionario_per_autocompletamento(self):
-        """
-           Partendo dal file che contiene elenco termini di autocompletamento, ne leggo il contenuto e lo aggiungo all'editor
-           Da notare come viene caricato di fatto un elenco sia con caratteri minuscoli che maiuscoli perché non sono riuscito
-           a far funzionare la sua preferenza 
-        """
-        global v_global_my_lexer_keywords
-                
-        # come termini di autocompletamento prendo tutti gli oggetti che ho nella lista usata a sua volta per evidenziare le parole
-        for v_keywords in v_global_my_lexer_keywords:
-            self.v_api_lexer.add(v_keywords.upper())                                    
-            self.v_api_lexer.add(v_keywords.lower())                                    
-
-        # Se esiste il file delle preferenze...le carico nell'oggetto
-        if os.path.isfile(v_global_work_dir + 'MSql_autocompletion.ini'):
-            # carico i dati presenti nel file di testo (questo è stato creato con la voce di menu dello stesso MSql che si chiama "Create autocomplete dictonary")
-            with open(v_global_work_dir + 'MSql_autocompletion.ini','r') as file:
-                for v_riga in file:                
-                    self.v_api_lexer.add(v_riga.upper())                                    
-                    self.v_api_lexer.add(v_riga.lower())                                    
-        
-        self.v_api_lexer.prepare()        
-
 def salvataggio_editor(p_save_as, p_nome, p_testo):
     """
         Salvataggio di p_testo dentro il file p_nome        
-        Se p_save_as è True oppure il titolo dell'editor inizia con "!" --> viene richiesto di salvarlo come nuovo file
+        Se p_save_as è True --> viene salvato come nuovo file
     """
     global o_global_preferences
-
-    # se il primo carattere del titolo inizia con un punto esclamativo, significa che il file è stato creato partendo dall'object navigator
-    # e quindi l'operazione di salva deve chiedere il nome del file e la posizione dove salvare
-    if p_nome[0:1] == '!':
-        p_save_as = True
-        p_nome = p_nome[1:len(p_nome)]
 
     # se indicato il save as, oppure il file è nuovo e non è mai stato salvato --> richiedo un nuovo nome di file    
     if p_save_as or (not p_save_as and p_nome[0:8]=='Untitled'):
@@ -332,7 +259,6 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         self.slot_editable()
         self.actionShow_end_of_line.setChecked(o_global_preferences.end_of_line)
         self.slot_end_of_file()
-        self.actionAutoColumnResize.setChecked(o_global_preferences.auto_column_resize)        
         
         ###
         # Imposto var con la geometria della window principale
@@ -441,6 +367,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             sub_window.setWindowIcon(QtGui.QIcon())                              
             sub_window.show()  
             sub_window.showMaximized()  
+
         # Codifica utf-8
         elif p_slot.text() == 'UTF-8 Coding':
             if self.actionUTF_8_Coding.isChecked():
@@ -448,10 +375,12 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             else:
                 o_global_preferences.utf_8 = False
             # aggiorno la label sulla statusbar
-            self.slot_utf8()        
+            self.slot_utf8()
+        
         # Gestione preferenze
         elif p_slot.text() == 'Preferences':
             self.slot_preferences()
+
         # Rendo l'output dell'sql editabile
         elif p_slot.text() == 'Make table editable':
             if self.actionMake_table_editable.isChecked():
@@ -460,10 +389,12 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 o_global_preferences.editable = False
             # aggiorno status bar e aggiorno oggetti
             self.slot_editable()
+
         # Uscita dal programma (invoco l'evento di chiusura della main window)
         elif p_slot.text() == 'Exit':
             v_event_close = QtGui.QCloseEvent()
             self.closeEvent(v_event_close)        
+
         # Riorganizzo le window in modalità cascata
         elif p_slot.text() == 'Cascade':
             self.mdiArea.cascadeSubWindows()
@@ -486,9 +417,6 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         # visualizza dock dell'history
         elif p_slot.text() == 'History':
             self.dockWidget_3.show()
-        # Indico che l'output sql ha le colonne con larghezza auto-adattabile
-        elif p_slot.text() == 'Auto Column Resize':
-            self.slot_menu_auto_column_resize()
                 
         # Queste voci di menu che agiscono sull'oggetto editor, sono valide solo se l'oggetto è attivo
         if o_MSql_win2 is not None:
@@ -639,10 +567,10 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             elif p_slot.text() == 'Go to End':
                 o_MSql_win2.slot_go_to_end()        
             # Esporto in formato Excel
-            elif p_slot.text() == 'Export to Excel-CSV':
-                o_MSql_win2.slot_export_to_excel_csv()
+            elif p_slot.text() == 'Export to Excel':
+                o_MSql_win2.slot_export_to_excel()
             # Pulizia di tutto l'output
-            elif p_slot.text() == 'Clear result,output':                 
+            elif p_slot.text() == 'Clear result,output': 
                 o_MSql_win2.slot_clear('ALL')                               
             # Selezione del font per l'editor
             elif p_slot.text() == 'Font editor selector':
@@ -653,6 +581,9 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             # Creo lo script per la modifica dei dati
             elif p_slot.text() == 'Script the changed data':
                 o_MSql_win2.slot_save_modified_data()
+            # Indico che l'output sql ha le colonne con larghezza auto-adattabile
+            elif p_slot.text() == 'Auto Column Resize':
+                o_MSql_win2.slot_menu_auto_column_resize()
 
     def slot_utf8(self):
         """
@@ -844,12 +775,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 # al momento leggo solo la prima riga che contiene la dimensione della mainwindow
                 v_my_window_pos = v_file.readline().rstrip('\n').split()                                
                 if v_my_window_pos[0] == 'MainWindow':
-                    # finestra massimizzata
-                    if v_my_window_pos[1] == 'MAXIMIZED':
-                        self.showMaximized()
-                    # finestra a dimensione specifica
-                    else:
-                        self.setGeometry(int(v_my_window_pos[1]), int(v_my_window_pos[2]), int(v_my_window_pos[3]), int(v_my_window_pos[4]))    
+                    self.setGeometry(int(v_my_window_pos[1]), int(v_my_window_pos[2]), int(v_my_window_pos[3]), int(v_my_window_pos[4]))    
                 v_file.close()
             
     def salvo_posizione_window(self):
@@ -863,12 +789,9 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         # se utente ha richiesto di salvare la posizione della window...
         if o_global_preferences.remember_window_pos:
             v_file = open(v_global_work_dir + 'Msql_window_pos.ini','w')
-            if self.isMaximized():
-                v_file.write("MainWindow MAXIMIZED")
-            else:
-                o_pos = self.geometry()            
-                o_rect = o_pos.getRect()                        
-                v_file.write("MainWindow " + str(o_rect[0]) + " " + str(o_rect[1]) + " " +  str(o_rect[2]) + " " + str(o_rect[3]))
+            o_pos = self.geometry()            
+            o_rect = o_pos.getRect()                        
+            v_file.write("MainWindow " + str(o_rect[0]) + " " + str(o_rect[1]) + " " +  str(o_rect[2]) + " " + str(o_rect[3]))
             v_file.close()
     
     def controllo_transazioni_aperte(self):
@@ -1002,7 +925,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             for v_riga in v_risultati:
                 v_global_my_lexer_keywords.append(v_riga[0])            
         
-        # scorro la lista-oggetti-editor...        
+        # scorro la lista-oggetti-editor...
         for obj_win2 in self.o_lst_window2:
             if not obj_win2.v_editor_chiuso and v_global_connesso:        
                 # ...e apro un cursore ad uso di quell'oggetto-editor                
@@ -1010,16 +933,20 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 # Imposto il colore di sfondo su tutti gli oggetti principali (l'editor è stato tolto volutamente per un effetto grafico non piacevole)                               
                 obj_win2.o_table.setStyleSheet("QTableWidget {background-color: " + v_color + ";}")
                 obj_win2.o_output.setStyleSheet("QPlainTextEdit {background-color: " + v_color + ";}")
-                obj_win2.o_map.setStyleSheet("QTableView {background-color: " + v_color + ";}")
                 self.oggetti_db_elenco.setStyleSheet("QListView {background-color: " + v_color + ";}")
                 self.db_oggetto_tree.setStyleSheet("QTreeView {background-color: " + v_color + ";}")
                 self.o_history.setStyleSheet("QListView {background-color: " + v_color + ";}")
                 # aggiorno il lexer aggiungendo tutte le nuove keywords
                 if len(v_global_my_lexer_keywords) > 0:                                        
                     obj_win2.v_lexer = My_MSql_Lexer(obj_win2.e_sql)
+                    # imposto carattere di default
+                    obj_win2.v_lexer.setDefaultFont(QFont("Cascadia Code SemiBold",11))    
+                    obj_win2.v_lexer.setFoldCompact(False)
+                    obj_win2.v_lexer.setFoldComments(True)
+                    obj_win2.v_lexer.setFoldAtElse(True)                
                     # attivo il lexer sull'editor
                     obj_win2.e_sql.setLexer(obj_win2.v_lexer)
-        
+
     def slot_oggetti_db_scelta(self):
         """
            In base alla voce scelta, viene caricata la lista con elenco degli oggetti pertinenti
@@ -1039,83 +966,37 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         self.oggetti_db_lista.clear()
         # se utente ha scelto un oggetto e si è connessi, procedo con il carico dell'elenco         
         if self.tipo_oggetto != '':            
-            # il tipo oggetto sono le primary key o le unique key...
-            if self.tipo_oggetto in ('PRIMARY_KEY','UNIQUE_KEY','FOREIGN_KEY','CHECK_KEY'):                
-                if self.tipo_oggetto == 'PRIMARY_KEY':
-                    v_select = """SELECT CONSTRAINT_NAME, DECODE(INVALID,NULL,0,1) INVALID FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND CONSTRAINT_TYPE='P' AND SUBSTR(CONSTRAINT_NAME,1,4) != 'BIN$'"""
-                elif self.tipo_oggetto == 'UNIQUE_KEY':
-                    v_select = """SELECT CONSTRAINT_NAME, DECODE(INVALID,NULL,0,1) INVALID FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND CONSTRAINT_TYPE='U' AND SUBSTR(CONSTRAINT_NAME,1,4) != 'BIN$'"""    
-                elif self.tipo_oggetto == 'FOREIGN_KEY':
-                    v_select = """SELECT CONSTRAINT_NAME, DECODE(INVALID,NULL,0,1) INVALID FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND CONSTRAINT_TYPE='R' AND SUBSTR(CONSTRAINT_NAME,1,4) != 'BIN$'"""    
-                elif self.tipo_oggetto == 'CHECK_KEY':
-                    v_select = """SELECT CONSTRAINT_NAME, DECODE(INVALID,NULL,0,1) INVALID FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND CONSTRAINT_TYPE='C' AND SUBSTR(CONSTRAINT_NAME,1,4) != 'BIN$'"""    
-                # se necessario applico il filtro di ricerca
-                if self.oggetti_db_ricerca.text() != '' or self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid':
-                    if self.oggetti_db_tipo_ricerca.currentText() == 'Start with':
-                        v_select += "  AND UPPER(CONSTRAINT_NAME) LIKE '" + self.oggetti_db_ricerca.text().upper() + "%'"
-                    elif self.oggetti_db_tipo_ricerca.currentText() == 'Like':
-                        v_select += "  AND UPPER(CONSTRAINT_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%'"
-                    elif self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid': 
-                        v_select += "  AND UPPER(CONSTRAINT_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%' AND INVALID IS NOT NULL"
-                # aggiungo order by
-                v_select += "  ORDER BY CONSTRAINT_NAME"                        
-            # il tipo oggetto sono i sinonimi ...
-            elif self.tipo_oggetto == 'SYNONYM':                
-                v_select = """SELECT SYNONYM_NAME, 0 INVALID FROM ALL_SYNONYMS WHERE OWNER='"""+self.e_user_name+"""'"""
-                # se necessario applico il filtro di ricerca
-                if self.oggetti_db_ricerca.text() != '' or self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid':
-                    if self.oggetti_db_tipo_ricerca.currentText() == 'Start with':
-                        v_select += "  AND UPPER(SYNONYM_NAME) LIKE '" + self.oggetti_db_ricerca.text().upper() + "%'"
-                    elif self.oggetti_db_tipo_ricerca.currentText() == 'Like':
-                        v_select += "  AND UPPER(SYNONYM_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%'"
-                    elif self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid': 
-                        v_select += "  AND UPPER(SYNONYM_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%' AND INVALID IS NOT NULL"
-                # aggiungo order by
-                v_select += "  ORDER BY SYNONYM_NAME"                      
-            # il tipo oggetto rientra nella tabella ALL_OBJECT
+            # leggo elenco degli oggetti indicati (con o senza descrizione)
+            if self.e_view_description.isChecked():
+                v_select = """SELECT *
+                              FROM  (SELECT OBJECT_NAME || 
+                                            CASE WHEN OBJECT_TYPE IN ('TABLE','VIEW') THEN
+                                                ' - ' || (SELECT COMMENTS FROM ALL_TAB_COMMENTS WHERE ALL_TAB_COMMENTS.OWNER=ALL_OBJECTS.OWNER AND ALL_TAB_COMMENTS.TABLE_NAME=ALL_OBJECTS.OBJECT_NAME)                                
+                                            ELSE NULL
+                                            END AS OBJECT_NAME,
+                                            (SELECT COUNT(*) 
+                                            FROM   DBA_OBJECTS 
+                                            WHERE  DBA_OBJECTS.OWNER=ALL_OBJECTS.OWNER AND 
+                                                   DBA_OBJECTS.OBJECT_NAME=ALL_OBJECTS.OBJECT_NAME AND 
+                                                   DBA_OBJECTS.STATUS != 'VALID') INVALID                                            
+                                    FROM   ALL_OBJECTS 
+                                    WHERE  OWNER='""" + self.e_user_name + """' AND 
+                                           OBJECT_TYPE='""" + self.tipo_oggetto + """' AND
+                                           SECONDARY = 'N'
+                                )"""
             else:
-                # leggo elenco degli oggetti indicati (con o senza descrizione)
-                if self.e_view_description.isChecked():
-                    v_select = """SELECT *
-                                  FROM  (SELECT OBJECT_NAME || 
-                                                CASE WHEN OBJECT_TYPE IN ('TABLE','VIEW') THEN
-                                                    ' - ' || (SELECT COMMENTS FROM ALL_TAB_COMMENTS WHERE ALL_TAB_COMMENTS.OWNER=ALL_OBJECTS.OWNER AND ALL_TAB_COMMENTS.TABLE_NAME=ALL_OBJECTS.OBJECT_NAME)                                
-                                                ELSE NULL
-                                                END AS OBJECT_NAME,
-                                                (SELECT COUNT(*) 
-                                                FROM   DBA_OBJECTS 
-                                                WHERE  DBA_OBJECTS.OWNER=ALL_OBJECTS.OWNER AND 
-                                                       DBA_OBJECTS.OBJECT_NAME=ALL_OBJECTS.OBJECT_NAME AND 
-                                                       DBA_OBJECTS.STATUS != 'VALID') INVALID                                            
-                                        FROM   ALL_OBJECTS 
-                                        WHERE  OWNER='""" + self.e_user_name + """' AND 
-                                               OBJECT_TYPE='""" + self.tipo_oggetto + """' AND
-                                               SECONDARY = 'N'
-                                    )"""
-                else:
-                    v_select = """SELECT *
-                                  FROM  (SELECT OBJECT_NAME,
-                                                (SELECT COUNT(*) 
-                                                 FROM   DBA_OBJECTS 
-                                                 WHERE  DBA_OBJECTS.OWNER=ALL_OBJECTS.OWNER AND 
-                                                        DBA_OBJECTS.OBJECT_NAME=ALL_OBJECTS.OBJECT_NAME AND 
-                                                        DBA_OBJECTS.STATUS != 'VALID') INVALID                                          
-                                         FROM   ALL_OBJECTS 
-                                         WHERE  OWNER='""" + self.e_user_name + """' AND 
-                                                OBJECT_TYPE='""" + self.tipo_oggetto + """' AND
-                                                SECONDARY = 'N'
-                               )"""
-                # se necessario applico il filtro di ricerca
-                if self.oggetti_db_ricerca.text() != '' or self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid':
-                    if self.oggetti_db_tipo_ricerca.currentText() == 'Start with':
-                        v_select += " WHERE UPPER(OBJECT_NAME) LIKE '" + self.oggetti_db_ricerca.text().upper() + "%'"
-                    elif self.oggetti_db_tipo_ricerca.currentText() == 'Like':
-                        v_select += " WHERE UPPER(OBJECT_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%'"
-                    elif self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid': 
-                        v_select += " WHERE UPPER(OBJECT_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%' AND INVALID > 0"
-                # aggiungo order by
-                v_select += " ORDER BY OBJECT_NAME"                        
-        # l'utente non ha scelto nessun tipo di oggetto....si carica tutta la tabella all_objects
+                v_select = """SELECT *
+                            FROM  (SELECT OBJECT_NAME,
+                                          (SELECT COUNT(*) 
+                                           FROM   DBA_OBJECTS 
+                                           WHERE  DBA_OBJECTS.OWNER=ALL_OBJECTS.OWNER AND 
+                                                  DBA_OBJECTS.OBJECT_NAME=ALL_OBJECTS.OBJECT_NAME AND 
+                                                  DBA_OBJECTS.STATUS != 'VALID') INVALID                                          
+                                    FROM   ALL_OBJECTS 
+                                    WHERE  OWNER='""" + self.e_user_name + """' AND 
+                                           OBJECT_TYPE='""" + self.tipo_oggetto + """' AND
+                                           SECONDARY = 'N'
+                                )"""
         else:
             v_select = """SELECT *
                           FROM  (SELECT OBJECT_NAME || ' - ' || OBJECT_TYPE AS OBJECT_NAME,                                        
@@ -1130,17 +1011,16 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                                         SECONDARY = 'N'
                                 )"""
 
-            # se necessario applico il filtro di ricerca
-            if self.oggetti_db_ricerca.text() != '' or self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid':
-                if self.oggetti_db_tipo_ricerca.currentText() == 'Start with':
-                    v_select += " WHERE UPPER(OBJECT_NAME) LIKE '" + self.oggetti_db_ricerca.text().upper() + "%'"
-                elif self.oggetti_db_tipo_ricerca.currentText() == 'Like':
-                    v_select += " WHERE UPPER(OBJECT_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%'"
-                elif self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid': 
-                    v_select += " WHERE UPPER(OBJECT_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%' AND INVALID > 0"
-            # aggiungo order by
-            v_select += " ORDER BY OBJECT_NAME"                        
-        
+        # se necessario applico il filtro di ricerca
+        if self.oggetti_db_ricerca.text() != '' or self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid':
+            if self.oggetti_db_tipo_ricerca.currentText() == 'Start with':
+                v_select += " WHERE UPPER(OBJECT_NAME) LIKE '" + self.oggetti_db_ricerca.text().upper() + "%'"
+            elif self.oggetti_db_tipo_ricerca.currentText() == 'Like':
+                v_select += " WHERE UPPER(OBJECT_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%'"
+            elif self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid': 
+                v_select += " WHERE UPPER(OBJECT_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%' AND INVALID > 0"
+        # aggiungo order by
+        v_select += " ORDER BY OBJECT_NAME"                        
         # eseguo la select
         self.v_cursor_db_obj.execute(v_select)            
         v_righe = self.v_cursor_db_obj.fetchall()            
@@ -1169,7 +1049,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             # imposto var che conterrà il testo dell'oggetto DB 
             v_testo_oggetto_db = ''
             # sostituisce la freccia del mouse con icona "clessidra"
-            QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))       
+            QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))        
 
             # richiamo la procedura di oracle che mi restituisce la ddl dell'oggetto
             # se richiesto di aprire il o il package body, allora devo fare una chiamata specifica
@@ -1206,18 +1086,8 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                                                 SELECT DBMS_METADATA.GET_DEPENDENT_DDL('TRIGGER','"""+self.nome_oggetto+"""') FROM DUAL
                                                 WHERE (SELECT COUNT(*) FROM ALL_TRIGGERS WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+self.nome_oggetto+"""') > 0													   
                                              """)
-            elif self.tipo_oggetto in ('PRIMARY_KEY','UNIQUE_KEY','CHECK_KEY'):
-                self.v_cursor_db_obj.execute("SELECT DBMS_METADATA.GET_DDL('CONSTRAINT','"+self.nome_oggetto+"') FROM DUAL")
-            elif self.tipo_oggetto == 'FOREIGN_KEY':
-                self.v_cursor_db_obj.execute("SELECT DBMS_METADATA.GET_DDL('REF_CONSTRAINT','"+self.nome_oggetto+"') FROM DUAL")
-            elif self.tipo_oggetto == 'SYNONYM':
-                self.v_cursor_db_obj.execute("SELECT DBMS_METADATA.GET_DDL('SYNONYM','"+self.nome_oggetto+"') FROM DUAL")
-            elif self.tipo_oggetto in ('PROCEDURE','FUNCTION','TRIGGER','VIEW','SEQUENCE'):                    
+            else:    
                 self.v_cursor_db_obj.execute("SELECT DBMS_METADATA.GET_DDL('"+self.tipo_oggetto+"','"+self.nome_oggetto+"') FROM DUAL")
-            else:
-                message_error('Invalid object!')
-                return 'ko'
-            
             # prendo il primo campo, del primo record e lo trasformo in stringa
             v_testo_oggetto_db = ''
             for v_record in self.v_cursor_db_obj:
@@ -1254,7 +1124,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             # apro una nuova finestra di editor simulando il segnale che scatta quando utente sceglie "Open", passando il sorgente ddl
             v_azione = QtWidgets.QAction()
             v_azione.setText('Open_db_obj')
-            self.smistamento_voci_menu(v_azione, '!' + self.nome_oggetto + '.msql', v_testo_oggetto_db)        
+            self.smistamento_voci_menu(v_azione, self.nome_oggetto + '.msql', v_testo_oggetto_db)        
                                         
             # Ripristino icona freccia del mouse
             QApplication.restoreOverrideCursor()    
@@ -1634,17 +1504,6 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                     
             v_file.close()
             message_info('The autocompletion dictionary has been created! Restart MSql to see the changes ;-)')
-    
-    def slot_menu_auto_column_resize(self):
-        """
-           Imposta la var che indica se la tabella del risultato ha attiva la formattazione automatica della larghezza delle colonne
-        """
-        global o_global_preferences
-
-        if o_global_preferences.auto_column_resize:
-            o_global_preferences.auto_column_resize = False
-        else:
-            o_global_preferences.auto_column_resize = True
 #
 #  _____ ____ ___ _____ ___  ____  
 # | ____|  _ \_ _|_   _/ _ \|  _ \ 
@@ -1671,9 +1530,6 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.setObjectName(p_titolo)
         self.setWindowTitle(titolo_window(self.objectName()))
 
-        # il widget della mappa lo nascondo
-        self.dockMapWidget.hide()
-
         # var che indica che è attiva-disattiva la sovrascrittura (tasto insert della tastiera)
         self.v_overwrite_enabled = False
         # mi salvo il puntatore alla classe principale (in questo modo posso accedere ai suoi oggetti e metodi)
@@ -1698,6 +1554,35 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         # attivo il lexer per evidenziare il codice del linguaggio SQL. Notare come faccia riferimento ad un oggetto che a sua volta personalizza il 
         # dizionario del lexer SQL, aggiungendo (se sono state caricate) le parole chiave di: tabelle, viste, package, ecc.
         self.v_lexer = My_MSql_Lexer(self.e_sql)                
+        # imposto carattere di default
+        self.v_lexer.setDefaultFont(QFont("Cascadia Code SemiBold",11))    
+        self.v_lexer.setFoldCompact(False)
+        self.v_lexer.setFoldComments(True)
+        self.v_lexer.setFoldAtElse(True)                                
+        # attivo le righe verticali che segnano le indentazioni
+        self.e_sql.setIndentationGuides(True)                
+        # attivo i margini con + e - 
+        self.e_sql.setFolding(self.e_sql.BoxedTreeFoldStyle, 2)
+        # indentazione
+        self.e_sql.setIndentationWidth(4)
+        self.e_sql.setAutoIndent(True)
+        # tabulatore a 4 caratteri
+        self.e_sql.setTabWidth(4)   
+                        
+        # attivo autocompletamento durante la digitazione 
+        # (comprende sia le parole del documento corrente che quelle aggiunte da un elenco specifico)
+        # attenzione! Da quanto ho capito, il fatto di avere attivo il lexer con linguaggio specifico (sql) questo prevale
+        # sul funzionamento di alcuni aspetti dell'autocompletamento....quindi ad un certo punto mi sono arreso con quello che
+        # sono riuscito a fare
+        self.v_api_lexer = Qsci.QsciAPIs(self.v_lexer)            
+        # aggiungo tutti i termini di autocompletamento (si trovanon all'interno di una tabella che viene generata a comando)
+        self.e_sql.setAutoCompletionSource(Qsci.QsciScintilla.AcsAll)                
+        self.carica_dizionario_per_autocompletamento()                
+        # indico dopo quanti caratteri che sono stati digitati dall'utente, si deve attivare l'autocompletamento
+        self.e_sql.setAutoCompletionThreshold(2)  
+        # attivo autocompletamento sia per la parte del contenuto del documento che per la parte di parole chiave specifiche
+        self.e_sql.autoCompleteFromAll()
+
         # attivo il lexer sull'editor
         self.e_sql.setLexer(self.v_lexer)
         
@@ -1722,14 +1607,18 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.v_carico_pagina_in_corso = False   
         # inzializzo la var che conterrà eventuale matrice dei dati modificati
         self.v_matrice_dati_modificati = []
+        # var che indica se attivare l'auto column resize (incide sulle prestazioni del caricamento)
+        self.v_auto_column_resize = False         
         # salva l'altezza del font usato nella sezione result e output e viene usata per modificare l'altezza della cella
         self.v_altezza_font_output = 9
-        # settaggio dei font di risultato e output (il font è una stringa con il nome del font e separato da virgola l'altezza)
+        # settaggio dei font di editor e di risultato e output (il font è una stringa con il nome del font e separato da virgola l'altezza)
+        if o_global_preferences.font_editor != '':
+            v_split = o_global_preferences.font_editor.split(',')            
+            v_font = QFont(str(v_split[0]),int(v_split[1]))
+            self.slot_font_editor_selector(v_font)
         if o_global_preferences.font_result != '':
             v_split = o_global_preferences.font_result.split(',')
             v_font = QFont(str(v_split[0]),int(v_split[1]))
-            if len(v_split) > 2 and v_split[2] == ' BOLD':
-                v_font.bold(True)
             self.slot_font_result_selector(v_font)
         # imposto editabile o meno sulla parte di risultato
         self.set_editable()            
@@ -1758,7 +1647,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.o_table.viewport().installEventFilter(self)   
         # slot per controllare quando cambia il testo digitato dall'utente
         self.e_sql.textChanged.connect(self.slot_e_sql_modificato)    
-        self.e_sql.cursorPositionChanged.connect(self.aggiorna_statusbar)            
+        self.e_sql.cursorPositionChanged.connect(self.slot_e_sql_spostamento_cursore)            
             
         # attivo il drop sulla parte di editor        
         self.e_sql.setAcceptDrops(True)    
@@ -1842,7 +1731,30 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                 
         # fine senza alcuna elaborazione e quindi si procede con esecuzione dei segnali nativi del framework       
         return False
-           
+        
+    def carica_dizionario_per_autocompletamento(self):
+        """
+           Partendo dal file che contiene elenco termini di autocompletamento, ne leggo il contenuto e lo aggiungo all'editor
+           Da notare come viene caricato di fatto un elenco sia con caratteri minuscoli che maiuscoli perché non sono riuscito
+           a far funzionare la sua preferenza 
+        """
+        global v_global_my_lexer_keywords
+                
+        # come termini di autocompletamento prendo tutti gli oggetti che ho nella lista usata a sua volta per evidenziare le parole
+        for v_keywords in v_global_my_lexer_keywords:
+            self.v_api_lexer.add(v_keywords.upper())                                    
+            self.v_api_lexer.add(v_keywords.lower())                                    
+
+        # Se esiste il file delle preferenze...le carico nell'oggetto
+        if os.path.isfile(v_global_work_dir + 'MSql_autocompletion.ini'):
+            # carico i dati presenti nel file di testo (questo è stato creato con la voce di menu dello stesso MSql che si chiama "Create autocomplete dictonary")
+            with open(v_global_work_dir + 'MSql_autocompletion.ini','r') as file:
+                for v_riga in file:                
+                    self.v_api_lexer.add(v_riga.upper())                                    
+                    self.v_api_lexer.add(v_riga.lower())                                    
+        
+        self.v_api_lexer.prepare()        
+   
     def tasto_desto_o_table(self, event):
         """
            Gestione del menu contestuale con tasto destro su tabella dei risultati
@@ -2083,6 +1995,22 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.v_testo_modificato = True
         # aggiorno i dati della statusbar
         self.aggiorna_statusbar()
+
+    def slot_e_sql_spostamento_cursore(self):
+        """
+           Individia spostamenti del cursore nell'editor e aggiorna la label che riporta le coordinate sulla status bar
+        """        
+        v_y, v_x = self.e_sql.getCursorPosition()
+        self.link_to_MSql_win1_class.l_cursor_pos.setText("Ln: " + str(v_y+1) + "  Col: " + str(v_x+1))
+    
+    def slot_menu_auto_column_resize(self):
+        """
+           Imposta la var che indica se la tabella del risultato ha attiva la formattazione automatica della larghezza delle colonne
+        """
+        if self.v_auto_column_resize:
+            self.v_auto_column_resize = False
+        else:
+            self.v_auto_column_resize = True
                                                                        
     def slot_esegui(self):
         """
@@ -2470,13 +2398,6 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                 errorObj, = e.args    
                 message_error("Error to fetch data: " + errorObj.message)                                            
                 return 'ko'
-            except cx_Oracle.InterfaceError as e: 
-                # ripristino icona freccia del mouse
-                QApplication.restoreOverrideCursor()                        
-                # emetto errore sulla barra di stato 
-                errorObj, = e.args    
-                message_error("Error to fetch data: " + errorObj.message)                                            
-                return 'ko'
             
             # se ero a fine flusso --> esco
             if v_riga_dati == None:
@@ -2513,9 +2434,6 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                     # campo data
                     elif self.tipi_intestazioni[x][1] == cx_Oracle.DATETIME:                                                                            
                         self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( str(field) ) )       
-                    # campo raw (si tratta di byte che vengono convertiti in stringa in formato hex)
-                    elif self.tipi_intestazioni[x][1] == cx_Oracle.DB_TYPE_RAW:                          
-                        self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( field.hex().upper() ) )       
                     # se il contenuto è un blob...utilizzo il metodo read sul campo field, poi lo inserisco in una immagine
                     # che poi carico una label e finisce dentro la cella a video
                     elif self.tipi_intestazioni[x][1] == cx_Oracle.BLOB:
@@ -2546,7 +2464,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                     break
             
             # indico di calcolare automaticamente la larghezza delle colonne
-            if o_global_preferences.auto_column_resize:                
+            if self.v_auto_column_resize:
                 self.o_table.resizeColumnsToContents()
 
             # indico che carico pagina terminato
@@ -2669,63 +2587,55 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             v_update = "UPDATE " + v_table_name + " SET " + self.nomi_intestazioni[yx[1]] + "='" + v_valore_cella + "' WHERE ROWID = '" + v_rowid + "'"
             self.e_sql.append(chr(10) + v_update + ';')                
 
-    def slot_export_to_excel_csv(self):
+    def slot_export_to_excel(self):
         """
-           Prende i dati presenti in tabella e li esporta in excel....viene usato il formato csv anche se in un primo momento
-           era stato predisposto per scrivere in modo nativo excel....ma non avendo (al momento) la possibilità di capire differenza
-           tra colonne numeriche e carattere, sono tornato al csv
+           Prende i dati presenti in tabella e li esporta in excel....per prima cosa li carica tutti a video....
         """
-        global v_global_work_dir
-        global o_global_preferences
-
-        # carico tutti i dati del cursore 
+        # Carico tutti i dati del cursore 
         self.slot_go_to_end()
 
-        # estraggo i dati dalla tableview (se errore la tabella è vuota e quindi esco)        
+        # Estraggo i dati dalla tableview (se errore la tabella è vuota e quindi esco)        
         v_model = self.o_table.model()
         if v_model == None:
             return None        
 
-        # creo file fisso in directory di lavoro
-        v_csv_file = open(v_global_work_dir + 'Export_data.csv','w', newline='', encoding='utf-8')
+        # Richiedo il nome del file dove scrivere output
+        v_xls_name = QtWidgets.QFileDialog.getSaveFileName(self, "Save a Excel file","export.xlsx","XLSX (*.xlsx)") [0]                  
+        if v_xls_name == "":            
+            message_error("Not a valid file name is selected")
+            return None    
+        
+        # Creazione del file excel
+        workbook = Workbook(v_xls_name)
+        worksheet = workbook.add_worksheet()
 
-        # creazione della riga intestazioni
-        v_intestazioni = ''
-        v_1a_volta = True
-        for nome_colonna in self.nomi_intestazioni:                        
-            if v_1a_volta:
-                v_intestazioni += nome_colonna            
-                v_1a_volta = False
-            else:
-                v_intestazioni += o_global_preferences.csv_separator + nome_colonna            
-
-        v_csv_file.write(v_intestazioni+'\n')
+        # Creazione della riga intestazioni
+        v_y = 0
+        v_x = 0
+        for nome_colonna in self.nomi_intestazioni:            
+            worksheet.write(v_y, v_x, nome_colonna)
+            v_x += 1
                 
-        # Creazione di tutta la tabella                
-        for row in range(v_model.rowCount()):            
-            v_riga = ''        
-            v_1a_volta = True
+        # Creazione di tutta la tabella        
+        v_y += 1
+        for row in range(v_model.rowCount()):
+            v_x = 0
             for column in range(v_model.columnCount()):
                 v_index = v_model.index(row, column)                
                 v_campo = v_model.data(v_index)
-                # normalizzo il campo se vuoto
-                if v_campo is None:
-                    v_campo = ''
-                # aggiungo il campo alla riga
-                if v_1a_volta:
-                    v_riga += v_campo
-                    v_1a_volta = False
-                else:
-                    v_riga += o_global_preferences.csv_separator + v_campo            
-            v_csv_file.write(v_riga+'\n')
-
-        v_csv_file.close()
-        
+                #if check_campo_numerico(v_campo):
+                #    worksheet.write(v_y, v_x, campo_numerico(v_campo))
+                #else:
+                worksheet.write(v_y, v_x, v_campo)
+                v_x += 1
+            v_y += 1
+                
+        workbook.close()
         # Apro direttamente il file            
         try:
-            os.startfile(v_global_work_dir + 'Export_data.csv')
+            os.startfile(v_xls_name)
         except:
-            message_error('Error in file creation!')
+            message_error('Error in file creation or file !')
       
     def closeEvent(self, e):
         """
@@ -3044,17 +2954,34 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         """
            Apre la window che visualizza la mappa di procedure-funzioni all'interno dell'editor
            Da li, l'utente, può navigare facendo click sugli elementi della lista
-        """ 
-        # visualizzo il widget della mappa
-        self.dockMapWidget.show()
-                   
+        """            
+        try:
+            # visualizzo la finestra di ricerca
+            self.dialog_find.show()
+        except:
+            # inizializzo le strutture grafiche e visualizzo la dialog per la ricerca del testo
+            self.dialog_map = QtWidgets.QDialog()            
+            self.win_map = Ui_MapWindow()        
+            self.win_map.setupUi(self.dialog_map)                                        
+            # reimposto il titolo perché nel caso di più editor aperti non si capisce a chi faccia riferimento la window
+            self.dialog_map.setWindowTitle('Map procedure/function (' + self.objectName() + ')')
+            # da notare come il collegamento delle funzioni venga fatto in questo punto e non nella ui            
+            self.win_map.b_refresh.clicked.connect(self.slot_refresh_map)                            
+            self.win_map.o_map.clicked['QModelIndex'].connect(self.slot_o_map_selected)
+            # tolgo i numeri di riga
+            self.win_map.o_map.verticalHeader().setVisible(False)
+            # visualizzo la finestra di ricerca
+            self.dialog_map.show()            
+                    
+        # reimposto la posizione e le dimensioni della window 
+        self.dialog_map.setGeometry(self.calcola_pos_win(self.dialog_map))                
+
         # carico la mappa
         self.slot_refresh_map()
 
     def slot_refresh_map(self):
         """
            Carica la mappa delle procedure-funzioni rispetto al contenuto dell'editor
-           Se è stato indicato un parametro di ricerca, estraggo solo quanto corrispondente
         """
         # imposto il modello per la visualizzazione dati                   
         self.map_model = QtGui.QStandardItemModel()        
@@ -3070,50 +2997,38 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         v_lista_testo = self.e_sql.text().split('\n')
         # partendo dalla lista che contiene il testo, creo un oggetto che contiene la lista di tutte le procedure-funzioni!
         v_lista_def = estrai_procedure_function(v_lista_testo)
-        # controllo se inserito un testo di ricerca
-        v_ricerca = self.e_map_search.text().upper()
         # leggo l'oggetto che contiene procedure-funzioni e lo carico nel modello da visualizzare a video
-        v_y = 0        
-        for ele in v_lista_def:          
-            # l'elemento è sempre valido
-            v_elemento_valido = True                              
-            # se chiesta ricerca e se elemento che sto analizzando contiene la stringa del testo di ricerca, allora ok
-            if v_ricerca != "":
-                if ele.nome_definizione.find(v_ricerca) == -1:
-                    v_elemento_valido = False
-            # se elemento è valido...
-            if v_elemento_valido:
-                # aumento la riga 
-                v_y += 1
-                self.map_model.setRowCount(v_y)
-                # campo che contiene il titolo della procedura-funzione
-                v_item = QStandardItem(ele.nome_definizione)                        
-                self.map_model.setItem(v_y-1, 0, v_item)                                                                
-                # campo che contiene il numero di riga                                    
-                v_item = QStandardItem('{:d}'.format(ele.numero_riga_testo))                        
-                v_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)   
-                self.map_model.setItem(v_y-1, 1, v_item)                                            
+        v_y = 0
+        for ele in v_lista_def:                                        
+            # aumento la riga 
+            v_y += 1
+            self.map_model.setRowCount(v_y)
+            # campo che contiene il titolo della procedura-funzione
+            v_item = QStandardItem(ele.nome_definizione)                        
+            self.map_model.setItem(v_y-1, 0, v_item)                                                                
+            # campo che contiene il numero di riga                                    
+            v_item = QStandardItem('{:d}'.format(ele.numero_riga_testo))                        
+            v_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)   
+            self.map_model.setItem(v_y-1, 1, v_item)                                            
         # carico il modello nel widget        
-        self.o_map.setModel(self.map_model)                                   
+        self.win_map.o_map.setModel(self.map_model)                                   
         # indico che la larghezza delle colonne si deve adattare al contenuto
-        self.o_map.resizeColumnsToContents()        
+        self.win_map.o_map.resizeColumnsToContents()        
         # forzo altezza delle righe (automatica in base al contenuto)
-        self.o_map.verticalHeader().setDefaultSectionSize(QHeaderView.ResizeToContents)
+        self.win_map.o_map.verticalHeader().setDefaultSectionSize(QHeaderView.ResizeToContents)
     
     def slot_o_map_selected(self):
         """
            Mi posiziono sull'editor in base alla posizione indicata sulla mappa
         """
         # ottengo un oggetto index-qt della riga selezionata
-        index = self.o_map.currentIndex()                
+        index = self.win_map.o_map.currentIndex()                
         # devo prendere la cella numero 1 che contiene il numero di riga a cui mi devo posizionare
         v_item_1 = self.map_model.itemFromIndex( index.sibling(index.row(), 1) )                
         # se è stata selezionata una riga, mi posiziono sull'editor
         if v_item_1 != None:                        
-            # sull'editor, mi posiziono alla riga richiesta dalla mappa (meno 1 perché nel testo la prima riga è la 0)
-            self.e_sql.setCursorPosition(int(v_item_1.text())-1,0)            
-            # forzo il fuoco sull'editor attraverso un timer!
-            QTimer.singleShot(0, self.e_sql.setFocus)
+            # sull'editor, mi posiziono alla riga richiesta dalla mappa
+            self.e_sql.setCursorPosition(int(v_item_1.text()),0)            
     
     def scrive_output(self, p_messaggio, p_tipo_messaggio):
         """
@@ -3205,10 +3120,6 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         else:                
             self.link_to_MSql_win1_class.l_overwrite_enabled.setText('Insert')
 
-        # posizione del cursore
-        v_y, v_x = self.e_sql.getCursorPosition()
-        self.link_to_MSql_win1_class.l_cursor_pos.setText("Ln: " + str(v_y+1) + "  Col: " + str(v_x+1))
-
 #
 #  ___ _   _ _____ ___  
 # |_ _| \ | |  ___/ _ \ 
@@ -3226,15 +3137,9 @@ class MSql_win3_class(QtWidgets.QDialog, Ui_MSql_win3):
         self.setupUi(self)
 
 # ----------------------------------------
-# AVVIO APPLICAZIONE
+# TEST APPLICAZIONE
 # ----------------------------------------
-if __name__ == "__main__":    
-    # Amplifico la pathname dell'applicazione in modo veda il contenuto della directory qtdesigner dove sono contenuti i layout
-    # Nota bene! Quando tramite pyinstaller verrà creato l'eseguibile, tutti i file della cartella qtdesigner verranno messi 
-    #            nella cartella principale e questa istruzione di cambio path di fatto non avrà alcun senso. Serve dunque solo
-    #            in fase di sviluppo. 
-    sys.path.append('qtdesigner')
-        
+if __name__ == "__main__":            
     # controllo se programma è stato richiamato da linea di comando passando il nome di un file    
     v_nome_file_da_caricare = ''
     try:

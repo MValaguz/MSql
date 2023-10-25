@@ -66,6 +66,13 @@ class preferences_class():
             # colori
             self.color_dev = v_json['color_dev']
             self.color_prod = v_json['color_prod']
+            # auto column resize
+            if v_json['auto_column_resize'] == 1:            
+                self.auto_column_resize = True
+            else:
+                self.auto_column_resize = False
+            # csv separator
+            self.csv_separator = v_json['csv_separator']
         # imposto valori di default senza presenza dello specifico file
         else:
             self.remember_window_pos = True
@@ -73,11 +80,13 @@ class preferences_class():
             self.save_dir = 'W:\\SQL'
             self.utf_8 = False
             self.end_of_line = False
-            self.font_editor = 'Cascadia Code SemiBold, 11'
+            self.font_editor = 'Courier New, 12, BOLD'
             self.font_result = 'Segoe UI, 8'
             self.editable = False
             self.color_prod = '#aaffff'
             self.color_dev = '#ffffff'
+            self.auto_column_resize = False
+            self.csv_separator = '|'
        
 class win_preferences_class(QMainWindow, Ui_preferences_window):
     """
@@ -102,6 +111,8 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         self.e_default_editable.setChecked(self.preferences.editable)   
         self.e_default_color_prod.setText(self.preferences.color_prod)
         self.e_default_color_dev.setText(self.preferences.color_dev)     
+        self.e_default_auto_column_resize.setChecked(self.preferences.auto_column_resize)
+        self.e_default_csv_separator.setText(self.preferences.csv_separator)
 
     def slot_b_restore(self):
         """
@@ -143,7 +154,10 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
 
         font, ok = QFontDialog.getFont(v_font_pref)
         if ok:
-            self.e_default_font_editor.setText(font.family() + ', '+ str(font.pointSize()))            
+            v_text = font.family() + ', '+ str(font.pointSize())            
+            if font.bold():
+                v_text += ', BOLD'
+            self.e_default_font_editor.setText(v_text)            
 
     def slot_b_default_font_result(self):
         """
@@ -155,7 +169,10 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         
         font, ok = QFontDialog.getFont(v_font_pref)
         if ok:
-            self.e_default_font_result.setText(font.family() + ','+ str(font.pointSize()))            
+            v_text = font.family() + ','+ str(font.pointSize())
+            if font.bold():
+                v_text += ', BOLD'
+            self.e_default_font_result.setText(v_text)            
 
     def slot_b_default_color_prod(self):
         """
@@ -198,6 +215,12 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
             v_eol = 1
         else:
             v_eol = 0
+            
+        # il default per auto column resize va convertito
+        if self.e_default_auto_column_resize.isChecked():
+            v_auto_column_resize = 1
+        else:
+            v_auto_column_resize = 0
 		
 		# scrivo nel file un elemento json contenente le informazioni inseriti dell'utente
         v_json ={'remember_window_pos': v_remember_window_pos,
@@ -209,7 +232,9 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
 		         'font_result' : self.e_default_font_result.text(),
                  'editable' : v_editable,
                  'color_prod': self.e_default_color_prod.text(),
-                 'color_dev': self.e_default_color_dev.text()}
+                 'color_dev': self.e_default_color_dev.text(),
+                 'auto_column_resize': v_auto_column_resize,
+                 'csv_separator': self.e_default_csv_separator.text()}
 		# scrittura nel file dell'oggetto json
         with open(self.nome_file_preferences, 'w') as outfile:json.dump(v_json, outfile)
         

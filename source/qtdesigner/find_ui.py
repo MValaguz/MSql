@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_FindWindow(object):
     def setupUi(self, FindWindow):
         FindWindow.setObjectName("FindWindow")
-        FindWindow.resize(259, 267)
+        FindWindow.resize(259, 325)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/icons/icons/search_file.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         FindWindow.setWindowIcon(icon)
@@ -51,6 +51,9 @@ class Ui_FindWindow(object):
         self.o_find_all_result.setObjectName("o_find_all_result")
         self.verticalLayout.addWidget(self.o_find_all_result)
         self.gridLayout_2.addLayout(self.verticalLayout, 2, 0, 1, 1)
+        self.verticalLayout_2 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_2.setObjectName("verticalLayout_2")
+        self.gridLayout_2.addLayout(self.verticalLayout_2, 3, 0, 1, 1)
         self.label.setBuddy(self.e_find)
 
         self.retranslateUi(FindWindow)

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>418</width>
-    <height>380</height>
+    <width>425</width>
+    <height>403</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,16 +19,6 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="9" column="0">
-     <widget class="QLabel" name="label_7">
-      <property name="text">
-       <string>Server Prod color:</string>
-      </property>
-      <property name="buddy">
-       <cstring>e_default_color_prod</cstring>
-      </property>
-     </widget>
-    </item>
     <item row="9" column="3">
      <widget class="QPushButton" name="b_default_color_prod">
       <property name="text">
@@ -40,6 +30,16 @@
       </property>
      </widget>
     </item>
+    <item row="9" column="0">
+     <widget class="QLabel" name="label_7">
+      <property name="text">
+       <string>Server Prod color:</string>
+      </property>
+      <property name="buddy">
+       <cstring>e_default_color_prod</cstring>
+      </property>
+     </widget>
+    </item>
     <item row="7" column="0">
      <widget class="QLabel" name="label_5">
       <property name="text">
@@ -47,6 +47,14 @@
       </property>
       <property name="buddy">
        <cstring>e_default_font_result</cstring>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="3">
+     <widget class="QPushButton" name="b_default_font_result">
+      <property name="icon">
+       <iconset resource="resource.qrc">
+        <normaloff>:/icons/icons/font_type.gif</normaloff>:/icons/icons/font_type.gif</iconset>
       </property>
      </widget>
     </item>
@@ -70,7 +78,7 @@
       </property>
      </widget>
     </item>
-    <item row="12" column="2">
+    <item row="13" column="2">
      <widget class="QPushButton" name="b_save">
       <property name="text">
        <string>Save preferences</string>
@@ -81,23 +89,18 @@
       </property>
      </widget>
     </item>
-    <item row="7" column="3">
-     <widget class="QPushButton" name="b_default_font_result">
-      <property name="icon">
-       <iconset resource="resource.qrc">
-        <normaloff>:/icons/icons/font_type.gif</normaloff>:/icons/icons/font_type.gif</iconset>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="2">
-     <widget class="QLineEdit" name="e_default_open_dir"/>
-    </item>
     <item row="6" column="2">
      <widget class="QLineEdit" name="e_default_font_editor">
       <property name="readOnly">
        <bool>true</bool>
       </property>
      </widget>
+    </item>
+    <item row="2" column="2">
+     <widget class="QLineEdit" name="e_default_open_dir"/>
+    </item>
+    <item row="4" column="2">
+     <widget class="QCheckBox" name="e_default_utf_8"/>
     </item>
     <item row="3" column="3">
      <widget class="QPushButton" name="b_default_save_dir">
@@ -107,15 +110,15 @@
       </property>
      </widget>
     </item>
-    <item row="4" column="2">
-     <widget class="QCheckBox" name="e_default_utf_8"/>
-    </item>
     <item row="8" column="2">
      <widget class="QCheckBox" name="e_default_editable">
       <property name="text">
        <string/>
       </property>
      </widget>
+    </item>
+    <item row="3" column="2">
+     <widget class="QLineEdit" name="e_default_save_dir"/>
     </item>
     <item row="6" column="3">
      <widget class="QPushButton" name="b_default_font_editor">
@@ -124,17 +127,6 @@
         <normaloff>:/icons/icons/font_type.gif</normaloff>:/icons/icons/font_type.gif</iconset>
       </property>
      </widget>
-    </item>
-    <item row="2" column="3">
-     <widget class="QPushButton" name="b_default_open_dir">
-      <property name="icon">
-       <iconset resource="resource.qrc">
-        <normaloff>:/icons/icons/folder.gif</normaloff>:/icons/icons/folder.gif</iconset>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="2">
-     <widget class="QLineEdit" name="e_default_save_dir"/>
     </item>
     <item row="7" column="2">
      <widget class="QLineEdit" name="e_default_font_result">
@@ -153,6 +145,17 @@
       </property>
      </widget>
     </item>
+    <item row="2" column="3">
+     <widget class="QPushButton" name="b_default_open_dir">
+      <property name="icon">
+       <iconset resource="resource.qrc">
+        <normaloff>:/icons/icons/folder.gif</normaloff>:/icons/icons/folder.gif</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="2">
+     <widget class="QLineEdit" name="e_default_color_prod"/>
+    </item>
     <item row="4" column="0">
      <widget class="QLabel" name="label_3">
       <property name="text">
@@ -160,16 +163,6 @@
       </property>
       <property name="buddy">
        <cstring>e_default_utf_8</cstring>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="0">
-     <widget class="QLabel" name="label_2">
-      <property name="text">
-       <string>Default Save Directory:</string>
-      </property>
-      <property name="buddy">
-       <cstring>e_default_save_dir</cstring>
       </property>
      </widget>
     </item>
@@ -183,20 +176,37 @@
       </property>
      </widget>
     </item>
-    <item row="9" column="2">
-     <widget class="QLineEdit" name="e_default_color_prod"/>
+    <item row="3" column="0">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>Default Save Directory:</string>
+      </property>
+      <property name="buddy">
+       <cstring>e_default_save_dir</cstring>
+      </property>
+     </widget>
     </item>
     <item row="10" column="2">
      <widget class="QLineEdit" name="e_default_color_dev"/>
     </item>
-    <item row="0" column="2">
-     <widget class="QPushButton" name="b_restore">
+    <item row="10" column="3">
+     <widget class="QPushButton" name="b_default_color_dev">
       <property name="text">
-       <string>Restore default preferences</string>
+       <string/>
       </property>
       <property name="icon">
        <iconset resource="resource.qrc">
-        <normaloff>:/icons/icons/undo.gif</normaloff>:/icons/icons/undo.gif</iconset>
+        <normaloff>:/icons/icons/color.gif</normaloff>:/icons/icons/color.gif</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="label_10">
+      <property name="text">
+       <string>Remember window position:</string>
+      </property>
+      <property name="buddy">
+       <cstring>e_remember_window_pos</cstring>
       </property>
      </widget>
     </item>
@@ -211,17 +221,6 @@
       </property>
      </widget>
     </item>
-    <item row="10" column="3">
-     <widget class="QPushButton" name="b_default_color_dev">
-      <property name="text">
-       <string/>
-      </property>
-      <property name="icon">
-       <iconset resource="resource.qrc">
-        <normaloff>:/icons/icons/color.gif</normaloff>:/icons/icons/color.gif</iconset>
-      </property>
-     </widget>
-    </item>
     <item row="5" column="0">
      <widget class="QLabel" name="label_9">
       <property name="text">
@@ -232,18 +231,50 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="label_10">
+    <item row="0" column="2">
+     <widget class="QPushButton" name="b_restore">
       <property name="text">
-       <string>Remember window position:</string>
+       <string>Restore default preferences</string>
       </property>
-      <property name="buddy">
-       <cstring>e_remember_window_pos</cstring>
+      <property name="icon">
+       <iconset resource="resource.qrc">
+        <normaloff>:/icons/icons/undo.gif</normaloff>:/icons/icons/undo.gif</iconset>
       </property>
      </widget>
     </item>
     <item row="1" column="2">
      <widget class="QCheckBox" name="e_remember_window_pos"/>
+    </item>
+    <item row="11" column="2">
+     <widget class="QCheckBox" name="e_default_auto_column_resize">
+      <property name="icon">
+       <iconset resource="resource.qrc">
+        <normaloff>:/icons/icons/fix_column.gif</normaloff>:/icons/icons/fix_column.gif</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="11" column="0">
+     <widget class="QLabel" name="label_11">
+      <property name="text">
+       <string>Auto Column Resize:</string>
+      </property>
+      <property name="buddy">
+       <cstring>e_default_auto_column_resize</cstring>
+      </property>
+     </widget>
+    </item>
+    <item row="12" column="2">
+     <widget class="QLineEdit" name="e_default_csv_separator"/>
+    </item>
+    <item row="12" column="0">
+     <widget class="QLabel" name="label_12">
+      <property name="text">
+       <string>CSV column separator:</string>
+      </property>
+      <property name="buddy">
+       <cstring>e_default_csv_separator</cstring>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -266,6 +297,8 @@
   <tabstop>b_default_color_prod</tabstop>
   <tabstop>e_default_color_dev</tabstop>
   <tabstop>b_default_color_dev</tabstop>
+  <tabstop>e_default_auto_column_resize</tabstop>
+  <tabstop>e_default_csv_separator</tabstop>
   <tabstop>b_save</tabstop>
  </tabstops>
  <resources>

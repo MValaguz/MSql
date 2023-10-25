@@ -37,11 +37,28 @@ class CustomMainWindow(QMainWindow):
 
         # ! Make instance of QsciScintilla class!
         self.__editor = QsciScintilla()
-        self.__editor.setText("Hello\n")
-        self.__editor.append("world")
-        self.__editor.setLexer(None)
+        #self.__editor.setLexer(None)
         self.__editor.setUtf8(True)  # Set encoding to UTF-8
         self.__editor.setFont(self.__myFont)  # Will be overridden by lexer!
+        
+        # attivo il lexer per linguaggio C
+        self.__lexer = QsciLexerCPP(self.__editor)
+        self.__editor.setLexer(self.__lexer)
+        
+        # attivo evidenziazione parentesi
+        #self.__editor.BraceMatch(QsciScintilla.StrictBraceMatch)   
+
+        self.__editor.setText("""int main()
+{
+    char arr[5] = {'h', 'e', 'l', 'l', 'o'};
+
+    int i;
+    for(i = 0; i < 5; i++) {
+        printf(arr[i]);
+    }
+    return 0;
+}
+        """)
 
         # ! Add editor to layout !
         self.__lyt.addWidget(self.__editor)

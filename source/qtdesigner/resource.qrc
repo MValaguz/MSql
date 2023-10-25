@@ -1,5 +1,12 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/grantee.gif</file>
+    <file>icons/synonym.gif</file>
+    <file>icons/check_key.gif</file>
+    <file>icons/foreign_key.gif</file>
+    <file>icons/unique_key.gif</file>
+    <file>icons/primary_key.gif</file>
+    <file>icons/map.gif</file>
     <file>icons/end_of_line.gif</file>
     <file>icons/color.gif</file>
     <file>icons/connect.gif</file>
