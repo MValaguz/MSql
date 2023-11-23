@@ -93,20 +93,6 @@
     <property name="title">
      <string>&amp;Connection</string>
     </property>
-    <addaction name="actionICOM_815"/>
-    <addaction name="actionBACKUP_815"/>
-    <addaction name="separator"/>
-    <addaction name="actionUSER_SMILE"/>
-    <addaction name="actionUSER_SMI"/>
-    <addaction name="actionUSER_SMIPACK"/>
-    <addaction name="actionUSER_TEC"/>
-    <addaction name="actionUSER_SMIMEC"/>
-    <addaction name="actionUSER_SMIWRAP"/>
-    <addaction name="actionUSER_ENOBERG"/>
-    <addaction name="actionUSER_SMIFORM"/>
-    <addaction name="actionUSER_SARCO"/>
-    <addaction name="separator"/>
-    <addaction name="separator"/>
     <addaction name="actionConnect"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
@@ -123,20 +109,20 @@
     <addaction name="separator"/>
     <addaction name="actionFold_All"/>
     <addaction name="actionShow_end_of_line"/>
-    <addaction name="actionFont_editor_selector"/>
-    <addaction name="actionCreate_autocompletation_dictionary"/>
     <addaction name="separator"/>
     <addaction name="actionZoom_In"/>
     <addaction name="actionZoom_Out"/>
     <addaction name="separator"/>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
-    <addaction name="separator"/>
     <addaction name="actionCut"/>
     <addaction name="actionCopy"/>
     <addaction name="actionPaste"/>
     <addaction name="actionSelectAll"/>
     <addaction name="separator"/>
+    <addaction name="actionCreate_autocompletation_dictionary"/>
+    <addaction name="separator"/>
+    <addaction name="actionFont_editor_selector"/>
    </widget>
    <widget class="QMenu" name="menuRun">
     <property name="title">
@@ -189,9 +175,9 @@
      <string>Tools</string>
     </property>
     <addaction name="actionMaps_procedure_function"/>
+    <addaction name="actionHistory"/>
     <addaction name="actionObjects_Navigator"/>
     <addaction name="actionObject_Viewer"/>
-    <addaction name="actionHistory"/>
    </widget>
    <addaction name="menuFiles"/>
    <addaction name="menuServer"/>
@@ -269,6 +255,9 @@
          <number>3</number>
         </property>
         <property name="bottomMargin">
+         <number>3</number>
+        </property>
+        <property name="verticalSpacing">
          <number>3</number>
         </property>
         <item row="1" column="0">
@@ -501,8 +490,8 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>96</width>
-     <height>117</height>
+     <width>241</width>
+     <height>170</height>
     </size>
    </property>
    <property name="font">
@@ -517,7 +506,7 @@
     <number>2</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_2">
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <layout class="QGridLayout" name="gridLayout_3">
      <property name="leftMargin">
       <number>0</number>
      </property>
@@ -525,84 +514,71 @@
       <number>0</number>
      </property>
      <property name="rightMargin">
-      <number>3</number>
-     </property>
-     <property name="bottomMargin">
-      <number>3</number>
-     </property>
-     <item>
-      <widget class="QTreeView" name="db_oggetto_tree">
-       <property name="font">
-        <font>
-         <pointsize>8</pointsize>
-        </font>
-       </property>
-       <property name="editTriggers">
-        <set>QAbstractItemView::NoEditTriggers</set>
-       </property>
-       <property name="dragEnabled">
-        <bool>true</bool>
-       </property>
-       <property name="alternatingRowColors">
-        <bool>true</bool>
-       </property>
-       <property name="selectionMode">
-        <enum>QAbstractItemView::ExtendedSelection</enum>
-       </property>
-       <property name="indentation">
-        <number>15</number>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-  </widget>
-  <widget class="QDockWidget" name="dockWidget_3">
-   <property name="font">
-    <font>
-     <family>Segoe UI</family>
-    </font>
-   </property>
-   <property name="windowTitle">
-    <string>SQL History</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>2</number>
-   </attribute>
-   <widget class="QWidget" name="dockWidgetContents_3">
-    <layout class="QHBoxLayout" name="horizontalLayout_5">
-     <property name="leftMargin">
       <number>0</number>
      </property>
-     <property name="topMargin">
+     <property name="bottomMargin">
       <number>0</number>
      </property>
-     <property name="rightMargin">
-      <number>3</number>
-     </property>
-     <property name="bottomMargin">
-      <number>3</number>
-     </property>
-     <item>
-      <widget class="QListView" name="o_history">
-       <property name="font">
-        <font>
-         <pointsize>8</pointsize>
-        </font>
+     <item row="0" column="0">
+      <layout class="QGridLayout" name="gridLayout_2">
+       <property name="leftMargin">
+        <number>3</number>
        </property>
-       <property name="dragEnabled">
-        <bool>true</bool>
+       <property name="rightMargin">
+        <number>3</number>
        </property>
-       <property name="dragDropMode">
-        <enum>QAbstractItemView::DragOnly</enum>
+       <property name="verticalSpacing">
+        <number>2</number>
        </property>
-       <property name="uniformItemSizes">
-        <bool>true</bool>
-       </property>
-       <property name="selectionRectVisible">
-        <bool>true</bool>
-       </property>
-      </widget>
+       <item row="0" column="0">
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Like:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="e_object_viewer_find">
+           <property name="clearButtonEnabled">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="1" column="0">
+        <widget class="QTreeView" name="db_oggetto_tree">
+         <property name="font">
+          <font>
+           <pointsize>8</pointsize>
+          </font>
+         </property>
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
+         </property>
+         <property name="dragEnabled">
+          <bool>true</bool>
+         </property>
+         <property name="alternatingRowColors">
+          <bool>true</bool>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
+         <property name="indentation">
+          <number>15</number>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </widget>
@@ -873,6 +849,9 @@
    <property name="text">
     <string>Commit</string>
    </property>
+   <property name="shortcut">
+    <string>F8</string>
+   </property>
   </action>
   <action name="actionRollback">
    <property name="icon">
@@ -895,7 +874,7 @@
   <action name="actionObjects_Navigator">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/navigator.gif</normaloff>:/icons/icons/navigator.gif</iconset>
+     <normaloff>:/icons/icons/procedure.gif</normaloff>:/icons/icons/procedure.gif</iconset>
    </property>
    <property name="text">
     <string>Objects Navigator</string>
@@ -917,6 +896,9 @@
    </property>
    <property name="text">
     <string>History</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
    </property>
   </action>
   <action name="actionHelp">
@@ -1194,7 +1176,7 @@
      <normaloff>:/icons/icons/map.gif</normaloff>:/icons/icons/map.gif</iconset>
    </property>
    <property name="text">
-    <string>Map procedure/function</string>
+    <string>Map procedures/functions</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+M</string>
@@ -1203,12 +1185,13 @@
  </widget>
  <tabstops>
   <tabstop>oggetti_db_scelta</tabstop>
+  <tabstop>e_view_description</tabstop>
   <tabstop>oggetti_db_refresh</tabstop>
   <tabstop>oggetti_db_tipo_ricerca</tabstop>
   <tabstop>oggetti_db_ricerca</tabstop>
   <tabstop>oggetti_db_elenco</tabstop>
+  <tabstop>e_object_viewer_find</tabstop>
   <tabstop>db_oggetto_tree</tabstop>
-  <tabstop>o_history</tabstop>
  </tabstops>
  <resources>
   <include location="resource.qrc"/>
@@ -1248,7 +1231,7 @@
   </connection>
   <connection>
    <sender>oggetti_db_ricerca</sender>
-   <signal>editingFinished()</signal>
+   <signal>textChanged(QString)</signal>
    <receiver>MSql_win1</receiver>
    <slot>slot_oggetti_db_scelta()</slot>
    <hints>
@@ -1285,8 +1268,8 @@
    <slot>slot_db_oggetto_tree_expand()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1121</x>
-     <y>452</y>
+     <x>1248</x>
+     <y>854</y>
     </hint>
     <hint type="destinationlabel">
      <x>995</x>
@@ -1301,8 +1284,8 @@
    <slot>slot_oggetti_db_scelta()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1075</x>
-     <y>106</y>
+     <x>1207</x>
+     <y>75</y>
     </hint>
     <hint type="destinationlabel">
      <x>1219</x>
@@ -1349,12 +1332,28 @@
    <slot>slot_db_oggetto_tree_doppio_click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1028</x>
-     <y>418</y>
+     <x>1248</x>
+     <y>854</y>
     </hint>
     <hint type="destinationlabel">
      <x>547</x>
      <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>e_object_viewer_find</sender>
+   <signal>editingFinished()</signal>
+   <receiver>MSql_win1</receiver>
+   <slot>slot_object_viewer_find()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1133</x>
+     <y>516</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>800</x>
+     <y>-6</y>
     </hint>
    </hints>
   </connection>
@@ -1366,5 +1365,6 @@
   <slot>slot_resize_MSql_win1()</slot>
   <slot>slot_db_oggetto_tree_expand()</slot>
   <slot>slot_db_oggetto_tree_doppio_click()</slot>
+  <slot>slot_object_viewer_find()</slot>
  </slots>
 </ui>

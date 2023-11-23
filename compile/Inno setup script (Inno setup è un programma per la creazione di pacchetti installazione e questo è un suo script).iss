@@ -14,7 +14,7 @@ ChangesAssociations=yes
 DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
-OutputDir=O:\Install\MSql
+OutputDir=C:\MSql_setup
 OutputBaseFilename=MSql_setup
 SetupIconFile=C:\Users\MValaguz\Documents\GitHub\MSql\source\qtdesigner\icons\MSql.ico
 Compression=lzma

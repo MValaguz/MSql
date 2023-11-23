@@ -7,6 +7,25 @@
  Descrizione...: Funzioni per l'estrazione di codice pl-sql 
 """
 
+def scrivi_testo_in_output(p_testo):
+    """
+       Utilizzata per il debug. Scrive nel file C:\MSql\output.txt il parametro p_testo
+    """      
+    print('Scrittura nel file C:\MSql\output.txt')
+    v_file = open('C:\MSql\output.txt','w', newline='')
+    v_file.write(p_testo)
+    v_file.close()
+
+def scrivi_lista_in_output(p_lista):
+    """
+       Utilizzata per il debug. Scrive nel file C:\MSql\output.txt il contenuto di p_lista
+    """      
+    print('Scrittura nel file C:\MSql\output.txt')
+    v_file = open('C:\MSql\output.txt','w', encoding='utf-8', newline='')
+    for riga in p_lista:
+        v_file.write(riga)                
+    v_file.close()
+
 def extract_word_from_cursor_pos(p_string, p_pos):
     """
        Data una stringa completa p_stringa e una posizione di cursore su di essa, 
@@ -21,7 +40,7 @@ def extract_word_from_cursor_pos(p_string, p_pos):
 
     # inizio a comporre la parola partendo dalla posizione del cursore (se non trovo nulla esco)
     v_word=p_string[p_pos]    
-    if v_word is None or v_word in ('',' ','=',':','.','(',')'):
+    if v_word is None or v_word in ('',' ','=',':','.','(',')',';'):
         return ''
 
     # mi sposto a sinistra rispetto al cursore e compongo la parola    
@@ -29,7 +48,7 @@ def extract_word_from_cursor_pos(p_string, p_pos):
     while True and v_index > 0:
         v_index -= 1
         if v_index < len(p_string):
-            if p_string[v_index] not in (' ','=',':','.','(',')'):
+            if p_string[v_index] not in (' ','=',':','.','(',')',';'):
                 v_word = p_string[v_index] + v_word
             else:
                 break
@@ -41,7 +60,7 @@ def extract_word_from_cursor_pos(p_string, p_pos):
     while True:
         v_index += 1
         if v_index < len(p_string):
-            if p_string[v_index] not in (' ','=',':','\n','\r','.','(',')'):
+            if p_string[v_index] not in (' ','=',':','\n','\r','.','(',')',';'):
                 v_word += p_string[v_index]
             else:
                 break
@@ -89,6 +108,9 @@ def estrai_procedure_function(p_testo):
        Il risultato è una lista formata dalla classe "class_definizione" che contiene 
        in prima battuta il nome della definizione e secondariamente una lista dei paramatri       
     """
+    # importo la libreria delle regular expression
+    import re
+
     # controllo se il testo che mi è stato passato ha sia il package specification che il body
     # se esistono entrambi andrò ad analizzare solo la parte di body
     # se non esistono perché siamo in presenza solo di una singola procedura-funzione, considero
@@ -115,15 +137,16 @@ def estrai_procedure_function(p_testo):
 
         # se la riga è valida perché siamo nel body....
         if v_numero_riga_testo > v_prima_riga_valida:            
-            # dalla riga elimino gli spazi a sinistra e a destra e la rendo maiuscola
+            # normalizzo la riga
             v_riga_raw = result.upper()
             v_riga = v_riga_raw.replace('\n','') # tolgo ritorno a capo dalla riga
             v_riga = v_riga.replace('\r','') # tolgo ritorno a capo dalla riga
             v_riga = v_riga.replace('"','') # tolgo i doppi apici dalla riga (potrebbero essere presenti nella dichiarazione della procedura)
             if v_riga.find('--') != -1: # se presente un commento, lo tolgo
                 v_riga = v_riga[0:v_riga.find('--')]
-            v_riga = v_riga.lstrip()
-            v_riga = v_riga.rstrip()                      
+            v_riga = v_riga.lstrip() # tolgo gli spazi a sinistra
+            v_riga = v_riga.rstrip() # tolgo gli spazi a destra            
+            v_riga = re.sub(' +', ' ', v_riga) # tolgo i doppi spazi utilizzando le regular expression                               
             # individuo riga di procedura-funzione        
             if v_riga[0:9] == 'PROCEDURE' or v_riga[0:8] == 'FUNCTION' or v_riga[0:38] == 'CREATE OR REPLACE EDITIONABLE FUNCTION' or v_riga[0:39] == 'CREATE OR REPLACE EDITIONABLE PROCEDURE':                        
                 if v_riga[0:38] == 'CREATE OR REPLACE EDITIONABLE FUNCTION' or v_riga[0:39] == 'CREATE OR REPLACE EDITIONABLE PROCEDURE':
@@ -136,7 +159,7 @@ def estrai_procedure_function(p_testo):
                 # creo il nodo con il nome della procedura-funzione
                 v_definizione = class_definizione()
                 v_definizione.nome_definizione = v_nome
-                v_definizione.numero_riga_testo = v_numero_riga_testo
+                v_definizione.numero_riga_testo = v_numero_riga_testo                
                 v_lista_definizioni.append(v_definizione)
                 # indico che lo start di procedure-function è iniziato
                 v_start = True
@@ -173,7 +196,7 @@ def estrai_procedure_function(p_testo):
 # TEST DELLA FUNZIONE CHE PARTENDO DA CODICE PL-SQL, RESTITUISCE UN OGGETTO CHE CONTIENE TUTTE LE DEFINIZIONI TROVATE
 ######################################################################################################################
 if __name__ == "__main__":   
-   v_file = open('c:\Msql\MW_MAGAZZINI_VTURRA.pls','r', newline='').read()   
+   v_file = open('c:\Msql\CG$SM_MAFOR.msql','r', newline='').read()   
    v_lista_def = estrai_procedure_function(v_file.split(chr(10)))
    # emetto a video il contenuto di tutto quello che ho trovato nel testo
    v_write = open('c:\\Msql\\output.txt','w', newline='')

@@ -480,7 +480,35 @@ def table_exists_sqlite(p_cursor,
     if p_cursor.fetchone()[0] > 0:
         return True
     else:
-        return False                  
+        return False       
+
+def write_sql_history(p_db_name, p_tipo, p_testo):
+    """
+       Usata per scrivere dentro un db SQLite tabella HISTORY, l'istruzione l'sql
+       Il parametro p_tipo, indica il tipo (istruzione sql, comandi ddl, codice pl-sql)
+    """ 
+    if p_testo != '':
+        v_conn = sqlite3.connect(database=p_db_name)
+        v_curs = v_conn.cursor()
+        v_curs.execute("""CREATE TABLE IF NOT EXISTS 
+                          HISTORY (ID         INTEGER PRIMARY KEY AUTOINCREMENT,
+                                   TIPO       VARCHAR(20) NOT NULL,
+                                   ORARIO     DATETIME    NOT NULL,
+                                   ISTRUZIONE BLOB        NOT NULL
+                              )""")     
+
+        v_curs.execute("""INSERT INTO HISTORY(TIPO,ORARIO,ISTRUZIONE) VALUES(?,?,?)""", (p_tipo, datetime.datetime.now(), p_testo) )
+        v_conn.commit()
+        v_conn.close()    
+    
+def purge_sql_history(p_db_name):
+    """
+       Elimina la tabella history
+    """
+    v_conn = sqlite3.connect(database=p_db_name)
+    v_curs = v_conn.cursor()
+    v_curs.execute('DROP TABLE IF EXISTS HISTORY')        
+    v_conn.close()
 
 #test per la funzione di estrazione ddl tabella
 if __name__ == "__main__":

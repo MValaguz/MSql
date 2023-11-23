@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/add.gif</file>
+    <file>icons/import.gif</file>
     <file>icons/grantee.gif</file>
     <file>icons/synonym.gif</file>
     <file>icons/check_key.gif</file>

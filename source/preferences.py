@@ -63,9 +63,6 @@ class preferences_class():
                 self.editable = True
             else:
                 self.editable = False
-            # colori
-            self.color_dev = v_json['color_dev']
-            self.color_prod = v_json['color_prod']
             # auto column resize
             if v_json['auto_column_resize'] == 1:            
                 self.auto_column_resize = True
@@ -73,6 +70,10 @@ class preferences_class():
                 self.auto_column_resize = False
             # csv separator
             self.csv_separator = v_json['csv_separator']
+            # server
+            self.elenco_server = v_json['server']
+            # users
+            self.elenco_user = v_json['users']
         # imposto valori di default senza presenza dello specifico file
         else:
             self.remember_window_pos = True
@@ -83,10 +84,21 @@ class preferences_class():
             self.font_editor = 'Courier New, 12, BOLD'
             self.font_result = 'Segoe UI, 8'
             self.editable = False
-            self.color_prod = '#aaffff'
-            self.color_dev = '#ffffff'
             self.auto_column_resize = False
             self.csv_separator = '|'
+            # elenco server è composto da Titolo, TNS e Colore
+            self.elenco_server = [('Server Prod (ICOM_815)','ICOM_815','#aaffff'),
+                                  ('Server Dev (BACKUP_815)','BACKUP_815','#ffffff')]
+            # elenco users è composto da Titolo, User, Password
+            self.elenco_user = [('USER_SMILE','SMILE','SMILE'),
+                                ('USER_SMI','SMI','SMI'),
+                                ('USER_SMIPACK','SMIPACK','SMIPACK'),
+                                ('USER_SMITEC','SMITEC','SMITEC'),
+                                ('USER_SMIMEC','SMIMEC','SMIMEC'),
+                                ('USER_SMIWRAP (SMIEnergia)','SMIWRAP','SMIWRAP'),
+                                ('USER_ENOBERG','ENOBERG','ENOBERG'),
+                                ('USER_FORM (SMILab)','SMIBLOW','SMIBLOW'),
+                                ('USER_SARCO','SARCO','SARCO')]
        
 class win_preferences_class(QMainWindow, Ui_preferences_window):
     """
@@ -97,6 +109,9 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         self.setupUi(self)
 
         self.nome_file_preferences = p_nome_file_preferences
+
+        # forzo il posizionamento sul primo tab
+        self.o_tab_widget.setCurrentIndex(0)
         
         # creo l'oggetto preferenze che automaticamente carica il file o le preferenze di default
         self.preferences = preferences_class(self.nome_file_preferences)        
@@ -109,11 +124,54 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         self.e_default_font_editor.setText(self.preferences.font_editor)
         self.e_default_font_result.setText(self.preferences.font_result)
         self.e_default_editable.setChecked(self.preferences.editable)   
-        self.e_default_color_prod.setText(self.preferences.color_prod)
-        self.e_default_color_dev.setText(self.preferences.color_dev)     
         self.e_default_auto_column_resize.setChecked(self.preferences.auto_column_resize)
         self.e_default_csv_separator.setText(self.preferences.csv_separator)
 
+        # preparo elenco server        
+        self.o_server.setColumnCount(4)
+        self.o_server.setHorizontalHeaderLabels(['Server title','TNS Name','Color',''])           
+        v_rig = 1                
+        for record in self.preferences.elenco_server:                                    
+            self.o_server.setRowCount(v_rig) 
+            self.o_server.setItem(v_rig-1,0,QTableWidgetItem(record[0]))       
+            self.o_server.setItem(v_rig-1,1,QTableWidgetItem(record[1]))                               
+            self.o_server.setItem(v_rig-1,2,QTableWidgetItem(record[2]))                                           
+            # come quarta colonna metto il pulsante per la scelta del colore
+            v_color_button = QPushButton()            
+            v_icon = QIcon()
+            v_icon.addPixmap(QPixmap(":/icons/icons/color.gif"), QIcon.Normal, QIcon.Off)
+            v_color_button.setIcon(v_icon)
+            v_color_button.clicked.connect(self.slot_set_color_server)
+
+            self.o_server.setCellWidget(v_rig-1,3,v_color_button)                               
+            v_rig += 1
+        self.o_server.resizeColumnsToContents()
+
+        # preparo elenco user        
+        self.o_users.setColumnCount(3)
+        self.o_users.setHorizontalHeaderLabels(['User title','User name','Password'])   
+        v_rig = 1                
+        for record in self.preferences.elenco_user:                                    
+            self.o_users.setRowCount(v_rig) 
+            self.o_users.setItem(v_rig-1,0,QTableWidgetItem(record[0]))       
+            self.o_users.setItem(v_rig-1,1,QTableWidgetItem(record[1]))                               
+            self.o_users.setItem(v_rig-1,2,QTableWidgetItem(record[2]))                               
+            v_rig += 1
+        self.o_users.resizeColumnsToContents()
+
+    def slot_set_color_server(self):
+        """
+           Gestione della scelta dei colori sull'elenco dei server
+        """
+        # ottengo un oggetto index-qt della riga selezionata
+        index = self.o_server.currentIndex()           
+        # prendo la cella che contiene il colore in modo da aprire la selezione partendo dal colore corrente
+        v_color_corrente = self.o_server.item( index.row(), 2).text()                        
+        # apro la dialog color
+        color = QColorDialog.getColor(QColor(v_color_corrente))                
+        # imposto il colore
+        self.o_server.setItem( index.row(), 2, QTableWidgetItem(color.name()) )            
+    
     def slot_b_restore(self):
         """
            Ripristina tutte preferenze di default
@@ -174,19 +232,29 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
                 v_text += ', BOLD'
             self.e_default_font_result.setText(v_text)            
 
-    def slot_b_default_color_prod(self):
+    def slot_b_server_add(self):
         """
-           Scelta del colore di base per server Prod (indicato da shortcut di tastiera F1)
+           Crea una riga vuota dove poter inserire informazioni connessioni al server
         """
-        color = QColorDialog.getColor()                
-        self.e_default_color_prod.setText(color.name())            
+        self.o_server.setRowCount(self.o_server.rowCount()+1)
 
-    def slot_b_default_color_dev(self):
+    def slot_b_server_remove(self):
         """
-           Scelta del colore di base per server Dev (indicato da shortcut di tastiera F2)
+           Toglie la riga selezionata, da elenco server
         """
-        color = QColorDialog.getColor()                
-        self.e_default_color_dev.setText(color.name())            
+        self.o_server.removeRow(self.o_server.currentRow())
+
+    def slot_b_user_add(self):
+        """
+           Crea una riga vuota dove poter inserire informazioni utente di connessione al server
+        """
+        self.o_users.setRowCount(self.o_users.rowCount()+1)
+
+    def slot_b_user_remove(self):
+        """
+           Toglie la riga selezionata, da elenco user
+        """
+        self.o_users.removeRow(self.o_users.currentRow())
 
     def slot_b_save(self):
         """
@@ -221,7 +289,17 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
             v_auto_column_resize = 1
         else:
             v_auto_column_resize = 0
-		
+
+        # elenco dei server
+        v_server = []
+        for i in range(0,self.o_server.rowCount()):
+            v_server.append( ( self.o_server.item(i,0).text(), self.o_server.item(i,1).text(), self.o_server.item(i,2).text() ) )            
+
+        # elenco dei users
+        v_users = []
+        for i in range(0,self.o_users.rowCount()):
+            v_users.append( ( self.o_users.item(i,0).text(), self.o_users.item(i,1).text() , self.o_users.item(i,2).text()) )            
+	
 		# scrivo nel file un elemento json contenente le informazioni inseriti dell'utente
         v_json ={'remember_window_pos': v_remember_window_pos,
                  'open_dir': self.e_default_open_dir.text(),
@@ -231,10 +309,12 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
 		         'font_editor' :self.e_default_font_editor.text(),
 		         'font_result' : self.e_default_font_result.text(),
                  'editable' : v_editable,
-                 'color_prod': self.e_default_color_prod.text(),
-                 'color_dev': self.e_default_color_dev.text(),
                  'auto_column_resize': v_auto_column_resize,
-                 'csv_separator': self.e_default_csv_separator.text()}
+                 'csv_separator': self.e_default_csv_separator.text(),
+                 'server': v_server,
+                 'users': v_users
+                }
+
 		# scrittura nel file dell'oggetto json
         with open(self.nome_file_preferences, 'w') as outfile:json.dump(v_json, outfile)
         
