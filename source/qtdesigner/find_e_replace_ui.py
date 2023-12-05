@@ -14,9 +14,9 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Find_e_Replace_Window(object):
     def setupUi(self, Find_e_Replace_Window):
         Find_e_Replace_Window.setObjectName("Find_e_Replace_Window")
-        Find_e_Replace_Window.resize(259, 180)
+        Find_e_Replace_Window.resize(260, 180)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/icons/icons/replace.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(":/icons/icons/MSql.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         Find_e_Replace_Window.setWindowIcon(icon)
         self.formLayout = QtWidgets.QFormLayout(Find_e_Replace_Window)
         self.formLayout.setObjectName("formLayout")

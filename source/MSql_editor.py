@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
 
 """
+ __  __ ____        _ 
+|  \/  / ___|  __ _| |
+| |\/| \___ \ / _` | |
+| |  | |___) | (_| | |
+|_|  |_|____/ \__, |_|
+                 |_|  
+                 
  Creato da.....: Marco Valaguzza
  Piattaforma...: Python3.11 con libreria pyqt5
  Data..........: 01/01/2023
@@ -1922,7 +1929,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             
             # bottone per copia valore
             icon1 = QtGui.QIcon()
-            icon1.addPixmap(QtGui.QPixmap(":/icons/icons/copy.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)        
+            icon1.addPixmap(QtGui.QPixmap(":/icons/icons/copy.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)        
             v_copia = QPushButton()
             v_copia.setText('Copy item')
             v_copia.setIcon(icon1)        
@@ -1933,7 +1940,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
 
             # bottone per aprire window dove viene visualizzato il contenuto della cella in modo amplificato
             icon2 = QtGui.QIcon()
-            icon2.addPixmap(QtGui.QPixmap(":/icons/icons/zoom.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)        
+            icon2.addPixmap(QtGui.QPixmap(":/icons/icons/zoom_avanti.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)        
             v_zoom = QPushButton()
             v_zoom.setText('Zoom item')
             v_zoom.setIcon(icon2)        
@@ -1963,7 +1970,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.win_dialog_zoom_item.resize(300, 200)
         self.win_dialog_zoom_item.setWindowTitle('Zoom item')
         v_icon = QtGui.QIcon()
-        v_icon.addPixmap(QtGui.QPixmap(":/icons/icons/zoom.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)        
+        v_icon.addPixmap(QtGui.QPixmap(":/icons/icons/MSql.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)        
         self.win_dialog_zoom_item.setWindowIcon(v_icon)
         self.win_dialog_zoom_item_gl = QtWidgets.QGridLayout(self.win_dialog_zoom_item)
         self.win_dialog_zoom_lineEdit = QtWidgets.QPlainTextEdit(self.win_dialog_zoom_item)        
@@ -2027,7 +2034,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                 
         # bottone per ordinamento ascendente
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/icons/icons/order_a_z.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)        
+        icon1.addPixmap(QtGui.QPixmap(":/icons/icons/order_a_z.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)        
         v_sort_a_z = QPushButton()
         v_sort_a_z.setText('Sort asc')
         v_sort_a_z.setIcon(icon1)        
@@ -2038,7 +2045,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
 
         # bottone per ordinamento discendente
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(":/icons/icons/order_z_a.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2.addPixmap(QtGui.QPixmap(":/icons/icons/order_z_a.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         v_sort_z_a = QPushButton()
         v_sort_z_a.setText('Sort desc')
         v_sort_z_a.setIcon(icon2)
@@ -2049,7 +2056,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         
         # bottone per raggruppamento su colonna
         icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap(":/icons/icons/group.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon3.addPixmap(QtGui.QPixmap(":/icons/icons/group.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         v_group_by = QPushButton()
         v_group_by.setText('Group by')
         v_group_by.setIcon(icon3)
@@ -3128,6 +3135,9 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                    
         # carico la mappa
         self.slot_refresh_map()
+
+        # posiziono il focus nel campo di ricerca
+        self.e_map_search.setFocus()
 
     def slot_refresh_map(self):
         """

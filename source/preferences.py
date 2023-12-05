@@ -139,7 +139,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
             # come quarta colonna metto il pulsante per la scelta del colore
             v_color_button = QPushButton()            
             v_icon = QIcon()
-            v_icon.addPixmap(QPixmap(":/icons/icons/color.gif"), QIcon.Normal, QIcon.Off)
+            v_icon.addPixmap(QPixmap(":/icons/icons/color.png"), QIcon.Normal, QIcon.Off)
             v_color_button.setIcon(v_icon)
             v_color_button.clicked.connect(self.slot_set_color_server)
 

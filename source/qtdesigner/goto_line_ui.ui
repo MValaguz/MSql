@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="resource.qrc">
-    <normaloff>:/icons/icons/right.gif</normaloff>:/icons/icons/right.gif</iconset>
+    <normaloff>:/icons/icons/MSql.ico</normaloff>:/icons/icons/MSql.ico</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout" columnstretch="0,1,0">
    <item row="0" column="0">
@@ -35,7 +35,7 @@
      </property>
      <property name="icon">
       <iconset resource="resource.qrc">
-       <normaloff>:/icons/icons/right.gif</normaloff>:/icons/icons/right.gif</iconset>
+       <normaloff>:/icons/icons/right.png</normaloff>:/icons/icons/right.png</iconset>
      </property>
     </widget>
    </item>

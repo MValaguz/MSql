@@ -16,7 +16,7 @@ class Ui_FindWindow(object):
         FindWindow.setObjectName("FindWindow")
         FindWindow.resize(259, 325)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/icons/icons/search_file.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(":/icons/icons/MSql.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         FindWindow.setWindowIcon(icon)
         self.gridLayout_2 = QtWidgets.QGridLayout(FindWindow)
         self.gridLayout_2.setObjectName("gridLayout_2")

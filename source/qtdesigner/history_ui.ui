@@ -59,7 +59,7 @@
          <string>Search</string>
         </property>
         <property name="icon">
-         <iconset resource="resource.qrc">
+         <iconset>
           <normaloff>:/icons/icons/go.gif</normaloff>:/icons/icons/go.gif</iconset>
         </property>
        </widget>
@@ -101,7 +101,7 @@
       </property>
       <property name="icon">
        <iconset resource="resource.qrc">
-        <normaloff>:/icons/icons/failed.gif</normaloff>:/icons/icons/failed.gif</iconset>
+        <normaloff>:/icons/icons/failed.png</normaloff>:/icons/icons/failed.png</iconset>
       </property>
      </widget>
     </item>

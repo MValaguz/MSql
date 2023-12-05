@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>848</width>
-    <height>600</height>
+    <height>601</height>
    </rect>
   </property>
   <property name="windowIcon">
@@ -141,7 +141,7 @@
     </font>
    </property>
    <property name="windowIcon">
-    <iconset resource="resource.qrc">
+    <iconset>
      <normaloff>:/icons/icons/map.gif</normaloff>:/icons/icons/map.gif</iconset>
    </property>
    <property name="windowTitle">
@@ -186,7 +186,7 @@
        </property>
        <property name="icon">
         <iconset resource="resource.qrc">
-         <normaloff>:/icons/icons/refresh.gif</normaloff>:/icons/icons/refresh.gif</iconset>
+         <normaloff>:/icons/icons/refresh.png</normaloff>:/icons/icons/refresh.png</iconset>
        </property>
       </widget>
      </item>

@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="resource.qrc">
-    <normaloff>:/icons/icons/gears.gif</normaloff>:/icons/icons/gears.gif</iconset>
+    <normaloff>:/icons/icons/MSql.ico</normaloff>:/icons/icons/MSql.ico</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -28,7 +28,7 @@
         </property>
         <property name="icon">
          <iconset resource="resource.qrc">
-          <normaloff>:/icons/icons/undo.gif</normaloff>:/icons/icons/undo.gif</iconset>
+          <normaloff>:/icons/icons/undo.png</normaloff>:/icons/icons/undo.png</iconset>
         </property>
        </widget>
       </item>
@@ -39,7 +39,7 @@
         </property>
         <property name="icon">
          <iconset resource="resource.qrc">
-          <normaloff>:/icons/icons/disk.gif</normaloff>:/icons/icons/disk.gif</iconset>
+          <normaloff>:/icons/icons/disk.png</normaloff>:/icons/icons/disk.png</iconset>
         </property>
        </widget>
       </item>
@@ -48,7 +48,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="o_tab_widget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="general">
        <attribute name="title">
@@ -136,7 +136,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="resource.qrc">
+            <iconset>
              <normaloff>:/icons/icons/end_of_line.gif</normaloff>:/icons/icons/end_of_line.gif</iconset>
            </property>
           </widget>
@@ -168,7 +168,7 @@
           <widget class="QPushButton" name="b_default_font_editor">
            <property name="icon">
             <iconset resource="resource.qrc">
-             <normaloff>:/icons/icons/font_type.gif</normaloff>:/icons/icons/font_type.gif</iconset>
+             <normaloff>:/icons/icons/font_type.png</normaloff>:/icons/icons/font_type.png</iconset>
            </property>
           </widget>
          </item>
@@ -176,7 +176,7 @@
           <widget class="QPushButton" name="b_default_font_result">
            <property name="icon">
             <iconset resource="resource.qrc">
-             <normaloff>:/icons/icons/font_type.gif</normaloff>:/icons/icons/font_type.gif</iconset>
+             <normaloff>:/icons/icons/font_type.png</normaloff>:/icons/icons/font_type.png</iconset>
            </property>
           </widget>
          </item>
@@ -217,7 +217,7 @@
          <item row="9" column="1">
           <widget class="QCheckBox" name="e_default_auto_column_resize">
            <property name="icon">
-            <iconset resource="resource.qrc">
+            <iconset>
              <normaloff>:/icons/icons/fix_column.gif</normaloff>:/icons/icons/fix_column.gif</iconset>
            </property>
           </widget>
@@ -239,7 +239,7 @@
           <widget class="QPushButton" name="b_default_open_dir">
            <property name="icon">
             <iconset resource="resource.qrc">
-             <normaloff>:/icons/icons/folder.gif</normaloff>:/icons/icons/folder.gif</iconset>
+             <normaloff>:/icons/icons/folder.png</normaloff>:/icons/icons/folder.png</iconset>
            </property>
           </widget>
          </item>
@@ -247,7 +247,7 @@
           <widget class="QPushButton" name="b_default_save_dir">
            <property name="icon">
             <iconset resource="resource.qrc">
-             <normaloff>:/icons/icons/folder.gif</normaloff>:/icons/icons/folder.gif</iconset>
+             <normaloff>:/icons/icons/folder.png</normaloff>:/icons/icons/folder.png</iconset>
            </property>
           </widget>
          </item>
@@ -296,7 +296,7 @@
               </property>
               <property name="icon">
                <iconset resource="resource.qrc">
-                <normaloff>:/icons/icons/add.gif</normaloff>:/icons/icons/add.gif</iconset>
+                <normaloff>:/icons/icons/add.png</normaloff>:/icons/icons/add.png</iconset>
               </property>
              </widget>
             </item>
@@ -310,7 +310,7 @@
               </property>
               <property name="icon">
                <iconset resource="resource.qrc">
-                <normaloff>:/icons/icons/failed.gif</normaloff>:/icons/icons/failed.gif</iconset>
+                <normaloff>:/icons/icons/failed.png</normaloff>:/icons/icons/failed.png</iconset>
               </property>
              </widget>
             </item>
@@ -362,7 +362,7 @@
               </property>
               <property name="icon">
                <iconset resource="resource.qrc">
-                <normaloff>:/icons/icons/add.gif</normaloff>:/icons/icons/add.gif</iconset>
+                <normaloff>:/icons/icons/add.png</normaloff>:/icons/icons/add.png</iconset>
               </property>
              </widget>
             </item>
@@ -376,7 +376,7 @@
               </property>
               <property name="icon">
                <iconset resource="resource.qrc">
-                <normaloff>:/icons/icons/failed.gif</normaloff>:/icons/icons/failed.gif</iconset>
+                <normaloff>:/icons/icons/failed.png</normaloff>:/icons/icons/failed.png</iconset>
               </property>
              </widget>
             </item>

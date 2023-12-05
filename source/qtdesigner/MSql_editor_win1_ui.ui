@@ -308,7 +308,7 @@
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
-               <normaloff>:/icons/icons/table.gif</normaloff>:/icons/icons/table.gif</iconset>
+               <normaloff>:/icons/icons/table.png</normaloff>:/icons/icons/table.png</iconset>
              </property>
             </item>
             <item>
@@ -317,7 +317,7 @@
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
-               <normaloff>:/icons/icons/package_body.gif</normaloff>:/icons/icons/package_body.gif</iconset>
+               <normaloff>:/icons/icons/package_body.png</normaloff>:/icons/icons/package_body.png</iconset>
              </property>
             </item>
             <item>
@@ -326,7 +326,7 @@
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
-               <normaloff>:/icons/icons/package.gif</normaloff>:/icons/icons/package.gif</iconset>
+               <normaloff>:/icons/icons/package.png</normaloff>:/icons/icons/package.png</iconset>
              </property>
             </item>
             <item>
@@ -335,7 +335,7 @@
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
-               <normaloff>:/icons/icons/procedure.gif</normaloff>:/icons/icons/procedure.gif</iconset>
+               <normaloff>:/icons/icons/procedure.png</normaloff>:/icons/icons/procedure.png</iconset>
              </property>
             </item>
             <item>
@@ -344,7 +344,7 @@
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
-               <normaloff>:/icons/icons/function.gif</normaloff>:/icons/icons/function.gif</iconset>
+               <normaloff>:/icons/icons/function.png</normaloff>:/icons/icons/function.png</iconset>
              </property>
             </item>
             <item>
@@ -353,7 +353,7 @@
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
-               <normaloff>:/icons/icons/trigger.gif</normaloff>:/icons/icons/trigger.gif</iconset>
+               <normaloff>:/icons/icons/trigger.png</normaloff>:/icons/icons/trigger.png</iconset>
              </property>
             </item>
             <item>
@@ -362,7 +362,7 @@
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
-               <normaloff>:/icons/icons/view.gif</normaloff>:/icons/icons/view.gif</iconset>
+               <normaloff>:/icons/icons/view.png</normaloff>:/icons/icons/view.png</iconset>
              </property>
             </item>
             <item>
@@ -371,7 +371,7 @@
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
-               <normaloff>:/icons/icons/sequences.gif</normaloff>:/icons/icons/sequences.gif</iconset>
+               <normaloff>:/icons/icons/sequence.png</normaloff>:/icons/icons/sequence.png</iconset>
              </property>
             </item>
             <item>
@@ -380,7 +380,7 @@
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
-               <normaloff>:/icons/icons/primary_key.gif</normaloff>:/icons/icons/primary_key.gif</iconset>
+               <normaloff>:/icons/icons/primary_key.png</normaloff>:/icons/icons/primary_key.png</iconset>
              </property>
             </item>
             <item>
@@ -389,7 +389,7 @@
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
-               <normaloff>:/icons/icons/unique_key.gif</normaloff>:/icons/icons/unique_key.gif</iconset>
+               <normaloff>:/icons/icons/unique_key.png</normaloff>:/icons/icons/unique_key.png</iconset>
              </property>
             </item>
             <item>
@@ -398,7 +398,7 @@
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
-               <normaloff>:/icons/icons/foreign_key.gif</normaloff>:/icons/icons/foreign_key.gif</iconset>
+               <normaloff>:/icons/icons/foreign_key.png</normaloff>:/icons/icons/foreign_key.png</iconset>
              </property>
             </item>
             <item>
@@ -407,7 +407,7 @@
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
-               <normaloff>:/icons/icons/check_key.gif</normaloff>:/icons/icons/check_key.gif</iconset>
+               <normaloff>:/icons/icons/check_key.png</normaloff>:/icons/icons/check_key.png</iconset>
              </property>
             </item>
             <item>
@@ -416,7 +416,7 @@
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
-               <normaloff>:/icons/icons/synonym.gif</normaloff>:/icons/icons/synonym.gif</iconset>
+               <normaloff>:/icons/icons/synonym.png</normaloff>:/icons/icons/synonym.png</iconset>
              </property>
             </item>
            </widget>
@@ -438,7 +438,7 @@
             </property>
             <property name="icon">
              <iconset resource="resource.qrc">
-              <normaloff>:/icons/icons/refresh.gif</normaloff>:/icons/icons/refresh.gif</iconset>
+              <normaloff>:/icons/icons/refresh.png</normaloff>:/icons/icons/refresh.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -583,10 +583,52 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>32</width>
+     <height>24</height>
+    </size>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionNew"/>
+   <addaction name="actionOpen"/>
+   <addaction name="actionSave"/>
+   <addaction name="separator"/>
+   <addaction name="actionConnect"/>
+   <addaction name="actionRun_selected_area"/>
+   <addaction name="separator"/>
+   <addaction name="actionCommit"/>
+   <addaction name="actionRollback"/>
+   <addaction name="separator"/>
+   <addaction name="actionGo_To_Line"/>
+   <addaction name="actionFind"/>
+   <addaction name="actionFind_and_Replace"/>
+   <addaction name="actionShow_end_of_line"/>
+   <addaction name="actionMaps_procedure_function"/>
+   <addaction name="actionZoom_In"/>
+   <addaction name="actionZoom_Out"/>
+   <addaction name="separator"/>
+   <addaction name="actionClear_output"/>
+   <addaction name="actionMake_table_editable"/>
+   <addaction name="actionSave_modified_data"/>
+   <addaction name="separator"/>
+   <addaction name="actionHistory"/>
+   <addaction name="actionCreate_autocompletation_dictionary"/>
+   <addaction name="actionPreferences"/>
+  </widget>
   <action name="actionOpen">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/folder.gif</normaloff>:/icons/icons/folder.gif</iconset>
+     <normaloff>:/icons/icons/folder.png</normaloff>:/icons/icons/folder.png</iconset>
    </property>
    <property name="text">
     <string>Open</string>
@@ -598,7 +640,7 @@
   <action name="actionSave">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/disk.gif</normaloff>:/icons/icons/disk.gif</iconset>
+     <normaloff>:/icons/icons/disk.png</normaloff>:/icons/icons/disk.png</iconset>
    </property>
    <property name="text">
     <string>Save</string>
@@ -610,54 +652,10 @@
   <action name="actionExit">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/kill.gif</normaloff>:/icons/icons/kill.gif</iconset>
+     <normaloff>:/icons/icons/kill.png</normaloff>:/icons/icons/kill.png</iconset>
    </property>
    <property name="text">
     <string>Exit</string>
-   </property>
-  </action>
-  <action name="actionICOM_815">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Server Prod (ICOM_815)</string>
-   </property>
-   <property name="shortcut">
-    <string>F1</string>
-   </property>
-  </action>
-  <action name="actionBACKUP_815">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Server Dev (BACKUP_815)</string>
-   </property>
-   <property name="shortcut">
-    <string>F2</string>
-   </property>
-  </action>
-  <action name="actionUSER_SMILE">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>USER_SMILE</string>
-   </property>
-  </action>
-  <action name="actionUSER_SMI">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>USER_SMI</string>
    </property>
   </action>
   <action name="actionFind">
@@ -666,7 +664,7 @@
    </property>
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/search_file.gif</normaloff>:/icons/icons/search_file.gif</iconset>
+     <normaloff>:/icons/icons/search_file.png</normaloff>:/icons/icons/search_file.png</iconset>
    </property>
    <property name="text">
     <string>Find</string>
@@ -678,7 +676,7 @@
   <action name="actionFind_and_Replace">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/replace.gif</normaloff>:/icons/icons/replace.gif</iconset>
+     <normaloff>:/icons/icons/find_adn_replace.png</normaloff>:/icons/icons/find_adn_replace.png</iconset>
    </property>
    <property name="text">
     <string>Find and Replace</string>
@@ -690,7 +688,7 @@
   <action name="actionRun_selected_area">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/go.gif</normaloff>:/icons/icons/go.gif</iconset>
+     <normaloff>:/icons/icons/go.png</normaloff>:/icons/icons/go.png</iconset>
    </property>
    <property name="text">
     <string>Execute</string>
@@ -705,7 +703,7 @@
    </property>
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/edit.gif</normaloff>:/icons/icons/edit.gif</iconset>
+     <normaloff>:/icons/icons/edit.png</normaloff>:/icons/icons/edit.png</iconset>
    </property>
    <property name="text">
     <string>Make table editable</string>
@@ -717,7 +715,7 @@
   <action name="actionSave_modified_data">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/table.gif</normaloff>:/icons/icons/table.gif</iconset>
+     <normaloff>:/icons/icons/function.png</normaloff>:/icons/icons/function.png</iconset>
    </property>
    <property name="text">
     <string>Script the changed data</string>
@@ -726,7 +724,7 @@
   <action name="actionGo_to_Top">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/arrow_up.gif</normaloff>:/icons/icons/arrow_up.gif</iconset>
+     <normaloff>:/icons/icons/arrow_up.png</normaloff>:/icons/icons/arrow_up.png</iconset>
    </property>
    <property name="text">
     <string>Go to Top</string>
@@ -738,7 +736,7 @@
   <action name="actionGo_to_End">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/down.gif</normaloff>:/icons/icons/down.gif</iconset>
+     <normaloff>:/icons/icons/down.png</normaloff>:/icons/icons/down.png</iconset>
    </property>
    <property name="text">
     <string>Go to End</string>
@@ -750,7 +748,7 @@
   <action name="actionExport_to_Excel">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/csv.gif</normaloff>:/icons/icons/csv.gif</iconset>
+     <normaloff>:/icons/icons/csv.png</normaloff>:/icons/icons/csv.png</iconset>
    </property>
    <property name="text">
     <string>Export to Excel-CSV</string>
@@ -762,7 +760,7 @@
    </property>
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/fix_column.gif</normaloff>:/icons/icons/fix_column.gif</iconset>
+     <normaloff>:/icons/icons/fix_column.png</normaloff>:/icons/icons/fix_column.png</iconset>
    </property>
    <property name="text">
     <string>Auto Column Resize</string>
@@ -787,7 +785,7 @@
   <action name="actionFont_editor_selector">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/font_type.gif</normaloff>:/icons/icons/font_type.gif</iconset>
+     <normaloff>:/icons/icons/font_type.png</normaloff>:/icons/icons/font_type.png</iconset>
    </property>
    <property name="text">
     <string>Font editor selector</string>
@@ -796,7 +794,7 @@
   <action name="actionFont_output_selector">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/font_type.gif</normaloff>:/icons/icons/font_type.gif</iconset>
+     <normaloff>:/icons/icons/font_type.png</normaloff>:/icons/icons/font_type.png</iconset>
    </property>
    <property name="text">
     <string>Font output selector</string>
@@ -805,7 +803,7 @@
   <action name="actionCascade">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/window.gif</normaloff>:/icons/icons/window.gif</iconset>
+     <normaloff>:/icons/icons/window2.png</normaloff>:/icons/icons/window2.png</iconset>
    </property>
    <property name="text">
     <string>Cascade</string>
@@ -814,7 +812,7 @@
   <action name="actionTile">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/window2.gif</normaloff>:/icons/icons/window2.gif</iconset>
+     <normaloff>:/icons/icons/window.png</normaloff>:/icons/icons/window.png</iconset>
    </property>
    <property name="text">
     <string>Tile</string>
@@ -823,7 +821,7 @@
   <action name="actionNew">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/new.gif</normaloff>:/icons/icons/new.gif</iconset>
+     <normaloff>:/icons/icons/new.png</normaloff>:/icons/icons/new.png</iconset>
    </property>
    <property name="text">
     <string>New</string>
@@ -835,7 +833,7 @@
   <action name="actionProgram_info">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/info.gif</normaloff>:/icons/icons/info.gif</iconset>
+     <normaloff>:/icons/icons/info.png</normaloff>:/icons/icons/info.png</iconset>
    </property>
    <property name="text">
     <string>Program info</string>
@@ -844,7 +842,7 @@
   <action name="actionCommit">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/confirm.gif</normaloff>:/icons/icons/confirm.gif</iconset>
+     <normaloff>:/icons/icons/confirm.png</normaloff>:/icons/icons/confirm.png</iconset>
    </property>
    <property name="text">
     <string>Commit</string>
@@ -856,7 +854,7 @@
   <action name="actionRollback">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/history.gif</normaloff>:/icons/icons/history.gif</iconset>
+     <normaloff>:/icons/icons/rollback.png</normaloff>:/icons/icons/rollback.png</iconset>
    </property>
    <property name="text">
     <string>Rollback</string>
@@ -865,7 +863,7 @@
   <action name="actionClear_output">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/eraser.gif</normaloff>:/icons/icons/eraser.gif</iconset>
+     <normaloff>:/icons/icons/eraser.png</normaloff>:/icons/icons/eraser.png</iconset>
    </property>
    <property name="text">
     <string>Clear result,output</string>
@@ -874,7 +872,7 @@
   <action name="actionObjects_Navigator">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/procedure.gif</normaloff>:/icons/icons/procedure.gif</iconset>
+     <normaloff>:/icons/icons/navigator.png</normaloff>:/icons/icons/navigator.png</iconset>
    </property>
    <property name="text">
     <string>Objects Navigator</string>
@@ -883,7 +881,7 @@
   <action name="actionObject_Viewer">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/trigger.gif</normaloff>:/icons/icons/trigger.gif</iconset>
+     <normaloff>:/icons/icons/view.png</normaloff>:/icons/icons/view.png</iconset>
    </property>
    <property name="text">
     <string>Object Viewer</string>
@@ -892,7 +890,7 @@
   <action name="actionHistory">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/history.gif</normaloff>:/icons/icons/history.gif</iconset>
+     <normaloff>:/icons/icons/history.png</normaloff>:/icons/icons/history.png</iconset>
    </property>
    <property name="text">
     <string>History</string>
@@ -904,7 +902,7 @@
   <action name="actionHelp">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/help.gif</normaloff>:/icons/icons/help.gif</iconset>
+     <normaloff>:/icons/icons/help.png</normaloff>:/icons/icons/help.png</iconset>
    </property>
    <property name="text">
     <string>Help</string>
@@ -913,7 +911,7 @@
   <action name="actionZoom_In">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/zoom.gif</normaloff>:/icons/icons/zoom.gif</iconset>
+     <normaloff>:/icons/icons/zoom_avanti.png</normaloff>:/icons/icons/zoom_avanti.png</iconset>
    </property>
    <property name="text">
     <string>Zoom In</string>
@@ -925,7 +923,7 @@
   <action name="actionZoom_Out">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/zoom.gif</normaloff>:/icons/icons/zoom.gif</iconset>
+     <normaloff>:/icons/icons/zoom_indietro.png</normaloff>:/icons/icons/zoom_indietro.png</iconset>
    </property>
    <property name="text">
     <string>Zoom Out</string>
@@ -937,7 +935,7 @@
   <action name="actionUndo">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/undo.gif</normaloff>:/icons/icons/undo.gif</iconset>
+     <normaloff>:/icons/icons/undo.png</normaloff>:/icons/icons/undo.png</iconset>
    </property>
    <property name="text">
     <string>Undo</string>
@@ -949,7 +947,7 @@
   <action name="actionRedo">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/redo.gif</normaloff>:/icons/icons/redo.gif</iconset>
+     <normaloff>:/icons/icons/redo.png</normaloff>:/icons/icons/redo.png</iconset>
    </property>
    <property name="text">
     <string>Redo</string>
@@ -961,7 +959,7 @@
   <action name="actionCopy">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/copy.gif</normaloff>:/icons/icons/copy.gif</iconset>
+     <normaloff>:/icons/icons/copy.png</normaloff>:/icons/icons/copy.png</iconset>
    </property>
    <property name="text">
     <string>Copy</string>
@@ -973,7 +971,7 @@
   <action name="actionPaste">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/paste.gif</normaloff>:/icons/icons/paste.gif</iconset>
+     <normaloff>:/icons/icons/paste.png</normaloff>:/icons/icons/paste.png</iconset>
    </property>
    <property name="text">
     <string>Paste</string>
@@ -985,7 +983,7 @@
   <action name="actionCut">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/cut.gif</normaloff>:/icons/icons/cut.gif</iconset>
+     <normaloff>:/icons/icons/cut.png</normaloff>:/icons/icons/cut.png</iconset>
    </property>
    <property name="text">
     <string>Cut</string>
@@ -997,7 +995,7 @@
   <action name="actionSelectAll">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/select_all.gif</normaloff>:/icons/icons/select_all.gif</iconset>
+     <normaloff>:/icons/icons/select_all.png</normaloff>:/icons/icons/select_all.png</iconset>
    </property>
    <property name="text">
     <string>Select All</string>
@@ -1009,7 +1007,7 @@
   <action name="actionGo_To_Line">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/right.gif</normaloff>:/icons/icons/right.gif</iconset>
+     <normaloff>:/icons/icons/right.png</normaloff>:/icons/icons/right.png</iconset>
    </property>
    <property name="text">
     <string>Go To Line</string>
@@ -1021,7 +1019,7 @@
   <action name="actionFold_All">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/minus.gif</normaloff>:/icons/icons/minus.gif</iconset>
+     <normaloff>:/icons/icons/collapse.png</normaloff>:/icons/icons/collapse.png</iconset>
    </property>
    <property name="text">
     <string>Fold/Unfold All</string>
@@ -1030,72 +1028,16 @@
   <action name="actionRect_selection">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/columns.gif</normaloff>:/icons/icons/columns.gif</iconset>
+     <normaloff>:/icons/icons/table.png</normaloff>:/icons/icons/table.png</iconset>
    </property>
    <property name="text">
     <string>Rect selection</string>
    </property>
   </action>
-  <action name="actionUSER_SMIPACK">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>USER_SMIPACK</string>
-   </property>
-  </action>
-  <action name="actionUSER_TEC">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>USER_SMITEC</string>
-   </property>
-  </action>
-  <action name="actionUSER_SMIMEC">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>USER_SMIMEC</string>
-   </property>
-  </action>
-  <action name="actionUSER_SMIWRAP">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>USER_SMIWRAP (SmiEnergia)</string>
-   </property>
-  </action>
-  <action name="actionUSER_ENOBERG">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>USER_ENOBERG</string>
-   </property>
-  </action>
-  <action name="actionUSER_SMIFORM">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>USER_FORM (SmiLab)</string>
-   </property>
-  </action>
-  <action name="actionUSER_SARCO">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>USER_SARCO</string>
-   </property>
-  </action>
   <action name="actionConnect">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/connect.gif</normaloff>:/icons/icons/connect.gif</iconset>
+     <normaloff>:/icons/icons/connect.png</normaloff>:/icons/icons/connect.png</iconset>
    </property>
    <property name="text">
     <string>Connect to specific database</string>
@@ -1107,7 +1049,7 @@
   <action name="actionUppercase_current_selection">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/uppercase.gif</normaloff>:/icons/icons/uppercase.gif</iconset>
+     <normaloff>:/icons/icons/uppercase.png</normaloff>:/icons/icons/uppercase.png</iconset>
    </property>
    <property name="text">
     <string>Uppercase</string>
@@ -1119,7 +1061,7 @@
   <action name="actionLowercase">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/lowercase.gif</normaloff>:/icons/icons/lowercase.gif</iconset>
+     <normaloff>:/icons/icons/lowercase.png</normaloff>:/icons/icons/lowercase.png</iconset>
    </property>
    <property name="text">
     <string>Lowercase</string>
@@ -1131,7 +1073,7 @@
   <action name="actionFind_object">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/navigator.gif</normaloff>:/icons/icons/navigator.gif</iconset>
+     <normaloff>:/icons/icons/navigator.png</normaloff>:/icons/icons/navigator.png</iconset>
    </property>
    <property name="text">
     <string>Find object</string>
@@ -1140,7 +1082,7 @@
   <action name="actionPreferences">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/gears.gif</normaloff>:/icons/icons/gears.gif</iconset>
+     <normaloff>:/icons/icons/gears.png</normaloff>:/icons/icons/gears.png</iconset>
    </property>
    <property name="text">
     <string>Preferences</string>
@@ -1149,7 +1091,7 @@
   <action name="actionCreate_autocompletation_dictionary">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/overwrite.gif</normaloff>:/icons/icons/overwrite.gif</iconset>
+     <normaloff>:/icons/icons/dictionary.png</normaloff>:/icons/icons/dictionary.png</iconset>
    </property>
    <property name="text">
     <string>Autocomplete dictionary</string>
@@ -1164,7 +1106,7 @@
    </property>
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/end_of_line.gif</normaloff>:/icons/icons/end_of_line.gif</iconset>
+     <normaloff>:/icons/icons/end_of_line.png</normaloff>:/icons/icons/end_of_line.png</iconset>
    </property>
    <property name="text">
     <string>Show end of line</string>
@@ -1173,7 +1115,7 @@
   <action name="actionMaps_procedure_function">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/map.gif</normaloff>:/icons/icons/map.gif</iconset>
+     <normaloff>:/icons/icons/map.png</normaloff>:/icons/icons/map.png</iconset>
    </property>
    <property name="text">
     <string>Map procedures/functions</string>

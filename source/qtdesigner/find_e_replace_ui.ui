@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="resource.qrc">
-    <normaloff>:/icons/icons/replace.gif</normaloff>:/icons/icons/replace.gif</iconset>
+    <normaloff>:/icons/icons/MSql.ico</normaloff>:/icons/icons/MSql.ico</iconset>
   </property>
   <layout class="QFormLayout" name="formLayout">
    <item row="0" column="0">

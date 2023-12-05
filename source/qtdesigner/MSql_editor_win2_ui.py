@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MSql_win2(object):
     def setupUi(self, MSql_win2):
         MSql_win2.setObjectName("MSql_win2")
-        MSql_win2.resize(848, 600)
+        MSql_win2.resize(848, 601)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/icons/icons/MSql.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MSql_win2.setWindowIcon(icon)
@@ -94,7 +94,7 @@ class Ui_MSql_win2(object):
         self.gridLayout.setObjectName("gridLayout")
         self.b_refresh_map = QtWidgets.QPushButton(self.dockWidgetContents)
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(":/icons/icons/refresh.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2.addPixmap(QtGui.QPixmap(":/icons/icons/refresh.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.b_refresh_map.setIcon(icon2)
         self.b_refresh_map.setObjectName("b_refresh_map")
         self.gridLayout.addWidget(self.b_refresh_map, 0, 0, 1, 1)

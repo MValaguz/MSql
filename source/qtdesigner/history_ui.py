@@ -62,7 +62,7 @@ class Ui_history_window(object):
         self.gridLayout.addWidget(self.o_lst1, 2, 0, 1, 1)
         self.b_purge = QtWidgets.QPushButton(self.centralwidget)
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(":/icons/icons/failed.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2.addPixmap(QtGui.QPixmap(":/icons/icons/failed.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.b_purge.setIcon(icon2)
         self.b_purge.setObjectName("b_purge")
         self.gridLayout.addWidget(self.b_purge, 3, 0, 1, 1)

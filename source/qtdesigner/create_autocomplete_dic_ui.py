@@ -42,7 +42,7 @@ class Ui_create_autocomplete_dic_window(object):
         self.verticalLayout_2.addWidget(self.groupBox)
         self.b_create = QtWidgets.QPushButton(self.layoutWidget)
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/icons/icons/go.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap(":/icons/icons/dictionary.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.b_create.setIcon(icon1)
         self.b_create.setObjectName("b_create")
         self.verticalLayout_2.addWidget(self.b_create)
