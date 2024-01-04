@@ -62,6 +62,7 @@ Tipi_Oggetti_DB = { 'Tables':'TABLE',
                     'Unique keys': 'UNIQUE_KEY',
                     'Foreign keys': 'FOREIGN_KEY',
                     'Check keys': 'CHECK_KEY',
+                    'Indexes': 'INDEXES',
                     'Synonyms': 'SYNONYM' }
 
 ###
@@ -100,6 +101,12 @@ class My_MSql_Lexer(Qsci.QsciLexerSQL):
         p_editor.setAutoIndent(True)
         # tabulatore a 4 caratteri
         p_editor.setTabWidth(4)   
+        # evidenzia l'intera riga dove posizionato il cursore
+        p_editor.setCaretLineVisible(True)
+        p_editor.setCaretLineBackgroundColor(QColor("#FFFF99"))
+        # attivo il margine 0 con la numerazione delle righe
+        p_editor.setMarginType(0, Qsci.QsciScintilla.NumberMargin)        
+        p_editor.setMarginsFont(QFont("Courier New",9))                   
                         
         # attivo autocompletamento durante la digitazione 
         # (comprende sia le parole del documento corrente che quelle aggiunte da un elenco specifico)
@@ -415,12 +422,12 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             Restituisce l'oggetto di classe MSql_win2_class riferito alla window di editor attiva
         """        
         # Ricavo quale sia la window di editor attiva in questo momento
-        v_window_attiva = self.mdiArea.activeSubWindow()            
-        if v_window_attiva is not None:                                             
+        self.window_attiva = self.mdiArea.activeSubWindow()            
+        if self.window_attiva is not None:                                             
             # scorro la lista-oggetti-editor fino a quando non trovo l'oggetto che ha lo stesso titolo della window attiva
             for i in range(0,len(self.o_lst_window2)):
                 if not self.o_lst_window2[i].v_editor_chiuso:
-                    if self.o_lst_window2[i].objectName() == v_window_attiva.objectName():
+                    if self.o_lst_window2[i].objectName() == self.window_attiva.objectName():
                         return self.o_lst_window2[i]
         return None                    
 
@@ -562,14 +569,16 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                     o_MSql_win2.setObjectName(v_nome_file)
                     o_MSql_win2.setWindowTitle(titolo_window(v_nome_file))
                     self.aggiorna_elenco_file_recenti(v_nome_file)
+                    self.window_attiva.setObjectName(v_nome_file) # notare come il nome della window va forzato anche sulla window attiva
             # Salvataggio del file come... (semplicemente non gli passo il titolo)
             elif p_slot.text() == 'Save as':
                 v_ok, v_nome_file = salvataggio_editor(True, o_MSql_win2.objectName(), o_MSql_win2.e_sql.text())
-                if v_ok == 'ok':
-                    o_MSql_win2.v_testo_modificato = False
-                    o_MSql_win2.setObjectName(v_nome_file)
+                if v_ok == 'ok':                    
+                    o_MSql_win2.v_testo_modificato = False                    
+                    o_MSql_win2.setObjectName(v_nome_file)                    
                     o_MSql_win2.setWindowTitle(titolo_window(v_nome_file))
-                    self.aggiorna_elenco_file_recenti(v_nome_file)
+                    self.aggiorna_elenco_file_recenti(v_nome_file)                    
+                    self.window_attiva.setObjectName(v_nome_file) # notare come il nome della window va forzato anche sulla window attiva
             # Creazione del dizionario termini per autocompletamento dell'editor
             elif p_slot.text() == 'Autocomplete dictionary':
                 self.crea_dizionario_per_autocompletamento()
@@ -634,7 +643,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             elif p_slot.text() == 'Go To Line':
                 o_MSql_win2.slot_goto_line()
             # Esecuzione dell'sql
-            elif p_slot.text() == 'Execute':
+            elif p_slot.text() == 'Execute':                
                 v_ok = o_MSql_win2.slot_esegui()
                 if v_ok == 'ko':
                     message_error('Script stopped for error!')
@@ -1063,6 +1072,19 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                         v_select += "  AND UPPER(CONSTRAINT_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%' AND INVALID IS NOT NULL"
                 # aggiungo order by
                 v_select += "  ORDER BY CONSTRAINT_NAME"                        
+            # il tipo oggetto sono gli indici ...
+            elif v_tipo_oggetto == 'INDEXES':                
+                v_select = """SELECT INDEX_NAME, 0 INVALID FROM ALL_INDEXES WHERE OWNER='"""+self.e_user_name+"""'"""
+                # se necessario applico il filtro di ricerca
+                if self.oggetti_db_ricerca.text() != '' or self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid':
+                    if self.oggetti_db_tipo_ricerca.currentText() == 'Start with':
+                        v_select += "  AND UPPER(INDEX_NAME) LIKE '" + self.oggetti_db_ricerca.text().upper() + "%'"
+                    elif self.oggetti_db_tipo_ricerca.currentText() == 'Like':
+                        v_select += "  AND UPPER(INDEX_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%'"
+                    elif self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid': 
+                        v_select += "  AND UPPER(INDEX_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%' AND INVALID IS NOT NULL"
+                # aggiungo order by
+                v_select += "  ORDER BY INDEX_NAME"                      
             # il tipo oggetto sono i sinonimi ...
             elif v_tipo_oggetto == 'SYNONYM':                
                 v_select = """SELECT SYNONYM_NAME, 0 INVALID FROM ALL_SYNONYMS WHERE OWNER='"""+self.e_user_name+"""'"""
@@ -1214,6 +1236,8 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 self.v_cursor_db_obj.execute("SELECT DBMS_METADATA.GET_DDL('CONSTRAINT','"+v_nome_oggetto+"') FROM DUAL")
             elif v_tipo_oggetto == 'FOREIGN_KEY':
                 self.v_cursor_db_obj.execute("SELECT DBMS_METADATA.GET_DDL('REF_CONSTRAINT','"+v_nome_oggetto+"') FROM DUAL")
+            elif v_tipo_oggetto == 'INDEXES':
+                self.v_cursor_db_obj.execute("SELECT DBMS_METADATA.GET_DDL('INDEX','"+v_nome_oggetto+"') FROM DUAL")
             elif v_tipo_oggetto == 'SYNONYM':
                 self.v_cursor_db_obj.execute("SELECT DBMS_METADATA.GET_DDL('SYNONYM','"+v_nome_oggetto+"') FROM DUAL")
             elif v_tipo_oggetto in ('PROCEDURE','FUNCTION','TRIGGER','VIEW','SEQUENCE'):                    
@@ -1742,7 +1766,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         super(MSql_win2_class, self).__init__()        
         self.setupUi(self)
                 
-        # imposto il titolo della nuova window (da notare come il nome completo dal file-editor sia annegato nel nome dell'oggetto!)
+        # imposto il titolo della nuova window (da notare come il nome completo dal file-editor sia annegato nel nome dell'oggetto!)        
         self.setObjectName(p_titolo)
         self.setWindowTitle(titolo_window(self.objectName()))
 
@@ -1759,17 +1783,11 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.splitter.setStretchFactor(0,1)
 
         ###
-        # IMPOSTAZIONI DELL'EDITOR SCINTILLA
+        # IMPOSTAZIONI DELL'EDITOR SCINTILLA (Notare come le impostazioni delle proprietà siano stato postate nella definizione del lexer)
         ###
         # attivo UTF-8 (se richiesto)
         if o_global_preferences.utf_8:
             self.e_sql.setUtf8(True)                                                        
-        # evidenzia l'intera riga dove posizionato il cursore
-        self.e_sql.setCaretLineVisible(True)
-        self.e_sql.setCaretLineBackgroundColor(QColor("#FFFF99"))
-        # attivo il margine 0 con la numerazione delle righe
-        self.e_sql.setMarginType(0, Qsci.QsciScintilla.NumberMargin)        
-        self.e_sql.setMarginsFont(QFont("Courier New",9))           
         # attivo il lexer per evidenziare il codice del linguaggio SQL. Notare come faccia riferimento ad un oggetto che a sua volta personalizza il 
         # dizionario del lexer SQL, aggiungendo (se sono state caricate) le parole chiave di: tabelle, viste, package, ecc.
         self.v_lexer = My_MSql_Lexer(self.e_sql)                
@@ -1795,8 +1813,10 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.v_esecuzione_ok = False  
         # inizializzo var che indica che si è in fase di caricamento dei dati
         self.v_carico_pagina_in_corso = False   
-        # inzializzo la var che conterrà eventuale matrice dei dati modificati
+        # inizializzo la var che conterrà eventuale matrice dei dati modificati
         self.v_matrice_dati_modificati = []
+        # inizializzo la var che contiene le intestazioni dell'output in tabella
+        self.nomi_intestazioni = []
         # salva l'altezza del font usato nella sezione result e output e viene usata per modificare l'altezza della cella
         self.v_altezza_font_output = 9
         # settaggio dei font di risultato e output (il font è una stringa con il nome del font e separato da virgola l'altezza)
@@ -2347,8 +2367,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             except cx_Oracle.Error as e:                                                                
                 # ripristino icona freccia del mouse
                 QApplication.restoreOverrideCursor()                        
-                # emetto errore sulla barra di stato 
-                errorObj, = e.args                                       
+                # emetto errore 
+                errorObj, = e.args                     
                 self.scrive_output("Error: " + errorObj.message, "E")                 
                 # per posizionarmi alla riga in errore ho solo la variabile offset che riporta il numero di carattere a cui l'errore si è verificato
                 v_riga, v_colonna = x_y_from_offset_text(p_plsql, errorObj.offset)                

@@ -412,6 +412,15 @@
             </item>
             <item>
              <property name="text">
+              <string>Indexes</string>
+             </property>
+             <property name="icon">
+              <iconset resource="resource.qrc">
+               <normaloff>:/icons/icons/index.png</normaloff>:/icons/icons/index.png</iconset>
+             </property>
+            </item>
+            <item>
+             <property name="text">
               <string>Synonyms</string>
              </property>
              <property name="icon">
@@ -609,6 +618,8 @@
    <addaction name="actionCommit"/>
    <addaction name="actionRollback"/>
    <addaction name="separator"/>
+   <addaction name="actionUndo"/>
+   <addaction name="actionRedo"/>
    <addaction name="actionGo_To_Line"/>
    <addaction name="actionFind"/>
    <addaction name="actionFind_and_Replace"/>
@@ -617,6 +628,9 @@
    <addaction name="actionZoom_In"/>
    <addaction name="actionZoom_Out"/>
    <addaction name="separator"/>
+   <addaction name="actionAutoColumnResize"/>
+   <addaction name="actionExport_to_Excel"/>
+   <addaction name="separator"/>
    <addaction name="actionClear_output"/>
    <addaction name="actionMake_table_editable"/>
    <addaction name="actionSave_modified_data"/>
@@ -624,6 +638,7 @@
    <addaction name="actionHistory"/>
    <addaction name="actionCreate_autocompletation_dictionary"/>
    <addaction name="actionPreferences"/>
+   <addaction name="actionProgram_info"/>
   </widget>
   <action name="actionOpen">
    <property name="icon">

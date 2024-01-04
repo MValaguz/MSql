@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/index.png</file>
     <file>icons/find_adn_replace.png</file>
     <file>icons/trigger.png</file>
     <file>icons/sequence.png</file>
