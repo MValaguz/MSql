@@ -31,9 +31,9 @@ class history_class(QMainWindow, Ui_history_window):
         self.nome_db = p_nome_db
 
         # apro il db attraverso gli strumenti librerie QT
-        v_sqlite_conn = QSqlDatabase.addDatabase("QSQLITE")
-        v_sqlite_conn.setDatabaseName(self.nome_db)
-        if not v_sqlite_conn.open():
+        self.v_sqlite_conn = QSqlDatabase.addDatabase("QSQLITE")
+        self.v_sqlite_conn.setDatabaseName(self.nome_db)
+        if not self.v_sqlite_conn.open():
             message_error('Error to open database')
             return 'ko'
 
@@ -69,6 +69,8 @@ class history_class(QMainWindow, Ui_history_window):
         v_vertical_header = self.o_lst1.verticalHeader()
         v_vertical_header.setDefaultSectionSize(8)   
         self.o_lst1.show()
+        # chiudo il database in modo che non vada in blocco per insert successive da parte di MSql
+        self.v_sqlite_conn.close()
 
     def slot_purge(self):
         """

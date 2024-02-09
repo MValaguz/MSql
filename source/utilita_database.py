@@ -489,7 +489,7 @@ def write_sql_history(p_db_name, p_tipo, p_testo):
     """ 
     if p_testo != '':
         v_conn = sqlite3.connect(database=p_db_name)
-        v_curs = v_conn.cursor()
+        v_curs = v_conn.cursor()        
         v_curs.execute("""CREATE TABLE IF NOT EXISTS 
                           HISTORY (ID         INTEGER PRIMARY KEY AUTOINCREMENT,
                                    TIPO       VARCHAR(20) NOT NULL,
@@ -497,8 +497,12 @@ def write_sql_history(p_db_name, p_tipo, p_testo):
                                    ISTRUZIONE BLOB        NOT NULL
                               )""")     
 
-        v_curs.execute("""INSERT INTO HISTORY(TIPO,ORARIO,ISTRUZIONE) VALUES(?,?,?)""", (p_tipo, datetime.datetime.now(), p_testo) )
-        v_conn.commit()
+        try:
+            v_curs.execute("""INSERT INTO HISTORY(TIPO,ORARIO,ISTRUZIONE) VALUES(?,?,?)""", (p_tipo, datetime.datetime.now(), p_testo) )
+            v_conn.commit()
+        except sqlite3.OperationalError:
+            message_error('Error while writing in history log!' + chr(10) + 'Probably the file MSql_history.db is locked!')        
+                
         v_conn.close()    
     
 def purge_sql_history(p_db_name):

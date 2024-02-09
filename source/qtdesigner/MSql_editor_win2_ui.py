@@ -104,6 +104,7 @@ class Ui_MSql_win2(object):
         self.label.setObjectName("label")
         self.horizontalLayout.addWidget(self.label)
         self.e_map_search = QtWidgets.QLineEdit(self.dockWidgetContents)
+        self.e_map_search.setClearButtonEnabled(True)
         self.e_map_search.setObjectName("e_map_search")
         self.horizontalLayout.addWidget(self.e_map_search)
         self.gridLayout.addLayout(self.horizontalLayout, 1, 0, 1, 1)

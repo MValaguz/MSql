@@ -40,7 +40,7 @@ def extract_word_from_cursor_pos(p_string, p_pos):
 
     # inizio a comporre la parola partendo dalla posizione del cursore (se non trovo nulla esco)
     v_word=p_string[p_pos]    
-    if v_word is None or v_word in ('',' ','=',':','.','(',')',';'):
+    if v_word is None or v_word in ('',' ','=',':','.','(',')',';',','):
         return ''
 
     # mi sposto a sinistra rispetto al cursore e compongo la parola    
@@ -48,7 +48,7 @@ def extract_word_from_cursor_pos(p_string, p_pos):
     while True and v_index > 0:
         v_index -= 1
         if v_index < len(p_string):
-            if p_string[v_index] not in (' ','=',':','.','(',')',';'):
+            if p_string[v_index] not in (' ','=',':','.','(',')',';',','):
                 v_word = p_string[v_index] + v_word
             else:
                 break
@@ -60,7 +60,7 @@ def extract_word_from_cursor_pos(p_string, p_pos):
     while True:
         v_index += 1
         if v_index < len(p_string):
-            if p_string[v_index] not in (' ','=',':','\n','\r','.','(',')',';'):
+            if p_string[v_index] not in (' ','=',':','\n','\r','.','(',')',';',','):
                 v_word += p_string[v_index]
             else:
                 break
@@ -69,15 +69,21 @@ def extract_word_from_cursor_pos(p_string, p_pos):
 
     return v_word
 
-def x_y_from_offset_text(p_text, p_offset):
+def x_y_from_offset_text(p_text, p_offset, p_setting_eol):
     """
        Analizzando il testo presente in p_text, restituisce il numero riga e colonna
        della posizione p_offset
+       Il parametro p_setting_eol indica il tipo di ritorno a capo W=Windows, U=Unix
     """
     # spezzo il testo in righe (in ambiente Windows l'eol end of line è indicato tramite LF-CR)    
     v_riga = 0    
     v_prog = 0
-    for v_testo in p_text.split('\r\n'):        
+    if p_setting_eol == 'W':
+        v_eol = '\r\n'
+    else:
+        v_eol = '\n'
+
+    for v_testo in p_text.split(v_eol):        
         v_prog += len(v_testo) + 2 # si sommano i due caratteri di fine riga        
         if v_prog >= p_offset:            
             # --> esco con il risultato (il numero di colonna viene ricavato incrociando offset e posizione raggiunta)
@@ -195,12 +201,13 @@ def estrai_procedure_function(p_testo):
 ######################################################################################################################
 # TEST DELLA FUNZIONE CHE PARTENDO DA CODICE PL-SQL, RESTITUISCE UN OGGETTO CHE CONTIENE TUTTE LE DEFINIZIONI TROVATE
 ######################################################################################################################
-if __name__ == "__main__":   
-   v_file = open('c:\Msql\CG$SM_MAFOR.msql','r', newline='').read()   
-   v_lista_def = estrai_procedure_function(v_file.split(chr(10)))
-   # emetto a video il contenuto di tutto quello che ho trovato nel testo
-   v_write = open('c:\\Msql\\output.txt','w', newline='')
-   for ele in v_lista_def:
-        v_write.write(ele.nome_definizione+' '+str(ele.numero_riga_testo)+'\r\n')
-        for par in ele.lista_parametri:
-            v_write.write('   ' + par + '\r\n')
+if __name__ == "__main__":       
+    v_file = open('c:\Msql\CG$SM_MAFOR.msql','r', newline='').read()   
+    v_lista_def = estrai_procedure_function(v_file.split(chr(10)))
+    # emetto a video il contenuto di tutto quello che ho trovato nel testo
+    v_write = open('c:\\Msql\\output.txt','w', newline='')
+    for ele in v_lista_def:
+            v_write.write(ele.nome_definizione+' '+str(ele.numero_riga_testo)+'\r\n')
+            for par in ele.lista_parametri:
+                v_write.write('   ' + par + '\r\n')    
+    #scrivi_lista_in_output(['ciao\n','marco\r\n'])

@@ -19,21 +19,18 @@
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
-    <layout class="QGridLayout" name="gridLayout" columnstretch="0,1">
-     <item row="0" column="1">
-      <widget class="QComboBox" name="e_find">
-       <property name="editable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
       <widget class="QLabel" name="label">
        <property name="text">
         <string>Text to find:</string>
        </property>
-       <property name="buddy">
-        <cstring>e_find</cstring>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="e_find">
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

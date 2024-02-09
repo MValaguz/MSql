@@ -1,6 +1,7 @@
 1) il file "compile_MSql.bat" viene lanciato per primo 
    prende i sorgenti di python da "Documenti\GitHub\MSql"
    e li compila in C:\MSql_exe\
+   Di fatto il risultato di questo passaggio produce un eseguibile....e il passaggio successivo serve solo per impacchettare il tutto
 2) utilizzando il programma "Inno setup" 
    e aprendo lo script che si trova in questa cartella, 
    è possibile creare un programma d'installazione 

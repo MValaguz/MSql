@@ -1139,6 +1139,22 @@
     <string>Ctrl+M</string>
    </property>
   </action>
+  <action name="actionWindows_CR_LF">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Windows (CR+LF)</string>
+   </property>
+  </action>
+  <action name="actionLinux_LF">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Unix (LF)</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>oggetti_db_scelta</tabstop>

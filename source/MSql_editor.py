@@ -21,14 +21,15 @@ import sys
 import os 
 import datetime 
 import locale
-import base64
+import re
 # Librerie di data base
 import cx_Oracle, oracle_my_lib
 # Librerie grafiche QT
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from PyQt5 import Qsci
+# Librerie QScintilla
+from PyQt5.Qsci import *
 # Classe per la gestione delle preferenze
 from preferences import preferences_class
 # Classi qtdesigner (win1 è la window principale, win2 la window dell'editor e win3 quella delle info di programma)
@@ -76,51 +77,54 @@ v_global_connesso = False
 v_global_work_dir = 'C:\\MSql\\'
 # Lista di parole aggiuntive al lexer che evidenzia le parole nell'editor
 v_global_my_lexer_keywords = []
-# Oggetto che carica le preferenze tramite l'apposita classe
+# Oggetto che carica le preferenze tramite l'apposita classe (notare che già a questa istruzione le preferenze vengono caricate!)
 o_global_preferences = preferences_class(v_global_work_dir + 'MSql.ini')
 # Contiene le coordinate della main window
 v_global_main_geometry = object
 
-class My_MSql_Lexer(Qsci.QsciLexerSQL):
+class My_MSql_Lexer(QsciLexerSQL):
     """
         Questa classe amplifica il dizionario di default del linguaggio SQL presente in QScintilla.
         In pratica aggiunge tutti i nomi di tabelle, viste, procedure, ecc. in modo vengano evidenziati
-        Si base sulla lista v_global_my_lexer_keywords che viene caricata quando ci si connette al DB
+        Si basa sulla lista v_global_my_lexer_keywords che viene caricata quando ci si connette al DB
         In base al valore di index è possibile settare parole chiave di una determinata categoria
-        1 = parole primarie ,2 = parole secondarie, 3 = commenti, 4 = classi, ecc.. usato 8 (boh!) 
+        1=parole primarie, 2=parole secondarie, 3=commenti, 4=classi, ecc.. usato 8 (boh!) 
     """
     def __init__(self, p_editor):        
-        super(My_MSql_Lexer, self).__init__()        
+        super(My_MSql_Lexer, self).__init__()  
+
+        # salvo il puntatore all'editor all'interno del lexer
+        self.p_editor = p_editor      
 
         # attivo le righe verticali che segnano le indentazioni
-        p_editor.setIndentationGuides(True)                
+        self.p_editor.setIndentationGuides(True)                
         # attivo i margini con + e - 
-        p_editor.setFolding(p_editor.BoxedTreeFoldStyle, 2)
+        self.p_editor.setFolding(p_editor.BoxedTreeFoldStyle, 2)
         # indentazione
-        p_editor.setIndentationWidth(4)
-        p_editor.setAutoIndent(True)
+        self.p_editor.setIndentationWidth(4)
+        self.p_editor.setAutoIndent(True)
         # tabulatore a 4 caratteri
-        p_editor.setTabWidth(4)   
+        self.p_editor.setTabWidth(4)   
         # evidenzia l'intera riga dove posizionato il cursore
-        p_editor.setCaretLineVisible(True)
-        p_editor.setCaretLineBackgroundColor(QColor("#FFFF99"))
+        self.p_editor.setCaretLineVisible(True)
+        self.p_editor.setCaretLineBackgroundColor(QColor("#FFFF99"))
         # attivo il margine 0 con la numerazione delle righe
-        p_editor.setMarginType(0, Qsci.QsciScintilla.NumberMargin)        
-        p_editor.setMarginsFont(QFont("Courier New",9))                   
+        self.p_editor.setMarginType(0, QsciScintilla.NumberMargin)        
+        self.p_editor.setMarginsFont(QFont("Courier New",9))                   
                         
         # attivo autocompletamento durante la digitazione 
         # (comprende sia le parole del documento corrente che quelle aggiunte da un elenco specifico)
         # attenzione! Da quanto ho capito, il fatto di avere attivo il lexer con linguaggio specifico (sql) questo prevale
         # sul funzionamento di alcuni aspetti dell'autocompletamento....quindi ad un certo punto mi sono arreso con quello che
         # sono riuscito a fare
-        self.v_api_lexer = Qsci.QsciAPIs(self)            
+        self.v_api_lexer = QsciAPIs(self)            
         # aggiungo tutti i termini di autocompletamento (si trovanon all'interno di una tabella che viene generata a comando)
-        p_editor.setAutoCompletionSource(Qsci.QsciScintilla.AcsAll)                
+        self.p_editor.setAutoCompletionSource(QsciScintilla.AcsAll)                
         self.carica_dizionario_per_autocompletamento()                
         # indico dopo quanti caratteri che sono stati digitati dall'utente, si deve attivare l'autocompletamento
-        p_editor.setAutoCompletionThreshold(3)  
+        self.p_editor.setAutoCompletionThreshold(3)  
         # attivo autocompletamento sia per la parte del contenuto del documento che per la parte di parole chiave specifiche
-        p_editor.autoCompleteFromAll()
+        self.p_editor.autoCompleteFromAll()
 
         # imposto il font dell'editor in base alle preferenze 
         if o_global_preferences.font_editor != '':
@@ -132,7 +136,14 @@ class My_MSql_Lexer(Qsci.QsciLexerSQL):
 
         self.setFoldCompact(False)
         self.setFoldComments(True)
-        self.setFoldAtElse(True)              
+        self.setFoldAtElse(True)     
+
+        # imposto gli elementi che servono all'interno dell'editor per attivare la funzione
+        # tale per cui quando utente fa doppio click su una parola, vengono evidenziate tutte 
+        # le parole uguali presenti nel testo!         
+        self.p_editor.selectionChanged.connect(self.cambio_di_selezione_testo)        
+        self.selection_lock = False
+        self.SELECTION_INDICATOR = 4 
 
     def keywords(self, index):
         """
@@ -141,9 +152,11 @@ class My_MSql_Lexer(Qsci.QsciLexerSQL):
         """
         global v_global_my_lexer_keywords        
 
-        keywords = Qsci.QsciLexerSQL.keywords(self, index) or ''
+        keywords = QsciLexerSQL.keywords(self, index) or ''        
         
-        if index == 8:            
+        # l'indice 6 è stato messo dopo che sono iniziati gli esperimenti per evidenziare la parola selezionata con doppio click...prima era 8
+        # anche se non compreso il significato di questa posizione!
+        if index == 6:            
             if len(v_global_my_lexer_keywords) > 0:                                            
                 v_new_keywords = ''
                 for v_keyword in v_global_my_lexer_keywords:
@@ -169,7 +182,7 @@ class My_MSql_Lexer(Qsci.QsciLexerSQL):
         if os.path.isfile(v_global_work_dir + 'MSql_autocompletion.ini'):
             # carico i dati presenti nel file di testo (questo è stato creato con la voce di menu dello stesso MSql che si chiama "Create autocomplete dictonary")
             with open(v_global_work_dir + 'MSql_autocompletion.ini','r') as file:
-                for v_riga in file:                
+                for v_riga in file:                                    
                     self.v_api_lexer.add(v_riga.upper())                                    
                     self.v_api_lexer.add(v_riga.lower())                                    
         
@@ -177,10 +190,137 @@ class My_MSql_Lexer(Qsci.QsciLexerSQL):
 
     def autoCompletionWordSeparators(self):
         """
-           Questa funzione è molto importante perché aggiunge al lexer il separatore delle parole quando si usa l'autocompletamento!!!!!
+           Questa funzione è molto importante perché aggiunge al lexer il separatore delle parole (il punto) quando si usa l'autocompletamento!!!!!
            E' stato molto difficile trovare questa cosa!!!
         """
         return ['.']
+
+    def cambio_di_selezione_testo(self):
+        """
+           Viene richiamata ogni volta che viene selezionato del testo
+           E' usata per quando utente facendo doppio click su una parola, il programma evidenzia tutti i punti dove quella parola è presente nel testo
+        """
+        # la variabile lock viene usata per evitare problemi di ricorsione
+        if self.selection_lock == False:
+            self.selection_lock = True
+            selected_text = self.p_editor.selectedText()
+            self.clear_selection_highlights()
+            if selected_text.isidentifier():
+                self._highlight_selected_text(selected_text,case_sensitive=False,regular_expression=True)
+            self.selection_lock = False        
+
+    def clear_selection_highlights(self):
+        """
+           Pulisce gli indicatori delle parole 
+        """        
+        self.p_editor.clearIndicatorRange(0,0,self.p_editor.lines(),self.p_editor.lineLength(self.p_editor.lines()-1),self.SELECTION_INDICATOR)
+
+    def _highlight_selected_text(self,
+                                 highlight_text,
+                                 case_sensitive=False,
+                                 regular_expression=False):
+        """
+           Same as the highlight_text function, but adapted for the use
+           with the __selection_changed functionality.
+        """
+        # Setup the indicator style, the highlight indicator will be 0
+        self.set_indicator("selection")
+        # Get all instances of the text using list comprehension and the re module
+        matches = self.find_all(highlight_text,case_sensitive,regular_expression,text_to_bytes=True,whole_words=True)
+        # Check if the match list is empty
+        if matches:
+            # Use the raw highlight function to set the highlight indicators
+            self.highlight_raw(matches)
+
+    def highlight_raw(self, highlight_list):
+        """
+           Core highlight function that uses Scintilla messages to style indicators.
+           QScintilla's fillIndicatorRange function is to slow for large numbers of
+           highlights!
+           INFO:   This is done using the scintilla "INDICATORS" described in the official
+                   scintilla API (http://www.scintilla.org/ScintillaDoc.html#Indicators)
+        """
+        scintilla_command = QsciScintillaBase.SCI_INDICATORFILLRANGE
+        for highlight in highlight_list:
+            start   = highlight[1]
+            length  = highlight[3] - highlight[1]
+            self.p_editor.SendScintilla(scintilla_command,start,length)
+
+    def _set_indicator(self,
+                       indicator,
+                       fore_color):
+        """
+           Set the indicator settings
+        """
+        self.p_editor.indicatorDefine(QsciScintilla.IndicatorStyle.StraightBoxIndicator,indicator)
+        self.p_editor.setIndicatorForegroundColor(QColor(fore_color),indicator)
+        self.p_editor.SendScintilla(QsciScintillaBase.SCI_SETINDICATORCURRENT,indicator)
+
+    def set_indicator(self, indicator):
+        """
+          Select the indicator that will be used for use with
+          Scintilla's indicator functionality
+        """                
+        if indicator == "selection":
+            # indica il colore da dare alla selezione
+            self._set_indicator(self.SELECTION_INDICATOR,'#643A93FF')        
+
+    def find_all(self,
+                 search_text,
+                 case_sensitive=False,
+                 regular_expression=False,
+                 text_to_bytes=False,
+                 whole_words=False):
+        """
+           Find all instances of a string and return a list of (line, index_start, index_end)
+        """
+        #Find all instances of the search string and return the list
+        matches = self.index_strings_in_text(search_text,self.p_editor.text(),case_sensitive,regular_expression,text_to_bytes,whole_words)
+        return matches
+
+    def index_strings_in_text(self,
+                              search_text, 
+                              text, 
+                              case_sensitive=False, 
+                              regular_expression=False, 
+                              text_to_bytes=False,
+                              whole_words=False):
+        """ 
+           Return all instances of the searched text in the text string
+           as a list of tuples(0, match_start_position, 0, match_end_position).
+        
+           Parameters:
+               - search_text:
+                   the text/expression to search for in the text parameter
+               - text:
+                   the text that will be searched through
+               - case_sensitive:
+                   case sensitivity of the performed search
+               - regular_expression:
+                   selection of whether the search string is a regular expression or not
+               - text_to_bytes:
+                   whether to transform the search_text and text parameters into byte objects
+               - whole_words:
+                   match only whole words
+        """
+        # Check if whole words only should be matched
+        if whole_words == True:
+            search_text = r"\b(" + search_text + r")\b"
+        # Convert text to bytes so that utf-8 characters will be parsed correctly
+        if text_to_bytes == True:
+            search_text = bytes(search_text, "utf-8")
+            text = bytes(text, "utf-8")
+        # Set the search text according to the regular expression selection
+        if regular_expression == False:
+            search_text = re.escape(search_text)
+        # Compile expression according to case sensitivity flag
+        if case_sensitive == True:
+            compiled_search_re = re.compile(search_text)
+        else:
+            compiled_search_re = re.compile(search_text, re.IGNORECASE)
+        # Create the list with all of the matches
+        list_of_matches = [(0, match.start(), 0, match.end()) for match in re.finditer(compiled_search_re, text)]
+        return list_of_matches
 
 def salvataggio_editor(p_save_as, p_nome, p_testo):
     """
@@ -237,6 +377,7 @@ def titolo_window(p_titolo_file):
     v_solo_nome_file_senza_suffisso = os.path.splitext(v_solo_nome_file)[0]
 
     return v_solo_nome_file_senza_suffisso
+    
 #
 #  __  __    _    ___ _   _  __        _____ _   _ ____   _____        __
 # |  \/  |  / \  |_ _| \ | | \ \      / /_ _| \ | |  _ \ / _ \ \      / /
@@ -248,7 +389,7 @@ def titolo_window(p_titolo_file):
 class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):    
     """
         Classe di gestione MDI principale 
-        p_nome_file_da_caricare indica eventuale file da aprire all'avvio
+        p_nome_file_da_caricare indica eventuale file da aprire all'avvio (capita quando da desktop si fa doppio click su icona di un file .msql)
     """       
     def __init__(self, p_nome_file_da_caricare):
         global o_global_preferences    
@@ -312,15 +453,10 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         self.l_tabella_editabile.setStyleSheet('color: black;')
         self.statusBar.addPermanentWidget(self.l_tabella_editabile)                
         # Numero totale di righe di testo
-        self.l_numero_righe = QLabel()
-        self.l_numero_righe.setFrameStyle(QFrame.Panel | QFrame.Sunken)
-        self.statusBar.addPermanentWidget(self.l_numero_righe)                
-        self.l_numero_righe.setText("Lines: 0")
-        # Numero totale di caratteri di testo
-        self.l_numero_caratteri = QLabel()
-        self.l_numero_caratteri.setFrameStyle(QFrame.Panel | QFrame.Sunken)
-        self.statusBar.addPermanentWidget(self.l_numero_caratteri)                
-        self.l_numero_caratteri.setText("Length: 0")
+        self.l_num_righe_e_char = QLabel()
+        self.l_num_righe_e_char.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        self.statusBar.addPermanentWidget(self.l_num_righe_e_char)                
+        self.l_num_righe_e_char.setText("Lines: 0 , Length: 0")        
         # Stato attivazione inserito di testo o overwrite
         self.l_overwrite_enabled = QLabel("INS")
         self.l_overwrite_enabled.setFrameStyle(QFrame.Panel | QFrame.Sunken)
@@ -329,6 +465,10 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         self.l_utf8_enabled = QLabel()
         self.l_utf8_enabled.setFrameStyle(QFrame.Panel | QFrame.Sunken)
         self.statusBar.addPermanentWidget(self.l_utf8_enabled)        
+        # Stato end of line
+        self.l_eol = QLabel()
+        self.l_eol.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        self.statusBar.addPermanentWidget(self.l_eol)        
         # Informazioni sulla connessione
         self.l_connection = QLabel("Connection:")
         self.l_connection.setFrameStyle(QFrame.Panel | QFrame.Sunken)
@@ -357,7 +497,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         self.menuBar.triggered[QAction].connect(self.smistamento_voci_menu)        
 
         ###        
-        # eseguo la connessione 
+        # eseguo la connessione automatica di default
         ###
         self.e_server_name = 'BACKUP_815'
         self.e_user_name = 'SMILE'
@@ -366,7 +506,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         self.slot_connetti()   
 
         ###
-        # Definizione della struttura per gestione elenco oggetti DB        
+        # Definizione della struttura per gestione elenco oggetti DB (object navigator)       
         ###
         self.oggetti_db_lista = QtGui.QStandardItemModel()        
         self.oggetti_db_elenco.setModel(self.oggetti_db_lista)
@@ -605,13 +745,13 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 o_MSql_win2.slot_map()
             # Selezione del testo rettangolare
             elif p_slot.text() == 'Rect selection':                
-                message_info('Press the Alt key for the rectangular selection ;-)')                                
+                message_info('There are 2 ways to switch to rectangular selection mode' + chr(10) + chr(10) + '1. (Keyboard and mouse) Hold down ALT while left clicking, then dragging' + chr(10) + chr(10) + '2. (Keyboard only) Hold down ALT+Shift while using the arrow keys')                                
             # Uppercase del testo selezionato
             elif p_slot.text() == 'Uppercase':                
-                o_MSql_win2.e_sql.SendScintilla(Qsci.QsciScintilla.SCI_UPPERCASE)
+                o_MSql_win2.e_sql.SendScintilla(QsciScintilla.SCI_UPPERCASE)
             # Lowercase del testo selezionato
             elif p_slot.text() == 'Lowercase':                
-                o_MSql_win2.e_sql.SendScintilla(Qsci.QsciScintilla.SCI_LOWERCASE)
+                o_MSql_win2.e_sql.SendScintilla(QsciScintilla.SCI_LOWERCASE)
             # Compressione di tutti i livelli
             elif p_slot.text() == 'Fold/Unfold All':
                 o_MSql_win2.e_sql.foldAll()
@@ -700,6 +840,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         if o_global_preferences.editable:            
             self.l_tabella_editabile.setText("Editable table: Enabled")            
             self.l_tabella_editabile.setStyleSheet('color: red;')      
+            self.l_tabella_editabile.setStyleSheet('background-color: red ;color: white;') 
         else:
             self.l_tabella_editabile.setText("Editable table: Disabled")            
             self.l_tabella_editabile.setStyleSheet('color: black;')      
@@ -1279,12 +1420,8 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             if v_testo_grant_db != '':
                 v_testo_oggetto_db += '\n' + '/\n' + v_testo_grant_db    
 
-            ###
-            # finalizzo: sostituisco eol (end of line) da LF a CR-LF
-            ###
-            v_testo_oggetto_db = v_testo_oggetto_db.replace('\n','\r\n')
-
             # apro una nuova finestra di editor simulando il segnale che scatta quando utente sceglie "Open", passando il sorgente ddl
+            # Attenzione! I file caricati da Oracle hanno come eol solo LF => formato Unix
             v_azione = QtWidgets.QAction()
             v_azione.setText('Open_db_obj')
             self.smistamento_voci_menu(v_azione, '!' + v_nome_oggetto + '.msql', v_testo_oggetto_db)        
@@ -1620,7 +1757,11 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         if self.tipo_oggetto not in ('PACKAGE BODY','PACKAGE','PROCEDURE','FUNCTION'):            
             return 'ko'
 
-        if p_model.data() != '':            
+        # carico l'oggetto di classe MSql_win2_class attivo in questo momento (così ho tutte le sue proprietà)        
+        o_MSql_win2 = self.oggetto_win2_attivo()
+
+        if p_model.data() != '' and o_MSql_win2 != None:                        
+            # imposto le var di lavoro
             v_risultato = self.nome_oggetto + '.'
             v_spazi = 0
             # leggo l'oggetto che contiene procedure-funzioni alla ricerca dell'elemento che ha selezionato l'utente
@@ -1637,18 +1778,23 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                             v_spazi = len(v_risultato)
                             v_risultato += par + ' => '
                         else:
-                            v_risultato += ', \r\n'                        
+                            # in base al settaggio di eol aggiungo il ritorno a capo
+                            if o_MSql_win2.setting_eol == 'W':
+                                v_risultato += ', \r\n'                        
+                            else:
+                                v_risultato += ', \n'                        
                             v_risultato += ' ' * v_spazi
                             v_risultato += par + ' => '
                     if not v_1a_volta:
                         v_risultato += ')'
                         break # esco dal ciclo --> se infatti ci fossero più procedure-funzioni con lo stesso nome esco alla prima
             # se caricato il risultato, prendo l'editor corrente e nella posizione del cursore ci metto il risultato (preceduto da un ritorno a capo)           
-            if v_risultato != '':
-                # Carico l'oggetto di classe MSql_win2_class attivo in questo momento         
-                o_MSql_win2 = self.oggetto_win2_attivo()
-                if o_MSql_win2 != None:
+            if v_risultato != '':                
+                # in base al settaggio di eol aggiungo il ritorno a capo
+                if o_MSql_win2.setting_eol == 'W':                            
                     o_MSql_win2.e_sql.insert('\r\n' + v_risultato)
+                else:
+                    o_MSql_win2.e_sql.insert('\n' + v_risultato)
     
     def richiesta_connessione_specifica(self):    
         """
@@ -1794,11 +1940,25 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         # attivo il lexer sull'editor
         self.e_sql.setLexer(self.v_lexer)
         
-        # imposto il ritorno a capo in formato Windows (CR-LF)
-        # Attenzione! Questa impostazione non converte eventuale testo che viene caricato da file con eol diverso
-        #             da quello considerato di default (Windows). Quindi, quando viene caricato un file, viene 
-        #             fatta la conversione dei eol LF con CR-LF (vedi caricamento file)
-        self.e_sql.setEolMode(Qsci.QsciScintilla.EolWindows)     
+        # imposto il ritorno a capo in formato Windows (CR-LF) o Unix (LF)
+        # Attenzione! Nel caso di nuovo file il formato è Windows, mentre se viene aperto un file, va analizzata la prima riga
+        #             e ricercato che formato ha....quello sarà poi il formato da utilizzare!
+        #             Questo è stato fatto per rendere l'editor più flessibile
+        if p_contenuto_file is not None:
+            if p_contenuto_file.find('\r\n') != -1:
+                self.setting_eol = 'W'
+            else:
+                self.setting_eol = 'U'
+        else:
+            self.setting_eol = 'W'
+
+        # controllo quale formato di eol ha il file e imposto tale opzione in Scintilla 
+        if self.setting_eol == 'W':
+            self.e_sql.setEolMode(QsciScintilla.EolWindows)                
+        else:
+            self.e_sql.setEolMode(QsciScintilla.EolUnix)                
+        # aggiorno la statusbar con l'impostazione di eol
+        self.aggiorna_statusbar()
 
         # visualizzo o meno il carattere di end of line in base alla preferenza
         self.set_show_end_of_line()        
@@ -1898,6 +2058,10 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             # tasto F12 premuto dall'utente --> richiamo l'object viewer            
             if event.key() == Qt.Key_F12:                 
                 self.slot_f12()   
+                return True
+            # tasto F3 premuto dall'utente --> richiamo la ricerca
+            if event.key() == Qt.Key_F3:                                 
+                self.slot_find_next()   
                 return True
 
         # individuo il drag sull'editor e...
@@ -2192,15 +2356,19 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
 
         # imposto la var di select corrente che serve in altre funzioni
         self.v_select_corrente = ''
-        # imposto la var che in caso di script che contiene più istruzioni separate da / tenga conto delle righe
-        # delle sezioni precedenti
-        self.v_offset_numero_di_riga = 0
 
         # prendo tutto il testo o solo quello evidenziato dall'utente
         if self.e_sql.selectedText():
             v_testo = self.e_sql.selectedText()            
-        else:            
+            # imposto la var che in caso di script che contiene più istruzioni separate da / tenga conto delle righe
+            # delle sezioni precedenti (in questo caso parto dalla riga relativa! ad esempio ho spezzoni di script e non parto dall'inizio....)
+            self.v_offset_numero_di_riga, v_start_pos = self.e_sql.getCursorPosition()
+        else:                        
             v_testo = self.e_sql.text()
+            # imposto la var che in caso di script che contiene più istruzioni separate da / tenga conto delle righe
+            # delle sezioni precedenti
+            self.v_offset_numero_di_riga = 0
+
         if v_testo == '':
             # emetto errore sulla barra di stato 
             message_error('No instruction!')                                 
@@ -2369,9 +2537,9 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                 QApplication.restoreOverrideCursor()                        
                 # emetto errore 
                 errorObj, = e.args                     
-                self.scrive_output("Error: " + errorObj.message, "E")                 
+                self.scrive_output("Error: " + errorObj.message, "E")                                 
                 # per posizionarmi alla riga in errore ho solo la variabile offset che riporta il numero di carattere a cui l'errore si è verificato
-                v_riga, v_colonna = x_y_from_offset_text(p_plsql, errorObj.offset)                
+                v_riga, v_colonna = x_y_from_offset_text(p_plsql, errorObj.offset, self.setting_eol)                
                 v_riga += self.v_offset_numero_di_riga
                 self.e_sql.setCursorPosition(v_riga,v_colonna)                
                 # ripristino icona freccia del mouse    
@@ -2938,7 +3106,9 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             # visualizzo la finestra di ricerca
             self.dialog_find.show()            
             self.dialog_find.activateWindow() 
-            self.win_find.e_find.setFocus()            
+            self.win_find.e_find.setFocus()  
+            # mi è risultato più comodo pulire il campo di ricerca quando riapro la finestra
+            self.win_find.e_find.clear()                 
         except:
             # inizializzo le strutture grafiche e visualizzo la dialog per la ricerca del testo
             self.dialog_find = QtWidgets.QDialog()            
@@ -2950,7 +3120,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             # da notare come il collegamento delle funzioni venga fatto in questo punto e non nella ui            
             self.win_find.b_next.clicked.connect(self.slot_find_next)                
             self.win_find.b_find_all.clicked.connect(self.slot_find_all)                
-            self.win_find.o_find_all_result.clicked.connect(self.slot_find_all_doppio_click)
+            self.win_find.o_find_all_result.clicked.connect(self.slot_find_all_click)
             # visualizzo la finestra di ricerca
             self.dialog_find.show()
             # definizione della struttura per elenco dei risultati (valido solo per find all)       
@@ -2968,7 +3138,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.find_all_model.clear()
 
         # prelevo la stringa da ricercare
-        v_string_to_search = self.win_find.e_find.currentText()
+        v_string_to_search = self.win_find.e_find.text()
         # se inserito una stringa di ricerca...
         if v_string_to_search != '':                        
             # lancio la ricerca su tutto e senza effetti a video (da notare come findFirst è un metodo di QScintilla)...
@@ -2996,12 +3166,12 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                 # lancio la ricerca su tutto e senza effetti a video (da notare come findFirst è un metodo di QScintilla)...
                 v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, 0, 0, False, False, False)
         
-    def slot_find_all_doppio_click(self, p_index):
+    def slot_find_all_click(self, p_index):
         """
            Partendo dalla selezione di find_all, si posiziona sulla specifica riga di testo dell'editor
         """
         # prelevo la stringa da ricercare
-        v_string_to_search = self.win_find.e_find.currentText()
+        v_string_to_search = self.win_find.e_find.text()
         # prendo elemento dell'elenco selezionato
         v_selindex = self.find_all_model.itemFromIndex(p_index)
         v_stringa = v_selindex.text()               
@@ -3018,11 +3188,17 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         """
            Ricerca la prossima ricorrenza verso il basso
         """        
-        v_string_to_search = self.win_find.e_find.currentText()
+        v_string_to_search = self.win_find.e_find.text()
         # se inserito una stringa di ricerca...
         if v_string_to_search != '':                       
             # lancio la ricerca dicendo di posizionarsi sulla prossima ricorrenza 
             v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, -1, -1, True, False, False)
+            # se sono arrivato alla fine, chiedo se si desidera ripartire dall'inizio...da notare come viene poi richiamata questa stessa funzione!
+            if not v_found:
+                if message_question_yes_no('Passed the end of file!'+chr(10)+'Move to the beginnig?') == 'Yes':
+                    print('ciao')
+                    self.e_sql.setCursorPosition(1,0)
+                    self.slot_find_next()
 
     def slot_find_e_replace(self):
         """
@@ -3046,6 +3222,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.win_find_e_replace.b_replace_all.clicked.connect(self.slot_find_e_replace_all)                            
             # visualizzo la finestra di ricerca
             self.dialog_find_e_replace.show()
+            # posiziono il cursore sul campo di trova
+            self.win_find_e_replace.e_find.setFocus()
         
         # reimposto la posizione e le dimensioni della window 
         self.dialog_find_e_replace.setGeometry(self.calcola_pos_win(self.dialog_find_e_replace))                
@@ -3054,7 +3232,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         """
            Ricerca la prossima ricorrenza verso il basso
         """        
-        v_string_to_search = self.win_find_e_replace.e_find.currentText()
+        v_string_to_search = self.win_find_e_replace.e_find.text()
         # se inserito una stringa di ricerca...
         if v_string_to_search != '':                       
             # lancio la ricerca dicendo di posizionarsi sulla prossima ricorrenza 
@@ -3065,9 +3243,9 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
            Sostituisce la ricorrenza attuale (ignora differenze tra maiuscole e minuscole)
         """
         # testo da ricercare
-        v_string_to_search = self.win_find_e_replace.e_find.currentText().upper()
+        v_string_to_search = self.win_find_e_replace.e_find.text().upper()
         # nuovo testo
-        v_string_to_replace = self.win_find_e_replace.e_replace.currentText()
+        v_string_to_replace = self.win_find_e_replace.e_replace.text()
 
         # se inserito una stringa di ricerca...
         if v_string_to_search != '' and v_string_to_replace != '':    
@@ -3087,9 +3265,9 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
            Sostituisce tutte le ricorrenze (ignora differenze tra maiuscole e minuscole)
         """
         # testo da ricercare
-        v_string_to_search = self.win_find_e_replace.e_find.currentText().upper()
+        v_string_to_search = self.win_find_e_replace.e_find.text().upper()
         # nuovo testo
-        v_string_to_replace = self.win_find_e_replace.e_replace.currentText()
+        v_string_to_replace = self.win_find_e_replace.e_replace.text()
 
         # se inserito una stringa di ricerca...
         if v_string_to_search != '' and v_string_to_replace != '':                        
@@ -3286,9 +3464,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         """
            Aggiorna i dati della statusbar 
         """
-        v_totale_righe = str(self.e_sql.lines())
-        self.link_to_MSql_win1_class.l_numero_righe.setText("Lines: " + str(v_totale_righe))
-        self.link_to_MSql_win1_class.l_numero_caratteri.setText("Length: " + str(self.e_sql.length()))
+        v_totale_righe = str(self.e_sql.lines())        
+        self.link_to_MSql_win1_class.l_num_righe_e_char.setText("Lines: " + str(v_totale_righe) + ", Length: " + str(self.e_sql.length()))        
 
         # reimposta larghezza del margine numeri di riga...
         self.e_sql.setMarginWidth(0, '0' + v_totale_righe)        
@@ -3298,6 +3475,12 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.link_to_MSql_win1_class.l_overwrite_enabled.setText('Overwrite')
         else:                
             self.link_to_MSql_win1_class.l_overwrite_enabled.setText('Insert')
+
+        # label che indica il tipo di eol 
+        if self.setting_eol == 'W':        
+            self.link_to_MSql_win1_class.l_eol.setText("Windows (CRLF)")         
+        else:            
+            self.link_to_MSql_win1_class.l_eol.setText("Unix (LF)")         
 
         # posizione del cursore
         v_y, v_x = self.e_sql.getCursorPosition()

@@ -25,7 +25,7 @@ def inizializzo_client():
          pass
       else:
          print('------------------------------------------------------------------------------')
-         print('ERRORE DURANTE INIZIALIZZAZIONE LIBRERIA CX_ORACLE IN LIBRERIA ORACLE_MY_LIB!!')
+         print('ERRORE DURANTE INIZIALIZZAZIONE LIBRERIA cx_Oracle IN LIBRERIA ORACLE_MY_LIB!  ')
          print(err)
          print('------------------------------------------------------------------------------')
 

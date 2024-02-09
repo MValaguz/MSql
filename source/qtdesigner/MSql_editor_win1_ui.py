@@ -457,6 +457,12 @@ class Ui_MSql_win1(object):
         icon54.addPixmap(QtGui.QPixmap(":/icons/icons/map.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionMaps_procedure_function.setIcon(icon54)
         self.actionMaps_procedure_function.setObjectName("actionMaps_procedure_function")
+        self.actionWindows_CR_LF = QtWidgets.QAction(MSql_win1)
+        self.actionWindows_CR_LF.setCheckable(True)
+        self.actionWindows_CR_LF.setObjectName("actionWindows_CR_LF")
+        self.actionLinux_LF = QtWidgets.QAction(MSql_win1)
+        self.actionLinux_LF.setCheckable(True)
+        self.actionLinux_LF.setObjectName("actionLinux_LF")
         self.menuFiles.addAction(self.actionNew)
         self.menuFiles.addAction(self.actionOpen)
         self.menuFiles.addAction(self.menuRecent_file.menuAction())
@@ -686,6 +692,8 @@ class Ui_MSql_win1(object):
         self.actionShow_end_of_line.setText(_translate("MSql_win1", "Show end of line"))
         self.actionMaps_procedure_function.setText(_translate("MSql_win1", "Map procedures/functions"))
         self.actionMaps_procedure_function.setShortcut(_translate("MSql_win1", "Ctrl+M"))
+        self.actionWindows_CR_LF.setText(_translate("MSql_win1", "Windows (CR+LF)"))
+        self.actionLinux_LF.setText(_translate("MSql_win1", "Unix (LF)"))
 import resource_rc
 
 

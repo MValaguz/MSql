@@ -203,7 +203,11 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="e_map_search"/>
+        <widget class="QLineEdit" name="e_map_search">
+         <property name="clearButtonEnabled">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>
