@@ -37,11 +37,16 @@ class preferences_class():
         # Se esiste il file delle preferenze...le carico nell'oggetto
         if os.path.isfile(p_nome_file_preferences):
             v_json = json.load(open(p_nome_file_preferences, 'r'))
-            # posizione finestre        
+            # ricordarsi posizione finestre        
             if v_json['remember_window_pos']==1:
                 self.remember_window_pos = True
             else:
                 self.remember_window_pos = False
+            # ricordarsi posizione testo nei files
+            if v_json['remember_text_pos']==1:
+                self.remember_text_pos = True
+            else:
+                self.remember_text_pos = False
             # directory apertura e salvataggio
             self.open_dir = v_json['open_dir']
             self.save_dir = v_json['save_dir']
@@ -77,6 +82,7 @@ class preferences_class():
         # imposto valori di default senza presenza dello specifico file
         else:
             self.remember_window_pos = True
+            self.remember_text_pos = True
             self.open_dir = 'W:\\SQL'
             self.save_dir = 'W:\\SQL'
             self.utf_8 = False
@@ -117,6 +123,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         self.preferences = preferences_class(self.nome_file_preferences)        
         # le preferenze caricate vengono riportate a video
         self.e_remember_window_pos.setChecked(self.preferences.remember_window_pos)        
+        self.e_remember_text_pos.setChecked(self.preferences.remember_text_pos)        
         self.e_default_open_dir.setText(self.preferences.open_dir)
         self.e_default_save_dir.setText(self.preferences.save_dir)        
         self.e_default_utf_8.setChecked(self.preferences.utf_8)        
@@ -265,6 +272,12 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
             v_remember_window_pos = 1
         else:
             v_remember_window_pos = 0
+
+        # il default per ricordare posizione del testo nei file
+        if self.e_remember_text_pos.isChecked():
+            v_remember_text_pos = 1
+        else:
+            v_remember_text_pos = 0
         
         # il default per utf-8 va convertito 
         if self.e_default_utf_8.isChecked():
@@ -302,6 +315,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
 	
 		# scrivo nel file un elemento json contenente le informazioni inseriti dell'utente
         v_json ={'remember_window_pos': v_remember_window_pos,
+                 'remember_text_pos': v_remember_text_pos,
                  'open_dir': self.e_default_open_dir.text(),
 		         'save_dir': self.e_default_save_dir.text(),
                  'utf_8': v_utf_8,

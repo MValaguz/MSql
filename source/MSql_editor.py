@@ -1874,7 +1874,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             self.dialog_history.activateWindow()             
         except:
             # inizializzo le strutture grafiche e visualizzo la dialog per la ricerca del testo
-            self.win_history = history_class(v_global_work_dir+'MSql_history.db')        
+            self.win_history = history_class(v_global_work_dir+'MSql_sql_history.db')        
             # aggiungo l'evento doppio click per l'import dell'istruzione nell'editor
             self.win_history.o_lst1.doubleClicked.connect(self.slot_history_doppio_click)
             self.win_history.show()     
@@ -1906,7 +1906,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                  p_titolo, # Titolo della window-editor
                  p_contenuto_file,  # Eventuale contenuto da inserire direttamente nella parte di editor
                  o_MSql_win1_class): # Puntatore alla classe principale (window1)                                  
-        global o_global_preferences        
+        global o_global_preferences  
+        global v_global_work_dir      
 
         # incapsulo la classe grafica da qtdesigner
         super(MSql_win2_class, self).__init__()        
@@ -1995,8 +1996,13 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         if p_contenuto_file is not None:        
             # imposto editor con quello ricevuto in ingresso
             self.e_sql.setText(p_contenuto_file)
-            # mi posiziono sulla prima riga
-            self.e_sql.setCursorPosition(0,0)
+            # chiedo allo storico di darmi eventuale posizione di dove si trovava il cursore ultima volta
+            if o_global_preferences.remember_text_pos:
+                v_cur_y, v_cur_x = read_files_history(v_global_work_dir+'MSql_files_history.db', p_titolo)
+            else:
+                v_cur_y, v_cur_x = 0,0
+            # mi posiziono sulla prima riga (la posizione X viene al momento forzata a zero!)
+            self.e_sql.setCursorPosition(v_cur_y,0)
 
         # var che indica che il testo è stato modificato
         #self.e_sql.insert('SELECT * FROM MS_UTN')
@@ -2485,7 +2491,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             v_ok = self.esegui_script(p_istruzione, True)        
                 
         # aggiungo l'istruzione all'history
-        write_sql_history(v_global_work_dir+'MSql_history.db',v_tipo,p_istruzione)
+        write_sql_history(v_global_work_dir+'MSql_sql_history.db',v_tipo,p_istruzione)
 
         return v_ok
 
@@ -2650,7 +2656,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.v_offset_numero_di_riga += len(p_plsql.split(chr(10)))
         
         # tutto ok ... aggiungo istruzione all'history
-        write_sql_history(v_global_work_dir+'MSql_history.db','SCRIPT',p_plsql)
+        write_sql_history(v_global_work_dir+'MSql_sql_history.db','SCRIPT',p_plsql)
         # esco con tutto ok
         return None
                 
@@ -3002,6 +3008,9 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
            Intercetto l'evento di chiusura del form e controllo se devo chiedere di salvare o meno
            Questa funzione sovrascrive quella nativa di QT            
         """
+        global o_global_preferences
+        global v_global_work_dir
+
         v_salvare = self.check_to_save_file()                    
         # richiesto di salvare e poi di chiudere
         if v_salvare == 'Yes':        
@@ -3012,9 +3021,14 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.v_editor_chiuso = False            
             e.ignore()            
         # chiudere
-        else:            
+        else:   
+            # alla chiusura salvo in uno storico la posizione del testo in modo si riposizioni alla prossima riapertura         
+            v_num_line, v_num_pos = self.e_sql.getCursorPosition()                
+            if o_global_preferences.remember_text_pos:
+                 write_files_history(v_global_work_dir+'MSql_files_history.db', self.objectName(), v_num_line, v_num_pos)          
+            # imposto indicatore di chiusura e chiudo
             self.v_editor_chiuso = True            
-            self.close()                        
+            self.close()    
     
     def check_to_save_file(self):
         """

@@ -491,17 +491,17 @@ def write_sql_history(p_db_name, p_tipo, p_testo):
         v_conn = sqlite3.connect(database=p_db_name)
         v_curs = v_conn.cursor()        
         v_curs.execute("""CREATE TABLE IF NOT EXISTS 
-                          HISTORY (ID         INTEGER PRIMARY KEY AUTOINCREMENT,
-                                   TIPO       VARCHAR(20) NOT NULL,
-                                   ORARIO     DATETIME    NOT NULL,
-                                   ISTRUZIONE BLOB        NOT NULL
+                          SQL_HISTORY (ID         INTEGER PRIMARY KEY AUTOINCREMENT,
+                                       TIPO       VARCHAR(20) NOT NULL,
+                                       ORARIO     DATETIME    NOT NULL,
+                                       ISTRUZIONE BLOB        NOT NULL
                               )""")     
 
         try:
-            v_curs.execute("""INSERT INTO HISTORY(TIPO,ORARIO,ISTRUZIONE) VALUES(?,?,?)""", (p_tipo, datetime.datetime.now(), p_testo) )
+            v_curs.execute("""INSERT INTO SQL_HISTORY(TIPO,ORARIO,ISTRUZIONE) VALUES(?,?,?)""", (p_tipo, datetime.datetime.now(), p_testo) )
             v_conn.commit()
         except sqlite3.OperationalError:
-            message_error('Error while writing in history log!' + chr(10) + 'Probably the file MSql_history.db is locked!')        
+            message_error('Error while writing in history log!' + chr(10) + 'Probably the file MSql_sql_history.db is locked!')        
                 
         v_conn.close()    
     
@@ -511,8 +511,64 @@ def purge_sql_history(p_db_name):
     """
     v_conn = sqlite3.connect(database=p_db_name)
     v_curs = v_conn.cursor()
-    v_curs.execute('DROP TABLE IF EXISTS HISTORY')        
+    v_curs.execute('DROP TABLE IF EXISTS SQL_HISTORY')        
     v_conn.close()
+
+def write_files_history(p_db_name, p_file_name, p_pos_y, p_pos_x):
+    """
+       Usata per scrivere dentro un db SQLite tabella FILE_HISTORY, l'istruzione l'sql       
+    """ 
+    if p_file_name != '':
+        v_conn = sqlite3.connect(database=p_db_name)
+        v_curs = v_conn.cursor()        
+        v_curs.execute("""CREATE TABLE IF NOT EXISTS 
+                          FILE_HISTORY (ID         INTEGER PRIMARY KEY AUTOINCREMENT,                                       
+                                        FILE_NAME  TEXT      NOT NULL,
+                                        ORARIO     DATETIME  NOT NULL,
+                                        POS_Y      INTEGER,
+                                        POS_X      INTEGER
+                              )""")     
+        
+        # controllo se il file è già presente in elenco
+        v_curs.execute("""SELECT POS_Y, POS_X FROM FILE_HISTORY WHERE FILE_NAME = ?""", (p_file_name,) )
+        v_record = v_curs.fetchone()
+        if v_record != None:
+            v_esiste = True
+        else:
+            v_esiste = False
+        
+        try:
+            if not v_esiste:
+                v_curs.execute("""INSERT INTO FILE_HISTORY(FILE_NAME,ORARIO,POS_Y,POS_X) VALUES(?,?,?,?)""", (p_file_name, datetime.datetime.now(), p_pos_y, p_pos_x) )
+            else:
+                v_curs.execute("""UPDATE FILE_HISTORY SET ORARIO=?,POS_Y=?,POS_X=? WHERE FILE_NAME=?""", (datetime.datetime.now(), p_pos_y, p_pos_x, p_file_name) )
+            v_conn.commit()
+        except sqlite3.OperationalError:
+            message_error('Error while writing in file history log!' + chr(10) + 'Probably the file MSql_files_history.db is locked!')                        
+        
+        v_conn.close()    
+
+def read_files_history(p_db_name, p_file_name):
+    """
+       Restituisce POS_Y e POS_X del file di history
+    """ 
+    v_pos_y = 0
+    v_pos_x = 0
+
+    if p_file_name != '':
+        v_conn = sqlite3.connect(database=p_db_name)
+        v_curs = v_conn.cursor()        
+        v_curs.execute("""SELECT POS_Y, POS_X FROM FILE_HISTORY WHERE FILE_NAME = ?""", (p_file_name,))
+        v_record = v_curs.fetchone()
+        if v_record != None:
+            if v_record[0] != None:
+                v_pos_y = v_record[0]
+            if v_record[1] != None:
+                v_pos_x = v_record[1]
+
+        v_conn.close()    
+    
+    return v_pos_y, v_pos_x
 
 #test per la funzione di estrazione ddl tabella
 if __name__ == "__main__":
