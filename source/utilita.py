@@ -6,7 +6,7 @@
  Data..........: 09/08/2018 
 """
 
-from PyQt5 import QtGui,QtWidgets
+from PyQt5 import QtGui,QtWidgets,QtCore
 
 def message_error(p_message):
     """
@@ -93,3 +93,14 @@ def message_warning_yes_no(p_message):
         return 'Yes'
     else:
         return 'No'
+
+def Freccia_Mouse(p_active):
+    """
+       Attiva o disattiva la freccia del muose indicando la clessidra di elaborazione se p_active = True
+    """
+    if p_active:
+        # sostituisce la freccia del mouse con icona "clessidra"
+        QtWidgets.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))        
+    else:
+        # ripristino icona freccia del mouse
+        QtWidgets.QApplication.restoreOverrideCursor()          

@@ -91,7 +91,7 @@ class CustomMainWindow(QMainWindow):
         self.__editor.setIndicatorHoverStyle(QsciScintilla.ThickCompositionIndicator,0)
         self.__editor.setIndicatorForegroundColor(QColor("#00f"), 0)
         self.__editor.setIndicatorHoverForegroundColor(QColor("#00f"), 0)
-        self.__editor.setIndicatorDrawUnder(True, 0)        
+        self.__editor.setIndicatorDrawUnder(True, 0)                
 
         # Attivo evento sulla selezione del testo e relative variabili
         # il tutto per quando l'utente seleziona con il doppio click una parola e si evidenziano

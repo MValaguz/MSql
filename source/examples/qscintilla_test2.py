@@ -188,6 +188,11 @@ class CustomMainWindow(QMainWindow):
         self.__editor.setMarginWidth(0, "0000")
         self.__editor.setMarginsForegroundColor(QColor("#ff888888"))
 
+        # Attivo il matching sulle parentesi
+        self.__editor.setBraceMatching(QsciScintilla.BraceMatch.SloppyBraceMatch)
+        self.__editor.setMatchedBraceBackgroundColor(QColor("#80ff9900"))
+
+
         # -------------------------------- #
         #          Install lexer           #
         # -------------------------------- #

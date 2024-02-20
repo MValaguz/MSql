@@ -1,5 +1,10 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/disabled.png</file>
+    <file>icons/error.png</file>
+    <file>icons/uncomment.png</file>
+    <file>icons/comment.png</file>
+    <file>icons/indent.png</file>
     <file>icons/index.png</file>
     <file>icons/find_adn_replace.png</file>
     <file>icons/trigger.png</file>

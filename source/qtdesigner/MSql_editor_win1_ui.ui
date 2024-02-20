@@ -107,11 +107,8 @@
     <addaction name="actionUppercase_current_selection"/>
     <addaction name="actionLowercase"/>
     <addaction name="separator"/>
-    <addaction name="actionFold_All"/>
-    <addaction name="actionShow_end_of_line"/>
-    <addaction name="separator"/>
-    <addaction name="actionZoom_In"/>
-    <addaction name="actionZoom_Out"/>
+    <addaction name="actionComment_selection"/>
+    <addaction name="actionUncomment_selection"/>
     <addaction name="separator"/>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
@@ -120,9 +117,7 @@
     <addaction name="actionPaste"/>
     <addaction name="actionSelectAll"/>
     <addaction name="separator"/>
-    <addaction name="actionCreate_autocompletation_dictionary"/>
-    <addaction name="separator"/>
-    <addaction name="actionFont_editor_selector"/>
+    <addaction name="actionFormat_SQL_instruction"/>
    </widget>
    <widget class="QMenu" name="menuRun">
     <property name="title">
@@ -170,22 +165,37 @@
     <addaction name="actionHelp"/>
     <addaction name="actionProgram_info"/>
    </widget>
-   <widget class="QMenu" name="menutOOLS">
+   <widget class="QMenu" name="menuTools">
     <property name="title">
-     <string>Tools</string>
+     <string>T&amp;ools</string>
     </property>
     <addaction name="actionMaps_procedure_function"/>
     <addaction name="actionHistory"/>
+    <addaction name="actionCreate_autocompletation_dictionary"/>
+    <addaction name="separator"/>
     <addaction name="actionObjects_Navigator"/>
     <addaction name="actionObject_Viewer"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>&amp;View</string>
+    </property>
+    <addaction name="actionZoom_In"/>
+    <addaction name="actionZoom_Out"/>
+    <addaction name="separator"/>
+    <addaction name="actionFold_All"/>
+    <addaction name="actionShow_end_of_line"/>
+    <addaction name="separator"/>
+    <addaction name="actionFont_editor_selector"/>
    </widget>
    <addaction name="menuFiles"/>
    <addaction name="menuServer"/>
    <addaction name="menuEdit"/>
+   <addaction name="menuView"/>
    <addaction name="menuRun"/>
    <addaction name="menuSql"/>
    <addaction name="menuAdvanced"/>
-   <addaction name="menutOOLS"/>
+   <addaction name="menuTools"/>
    <addaction name="menuWindow"/>
    <addaction name="menuHelp"/>
   </widget>
@@ -277,6 +287,19 @@
             <item>
              <property name="text">
               <string>Only invalid</string>
+             </property>
+             <property name="icon">
+              <iconset resource="resource.qrc">
+               <normaloff>:/icons/icons/error.png</normaloff>:/icons/icons/error.png</iconset>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Only disabled</string>
+             </property>
+             <property name="icon">
+              <iconset resource="resource.qrc">
+               <normaloff>:/icons/icons/disabled.png</normaloff>:/icons/icons/disabled.png</iconset>
              </property>
             </item>
            </widget>
@@ -1153,6 +1176,42 @@
    </property>
    <property name="text">
     <string>Unix (LF)</string>
+   </property>
+  </action>
+  <action name="actionFormat_SQL_instruction">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/indent.png</normaloff>:/icons/icons/indent.png</iconset>
+   </property>
+   <property name="text">
+    <string>Format SQL statement</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="actionComment_selection">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/comment.png</normaloff>:/icons/icons/comment.png</iconset>
+   </property>
+   <property name="text">
+    <string>Comment selection</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+C</string>
+   </property>
+  </action>
+  <action name="actionUncomment_selection">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/uncomment.png</normaloff>:/icons/icons/uncomment.png</iconset>
+   </property>
+   <property name="text">
+    <string>Uncomment selection</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+U</string>
    </property>
   </action>
  </widget>

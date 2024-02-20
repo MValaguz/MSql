@@ -52,7 +52,7 @@ class history_class(QMainWindow, Ui_history_window):
 
         # creo un modello di dati su query
         v_modello = QSqlQueryModel()
-        v_modello.setQuery('select TIPO TYPE, ORARIO TIME, ISTRUZIONE INSTRUCTION from HISTORY ' + v_where + ' order by ORARIO desc')
+        v_modello.setQuery('select TIPO TYPE, ORARIO TIME, ISTRUZIONE INSTRUCTION from SQL_HISTORY ' + v_where + ' order by ORARIO desc')
 
         # imposto l'oggetto di visualizzazione con il modello 
         self.o_lst1.setModel(v_modello)

@@ -49,6 +49,8 @@ from avanzamento import avanzamento_infinito_class
 from utilita import *
 from utilita_database import *
 from utilita_testo import *
+# Libreria che permette, selezionata un'istruzione sql nell'editor di indentarla automaticamente
+from sql_formatter.core import format_sql
 
 # Tipi oggetti di database
 Tipi_Oggetti_DB = { 'Tables':'TABLE',                    
@@ -110,7 +112,10 @@ class My_MSql_Lexer(QsciLexerSQL):
         self.p_editor.setCaretLineBackgroundColor(QColor("#FFFF99"))
         # attivo il margine 0 con la numerazione delle righe
         self.p_editor.setMarginType(0, QsciScintilla.NumberMargin)        
-        self.p_editor.setMarginsFont(QFont("Courier New",9))                   
+        self.p_editor.setMarginsFont(QFont("Courier New",9))                           
+        # attivo il matching sulle parentesi con uno specifico colore
+        self.p_editor.setBraceMatching(QsciScintilla.BraceMatch.SloppyBraceMatch)
+        self.p_editor.setMatchedBraceBackgroundColor(QColor("#80ff9900"))
                         
         # attivo autocompletamento durante la digitazione 
         # (comprende sia le parole del documento corrente che quelle aggiunte da un elenco specifico)
@@ -514,7 +519,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         self.oggetti_db_scelta.setCurrentIndex(1)
         # per object viewer e nel caso di package, riporta la struttura delle procedure-funzioni che il package contiene
         # per la struttura di questa var fare riferimento alla funzione estrai_procedure_function che si trova in utilita_testo.py
-        self.oggetti_db_lista_proc_func = object
+        self.oggetti_db_lista_proc_func = object        
 
         ###
         # Imposto default in base alle preferenze (setto anche le opzioni sulle voci di menu)
@@ -746,6 +751,12 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             # Selezione del testo rettangolare
             elif p_slot.text() == 'Rect selection':                
                 message_info('There are 2 ways to switch to rectangular selection mode' + chr(10) + chr(10) + '1. (Keyboard and mouse) Hold down ALT while left clicking, then dragging' + chr(10) + chr(10) + '2. (Keyboard only) Hold down ALT+Shift while using the arrow keys')                                
+            # Commenta il testo selezionato
+            elif p_slot.text() == 'Comment selection':                
+                o_MSql_win2.slot_commenta()
+            # Decommenta il testo selezionato
+            elif p_slot.text() == 'Uncomment selection':                
+                o_MSql_win2.slot_scommenta()
             # Uppercase del testo selezionato
             elif p_slot.text() == 'Uppercase':                
                 o_MSql_win2.e_sql.SendScintilla(QsciScintilla.SCI_UPPERCASE)
@@ -817,6 +828,9 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             # Creo lo script per la modifica dei dati
             elif p_slot.text() == 'Script the changed data':
                 o_MSql_win2.slot_save_modified_data()
+            # Prendo il testo selezionato e lo riformatto (esempio istruzione SQL che viene reindentata)
+            elif p_slot.text() == 'Format SQL statement':
+                o_MSql_win2.slot_format_sql_statement()
 
     def slot_utf8(self):
         """
@@ -1193,132 +1207,123 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         self.oggetti_db_lista.clear()
         # se utente ha scelto un oggetto e si è connessi, procedo con il carico dell'elenco         
         if v_tipo_oggetto != '':            
-            # il tipo oggetto sono le primary key o le unique key...
-            if v_tipo_oggetto in ('PRIMARY_KEY','UNIQUE_KEY','FOREIGN_KEY','CHECK_KEY'):                
-                if v_tipo_oggetto == 'PRIMARY_KEY':
-                    v_select = """SELECT CONSTRAINT_NAME, DECODE(INVALID,NULL,0,1) INVALID FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND CONSTRAINT_TYPE='P' AND SUBSTR(CONSTRAINT_NAME,1,4) != 'BIN$'"""
-                elif v_tipo_oggetto == 'UNIQUE_KEY':
-                    v_select = """SELECT CONSTRAINT_NAME, DECODE(INVALID,NULL,0,1) INVALID FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND CONSTRAINT_TYPE='U' AND SUBSTR(CONSTRAINT_NAME,1,4) != 'BIN$'"""    
-                elif v_tipo_oggetto == 'FOREIGN_KEY':
-                    v_select = """SELECT CONSTRAINT_NAME, DECODE(INVALID,NULL,0,1) INVALID FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND CONSTRAINT_TYPE='R' AND SUBSTR(CONSTRAINT_NAME,1,4) != 'BIN$'"""    
-                elif v_tipo_oggetto == 'CHECK_KEY':
-                    v_select = """SELECT CONSTRAINT_NAME, DECODE(INVALID,NULL,0,1) INVALID FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND CONSTRAINT_TYPE='C' AND SUBSTR(CONSTRAINT_NAME,1,4) != 'BIN$'"""    
-                # se necessario applico il filtro di ricerca
-                if self.oggetti_db_ricerca.text() != '' or self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid':
-                    if self.oggetti_db_tipo_ricerca.currentText() == 'Start with':
-                        v_select += "  AND UPPER(CONSTRAINT_NAME) LIKE '" + self.oggetti_db_ricerca.text().upper() + "%'"
-                    elif self.oggetti_db_tipo_ricerca.currentText() == 'Like':
-                        v_select += "  AND UPPER(CONSTRAINT_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%'"
-                    elif self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid': 
-                        v_select += "  AND UPPER(CONSTRAINT_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%' AND INVALID IS NOT NULL"
-                # aggiungo order by
-                v_select += "  ORDER BY CONSTRAINT_NAME"                        
-            # il tipo oggetto sono gli indici ...
+            # chiavi primarie
+            if v_tipo_oggetto == 'PRIMARY_KEY':
+                v_select = """SELECT CONSTRAINT_NAME OBJECT_NAME, DECODE(INVALID,NULL,0,1) INVALID, STATUS FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND CONSTRAINT_TYPE='P' AND SUBSTR(CONSTRAINT_NAME,1,4) != 'BIN$'"""
+            # chiavi univoche
+            elif v_tipo_oggetto == 'UNIQUE_KEY':
+                v_select = """SELECT CONSTRAINT_NAME OBJECT_NAME, DECODE(INVALID,NULL,0,1) INVALID, STATUS FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND CONSTRAINT_TYPE='U' AND SUBSTR(CONSTRAINT_NAME,1,4) != 'BIN$'"""    
+            # relazioni
+            elif v_tipo_oggetto == 'FOREIGN_KEY':
+                v_select = """SELECT CONSTRAINT_NAME OBJECT_NAME, DECODE(INVALID,NULL,0,1) INVALID, STATUS FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND CONSTRAINT_TYPE='R' AND SUBSTR(CONSTRAINT_NAME,1,4) != 'BIN$'"""    
+            # check
+            elif v_tipo_oggetto == 'CHECK_KEY':
+                v_select = """SELECT CONSTRAINT_NAME OBJECT_NAME, DECODE(INVALID,NULL,0,1) INVALID, STATUS FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND CONSTRAINT_TYPE='C' AND SUBSTR(CONSTRAINT_NAME,1,4) != 'BIN$'"""    
+            # indici
             elif v_tipo_oggetto == 'INDEXES':                
-                v_select = """SELECT INDEX_NAME, 0 INVALID FROM ALL_INDEXES WHERE OWNER='"""+self.e_user_name+"""'"""
-                # se necessario applico il filtro di ricerca
-                if self.oggetti_db_ricerca.text() != '' or self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid':
-                    if self.oggetti_db_tipo_ricerca.currentText() == 'Start with':
-                        v_select += "  AND UPPER(INDEX_NAME) LIKE '" + self.oggetti_db_ricerca.text().upper() + "%'"
-                    elif self.oggetti_db_tipo_ricerca.currentText() == 'Like':
-                        v_select += "  AND UPPER(INDEX_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%'"
-                    elif self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid': 
-                        v_select += "  AND UPPER(INDEX_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%' AND INVALID IS NOT NULL"
-                # aggiungo order by
-                v_select += "  ORDER BY INDEX_NAME"                      
-            # il tipo oggetto sono i sinonimi ...
+                v_select = """SELECT INDEX_NAME OBJECT_NAME, 0 INVALID, 'ENABLED' STATUS FROM ALL_INDEXES WHERE OWNER='"""+self.e_user_name+"""'"""
+            # sinonimi
             elif v_tipo_oggetto == 'SYNONYM':                
-                v_select = """SELECT SYNONYM_NAME, 0 INVALID FROM ALL_SYNONYMS WHERE OWNER='"""+self.e_user_name+"""'"""
-                # se necessario applico il filtro di ricerca
-                if self.oggetti_db_ricerca.text() != '' or self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid':
-                    if self.oggetti_db_tipo_ricerca.currentText() == 'Start with':
-                        v_select += "  AND UPPER(SYNONYM_NAME) LIKE '" + self.oggetti_db_ricerca.text().upper() + "%'"
-                    elif self.oggetti_db_tipo_ricerca.currentText() == 'Like':
-                        v_select += "  AND UPPER(SYNONYM_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%'"
-                    elif self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid': 
-                        v_select += "  AND UPPER(SYNONYM_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%' AND INVALID IS NOT NULL"
-                # aggiungo order by
-                v_select += "  ORDER BY SYNONYM_NAME"                      
+                v_select = """SELECT SYNONYM_NAME OBJECT_NAME, 0 INVALID, 'ENABLED' STATUS FROM ALL_SYNONYMS WHERE OWNER='"""+self.e_user_name+"""'"""
             # il tipo oggetto rientra nella tabella ALL_OBJECT
             else:
                 # leggo elenco degli oggetti indicati (con o senza descrizione)
                 if self.e_view_description.isChecked():
-                    v_select = """SELECT *
-                                  FROM  (SELECT OBJECT_NAME || 
-                                                CASE WHEN OBJECT_TYPE IN ('TABLE','VIEW') THEN
-                                                    ' - ' || (SELECT COMMENTS FROM ALL_TAB_COMMENTS WHERE ALL_TAB_COMMENTS.OWNER=ALL_OBJECTS.OWNER AND ALL_TAB_COMMENTS.TABLE_NAME=ALL_OBJECTS.OBJECT_NAME)                                
-                                                ELSE NULL
-                                                END AS OBJECT_NAME,
-                                                (SELECT COUNT(*) 
-                                                FROM   DBA_OBJECTS 
-                                                WHERE  DBA_OBJECTS.OWNER=ALL_OBJECTS.OWNER AND 
-                                                       DBA_OBJECTS.OBJECT_NAME=ALL_OBJECTS.OBJECT_NAME AND 
-                                                       DBA_OBJECTS.STATUS != 'VALID') INVALID                                            
-                                        FROM   ALL_OBJECTS 
-                                        WHERE  OWNER='""" + self.e_user_name + """' AND 
-                                               OBJECT_TYPE='""" + v_tipo_oggetto + """' AND
-                                               SECONDARY = 'N'
-                                    )"""
+                    v_select = """SELECT OBJECT_NAME || 
+                                         CASE WHEN OBJECT_TYPE IN ('TABLE','VIEW') THEN
+                                               ' - ' || (SELECT COMMENTS FROM ALL_TAB_COMMENTS WHERE ALL_TAB_COMMENTS.OWNER=ALL_OBJECTS.OWNER AND ALL_TAB_COMMENTS.TABLE_NAME=ALL_OBJECTS.OBJECT_NAME)                                
+                                         ELSE 
+                                             NULL
+                                         END AS OBJECT_NAME,
+                                         (SELECT COUNT(*) 
+                                          FROM   DBA_OBJECTS 
+                                          WHERE  DBA_OBJECTS.OWNER=ALL_OBJECTS.OWNER AND 
+                                                 DBA_OBJECTS.OBJECT_NAME=ALL_OBJECTS.OBJECT_NAME AND 
+                                                 DBA_OBJECTS.STATUS != 'VALID') INVALID,
+                                         CASE WHEN OBJECT_TYPE IN ('TRIGGER') THEN
+                                              (SELECT STATUS FROM DBA_TRIGGERS WHERE OWNER=ALL_OBJECTS.OWNER AND TRIGGER_NAME=ALL_OBJECTS.OBJECT_NAME) 
+                                         ELSE
+                                             'ENABLED'
+                                         END STATUS                                          
+                                  FROM   ALL_OBJECTS 
+                                  WHERE  OWNER='""" + self.e_user_name + """' AND 
+                                         OBJECT_TYPE='""" + v_tipo_oggetto + """' AND
+                                         SECONDARY = 'N'"""
                 else:
-                    v_select = """SELECT *
-                                  FROM  (SELECT OBJECT_NAME,
-                                                (SELECT COUNT(*) 
-                                                 FROM   DBA_OBJECTS 
-                                                 WHERE  DBA_OBJECTS.OWNER=ALL_OBJECTS.OWNER AND 
-                                                        DBA_OBJECTS.OBJECT_NAME=ALL_OBJECTS.OBJECT_NAME AND 
-                                                        DBA_OBJECTS.STATUS != 'VALID') INVALID                                          
-                                         FROM   ALL_OBJECTS 
-                                         WHERE  OWNER='""" + self.e_user_name + """' AND 
-                                                OBJECT_TYPE='""" + v_tipo_oggetto + """' AND
-                                                SECONDARY = 'N'
-                               )"""
-                # se necessario applico il filtro di ricerca
-                if self.oggetti_db_ricerca.text() != '' or self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid':
-                    if self.oggetti_db_tipo_ricerca.currentText() == 'Start with':
-                        v_select += " WHERE UPPER(OBJECT_NAME) LIKE '" + self.oggetti_db_ricerca.text().upper() + "%'"
-                    elif self.oggetti_db_tipo_ricerca.currentText() == 'Like':
-                        v_select += " WHERE UPPER(OBJECT_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%'"
-                    elif self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid': 
-                        v_select += " WHERE UPPER(OBJECT_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%' AND INVALID > 0"
-                # aggiungo order by
-                v_select += " ORDER BY OBJECT_NAME"                        
-        # l'utente non ha scelto nessun tipo di oggetto....si carica tutta la tabella all_objects
+                    v_select = """SELECT OBJECT_NAME,
+                                         (SELECT COUNT(*) 
+                                          FROM   DBA_OBJECTS 
+                                          WHERE  DBA_OBJECTS.OWNER=ALL_OBJECTS.OWNER AND 
+                                                 DBA_OBJECTS.OBJECT_NAME=ALL_OBJECTS.OBJECT_NAME AND 
+                                                 DBA_OBJECTS.STATUS != 'VALID') INVALID,
+                                                 CASE WHEN OBJECT_TYPE IN ('TRIGGER') THEN
+                                                    (SELECT STATUS FROM DBA_TRIGGERS WHERE OWNER=ALL_OBJECTS.OWNER AND TRIGGER_NAME=ALL_OBJECTS.OBJECT_NAME) 
+                                                 ELSE
+                                                    'ENABLED'
+                                                 END STATUS                                          
+                                          FROM   ALL_OBJECTS 
+                                          WHERE  OWNER='""" + self.e_user_name + """' AND 
+                                                 OBJECT_TYPE='""" + v_tipo_oggetto + """' AND
+                                                 SECONDARY = 'N'"""                          
+        # l'utente non ha scelto nessun tipo di oggetto....si carica tutta la tabella all_objects (notare come alcuni tipi di oggetti come le foreign key non siano presenti)
         else:
-            v_select = """SELECT *
-                          FROM  (SELECT OBJECT_NAME || ' - ' || OBJECT_TYPE AS OBJECT_NAME,                                        
-                                        (SELECT COUNT(*) 
-                                         FROM   DBA_OBJECTS 
-                                         WHERE  DBA_OBJECTS.OWNER=ALL_OBJECTS.OWNER AND 
-                                                DBA_OBJECTS.OBJECT_NAME=ALL_OBJECTS.OBJECT_NAME AND 
-                                                DBA_OBJECTS.STATUS != 'VALID') INVALID                                        
-                                 FROM   ALL_OBJECTS 
-                                 WHERE  OWNER='""" + self.e_user_name + """' AND
-                                        OBJECT_TYPE IN ('TABLE','VIEW','PACKAGE','PROCEDURE','FUNCTION','TRIGGER','SEQUENCE') AND                                      
-                                        SECONDARY = 'N'
-                                )"""
+            v_select = """SELECT OBJECT_NAME || ' - ' || OBJECT_TYPE AS OBJECT_NAME,                                        
+                                 (SELECT COUNT(*) 
+                                  FROM   DBA_OBJECTS 
+                                  WHERE  DBA_OBJECTS.OWNER=ALL_OBJECTS.OWNER AND 
+                                         DBA_OBJECTS.OBJECT_NAME=ALL_OBJECTS.OBJECT_NAME AND 
+                                         DBA_OBJECTS.STATUS != 'VALID') INVALID,
+                                 CASE WHEN OBJECT_TYPE IN ('TRIGGER') THEN
+                                      (SELECT STATUS FROM DBA_TRIGGERS WHERE OWNER=ALL_OBJECTS.OWNER AND TRIGGER_NAME=ALL_OBJECTS.OBJECT_NAME)
+                                 ELSE
+                                     'ENABLED'
+                                 END STATUS                                          
+                          FROM   ALL_OBJECTS 
+                          WHERE  OWNER='""" + self.e_user_name + """' AND
+                                 OBJECT_TYPE IN ('TABLE','VIEW','PACKAGE','PROCEDURE','FUNCTION','TRIGGER','SEQUENCE') AND                                      
+                                 SECONDARY = 'N'"""
 
-            # se necessario applico il filtro di ricerca
-            if self.oggetti_db_ricerca.text() != '' or self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid':
-                if self.oggetti_db_tipo_ricerca.currentText() == 'Start with':
-                    v_select += " WHERE UPPER(OBJECT_NAME) LIKE '" + self.oggetti_db_ricerca.text().upper() + "%'"
-                elif self.oggetti_db_tipo_ricerca.currentText() == 'Like':
-                    v_select += " WHERE UPPER(OBJECT_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%'"
-                elif self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid': 
-                    v_select += " WHERE UPPER(OBJECT_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%' AND INVALID > 0"
-            # aggiungo order by
-            v_select += " ORDER BY OBJECT_NAME"                        
-        
-        # eseguo la select
+        # inserisco la select creata in una di livello superiore per poter poi applicare filtri e ordinamento
+        v_select = 'SELECT * FROM ( ' + v_select + ' ) '
+
+        # se necessario applico il filtro di ricerca
+        if self.oggetti_db_ricerca.text() != '' or self.oggetti_db_tipo_ricerca.currentText() in ('Only invalid','Only disabled'):
+            if self.oggetti_db_tipo_ricerca.currentText() == 'Start with':
+                v_select += " WHERE UPPER(OBJECT_NAME) LIKE '" + self.oggetti_db_ricerca.text().upper() + "%'"
+            elif self.oggetti_db_tipo_ricerca.currentText() == 'Like':
+                v_select += " WHERE UPPER(OBJECT_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%'"
+            elif self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid': 
+                v_select += " WHERE UPPER(OBJECT_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%' AND INVALID > 0"
+            elif self.oggetti_db_tipo_ricerca.currentText() == 'Only disabled': 
+                v_select += " WHERE UPPER(OBJECT_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%' AND STATUS = 'DISABLED'"
+        # aggiungo order by
+        v_select += " ORDER BY OBJECT_NAME"                                
+                
+        # sostituisce la freccia del mouse con icona "clessidra"
+        Freccia_Mouse(True)        
+        # eseguo la select        
         self.v_cursor_db_obj.execute(v_select)            
-        v_righe = self.v_cursor_db_obj.fetchall()            
+        v_righe = self.v_cursor_db_obj.fetchall()                    
         # carico elenco nel modello che è collegato alla lista
         for v_riga in v_righe:
-            v_item = QtGui.QStandardItem()
+            v_item = QtGui.QStandardItem()                        
             # nell'item inserisco nome oggetto e commento
             v_item.setText(v_riga[0]) 
+            # oggetto invalido imposto icona errore
             if v_riga[1] != 0: 
-                v_item.setBackground(QColor(Qt.red))
+                v_icon = QtGui.QIcon()
+                v_icon.addPixmap(QtGui.QPixmap(":/icons/icons/error.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+                v_item.setIcon(v_icon)                
+            # oggetto disabilitato imposto icona disabled
+            if v_riga[2] == 'DISABLED': 
+                v_icon = QtGui.QIcon()
+                v_icon.addPixmap(QtGui.QPixmap(":/icons/icons/disabled.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+                v_item.setIcon(v_icon)                
+
             self.oggetti_db_lista.appendRow(v_item)                        
+
+        # Ripristino icona freccia del mouse
+        Freccia_Mouse(False)        
 
     def slot_oggetti_db_doppio_click(self, p_index):
         """
@@ -1336,7 +1341,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             # imposto var che conterrà il testo dell'oggetto DB 
             v_testo_oggetto_db = ''
             # sostituisce la freccia del mouse con icona "clessidra"
-            QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))       
+            Freccia_Mouse(True)
 
             # richiamo la procedura di oracle che mi restituisce la ddl dell'oggetto
             # se richiesto di aprire il o il package body, allora devo fare una chiamata specifica
@@ -1427,7 +1432,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             self.smistamento_voci_menu(v_azione, '!' + v_nome_oggetto + '.msql', v_testo_oggetto_db)        
                                         
             # Ripristino icona freccia del mouse
-            QApplication.restoreOverrideCursor()    
+            Freccia_Mouse(False)
 
     def slot_oggetti_db_click(self, p_index):
         """
@@ -1459,7 +1464,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         self.tipo_oggetto = p_tipo_oggetto
         self.nome_oggetto = p_nome_oggetto        
         # sostituisce la freccia del mouse con icona "clessidra"
-        QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))        
+        Freccia_Mouse(True)
 
         # pulisco la var che contiene eventuale elenco di procedure-funzioni (solo se si stanno analizzando: procedure-funzioni e package)
         self.oggetti_db_lista_proc_func = ''
@@ -1650,7 +1655,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             self.db_oggetto_tree.expand(v_index)
                                     
         # Ripristino icona freccia del mouse
-        QApplication.restoreOverrideCursor()          
+        Freccia_Mouse(False)
 
     def slot_object_viewer_find(self):
         """
@@ -1718,7 +1723,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         """
         if p_model.data() == 'Referenced By':
             # sostituisce la freccia del mouse con icona "clessidra"
-            QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))        
+            Freccia_Mouse(True)
 
             # preparo la select per ricerca tutte le tabelle referenziate
             self.v_cursor_db_obj.execute("""SELECT DISTINCT TABLE_NAME
@@ -1744,7 +1749,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 v_root_ref.appendRow([v_campo_col0,v_campo_col1,v_campo_col2,v_campo_col3])                            
 
             # Ripristino icona freccia del mouse
-            QApplication.restoreOverrideCursor()          
+            Freccia_Mouse(False)
 
     def slot_db_oggetto_tree_doppio_click(self, p_model):
         """
@@ -1945,10 +1950,11 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         # Attenzione! Nel caso di nuovo file il formato è Windows, mentre se viene aperto un file, va analizzata la prima riga
         #             e ricercato che formato ha....quello sarà poi il formato da utilizzare!
         #             Questo è stato fatto per rendere l'editor più flessibile
+        #             Ho poi scoperto che ci sono in giro file misti tra (CR-LF) e (LF) e quindi limitato ai primi 1000 caratteri....
         if p_contenuto_file is not None:
-            if p_contenuto_file.find('\r\n') != -1:
+            if p_contenuto_file[0:1000].find('\r\n') != -1:                
                 self.setting_eol = 'W'
-            else:
+            else:                
                 self.setting_eol = 'U'
         else:
             self.setting_eol = 'W'
@@ -2521,7 +2527,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
     
         if v_global_connesso:            
             # sostituisce la freccia del mouse con icona "clessidra"
-            QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))                    
+            Freccia_Mouse(True)
 
             # imposto indicatore di esecuzione a false --> nessuna esecuzione
             self.v_esecuzione_ok = False
@@ -2540,7 +2546,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             # se riscontrato errore di primo livello --> emetto sia codice che messaggio ed esco
             except cx_Oracle.Error as e:                                                                
                 # ripristino icona freccia del mouse
-                QApplication.restoreOverrideCursor()                        
+                Freccia_Mouse(False)
                 # emetto errore 
                 errorObj, = e.args                     
                 self.scrive_output("Error: " + errorObj.message, "E")                                 
@@ -2549,7 +2555,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                 v_riga += self.v_offset_numero_di_riga
                 self.e_sql.setCursorPosition(v_riga,v_colonna)                
                 # ripristino icona freccia del mouse    
-                QApplication.restoreOverrideCursor()                            
+                Freccia_Mouse(False)
                 # esco con errore
                 return 'ko'
 
@@ -2614,7 +2620,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                             self.e_sql.setCursorPosition(v_riga,v_colonna)
                             v_1a_volta = False
                     # ripristino icona freccia del mouse    
-                    QApplication.restoreOverrideCursor()                            
+                    Freccia_Mouse(False)
                     # esco con errore
                     return 'ko'
                 # tutto ok! --> scrivo nell'output messaggio di buona riuscita operazione
@@ -2651,7 +2657,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                         self.scrive_output('Script executed!', 'I')
 
             # ripristino icona freccia del mouse
-            QApplication.restoreOverrideCursor()                            
+            Freccia_Mouse(False)
             # aumento il numero di riga di offset (serve per eventuale script successivo di questo gruppo di esecuzione)            
             self.v_offset_numero_di_riga += len(p_plsql.split(chr(10)))
         
@@ -2675,7 +2681,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.v_matrice_dati_modificati = []
             
             # sostituisce la freccia del mouse con icona "clessidra"
-            QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))                    
+            Freccia_Mouse(True)
 
             # imposto indicatore di esecuzione a false --> nessuna esecuzione
             self.v_esecuzione_ok = False
@@ -2701,7 +2707,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             # se riscontrato errore --> emetto sia codice che messaggio
             except cx_Oracle.Error as e:                                                
                 # ripristino icona freccia del mouse
-                QApplication.restoreOverrideCursor()                        
+                Freccia_Mouse(False)
                 # emetto errore sulla barra di stato 
                 errorObj, = e.args    
                 self.scrive_output("Error: " + errorObj.message, "E")                                            
@@ -2722,7 +2728,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.o_tab_widget.setCurrentIndex(0) 
 
             # Ripristino icona freccia del mouse
-            QApplication.restoreOverrideCursor()   
+            Freccia_Mouse(False)
             return None                     
 
     def carica_pagina(self):
@@ -2741,14 +2747,14 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                 v_riga_dati = self.v_cursor.fetchone()
             except cx_Oracle.DatabaseError as e: 
                  # ripristino icona freccia del mouse
-                QApplication.restoreOverrideCursor()                        
+                Freccia_Mouse(False)
                 # emetto errore sulla barra di stato 
                 errorObj, = e.args    
                 message_error("Error to fetch data: " + errorObj.message)                                            
                 return 'ko'
             except cx_Oracle.InterfaceError as e: 
                 # ripristino icona freccia del mouse
-                QApplication.restoreOverrideCursor()                        
+                Freccia_Mouse(False)
                 # emetto errore sulla barra di stato 
                 errorObj, = e.args    
                 message_error("Error to fetch data: " + errorObj.message)                                            
@@ -2849,13 +2855,13 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         # se sono arrivato alla punto più basso della scrollbar, vuol dire che posso caricare gli altri dati
         if posizione == self.o_table.verticalScrollBar().maximum() and self.v_pos_y > 0:            
             # sostituisce la freccia del mouse con icona "clessidra"
-            QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))        
+            Freccia_Mouse(True)
 
             # carico prossima pagina
             self.carica_pagina()
                         
             # Ripristino icona freccia del mouse
-            QApplication.restoreOverrideCursor()    
+            Freccia_Mouse(False)
 
     def slot_go_to_end(self):
         """
@@ -3415,6 +3421,75 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             # forzo il fuoco sull'editor attraverso un timer!
             QTimer.singleShot(0, self.e_sql.setFocus)
     
+    def slot_format_sql_statement(self):
+        """
+           Prende il testo selezionato sull'editor e lo reindenta 
+        """        
+        # prendo il testo selezionato        
+        #v_start_line, v_start_pos, v_end_line, v_end_pos = self.e_sql.getSelection()
+        v_testo_sel = self.e_sql.selectedText()        
+        if v_testo_sel is None or v_testo_sel == '':
+            message_info("Please select a text with SQL statement!")
+            return 'ko'
+
+        # elimino il testo selezionato 
+        self.e_sql.cut()
+        # chiamo la reindentazione del testo (trasformando tutto in mauiscolo)
+        v_testo_sel = format_sql(v_testo_sel).upper()
+        # inserisco il nuovo testo al posto di quello eliminato
+        self.e_sql.insert(v_testo_sel)        
+
+    def slot_commenta(self):
+        """
+           Commenta la riga selezionata
+        """
+        v_testo_sel = self.e_sql.selectedText()        
+        if v_testo_sel is None or v_testo_sel == '':        
+            return 'ko'
+
+        # elimino il testo selezionato 
+        self.e_sql.cut()
+        # devo capire quali carattersi sono stati usati per il ritorno a capo                
+        if self.setting_eol == 'W':                        
+            v_eol = '\r\n'
+        else:
+            v_eol = '\n'
+        v_new_text = ''
+        # prendo il testo selezionato e ne estraggo le righe in base al ritorno a capo
+        for v_line in v_testo_sel.split(v_eol):                                    
+            v_new_text += '--' + v_line + v_eol
+        
+        # inserisco il nuovo testo al posto di quello eliminato
+        self.e_sql.insert(v_new_text)        
+
+    def slot_scommenta(self):
+        """
+           Scommenta la riga selezionata
+        """        
+        v_testo_sel = self.e_sql.selectedText()        
+        if v_testo_sel is None or v_testo_sel == '':        
+            return 'ko'
+
+        # elimino il testo selezionato 
+        # vedere di sostituire la cut con altra istruzione perché la cut la segna nell'undo e quindi se successivamente utente fa
+        # ctrl-z si vede che c'è stata la cut
+        self.e_sql.cut()
+        # devo capire quali carattersi sono stati usati per il ritorno a capo
+        if self.setting_eol == 'W':                        
+            v_eol = '\r\n'
+        else:
+            v_eol = '\n'
+        v_new_text = ''
+        # prendo il testo selezionato e ne estraggo le righe in base al ritorno a capo
+        for v_line in v_testo_sel.split(v_eol):                                                
+            if v_line[0:2]=='--':                
+                v_new_text += v_line[2:] + v_eol
+            else:
+                v_new_text += v_line + v_eol
+        
+        # inserisco il nuovo testo al posto di quello eliminato
+        self.e_sql.insert(v_new_text)        
+    
     def scrive_output(self, p_messaggio, p_tipo_messaggio):
         """
            Scrive p_messaggio nella sezione "output" precedendolo dall'ora di sistema
@@ -3516,9 +3591,13 @@ class MSql_win3_class(QtWidgets.QDialog, Ui_MSql_win3):
         super(MSql_win3_class, self).__init__()        
         self.setupUi(self)
 
-# ----------------------------------------
-# AVVIO APPLICAZIONE
-# ----------------------------------------
+#
+#  ____ _____  _    ____ _____ 
+# / ___|_   _|/ \  |  _ \_   _|
+# \___ \ | | / _ \ | |_) || |  
+#  ___) || |/ ___ \|  _ < | |  
+# |____/ |_/_/   \_\_| \_\|_|  
+#
 if __name__ == "__main__":    
     # Amplifico la pathname dell'applicazione in modo veda il contenuto della directory qtdesigner dove sono contenuti i layout
     # Nota bene! Quando tramite pyinstaller verrà creato l'eseguibile, tutti i file della cartella qtdesigner verranno messi 
