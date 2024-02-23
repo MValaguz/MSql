@@ -29,21 +29,22 @@ class history_class(QMainWindow, Ui_history_window):
         super(history_class, self).__init__()        
         self.setupUi(self)    
         self.nome_db = p_nome_db
+        self.v_sqlite_conn = None
 
-        # apro il db attraverso gli strumenti librerie QT
-        self.v_sqlite_conn = QSqlDatabase.addDatabase("QSQLITE")
-        self.v_sqlite_conn.setDatabaseName(self.nome_db)
-        if not self.v_sqlite_conn.open():
-            message_error('Error to open database')
-            return 'ko'
-
-        # apro e visualizzo il database
+        # richiamo la procedura di visualizzazione 
         self.slot_start()
 
     def slot_start(self):
         """
            carico a video la tabella
-        """                                  
+        """                             
+        # apro il db attraverso gli strumenti librerie QT        
+        self.v_sqlite_conn = QSqlDatabase.addDatabase("QSQLITE")
+        self.v_sqlite_conn.setDatabaseName(self.nome_db)
+        if not self.v_sqlite_conn.open():
+            message_error('Error to open database')
+            return 'ko'
+     
         # controllo se indicata la where
         if self.e_where_cond.toPlainText() != '':
             v_where = ' where ' + self.e_where_cond.toPlainText()
@@ -52,7 +53,7 @@ class history_class(QMainWindow, Ui_history_window):
 
         # creo un modello di dati su query
         v_modello = QSqlQueryModel()
-        v_modello.setQuery('select TIPO TYPE, ORARIO TIME, ISTRUZIONE INSTRUCTION from SQL_HISTORY ' + v_where + ' order by ORARIO desc')
+        v_modello.setQuery('select TIPO TYPE, ORARIO TIME, UPPER(ISTRUZIONE) INSTRUCTION from SQL_HISTORY ' + v_where.upper() + ' order by ORARIO desc')
 
         # imposto l'oggetto di visualizzazione con il modello 
         self.o_lst1.setModel(v_modello)
@@ -69,8 +70,8 @@ class history_class(QMainWindow, Ui_history_window):
         v_vertical_header = self.o_lst1.verticalHeader()
         v_vertical_header.setDefaultSectionSize(8)   
         self.o_lst1.show()
-        # chiudo il database in modo che non vada in blocco per insert successive da parte di MSql
-        self.v_sqlite_conn.close()
+        # chiudo il database in modo che non vada in blocco per insert successive da parte di MSql        
+        self.v_sqlite_conn.close()        
 
     def slot_purge(self):
         """
@@ -80,12 +81,11 @@ class history_class(QMainWindow, Ui_history_window):
             purge_sql_history(self.nome_db)
             message_info('History deleted! Restart MSql!')
             
-
 # ----------------------------------------
 # TEST APPLICAZIONE
 # ----------------------------------------
 if __name__ == "__main__":    
     app = QApplication([])    
-    application = history_class('C:\MSql\MSql_history.db') 
+    application = history_class('C:\MSql\MSql_sql_history.db') 
     application.show()
     sys.exit(app.exec())      

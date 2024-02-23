@@ -46,7 +46,6 @@ class Ui_FindWindow(object):
         self.verticalLayout.addWidget(self.label_2)
         self.o_find_all_result = QtWidgets.QListView(FindWindow)
         self.o_find_all_result.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.o_find_all_result.setAlternatingRowColors(True)
         self.o_find_all_result.setObjectName("o_find_all_result")
         self.verticalLayout.addWidget(self.o_find_all_result)
         self.gridLayout_2.addLayout(self.verticalLayout, 2, 0, 1, 1)

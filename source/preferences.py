@@ -47,6 +47,11 @@ class preferences_class():
                 self.remember_text_pos = True
             else:
                 self.remember_text_pos = False
+            # tema dei colori scuro
+            if v_json['dark_theme']==1:
+                self.dark_theme = True
+            else:
+                self.dark_theme = False
             # directory apertura e salvataggio
             self.open_dir = v_json['open_dir']
             self.save_dir = v_json['save_dir']
@@ -83,6 +88,7 @@ class preferences_class():
         else:
             self.remember_window_pos = True
             self.remember_text_pos = True
+            self.dark_theme = False
             self.open_dir = 'W:\\SQL'
             self.save_dir = 'W:\\SQL'
             self.utf_8 = False
@@ -124,6 +130,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         # le preferenze caricate vengono riportate a video
         self.e_remember_window_pos.setChecked(self.preferences.remember_window_pos)        
         self.e_remember_text_pos.setChecked(self.preferences.remember_text_pos)        
+        self.e_dark_theme.setChecked(self.preferences.dark_theme)        
         self.e_default_open_dir.setText(self.preferences.open_dir)
         self.e_default_save_dir.setText(self.preferences.save_dir)        
         self.e_default_utf_8.setChecked(self.preferences.utf_8)        
@@ -278,6 +285,12 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
             v_remember_text_pos = 1
         else:
             v_remember_text_pos = 0
+
+        # tema dei colori scuro
+        if self.e_dark_theme.isChecked():
+            v_dark_theme = 1
+        else:
+            v_dark_theme = 0
         
         # il default per utf-8 va convertito 
         if self.e_default_utf_8.isChecked():
@@ -316,6 +329,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
 		# scrivo nel file un elemento json contenente le informazioni inseriti dell'utente
         v_json ={'remember_window_pos': v_remember_window_pos,
                  'remember_text_pos': v_remember_text_pos,
+                 'dark_theme': v_dark_theme,
                  'open_dir': self.e_default_open_dir.text(),
 		         'save_dir': self.e_default_save_dir.text(),
                  'utf_8': v_utf_8,

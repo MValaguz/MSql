@@ -11,9 +11,9 @@ a = Analysis(['..\\source\\MSql_editor.py'],
              pathex=[],
              binaries=[],
              datas=[					
-					('..\\source\\help\\*.*','help'),										
-					('..\\source\\qtdesigner\\*.py','.')
-			       ],
+		      ('..\\source\\help\\*.*','help'),										
+		      ('..\\source\\qtdesigner\\*.py','.')
+	           ],
              hiddenimports=[],             
              hookspath=[],
              runtime_hooks=[],

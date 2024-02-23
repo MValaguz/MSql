@@ -1,6 +1,8 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/rabbit.png</file>
     <file>icons/disabled.png</file>
+    <file>icons/checkbox_dark_theme.png</file>
     <file>icons/error.png</file>
     <file>icons/uncomment.png</file>
     <file>icons/comment.png</file>

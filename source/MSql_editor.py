@@ -13,7 +13,14 @@
  Data..........: 01/01/2023
  Descrizione...: Questo programma ha la "pretesa" di essere una sorta di piccolo editor SQL per ambiente Oracle....            
                  al momento si tratta più di un esperimento che di qualcosa di utilizzabile.
-                 In questo programma sono state sperimentate diverse tecniche!
+                 In questo programma sono state sperimentate diverse tecniche tra cui quelle per comprendere meglio la programmazione ad oggetti.
+                 
+ Note..........: La classe principale è MSql_win1_class che apre la window di menu e che contiene l'area mdi dove poi si raggrupperranno
+                 le varie finestre dell'editor (gestito dalla classe MSql_win2_class). La window principale si collega con la 
+                 secondaria dell'editor utilizzando un array che contiene i puntatori all'oggetto editor (MSql_win2_class). 
+                 Quindi in MSql_win1_class vi è una continua ricerca all'oggetto editor di riferimento in modo da lavorare in modo corretto.
+                 Tutta la parte di definizione grafica è stata creata tramite QtDesigner e i file da lui prodotti, convertiti tramite un'utilità 
+                 in classi Python da dare poi in pasto alla libreria QT.
 """
 
 # Librerie di base
@@ -32,6 +39,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.Qsci import *
 # Classe per la gestione delle preferenze
 from preferences import preferences_class
+# Definizione del solo tema dark
+from dark_theme import dark_theme_definition
 # Classi qtdesigner (win1 è la window principale, win2 la window dell'editor e win3 quella delle info di programma)
 from MSql_editor_win1_ui import Ui_MSql_win1
 from MSql_editor_win2_ui import Ui_MSql_win2
@@ -107,9 +116,14 @@ class My_MSql_Lexer(QsciLexerSQL):
         self.p_editor.setAutoIndent(True)
         # tabulatore a 4 caratteri
         self.p_editor.setTabWidth(4)   
-        # evidenzia l'intera riga dove posizionato il cursore
+        # evidenzia l'intera riga dove posizionato il cursore (grigio scuro e cursore bianco se il tema è dark)
         self.p_editor.setCaretLineVisible(True)
-        self.p_editor.setCaretLineBackgroundColor(QColor("#FFFF99"))
+        if o_global_preferences.dark_theme:
+            self.p_editor.setCaretLineBackgroundColor(QColor("#4a5157"))
+            self.p_editor.setCaretForegroundColor(QColor("white"))
+        else:
+            self.p_editor.setCaretLineBackgroundColor(QColor("#FFFF99"))        
+            self.p_editor.setCaretForegroundColor(QColor("black"))
         # attivo il margine 0 con la numerazione delle righe
         self.p_editor.setMarginType(0, QsciScintilla.NumberMargin)        
         self.p_editor.setMarginsFont(QFont("Courier New",9))                           
@@ -149,6 +163,37 @@ class My_MSql_Lexer(QsciLexerSQL):
         self.p_editor.selectionChanged.connect(self.cambio_di_selezione_testo)        
         self.selection_lock = False
         self.SELECTION_INDICATOR = 4 
+
+        # se è stato scelto il tema colori scuro --> reimposto i colori della sezione qscintilla
+        # non sono riuscito a trovare altre strade per fare questa cosa
+        if o_global_preferences.dark_theme:
+            self.p_editor.setMarginsForegroundColor(QColor('white'))
+            self.p_editor.setMarginsBackgroundColor(QColor('#242424'))
+            self.p_editor.setFoldMarginColors(QColor('grey'),QColor('#242424'))
+            self.setDefaultPaper(QColor('#242424'))
+            self.setPaper(QColor('#242424'))            
+            self.setColor(QColor('white'), QsciLexerSQL.Default) 
+            self.setColor(QColor('#608B4E'), QsciLexerSQL.Comment)
+            self.setColor(QColor('#608B4E'), QsciLexerSQL.CommentLine)
+            self.setColor(QColor('#608B4E'), QsciLexerSQL.CommentDoc) 
+            self.setColor(QColor('#b5cea8'), QsciLexerSQL.Number)
+            self.setColor(QColor('#BA231E'), QsciLexerSQL.Keyword)
+            self.setColor(QColor('darkyellow'), QsciLexerSQL.DoubleQuotedString) 
+            self.setColor(QColor('#ECBB76'), QsciLexerSQL.SingleQuotedString) 
+            self.setColor(QColor('green'), QsciLexerSQL.PlusKeyword)
+            self.setColor(QColor('green'), QsciLexerSQL.PlusPrompt) 
+            self.setColor(QColor('cyan'), QsciLexerSQL.Operator) 
+            self.setColor(QColor('#D4D4D4'), QsciLexerSQL.Identifier)
+            self.setColor(QColor('green'), QsciLexerSQL.PlusComment) 
+            self.setColor(QColor('green'), QsciLexerSQL.CommentLineHash) 
+            self.setColor(QColor('green'), QsciLexerSQL.CommentDocKeyword)
+            self.setColor(QColor('green'), QsciLexerSQL.CommentDocKeywordError) 
+            self.setColor(QColor('#9987B3'), QsciLexerSQL.KeywordSet5) 
+            self.setColor(QColor('#9987B3'), QsciLexerSQL.KeywordSet6)
+            self.setColor(QColor('#9987B3'), QsciLexerSQL.KeywordSet7) 
+            self.setColor(QColor('#9987B3'), QsciLexerSQL.KeywordSet8) 
+            self.setColor(QColor('green'), QsciLexerSQL.QuotedIdentifier)
+            self.setColor(QColor('green'), QsciLexerSQL.QuotedOperator)
 
     def keywords(self, index):
         """
@@ -442,7 +487,13 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 v_qaction.setText(rec[0])
                 v_qaction.setData('MENU_USER')
                 self.action_elenco_user.append(v_qaction)
-                self.menuServer.addAction(v_qaction)               
+                self.menuServer.addAction(v_qaction)  
+
+        ###
+        # Se richiesto il tema scuro forzo il colore scuro sull'area Mdi (non sono riuscito a farlo )             
+        ###
+        if o_global_preferences.dark_theme:
+            self.mdiArea.setBackground(QColor('#242424'))                                    
 
         ###
         # Aggiunta di windget alla statusbar con: flag editabilità, numero di caratteri, indicatore di overwrite, ecc..
@@ -807,6 +858,9 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             # Ricerca di un oggetto
             elif p_slot.text() == 'Find object':                
                 message_info('Position yourself in the text-editor on the object and press F12')                                
+            # Query veloce sul nome di tabella
+            elif p_slot.text() == 'Quick query':                
+                message_info('Position yourself in the text-editor on the table and press F11')                                
             # Carico il risultato sql alla prima riga
             elif p_slot.text() == 'Go to Top':
                 o_MSql_win2.slot_go_to_top()
@@ -852,12 +906,15 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         
         # se edit abilitato, la evidenzio
         if o_global_preferences.editable:            
-            self.l_tabella_editabile.setText("Editable table: Enabled")            
+            self.l_tabella_editabile.setText("Editable table: Enabled")                        
             self.l_tabella_editabile.setStyleSheet('color: red;')      
-            self.l_tabella_editabile.setStyleSheet('background-color: red ;color: white;') 
+            self.l_tabella_editabile.setStyleSheet('background-color: red ;color: white;')             
         else:
             self.l_tabella_editabile.setText("Editable table: Disabled")            
-            self.l_tabella_editabile.setStyleSheet('color: black;')      
+            if o_global_preferences.dark_theme:                
+                self.l_tabella_editabile.setStyleSheet('color: white;')      
+            else:
+                self.l_tabella_editabile.setStyleSheet('color: black;')      
 
         # scorro la lista-oggetti-editor e modifico lo stato edit di ognuno
         for obj_win2 in self.o_lst_window2:
@@ -1153,8 +1210,11 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             v_background = 'red'
 
         # sulla statusbar, aggiorno la label della connessione        
-        self.l_connection.setText("Connection: " + self.e_server_name + "/" + self.e_user_name)                            
-        self.l_connection.setStyleSheet('background-color: ' + v_background + ';color: "' + v_color + '";')              
+        self.l_connection.setText("Connection: " + self.e_server_name + "/" + self.e_user_name)     
+        if o_global_preferences.dark_theme:                       
+            self.l_connection.setStyleSheet('background-color: ' + v_color + ';color: "' + v_background + '";')              
+        else:
+            self.l_connection.setStyleSheet('background-color: ' + v_background + ';color: "' + v_color + '";')              
 
         # se la connessione è andata a buon fine, richiedo elenco degli oggetti in modo da aggiornare il dizionario dell'editor con nuove parole chiave
         # in questa sezione viene caricata la lista v_global_my_lexer_keywords con tutti i nomi di tabelle, viste, procedure, ecc.
@@ -1177,11 +1237,13 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 # ...e apro un cursore ad uso di quell'oggetto-editor                
                 obj_win2.v_cursor = v_global_connection.cursor()
                 # Imposto il colore di sfondo su tutti gli oggetti principali (l'editor è stato tolto volutamente per un effetto grafico non piacevole)                               
-                obj_win2.o_table.setStyleSheet("QTableWidget {background-color: " + v_color + ";}")
-                obj_win2.o_output.setStyleSheet("QPlainTextEdit {background-color: " + v_color + ";}")
-                obj_win2.o_map.setStyleSheet("QTableView {background-color: " + v_color + ";}")
-                self.oggetti_db_elenco.setStyleSheet("QListView {background-color: " + v_color + ";}")
-                self.db_oggetto_tree.setStyleSheet("QTreeView {background-color: " + v_color + ";}")                
+                # Questa reimpostazione vale solo per il tema di colori chiaro e non per il tema scuro
+                if not o_global_preferences.dark_theme:
+                    obj_win2.o_table.setStyleSheet("QTableWidget {background-color: " + v_color + ";}")
+                    obj_win2.o_output.setStyleSheet("QPlainTextEdit {background-color: " + v_color + ";}")
+                    obj_win2.o_map.setStyleSheet("QTableView {background-color: " + v_color + ";}")
+                    self.oggetti_db_elenco.setStyleSheet("QListView {background-color: " + v_color + ";}")
+                    self.db_oggetto_tree.setStyleSheet("QTreeView {background-color: " + v_color + ";}")                
                 # aggiorno il lexer aggiungendo tutte le nuove keywords
                 if len(v_global_my_lexer_keywords) > 0:                                        
                     obj_win2.v_lexer = My_MSql_Lexer(obj_win2.e_sql)
@@ -1892,8 +1954,14 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         index = self.win_history.o_lst1.selectedIndexes()[2]           
         # il valore della colonna istruction viene caricato nell'editor corrente
         o_MSql_win2 = self.oggetto_win2_attivo()
-        if o_MSql_win2 != None:
-            o_MSql_win2.e_sql.insert(self.win_history.o_lst1.model().data(index))        
+        if o_MSql_win2 != None:            
+            v_risultato = self.win_history.o_lst1.model().data(index)
+            # il testo che prendo dall'history ha formato eol Linux, e se necessario
+            # va convertito in Windows (a seconda dell'impostazione dell'editor di destinazione)
+            if o_MSql_win2.setting_eol == 'W':
+                v_risultato = v_risultato.replace('\n', '\r\n')                                    
+
+            o_MSql_win2.e_sql.insert(v_risultato)        
 
 #
 #  _____ ____ ___ _____ ___  ____  
@@ -1945,7 +2013,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.v_lexer = My_MSql_Lexer(self.e_sql)                
         # attivo il lexer sull'editor
         self.e_sql.setLexer(self.v_lexer)
-        
+                
         # imposto il ritorno a capo in formato Windows (CR-LF) o Unix (LF)
         # Attenzione! Nel caso di nuovo file il formato è Windows, mentre se viene aperto un file, va analizzata la prima riga
         #             e ricercato che formato ha....quello sarà poi il formato da utilizzare!
@@ -2067,6 +2135,10 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                     self.v_overwrite_enabled = True                
                 # aggiorno la status bar con relative label
                 self.aggiorna_statusbar()
+            # tasto F11 premuto dall'utente --> eseguo la quick query
+            if event.key() == Qt.Key_F11:                 
+                self.slot_f11()   
+                return True
             # tasto F12 premuto dall'utente --> richiamo l'object viewer            
             if event.key() == Qt.Key_F12:                 
                 self.slot_f12()   
@@ -2174,6 +2246,29 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.win_dialog_zoom_lineEdit.setPlainText(self.v_o_table_current_item.text())
         self.win_dialog_zoom_item.show()
 
+    def slot_f11(self):
+        """
+           Premendo F11 viene estratto dalla posizione del cursore dell'editor, il nome dell'oggetto
+           e da li viene eseguita una query
+
+           Note: Ho provato a vedere se esiste possibilità di chiedere a qscintilla se mi può dare la parola su cui il cursore è posizionato
+                 ma no trovato. Quindi fatto una cosa semiinterna creando una funzione in package utilita
+        """
+        # ricavo numero riga e posizione del cursore
+        v_num_line, v_num_pos = self.e_sql.getCursorPosition()                
+        # estraggo l'intera riga dove è posizionato il cursore
+        self.e_sql.setSelection(v_num_line, 0, v_num_line+1, -1)
+        v_line = self.e_sql.selectedText()
+        # riposiziono il cursore allo stato originario
+        self.e_sql.setSelection(v_num_line, v_num_pos, v_num_line, v_num_pos)
+        # utilizzando la posizione del cursore sulla riga, estraggo la parola più prossima al cursore stesso                
+        v_oggetto = extract_word_from_cursor_pos(v_line.upper(), v_num_pos)                
+        if v_oggetto != '':
+            print('F11-Quick query on --> ' + v_oggetto)      
+            # tento di eseguire la query dell'oggetto selezionato (dovrebbe essere una tabella)
+            v_select = 'SELECT * FROM ' + v_oggetto
+            self.esegui_select(v_select, v_select)
+        
     def slot_f12(self):
         """
            Premendo F12 viene estratto dalla posizione del cursore dell'editor, il nome dell'oggetto
@@ -2260,6 +2355,17 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         v_action = QWidgetAction(self.o_table_popup)
         v_action.setDefaultWidget(v_group_by)        
         self.o_table_popup.addAction(v_action)
+                
+        # bottone per il count numero record
+        icon4 = QtGui.QIcon()
+        icon4.addPixmap(QtGui.QPixmap(":/icons/icons/sequence.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        v_count = QPushButton()
+        v_count.setText('Count')
+        v_count.setIcon(icon4)
+        v_count.clicked.connect(self.slot_count_popup)
+        v_action = QWidgetAction(self.o_table_popup)
+        v_action.setDefaultWidget(v_count)        
+        self.o_table_popup.addAction(v_action)
 
         # calcolo la posizione dove deve essere visualizzato il menu popup in base alle proprietà dell'header di tabella
         headerPos = self.o_table.mapToGlobal(self.o_table_hH.pos())
@@ -2325,7 +2431,24 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         v_header_item = self.o_table.horizontalHeaderItem(self.o_table_popup_index)
         
         # wrap dell'attuale select con altra order by
-        v_new_select = 'SELECT DISTINCT ' + v_header_item.text() + ' FROM (' + self.v_select_corrente + ') ORDER BY ' + v_header_item.text()
+        v_new_select = 'SELECT ' + v_header_item.text() + ', COUNT(*) FROM (' + self.v_select_corrente + ') GROUP BY ' +  v_header_item.text() + ' ORDER BY ' + v_header_item.text()
+                
+        # rieseguo la select
+        self.esegui_select(v_new_select, False)
+        
+        # chiudo il menu popup
+        self.o_table_popup.close()
+
+    def slot_count_popup(self):
+        """
+           Gestione menu popup all'interno dei risultati
+           Riesegue la select corrente con la count numero totale di record
+        """
+        # prendo l'item dell'header di tabella 
+        v_header_item = self.o_table.horizontalHeaderItem(self.o_table_popup_index)
+        
+        # wrap dell'attuale select con altra order by
+        v_new_select = 'SELECT COUNT(*) FROM (' + self.v_select_corrente + ')'
                 
         # rieseguo la select
         self.esegui_select(v_new_select, False)
@@ -3494,15 +3617,23 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         """
            Scrive p_messaggio nella sezione "output" precedendolo dall'ora di sistema
         """
-        # definizione dei pennelli per scrivere il testo in diversi colori
+        global o_global_preferences
+        
+        # definizione dei pennelli per scrivere il testo in diversi colori (i nomi fanno riferimento al tema chiaro)
         v_pennello_rosso = QtGui.QTextCharFormat()
-        v_pennello_rosso.setForeground(Qt.red)
         v_pennello_blu = QtGui.QTextCharFormat()
-        v_pennello_blu.setForeground(Qt.blue)
         v_pennello_nero = QtGui.QTextCharFormat()
-        v_pennello_nero.setForeground(Qt.black)
         v_pennello_verde = QtGui.QTextCharFormat()
-        v_pennello_verde.setForeground(Qt.darkGreen)
+        if o_global_preferences.dark_theme:            
+            v_pennello_rosso.setForeground(Qt.red)            
+            v_pennello_blu.setForeground(Qt.cyan)            
+            v_pennello_nero.setForeground(Qt.white)            
+            v_pennello_verde.setForeground(Qt.green)
+        else:            
+            v_pennello_rosso.setForeground(Qt.red)            
+            v_pennello_blu.setForeground(Qt.blue)            
+            v_pennello_nero.setForeground(Qt.black)            
+            v_pennello_verde.setForeground(Qt.darkGreen)
 
         # stampo in blu l'ora di sistema
         v_time = datetime.datetime.now()        
@@ -3613,7 +3744,7 @@ if __name__ == "__main__":
     except:
         pass    
 
-    # controllo se esiste dir di lavoro (servirà per salvare le preferenze...)        
+    # controllo se esiste dir di lavoro (servirà per salvare le preferenze, ecc....)        
     if not os.path.isdir(v_global_work_dir):
         os.makedirs(v_global_work_dir)
     
@@ -3621,4 +3752,12 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication([])    
     application = MSql_win1_class(v_nome_file_da_caricare)     
     application.show()
+
+    # se è stato scelto di avere il tema dei colori scuro, lo carico
+    # Attenzione! La parte principale del tema colori rispetta il meccanismo di QT library
+    #             Mentre per la parte di QScintilla ho dovuto fare le impostazioni manuali (v. definizione del lexer)
+    if o_global_preferences.dark_theme:        
+        app.setStyleSheet(dark_theme_definition())                    
+            
+    # attivazione degli eventi
     sys.exit(app.exec())    

@@ -55,7 +55,6 @@ class Ui_history_window(object):
         font = QtGui.QFont()
         font.setPointSize(8)
         self.o_lst1.setFont(font)
-        self.o_lst1.setAlternatingRowColors(True)
         self.o_lst1.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.o_lst1.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.o_lst1.setObjectName("o_lst1")

@@ -48,9 +48,6 @@
        </property>
       </widget>
       <widget class="QTabWidget" name="o_tab_widget">
-       <property name="tabShape">
-        <enum>QTabWidget::Triangular</enum>
-       </property>
        <property name="currentIndex">
         <number>0</number>
        </property>
@@ -80,9 +77,6 @@
             <font>
              <pointsize>8</pointsize>
             </font>
-           </property>
-           <property name="alternatingRowColors">
-            <bool>true</bool>
            </property>
            <property name="selectionMode">
             <enum>QAbstractItemView::SingleSelection</enum>
@@ -226,9 +220,6 @@
        </property>
        <property name="defaultDropAction">
         <enum>Qt::CopyAction</enum>
-       </property>
-       <property name="alternatingRowColors">
-        <bool>true</bool>
        </property>
        <property name="selectionMode">
         <enum>QAbstractItemView::SingleSelection</enum>
