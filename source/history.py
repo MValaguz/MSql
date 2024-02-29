@@ -86,6 +86,6 @@ class history_class(QMainWindow, Ui_history_window):
 # ----------------------------------------
 if __name__ == "__main__":    
     app = QApplication([])    
-    application = history_class('C:\MSql\MSql_sql_history.db') 
+    application = history_class('C:\MSql\MSql.db') 
     application.show()
     sys.exit(app.exec())      

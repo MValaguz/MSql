@@ -501,7 +501,7 @@ def write_sql_history(p_db_name, p_tipo, p_testo):
             v_curs.execute("""INSERT INTO SQL_HISTORY(TIPO,ORARIO,ISTRUZIONE) VALUES(?,?,?)""", (p_tipo, datetime.datetime.now(), p_testo) )
             v_conn.commit()
         except sqlite3.OperationalError:
-            message_error('Error while writing in history log!' + chr(10) + 'Probably the file MSql_sql_history.db is locked!')        
+            message_error('Error while writing in history log!' + chr(10) + 'Probably the file MSql.db is locked!')        
                 
         v_conn.close()    
     
@@ -544,7 +544,7 @@ def write_files_history(p_db_name, p_file_name, p_pos_y, p_pos_x):
                 v_curs.execute("""UPDATE FILE_HISTORY SET ORARIO=?,POS_Y=?,POS_X=? WHERE FILE_NAME=?""", (datetime.datetime.now(), p_pos_y, p_pos_x, p_file_name) )
             v_conn.commit()
         except sqlite3.OperationalError:
-            message_error('Error while writing in file history log!' + chr(10) + 'Probably the file MSql_files_history.db is locked!')                        
+            message_error('Error while writing in file history log!' + chr(10) + 'Probably the file MSql.db is locked!')                        
         
         v_conn.close()    
 

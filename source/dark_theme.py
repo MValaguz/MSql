@@ -15,6 +15,7 @@
 # Definizione dei colori principali usati da questo tema
 # #242424 = "Nero"
 # #4a5157 = "Grigio"
+# #667078 = "Grigio chiaro"
 # #003333 = "Verde petrolio scuro"
 # #006666 = "Verde petrolio chiaro"
 #
@@ -31,6 +32,7 @@ QWidget
 	color: #fff;
 	selection-background-color: #fff;
 	selection-color: #000;
+    alternate-background-color: #4f585e;
 }
 
 

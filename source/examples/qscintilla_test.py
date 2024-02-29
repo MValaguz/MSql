@@ -74,7 +74,8 @@ class CustomMainWindow(QMainWindow):
         # aggiungo tutti i termini di autocompletamento (si trovanon all'interno di una tabella che viene generata a comando)
         self.v_api_lexer.add('descri.elemento(primo,secondo)')                                    
         self.v_api_lexer.add('descri.secondo(terzo,quarto)')                                    
-        self.v_api_lexer.prepare()        
+        self.v_api_lexer.prepare()   
+        
                         
         # attivo il filtro di eventi sull'oggetto editor; ogni evento passerà dalla funzione eventFilter
         #self.__editor.installEventFilter(self)                   

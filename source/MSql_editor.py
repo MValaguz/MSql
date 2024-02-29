@@ -50,6 +50,7 @@ from find_ui import Ui_FindWindow
 from find_e_replace_ui import Ui_Find_e_Replace_Window
 from goto_line_ui import Ui_GotoLineWindow
 from history import history_class
+from preferred_sql import preferred_sql_class
 # Classe qtdesigner per la richiesta di connessione
 from connect_ui import Ui_connect_window
 # Classe per visualizzare la barra di avanzamento 
@@ -167,18 +168,21 @@ class My_MSql_Lexer(QsciLexerSQL):
         # se è stato scelto il tema colori scuro --> reimposto i colori della sezione qscintilla
         # non sono riuscito a trovare altre strade per fare questa cosa
         if o_global_preferences.dark_theme:
+            # colori di sfondo
             self.p_editor.setMarginsForegroundColor(QColor('white'))
             self.p_editor.setMarginsBackgroundColor(QColor('#242424'))
             self.p_editor.setFoldMarginColors(QColor('grey'),QColor('#242424'))
             self.setDefaultPaper(QColor('#242424'))
-            self.setPaper(QColor('#242424'))            
+            self.setPaper(QColor('#242424'))  
+            # colori delle parole
             self.setColor(QColor('white'), QsciLexerSQL.Default) 
             self.setColor(QColor('#608B4E'), QsciLexerSQL.Comment)
             self.setColor(QColor('#608B4E'), QsciLexerSQL.CommentLine)
             self.setColor(QColor('#608B4E'), QsciLexerSQL.CommentDoc) 
             self.setColor(QColor('#b5cea8'), QsciLexerSQL.Number)
-            self.setColor(QColor('#BA231E'), QsciLexerSQL.Keyword)
-            self.setColor(QColor('darkyellow'), QsciLexerSQL.DoubleQuotedString) 
+            #self.setColor(QColor('#BA231E'), QsciLexerSQL.Keyword)            
+            self.setColor(QColor('#00cb62'), QsciLexerSQL.Keyword)
+            self.setColor(QColor('#00aaff'), QsciLexerSQL.DoubleQuotedString) 
             self.setColor(QColor('#ECBB76'), QsciLexerSQL.SingleQuotedString) 
             self.setColor(QColor('green'), QsciLexerSQL.PlusKeyword)
             self.setColor(QColor('green'), QsciLexerSQL.PlusPrompt) 
@@ -188,10 +192,10 @@ class My_MSql_Lexer(QsciLexerSQL):
             self.setColor(QColor('green'), QsciLexerSQL.CommentLineHash) 
             self.setColor(QColor('green'), QsciLexerSQL.CommentDocKeyword)
             self.setColor(QColor('green'), QsciLexerSQL.CommentDocKeywordError) 
-            self.setColor(QColor('#9987B3'), QsciLexerSQL.KeywordSet5) 
-            self.setColor(QColor('#9987B3'), QsciLexerSQL.KeywordSet6)
-            self.setColor(QColor('#9987B3'), QsciLexerSQL.KeywordSet7) 
-            self.setColor(QColor('#9987B3'), QsciLexerSQL.KeywordSet8) 
+            self.setColor(QColor('#ac98ca'), QsciLexerSQL.KeywordSet5) 
+            self.setColor(QColor('#ac98ca'), QsciLexerSQL.KeywordSet6)
+            self.setColor(QColor('#ac98ca'), QsciLexerSQL.KeywordSet7) 
+            self.setColor(QColor('#ac98ca'), QsciLexerSQL.KeywordSet8) 
             self.setColor(QColor('green'), QsciLexerSQL.QuotedIdentifier)
             self.setColor(QColor('green'), QsciLexerSQL.QuotedOperator)
 
@@ -490,7 +494,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 self.menuServer.addAction(v_qaction)  
 
         ###
-        # Se richiesto il tema scuro forzo il colore scuro sull'area Mdi (non sono riuscito a farlo )             
+        # Se richiesto il tema scuro forzo il colore scuro sull'area Mdi (non sono riuscito a farlo usando il tema!)             
         ###
         if o_global_preferences.dark_theme:
             self.mdiArea.setBackground(QColor('#242424'))                                    
@@ -553,13 +557,13 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         self.menuBar.triggered[QAction].connect(self.smistamento_voci_menu)        
 
         ###        
-        # eseguo la connessione automatica di default
+        # eseguo la connessione automatica di default (questa cosa va rivista perché ora l'elenco è dinamico!)
         ###
         self.e_server_name = 'BACKUP_815'
         self.e_user_name = 'SMILE'
         self.e_password = 'SMILE'        
         self.e_user_mode = 'Normal'        
-        self.slot_connetti()   
+        self.slot_connetti()           
 
         ###
         # Definizione della struttura per gestione elenco oggetti DB (object navigator)       
@@ -611,7 +615,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         else:
             v_azione = QtWidgets.QAction()
             v_azione.setText('New')
-            self.smistamento_voci_menu(v_azione)                     
+            self.smistamento_voci_menu(v_azione)                 
 
     def oggetto_win2_attivo(self):
         """
@@ -751,6 +755,9 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         # visualizza l'history
         elif p_slot.text() == 'History':
             self.slot_history()
+        # visualizza la gestione degli sql preferiti
+        elif p_slot.text() == 'My preferred SQL':
+            self.slot_preferred_sql()
         # Indico che l'output sql ha le colonne con larghezza auto-adattabile
         elif p_slot.text() == 'Auto Column Resize':
             self.slot_menu_auto_column_resize()
@@ -1298,12 +1305,12 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                                              NULL
                                          END AS OBJECT_NAME,
                                          (SELECT COUNT(*) 
-                                          FROM   DBA_OBJECTS 
-                                          WHERE  DBA_OBJECTS.OWNER=ALL_OBJECTS.OWNER AND 
-                                                 DBA_OBJECTS.OBJECT_NAME=ALL_OBJECTS.OBJECT_NAME AND 
-                                                 DBA_OBJECTS.STATUS != 'VALID') INVALID,
+                                          FROM   ALL_OBJECTS ABJ
+                                          WHERE  ABJ.OWNER=ALL_OBJECTS.OWNER AND 
+                                                 ABJ.OBJECT_NAME=ALL_OBJECTS.OBJECT_NAME AND 
+                                                 ABJ.STATUS != 'VALID') INVALID,
                                          CASE WHEN OBJECT_TYPE IN ('TRIGGER') THEN
-                                              (SELECT STATUS FROM DBA_TRIGGERS WHERE OWNER=ALL_OBJECTS.OWNER AND TRIGGER_NAME=ALL_OBJECTS.OBJECT_NAME) 
+                                              (SELECT STATUS FROM ALL_TRIGGERS WHERE OWNER=ALL_OBJECTS.OWNER AND TRIGGER_NAME=ALL_OBJECTS.OBJECT_NAME) 
                                          ELSE
                                              'ENABLED'
                                          END STATUS                                          
@@ -1314,12 +1321,12 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 else:
                     v_select = """SELECT OBJECT_NAME,
                                          (SELECT COUNT(*) 
-                                          FROM   DBA_OBJECTS 
-                                          WHERE  DBA_OBJECTS.OWNER=ALL_OBJECTS.OWNER AND 
-                                                 DBA_OBJECTS.OBJECT_NAME=ALL_OBJECTS.OBJECT_NAME AND 
-                                                 DBA_OBJECTS.STATUS != 'VALID') INVALID,
+                                          FROM   ALL_OBJECTS ABJ
+                                          WHERE  ABJ.OWNER=ALL_OBJECTS.OWNER AND 
+                                                 ABJ.OBJECT_NAME=ALL_OBJECTS.OBJECT_NAME AND 
+                                                 ABJ.STATUS != 'VALID') INVALID,
                                                  CASE WHEN OBJECT_TYPE IN ('TRIGGER') THEN
-                                                    (SELECT STATUS FROM DBA_TRIGGERS WHERE OWNER=ALL_OBJECTS.OWNER AND TRIGGER_NAME=ALL_OBJECTS.OBJECT_NAME) 
+                                                    (SELECT STATUS FROM ALL_TRIGGERS WHERE OWNER=ALL_OBJECTS.OWNER AND TRIGGER_NAME=ALL_OBJECTS.OBJECT_NAME) 
                                                  ELSE
                                                     'ENABLED'
                                                  END STATUS                                          
@@ -1331,12 +1338,12 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         else:
             v_select = """SELECT OBJECT_NAME || ' - ' || OBJECT_TYPE AS OBJECT_NAME,                                        
                                  (SELECT COUNT(*) 
-                                  FROM   DBA_OBJECTS 
-                                  WHERE  DBA_OBJECTS.OWNER=ALL_OBJECTS.OWNER AND 
-                                         DBA_OBJECTS.OBJECT_NAME=ALL_OBJECTS.OBJECT_NAME AND 
-                                         DBA_OBJECTS.STATUS != 'VALID') INVALID,
+                                  FROM   ALL_OBJECTS ABJ
+                                  WHERE  ABJ.OWNER=ALL_OBJECTS.OWNER AND 
+                                         ABJ.OBJECT_NAME=ALL_OBJECTS.OBJECT_NAME AND 
+                                         ABJ.STATUS != 'VALID') INVALID,
                                  CASE WHEN OBJECT_TYPE IN ('TRIGGER') THEN
-                                      (SELECT STATUS FROM DBA_TRIGGERS WHERE OWNER=ALL_OBJECTS.OWNER AND TRIGGER_NAME=ALL_OBJECTS.OBJECT_NAME)
+                                      (SELECT STATUS FROM ALL_TRIGGERS WHERE OWNER=ALL_OBJECTS.OWNER AND TRIGGER_NAME=ALL_OBJECTS.OBJECT_NAME)
                                  ELSE
                                      'ENABLED'
                                  END STATUS                                          
@@ -1363,8 +1370,17 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 
         # sostituisce la freccia del mouse con icona "clessidra"
         Freccia_Mouse(True)        
-        # eseguo la select        
-        self.v_cursor_db_obj.execute(v_select)            
+        # eseguo la select                
+        try:            
+            self.v_cursor_db_obj.execute(v_select)                    
+        except cx_Oracle.Error as e:                                                                
+            # ripristino icona freccia del mouse
+            Freccia_Mouse(False)
+            # emetto errore 
+            errorObj, = e.args                     
+            message_error("Error: " + errorObj.message)       
+            return "ko"                  
+        # carico il risultato     
         v_righe = self.v_cursor_db_obj.fetchall()                    
         # carico elenco nel modello che è collegato alla lista
         for v_riga in v_righe:
@@ -1399,6 +1415,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         # prendo il nome dell'oggetto scelto dall'utente
         v_selindex = self.oggetti_db_lista.itemFromIndex(p_index)
         v_nome_oggetto = v_selindex.text()               
+        v_select = ''
         if v_nome_oggetto != '' and v_tipo_oggetto != '':
             # imposto var che conterrà il testo dell'oggetto DB 
             v_testo_oggetto_db = ''
@@ -1408,66 +1425,72 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             # richiamo la procedura di oracle che mi restituisce la ddl dell'oggetto
             # se richiesto di aprire il o il package body, allora devo fare una chiamata specifica
             if v_tipo_oggetto == 'PACKAGE BODY': 
-                self.v_cursor_db_obj.execute("SELECT DBMS_METADATA.GET_DDL('PACKAGE_BODY','"+v_nome_oggetto+"') FROM DUAL")
+                v_select = "SELECT DBMS_METADATA.GET_DDL('PACKAGE_BODY','"+v_nome_oggetto+"') FROM DUAL"
             elif v_tipo_oggetto == 'PACKAGE':
-                self.v_cursor_db_obj.execute("""SELECT DBMS_METADATA.GET_DDL('PACKAGE_SPEC','"""+v_nome_oggetto+"""') FROM DUAL 
-                                                UNION ALL
-                                                SELECT TO_CLOB('\n/\n') FROM DUAL
-                                                UNION ALL
-                                                SELECT DBMS_METADATA.GET_DDL('PACKAGE_BODY','"""+v_nome_oggetto+"""') FROM DUAL
-                                              """)                
+                v_select = """SELECT DBMS_METADATA.GET_DDL('PACKAGE_SPEC','"""+v_nome_oggetto+"""') FROM DUAL 
+                              UNION ALL
+                              SELECT TO_CLOB('\n/\n') FROM DUAL
+                              UNION ALL
+                              SELECT DBMS_METADATA.GET_DDL('PACKAGE_BODY','"""+v_nome_oggetto+"""') FROM DUAL
+                           """
             elif v_tipo_oggetto == 'TABLE':
-                self.v_cursor_db_obj.execute("""SELECT DBMS_METADATA.GET_DDL('"""+v_tipo_oggetto+"""','"""+v_nome_oggetto+"""') FROM DUAL
-                                                UNION ALL
-                                                SELECT TO_CLOB('\n/\n') FROM DUAL
-                                                UNION ALL
-                                                SELECT DBMS_METADATA.GET_DEPENDENT_DDL('INDEX','"""+v_nome_oggetto+"""') FROM DUAL
-                                                WHERE (SELECT COUNT(*) FROM ALL_INDEXES WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+v_nome_oggetto+"""') > 0													   
-                                                UNION ALL
-                                                SELECT TO_CLOB('\n/\n') FROM DUAL
-                                                UNION ALL                                                
-                                                SELECT DBMS_METADATA.GET_DEPENDENT_DDL('CONSTRAINT','"""+v_nome_oggetto+"""') FROM DUAL
-                                                WHERE (SELECT COUNT(*) FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+v_nome_oggetto+"""' AND R_CONSTRAINT_NAME IS NULL) > 0													   
-                                                UNION ALL
-                                                SELECT TO_CLOB('\n/\n') FROM DUAL
-                                                UNION ALL
-                                                /*
-                                                SELECT DBMS_METADATA.GET_DEPENDENT_DDL('REF_CONSTRAINT','"""+v_nome_oggetto+"""') FROM DUAL
-                                                WHERE (SELECT COUNT(*) FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+v_nome_oggetto+"""' AND R_CONSTRAINT_NAME IS NOT NULL) > 0													   
-                                                UNION ALL
-                                                SELECT TO_CLOB('\n/\n') FROM DUAL
-                                                UNION ALL*/
-                                                SELECT DBMS_METADATA.GET_DEPENDENT_DDL('TRIGGER','"""+v_nome_oggetto+"""') FROM DUAL
-                                                WHERE (SELECT COUNT(*) FROM ALL_TRIGGERS WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+v_nome_oggetto+"""') > 0													   
-                                             """)
+                v_select = """SELECT DBMS_METADATA.GET_DDL('"""+v_tipo_oggetto+"""','"""+v_nome_oggetto+"""') FROM DUAL
+                              UNION ALL
+                              SELECT TO_CLOB('\n/\n') FROM DUAL
+                              UNION ALL
+                              SELECT DBMS_METADATA.GET_DEPENDENT_DDL('INDEX','"""+v_nome_oggetto+"""') FROM DUAL
+                              WHERE (SELECT COUNT(*) FROM ALL_INDEXES WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+v_nome_oggetto+"""') > 0													   
+                              UNION ALL
+                              SELECT TO_CLOB('\n/\n') FROM DUAL
+                              UNION ALL                                                
+                              SELECT DBMS_METADATA.GET_DEPENDENT_DDL('CONSTRAINT','"""+v_nome_oggetto+"""') FROM DUAL
+                              WHERE (SELECT COUNT(*) FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+v_nome_oggetto+"""' AND R_CONSTRAINT_NAME IS NULL) > 0													   
+                              UNION ALL
+                              SELECT TO_CLOB('\n/\n') FROM DUAL
+                              UNION ALL
+                              /*
+                               SELECT DBMS_METADATA.GET_DEPENDENT_DDL('REF_CONSTRAINT','"""+v_nome_oggetto+"""') FROM DUAL
+                               WHERE (SELECT COUNT(*) FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+v_nome_oggetto+"""' AND R_CONSTRAINT_NAME IS NOT NULL) > 0													   
+                               UNION ALL
+                               SELECT TO_CLOB('\n/\n') FROM DUAL
+                              UNION ALL*/
+                              SELECT DBMS_METADATA.GET_DEPENDENT_DDL('TRIGGER','"""+v_nome_oggetto+"""') FROM DUAL
+                              WHERE (SELECT COUNT(*) FROM ALL_TRIGGERS WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+v_nome_oggetto+"""') > 0													   
+                           """
             elif v_tipo_oggetto in ('PRIMARY_KEY','UNIQUE_KEY','CHECK_KEY'):
-                self.v_cursor_db_obj.execute("SELECT DBMS_METADATA.GET_DDL('CONSTRAINT','"+v_nome_oggetto+"') FROM DUAL")
+                v_select = "SELECT DBMS_METADATA.GET_DDL('CONSTRAINT','"+v_nome_oggetto+"') FROM DUAL"
             elif v_tipo_oggetto == 'FOREIGN_KEY':
-                self.v_cursor_db_obj.execute("SELECT DBMS_METADATA.GET_DDL('REF_CONSTRAINT','"+v_nome_oggetto+"') FROM DUAL")
+                v_select = "SELECT DBMS_METADATA.GET_DDL('REF_CONSTRAINT','"+v_nome_oggetto+"') FROM DUAL"
             elif v_tipo_oggetto == 'INDEXES':
-                self.v_cursor_db_obj.execute("SELECT DBMS_METADATA.GET_DDL('INDEX','"+v_nome_oggetto+"') FROM DUAL")
+                v_select = "SELECT DBMS_METADATA.GET_DDL('INDEX','"+v_nome_oggetto+"') FROM DUAL"
             elif v_tipo_oggetto == 'SYNONYM':
-                self.v_cursor_db_obj.execute("SELECT DBMS_METADATA.GET_DDL('SYNONYM','"+v_nome_oggetto+"') FROM DUAL")
+                v_select = "SELECT DBMS_METADATA.GET_DDL('SYNONYM','"+v_nome_oggetto+"') FROM DUAL"
             elif v_tipo_oggetto in ('PROCEDURE','FUNCTION','TRIGGER','VIEW','SEQUENCE'):                    
-                self.v_cursor_db_obj.execute("SELECT DBMS_METADATA.GET_DDL('"+v_tipo_oggetto+"','"+v_nome_oggetto+"') FROM DUAL")
+                v_select = "SELECT DBMS_METADATA.GET_DDL('"+v_tipo_oggetto+"','"+v_nome_oggetto+"') FROM DUAL"
             else:
                 message_error('Invalid object!')
                 return 'ko'
             
-            # prendo il primo campo, del primo record e lo trasformo in stringa ricavandone tutto il sorgente
-            v_testo_oggetto_db = ''
-            for v_record in self.v_cursor_db_obj:
-                v_testo_oggetto_db += str(v_record[0])
-
+            try:                            
+                # prendo il primo campo, del primo record e lo trasformo in stringa ricavandone tutto il sorgente
+                self.v_cursor_db_obj.execute(v_select)
+                v_testo_oggetto_db = ''
+                for v_record in self.v_cursor_db_obj:
+                    v_testo_oggetto_db += str(v_record[0])
+            except:
+                Freccia_Mouse(False)
+                message_error('Error to retrive metadata information!')
+                return 'ko'
+            
             ###
             # aggiungo la parte dei grant
-            ###
+            ###            
             try:
                 self.v_cursor_db_obj.execute("""SELECT GRANTEE, 
                                                        LISTAGG(PRIVILEGE, ',') WITHIN GROUP (ORDER BY PRIVILEGE) AS PRIVILEGE,
                                                        GRANTABLE
-                                                FROM   DBA_TAB_PRIVS 
-                                                WHERE  TABLE_NAME = '"""+v_nome_oggetto+"""' AND OWNER='"""+self.e_user_name+"""'
+                                                FROM   ALL_TAB_PRIVS 
+                                                WHERE  TABLE_NAME = '"""+v_nome_oggetto+"""' AND GRANTEE='"""+self.e_user_name+"""'
                                                 GROUP BY GRANTEE, GRANTABLE
                                                 ORDER BY GRANTEE
                                              """)
@@ -1940,8 +1963,8 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             self.dialog_history.show()            
             self.dialog_history.activateWindow()             
         except:
-            # inizializzo le strutture grafiche e visualizzo la dialog per la ricerca del testo
-            self.win_history = history_class(v_global_work_dir+'MSql_sql_history.db')        
+            # inizializzo le strutture grafiche e visualizzo la dialog 
+            self.win_history = history_class(v_global_work_dir+'MSql.db')        
             # aggiungo l'evento doppio click per l'import dell'istruzione nell'editor
             self.win_history.o_lst1.doubleClicked.connect(self.slot_history_doppio_click)
             self.win_history.show()     
@@ -1957,6 +1980,40 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         if o_MSql_win2 != None:            
             v_risultato = self.win_history.o_lst1.model().data(index)
             # il testo che prendo dall'history ha formato eol Linux, e se necessario
+            # va convertito in Windows (a seconda dell'impostazione dell'editor di destinazione)
+            if o_MSql_win2.setting_eol == 'W':
+                v_risultato = v_risultato.replace('\n', '\r\n')                                    
+
+            o_MSql_win2.e_sql.insert(v_risultato)        
+
+    def slot_preferred_sql(self):
+        """
+           Apre la window per la gestione delle istruzioni sql preferite
+        """    
+        global v_global_work_dir, o_global_preferences
+
+        try:
+            # visualizzo la finestra di ricerca
+            self.dialog_preferred_sql.show()            
+            self.dialog_preferred_sql.activateWindow()             
+        except:
+            # inizializzo le strutture grafiche e visualizzo la dialog 
+            self.win_preferred_sql = preferred_sql_class(v_global_work_dir+'MSql.db')        
+            # aggiungo l'evento doppio click per l'import dell'istruzione nell'editor
+            self.win_preferred_sql.o_tabella.doubleClicked.connect(self.slot_preferred_sql_doppio_click)
+            self.win_preferred_sql.show()     
+
+    def slot_preferred_sql_doppio_click(self):
+        """
+           Prende la riga selezionata nell'elenco dei preferiti e la porta dentro l'editor corrente
+        """       
+        # prendo indice dalla tabella
+        index = self.win_preferred_sql.o_tabella.selectedIndexes()[2]           
+        # il valore della colonna istruction viene caricato nell'editor corrente
+        o_MSql_win2 = self.oggetto_win2_attivo()
+        if o_MSql_win2 != None:            
+            v_risultato = self.win_preferred_sql.o_tabella.model().data(index)
+            # il testo che prendo ha formato eol Linux, e se necessario
             # va convertito in Windows (a seconda dell'impostazione dell'editor di destinazione)
             if o_MSql_win2.setting_eol == 'W':
                 v_risultato = v_risultato.replace('\n', '\r\n')                                    
@@ -2018,7 +2075,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         # Attenzione! Nel caso di nuovo file il formato è Windows, mentre se viene aperto un file, va analizzata la prima riga
         #             e ricercato che formato ha....quello sarà poi il formato da utilizzare!
         #             Questo è stato fatto per rendere l'editor più flessibile
-        #             Ho poi scoperto che ci sono in giro file misti tra (CR-LF) e (LF) e quindi limitato ai primi 1000 caratteri....
+        #             Ho poi scoperto che ci sono in giro file misti tra (CR-LF) e (LF) e quindi limitato l'analisi ai primi 1000 caratteri....
         if p_contenuto_file is not None:
             if p_contenuto_file[0:1000].find('\r\n') != -1:                
                 self.setting_eol = 'W'
@@ -2067,16 +2124,16 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         ###
         # Precaricamento (se passato un contenuto di file) 
         ###
+        v_cur_y, v_cur_x = 0,0
         if p_contenuto_file is not None:        
             # imposto editor con quello ricevuto in ingresso
             self.e_sql.setText(p_contenuto_file)
             # chiedo allo storico di darmi eventuale posizione di dove si trovava il cursore ultima volta
             if o_global_preferences.remember_text_pos:
-                v_cur_y, v_cur_x = read_files_history(v_global_work_dir+'MSql_files_history.db', p_titolo)
-            else:
-                v_cur_y, v_cur_x = 0,0
-            # mi posiziono sulla prima riga (la posizione X viene al momento forzata a zero!)
-            self.e_sql.setCursorPosition(v_cur_y,0)
+                v_cur_y, v_cur_x = read_files_history(v_global_work_dir+'MSql.db', p_titolo)            
+                
+        # mi posiziono sulla prima riga (la posizione X viene al momento forzata a zero!)
+        self.e_sql.setCursorPosition(v_cur_y,0)
 
         # var che indica che il testo è stato modificato
         #self.e_sql.insert('SELECT * FROM MS_UTN')
@@ -2182,7 +2239,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         if event.type() == QEvent.FocusIn:                  
             # aggiorno i dati della statusbar
             self.aggiorna_statusbar()
-                
+                            
         # fine senza alcuna elaborazione e quindi si procede con esecuzione dei segnali nativi del framework       
         return False
            
@@ -2620,7 +2677,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             v_ok = self.esegui_script(p_istruzione, True)        
                 
         # aggiungo l'istruzione all'history
-        write_sql_history(v_global_work_dir+'MSql_sql_history.db',v_tipo,p_istruzione)
+        write_sql_history(v_global_work_dir+'MSql.db',v_tipo,p_istruzione)
 
         return v_ok
 
@@ -2785,7 +2842,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.v_offset_numero_di_riga += len(p_plsql.split(chr(10)))
         
         # tutto ok ... aggiungo istruzione all'history
-        write_sql_history(v_global_work_dir+'MSql_sql_history.db','SCRIPT',p_plsql)
+        write_sql_history(v_global_work_dir+'MSql.db','SCRIPT',p_plsql)
         # esco con tutto ok
         return None
                 
@@ -3154,7 +3211,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             # alla chiusura salvo in uno storico la posizione del testo in modo si riposizioni alla prossima riapertura         
             v_num_line, v_num_pos = self.e_sql.getCursorPosition()                
             if o_global_preferences.remember_text_pos:
-                 write_files_history(v_global_work_dir+'MSql_files_history.db', self.objectName(), v_num_line, v_num_pos)          
+                 write_files_history(v_global_work_dir+'MSql.db', self.objectName(), v_num_line, v_num_pos)          
             # imposto indicatore di chiusura e chiudo
             self.v_editor_chiuso = True            
             self.close()    
@@ -3748,16 +3805,18 @@ if __name__ == "__main__":
     if not os.path.isdir(v_global_work_dir):
         os.makedirs(v_global_work_dir)
     
-    # avvio del programma (aprendo eventuale file indicato su linea di comando)   
+    # inizializzazione ambiente grafico
     app = QtWidgets.QApplication([])    
-    application = MSql_win1_class(v_nome_file_da_caricare)     
-    application.show()
 
     # se è stato scelto di avere il tema dei colori scuro, lo carico
     # Attenzione! La parte principale del tema colori rispetta il meccanismo di QT library
     #             Mentre per la parte di QScintilla ho dovuto fare le impostazioni manuali (v. definizione del lexer)
     if o_global_preferences.dark_theme:        
         app.setStyleSheet(dark_theme_definition())                    
+
+    # avvio del programma (aprendo eventuale file indicato su linea di comando)   
+    application = MSql_win1_class(v_nome_file_da_caricare)     
+    application.show()
             
     # attivazione degli eventi
     sys.exit(app.exec())    
