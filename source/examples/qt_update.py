@@ -1,68 +1,79 @@
-# Ignore lazy imports
 import sys
-from typing import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtSql import *
-from PyQt5.QtWidgets import *
+import sqlite3
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidget, QTableWidgetItem, QPushButton, QVBoxLayout, QWidget
 
-def createTable() -> QTableWidget:
-    """Let's create a QTableWidget with the data you provided."""
-    data = [
-        ("Joe", "Senior Web Developer", "joe@example.com"),
-        ("Lara", "Project Manager", "lara@example.com"),
-        ("David", "Data Analyst", "david@example.com"),
-        ("Jane", "Senior Python Developer", "jane@example.com"),
-    ]
-    table = QTableWidget()
-    table.setRowCount(len(data))
-    table.setColumnCount(len(data[0]))
-    for i, row in enumerate(data):
-        for j, val in enumerate(row):
-            table.setItem(i, j, QTableWidgetItem(val))
-    return table
+class MyWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
 
+        # Inizializza la connessione al database SQLite
+        self.conn = sqlite3.connect("my_database.db")
+        self.c = self.conn.cursor()
 
-def getData(table: QTableWidget) -> List[Tuple[str]]:
-    """Fetch the data from the QTableWidget and return it as `data`."""
-    data = []
-    for row in range(table.rowCount()):
-        rowData = []
-        for col in range(table.columnCount()):
-            rowData.append(table.item(row, col).data(Qt.EditRole))
-        data.append(tuple(rowData))
-    return data
+        # Crea la tabella se non esiste già
+        self.c.execute('''CREATE TABLE IF NOT EXISTS my_table (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, sql TEXT, data TEXT)''')
+        self.conn.commit()
 
-def insertData(data: List[Tuple[str]]) -> None:
-    """Creating a query for later execution using .prepare()"""
-    insertDataQuery = QSqlQuery()
-    insertDataQuery.prepare(
-        """
-        INSERT INTO contacts (
-            name,
-            job,
-            email
-        )
-        VALUES (?, ?, ?)
-        """
-    )
-    # Use .addBindValue() to insert data
-    for name, job, email in data:
-        insertDataQuery.addBindValue(name)
-        insertDataQuery.addBindValue(job)
-        insertDataQuery.addBindValue(email)
-        insertDataQuery.exec_()
-    # Note that you need to run `QSqlDatabase().commit()`` if you want the data to be committed in the database.  
+        # Crea la finestra principale
+        self.setWindowTitle("Griglia con PyQt5 e SQLite")
+        self.setGeometry(100, 100, 800, 600)
 
-app = QApplication([sys.argv])
-# Connect to sample database
-sampleDb = QSqlDatabase.addDatabase("QSQLITE")
-sampleDb.setDatabaseName("sample.sqlite")
-sampleDb.open()
-# Create table with sample data
-table = createTable()
-# Get data from table
-data = getData(table)
-# Insert data into the database
-insertData(data)
-sys.exit(app.exec_())	
+        # Crea il QTableWidget
+        self.tableWidget = QTableWidget(self)
+        self.tableWidget.setColumnCount(3)
+        self.tableWidget.setHorizontalHeaderLabels(["NOME", "SQL", "DATA"])
+
+        # Aggiungi pulsanti per inserire e aggiornare i dati
+        self.insert_button = QPushButton("Inserisci")
+        self.update_button = QPushButton("Aggiorna")
+        self.insert_button.clicked.connect(self.insert_data)
+        self.update_button.clicked.connect(self.update_data)
+
+        # Layout verticale per i widget
+        layout = QVBoxLayout()
+        layout.addWidget(self.tableWidget)
+        layout.addWidget(self.insert_button)
+        layout.addWidget(self.update_button)
+
+        # Widget principale
+        central_widget = QWidget()
+        central_widget.setLayout(layout)
+        self.setCentralWidget(central_widget)
+
+        # Carica i dati dal database nella griglia
+        self.load_data()
+
+    def load_data(self):
+        self.tableWidget.setRowCount(0)
+        self.c.execute('''SELECT * FROM my_table''')
+        rows = self.c.fetchall()
+        for row in rows:
+            inx = rows.index(row)
+            self.tableWidget.insertRow(inx)
+            self.tableWidget.setItem(inx, 0, QTableWidgetItem(row[1]))
+            self.tableWidget.setItem(inx, 1, QTableWidgetItem(row[2]))
+            self.tableWidget.setItem(inx, 2, QTableWidgetItem(row[3]))
+
+    def insert_data(self):
+        nome = "Nuovo Nome"
+        sql = "Nuovo SQL"
+        data = "Nuova Data"
+        self.c.execute('''INSERT INTO my_table (nome, sql, data) VALUES (?, ?, ?)''', (nome, sql, data))
+        self.conn.commit()
+        self.load_data()
+
+    def update_data(self):
+        selected_row = self.tableWidget.currentRow()
+        if selected_row >= 0:
+            nome = self.tableWidget.item(selected_row, 0).text()
+            sql = self.tableWidget.item(selected_row, 1).text()
+            data = self.tableWidget.item(selected_row, 2).text()
+            self.c.execute('''UPDATE my_table SET nome=?, sql=?, data=? WHERE id=?''', (nome, sql, data, selected_row + 1))
+            self.conn.commit()
+            self.load_data()
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = MyWindow()
+    window.show()
+    sys.exit(app.exec_())

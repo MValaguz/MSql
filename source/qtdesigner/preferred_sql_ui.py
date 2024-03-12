@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_preferred_sql_window(object):
     def setupUi(self, preferred_sql_window):
         preferred_sql_window.setObjectName("preferred_sql_window")
-        preferred_sql_window.resize(692, 775)
+        preferred_sql_window.resize(676, 691)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/icons/icons/MSql.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         preferred_sql_window.setWindowIcon(icon)
@@ -62,10 +62,16 @@ class Ui_preferred_sql_window(object):
         self.b_delete_row.setIcon(icon3)
         self.b_delete_row.setObjectName("b_delete_row")
         self.horizontalLayout_2.addWidget(self.b_delete_row)
-        self.b_save_rows = QtWidgets.QPushButton(self.centralwidget)
+        self.b_debug = QtWidgets.QPushButton(self.centralwidget)
         icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap(":/icons/icons/disk.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.b_save_rows.setIcon(icon4)
+        icon4.addPixmap(QtGui.QPixmap(":/icons/icons/debug.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.b_debug.setIcon(icon4)
+        self.b_debug.setObjectName("b_debug")
+        self.horizontalLayout_2.addWidget(self.b_debug)
+        self.b_save_rows = QtWidgets.QPushButton(self.centralwidget)
+        icon5 = QtGui.QIcon()
+        icon5.addPixmap(QtGui.QPixmap(":/icons/icons/disk.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.b_save_rows.setIcon(icon5)
         self.b_save_rows.setObjectName("b_save_rows")
         self.horizontalLayout_2.addWidget(self.b_save_rows)
         self.gridLayout.addLayout(self.horizontalLayout_2, 1, 0, 1, 1)
@@ -77,9 +83,9 @@ class Ui_preferred_sql_window(object):
         self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
         self.b_insert_in_editor = QtWidgets.QPushButton(self.centralwidget)
-        icon5 = QtGui.QIcon()
-        icon5.addPixmap(QtGui.QPixmap(":/icons/icons/indent.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.b_insert_in_editor.setIcon(icon5)
+        icon6 = QtGui.QIcon()
+        icon6.addPixmap(QtGui.QPixmap(":/icons/icons/indent.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.b_insert_in_editor.setIcon(icon6)
         self.b_insert_in_editor.setObjectName("b_insert_in_editor")
         self.horizontalLayout_3.addWidget(self.b_insert_in_editor)
         self.gridLayout.addLayout(self.horizontalLayout_3, 3, 0, 1, 1)
@@ -92,11 +98,13 @@ class Ui_preferred_sql_window(object):
         self.b_delete_row.clicked.connect(preferred_sql_window.slot_delete_row) # type: ignore
         self.b_save_rows.clicked.connect(preferred_sql_window.slot_save) # type: ignore
         self.o_tabella.cellChanged['int','int'].connect(preferred_sql_window.slot_cell_changed) # type: ignore
+        self.b_debug.clicked.connect(preferred_sql_window.slot_debug) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(preferred_sql_window)
         preferred_sql_window.setTabOrder(self.e_where_cond, self.b_start)
         preferred_sql_window.setTabOrder(self.b_start, self.b_insert_row)
         preferred_sql_window.setTabOrder(self.b_insert_row, self.b_delete_row)
-        preferred_sql_window.setTabOrder(self.b_delete_row, self.b_save_rows)
+        preferred_sql_window.setTabOrder(self.b_delete_row, self.b_debug)
+        preferred_sql_window.setTabOrder(self.b_debug, self.b_save_rows)
         preferred_sql_window.setTabOrder(self.b_save_rows, self.o_tabella)
         preferred_sql_window.setTabOrder(self.o_tabella, self.b_insert_in_editor)
 
@@ -107,7 +115,9 @@ class Ui_preferred_sql_window(object):
         self.b_start.setText(_translate("preferred_sql_window", "Search"))
         self.b_insert_row.setText(_translate("preferred_sql_window", "Insert row"))
         self.b_delete_row.setText(_translate("preferred_sql_window", "Delete row"))
+        self.b_debug.setText(_translate("preferred_sql_window", "Debug"))
         self.b_save_rows.setText(_translate("preferred_sql_window", "Save"))
+        self.o_tabella.setSortingEnabled(True)
         self.b_insert_in_editor.setText(_translate("preferred_sql_window", "Insert SQL in editor"))
 import resource_rc
 

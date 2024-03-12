@@ -1228,16 +1228,17 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         # tale lista viene poi aggiornata quando viene aperto un nuovo editor o quando viene cambiata la connessione
         if v_global_connesso:
             v_global_my_lexer_keywords.clear()
-            v_cursor = v_global_connection.cursor()
+            v_cursor = v_global_connection.cursor()            
+            # carico elenco delle parole chiave per evidenziarle (in questo caso i nomi degli oggetti)
             v_select = """SELECT OBJECT_NAME
                           FROM   ALL_OBJECTS 
                           WHERE  OWNER='""" + self.e_user_name + """' AND 
                                  STATUS='VALID' AND
-                                 OBJECT_TYPE IN ('SEQUENCE','PROCEDURE','PACKAGE','TABLE','VIEW','FUNCTION')"""
-            v_risultati = v_cursor.execute(v_select)
+                                 OBJECT_TYPE IN ('SEQUENCE','PROCEDURE','PACKAGE','TABLE','VIEW','FUNCTION')"""                                                         
+            v_risultati = v_cursor.execute(v_select)            
             for v_riga in v_risultati:
-                v_global_my_lexer_keywords.append(v_riga[0])            
-        
+                v_global_my_lexer_keywords.append(v_riga[0])       
+             
         # scorro la lista-oggetti-editor...        
         for obj_win2 in self.o_lst_window2:
             if not obj_win2.v_editor_chiuso and v_global_connesso:        
@@ -1272,6 +1273,10 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             v_tipo_oggetto = Tipi_Oggetti_DB[self.oggetti_db_scelta.currentText()]                
         except:
             v_tipo_oggetto = ''
+        
+        # sostituisce la freccia del mouse con icona "clessidra"
+        Freccia_Mouse(True)        
+
         # pulisco elenco
         self.oggetti_db_lista.clear()
         # se utente ha scelto un oggetto e si è connessi, procedo con il carico dell'elenco         
@@ -1368,8 +1373,6 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         # aggiungo order by
         v_select += " ORDER BY OBJECT_NAME"                                
                 
-        # sostituisce la freccia del mouse con icona "clessidra"
-        Freccia_Mouse(True)        
         # eseguo la select                
         try:            
             self.v_cursor_db_obj.execute(v_select)                    
@@ -1405,7 +1408,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
 
     def slot_oggetti_db_doppio_click(self, p_index):
         """
-           Carica la definizione dell'oggetto su cui si è fatto doppio click (es. il sorgente di un package o di una tabella...)           
+           Carica il sorgente dell'oggetto selezionato (facendo doppio click), dentro l'editor
         """                
         # prendo il tipo di oggetto scelto dall'utente
         try:            
@@ -1455,7 +1458,21 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                                SELECT TO_CLOB('\n/\n') FROM DUAL
                               UNION ALL*/
                               SELECT DBMS_METADATA.GET_DEPENDENT_DDL('TRIGGER','"""+v_nome_oggetto+"""') FROM DUAL
-                              WHERE (SELECT COUNT(*) FROM ALL_TRIGGERS WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+v_nome_oggetto+"""') > 0													   
+                              WHERE (SELECT COUNT(*) FROM ALL_TRIGGERS WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+v_nome_oggetto+"""') > 0													                                 
+                              UNION ALL 
+                              SELECT TO_CLOB('\n/\n') FROM DUAL                              
+                              UNION ALL
+                              SELECT TO_CLOB('COMMENT ON TABLE ' || TABLE_NAME || ' IS ''' || REPLACE(COMMENTS,'''','''''') || ''';')
+                              FROM   ALL_TAB_COMMENTS
+                              WHERE  ALL_TAB_COMMENTS.OWNER = '"""+self.e_user_name+"""'
+                                AND  ALL_TAB_COMMENTS.TABLE_NAME = '"""+v_nome_oggetto+"""'   
+                              UNION ALL 
+                              SELECT TO_CLOB('\n/\n') FROM DUAL                              
+                              UNION ALL
+                              SELECT TO_CLOB('COMMENT ON COLUMN '|| TABLE_NAME || '.' || COLUMN_NAME || ' IS ''' || REPLACE(COMMENTS,'''','''''') || ''';\n')
+                              FROM   ALL_COL_COMMENTS
+                              WHERE  ALL_COL_COMMENTS.OWNER = '"""+self.e_user_name+"""'
+                                AND  ALL_COL_COMMENTS.TABLE_NAME = '"""+v_nome_oggetto+"""'   
                            """
             elif v_tipo_oggetto in ('PRIMARY_KEY','UNIQUE_KEY','CHECK_KEY'):
                 v_select = "SELECT DBMS_METADATA.GET_DDL('CONSTRAINT','"+v_nome_oggetto+"') FROM DUAL"
@@ -1486,14 +1503,16 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             # aggiungo la parte dei grant
             ###            
             try:
-                self.v_cursor_db_obj.execute("""SELECT GRANTEE, 
-                                                       LISTAGG(PRIVILEGE, ',') WITHIN GROUP (ORDER BY PRIVILEGE) AS PRIVILEGE,
-                                                       GRANTABLE
-                                                FROM   ALL_TAB_PRIVS 
-                                                WHERE  TABLE_NAME = '"""+v_nome_oggetto+"""' AND GRANTEE='"""+self.e_user_name+"""'
-                                                GROUP BY GRANTEE, GRANTABLE
-                                                ORDER BY GRANTEE
-                                             """)
+                v_select = """SELECT GRANTEE, 
+                                     LISTAGG(PRIVILEGE, ',') WITHIN GROUP (ORDER BY PRIVILEGE) AS PRIVILEGE,
+                                     GRANTABLE
+                              FROM   ALL_TAB_PRIVS 
+                              WHERE  TABLE_NAME = '"""+v_nome_oggetto+"""' 
+                                 AND GRANTOR='"""+self.e_user_name+"""'
+                              GROUP BY GRANTEE, GRANTABLE
+                              ORDER BY GRANTEE
+                           """
+                self.v_cursor_db_obj.execute(v_select)
                             
                 # aggiungo la parte di grant solo se presente
                 v_testo_grant_db = ''
@@ -1998,21 +2017,22 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             self.dialog_preferred_sql.activateWindow()             
         except:
             # inizializzo le strutture grafiche e visualizzo la dialog 
-            self.win_preferred_sql = preferred_sql_class(v_global_work_dir+'MSql.db')        
+            self.win_preferred_sql = preferred_sql_class(v_global_work_dir+'MSql.db',False)        
             # aggiungo l'evento doppio click per l'import dell'istruzione nell'editor
-            self.win_preferred_sql.o_tabella.doubleClicked.connect(self.slot_preferred_sql_doppio_click)
+            self.win_preferred_sql.b_insert_in_editor.clicked.connect(self.slot_preferred_sql_insert_in_editor)
             self.win_preferred_sql.show()     
 
-    def slot_preferred_sql_doppio_click(self):
+    def slot_preferred_sql_insert_in_editor(self):
         """
            Prende la riga selezionata nell'elenco dei preferiti e la porta dentro l'editor corrente
         """       
         # prendo indice dalla tabella
-        index = self.win_preferred_sql.o_tabella.selectedIndexes()[2]           
-        # il valore della colonna istruction viene caricato nell'editor corrente
+        #index = self.win_preferred_sql.o_tabella.selectedIndexes()[2]           
+        index = self.win_preferred_sql.o_tabella.currentRow()           
+        # il valore della colonna istruction viene caricato nell'editor corrente        
         o_MSql_win2 = self.oggetto_win2_attivo()
-        if o_MSql_win2 != None:            
-            v_risultato = self.win_preferred_sql.o_tabella.model().data(index)
+        if o_MSql_win2 != None and index != -1:            
+            v_risultato = self.win_preferred_sql.o_tabella.item(index,2).text()
             # il testo che prendo ha formato eol Linux, e se necessario
             # va convertito in Windows (a seconda dell'impostazione dell'editor di destinazione)
             if o_MSql_win2.setting_eol == 'W':

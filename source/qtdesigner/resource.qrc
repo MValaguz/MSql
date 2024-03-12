@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/debug.png</file>
     <file>icons/preferiti.png</file>
     <file>icons/rabbit.png</file>
     <file>icons/disabled.png</file>

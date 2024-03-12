@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>692</width>
-    <height>775</height>
+    <width>676</width>
+    <height>691</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -91,6 +91,17 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="b_debug">
+        <property name="text">
+         <string>Debug</string>
+        </property>
+        <property name="icon">
+         <iconset resource="resource.qrc">
+          <normaloff>:/icons/icons/debug.png</normaloff>:/icons/icons/debug.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="b_save_rows">
         <property name="text">
          <string>Save</string>
@@ -104,7 +115,11 @@
      </layout>
     </item>
     <item row="2" column="0">
-     <widget class="QTableWidget" name="o_tabella"/>
+     <widget class="QTableWidget" name="o_tabella">
+      <property name="sortingEnabled">
+       <bool>true</bool>
+      </property>
+     </widget>
     </item>
     <item row="3" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -129,6 +144,7 @@
   <tabstop>b_start</tabstop>
   <tabstop>b_insert_row</tabstop>
   <tabstop>b_delete_row</tabstop>
+  <tabstop>b_debug</tabstop>
   <tabstop>b_save_rows</tabstop>
   <tabstop>o_tabella</tabstop>
   <tabstop>b_insert_in_editor</tabstop>
@@ -144,7 +160,7 @@
    <slot>slot_start()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>679</x>
+     <x>621</x>
      <y>50</y>
     </hint>
     <hint type="destinationlabel">
@@ -165,7 +181,7 @@
     </hint>
     <hint type="destinationlabel">
      <x>167</x>
-     <y>-13</y>
+     <y>0</y>
     </hint>
    </hints>
   </connection>
@@ -197,7 +213,7 @@
     </hint>
     <hint type="destinationlabel">
      <x>553</x>
-     <y>-5</y>
+     <y>0</y>
     </hint>
    </hints>
   </connection>
@@ -208,12 +224,28 @@
    <slot>slot_cell_changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>483</x>
-     <y>150</y>
+     <x>275</x>
+     <y>212</y>
     </hint>
     <hint type="destinationlabel">
-     <x>394</x>
-     <y>-4</y>
+     <x>370</x>
+     <y>0</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>b_debug</sender>
+   <signal>clicked()</signal>
+   <receiver>preferred_sql_window</receiver>
+   <slot>slot_debug()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>87</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>302</x>
+     <y>-6</y>
     </hint>
    </hints>
   </connection>
@@ -224,5 +256,6 @@
   <slot>slot_delete_row()</slot>
   <slot>slot_save()</slot>
   <slot>slot_cell_changed()</slot>
+  <slot>slot_debug()</slot>
  </slots>
 </ui>
