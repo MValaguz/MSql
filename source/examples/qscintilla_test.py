@@ -69,7 +69,9 @@ class CustomMainWindow(QMainWindow):
         self.v_api_lexer = QsciAPIs(self.__lexer)                    
         self.__editor.setAutoCompletionSource(QsciScintilla.AcsAll)                
         self.__editor.setAutoCompletionThreshold(2)          
-        self.__editor.autoCompleteFromAll()                  
+        self.__editor.autoCompleteFromAll()       
+
+        self.__editor.SendScintilla(QsciScintillaBase.SCI_SETVIEWWS,QsciScintillaBase.SCWS_VISIBLEALWAYS)           
         
         # aggiungo tutti i termini di autocompletamento (si trovanon all'interno di una tabella che viene generata a comando)
         self.v_api_lexer.add('descri.elemento(primo,secondo)')                                    

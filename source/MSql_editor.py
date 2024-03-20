@@ -2032,11 +2032,10 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         # il valore della colonna istruction viene caricato nell'editor corrente        
         o_MSql_win2 = self.oggetto_win2_attivo()
         if o_MSql_win2 != None and index != -1:            
-            v_risultato = self.win_preferred_sql.o_tabella.item(index,2).text()
-            # il testo che prendo ha formato eol Linux, e se necessario
-            # va convertito in Windows (a seconda dell'impostazione dell'editor di destinazione)
-            if o_MSql_win2.setting_eol == 'W':
-                v_risultato = v_risultato.replace('\n', '\r\n')                                    
+            v_risultato = self.win_preferred_sql.o_tabella.item(index,2).text()            
+            # converto l'eol se editor è in modalità Unix
+            if o_MSql_win2.setting_eol == 'U':
+                v_risultato = v_risultato.replace('\r\n','\n')                                    
 
             o_MSql_win2.e_sql.insert(v_risultato)        
 
@@ -2558,6 +2557,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
     def slot_esegui(self):
         """
            Prende tutto il testo selezionato ed inizia ad eseguirlo step by step
+           Nota Bene! Nell'editor sql l'utente può aver scritto PL-SQL, SQL o entrambe le cose, intervvallati
+                      da segni di separazione come / e ;
            Se si attiva v_debug, variabile interna, verrà eseguito l'output di tutte le righe processate
         """
         # se metto a true v_debug usciranno tutti i messaggi di diagnostica della ricerca delle istruzioni
@@ -2625,17 +2626,17 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             # riga vuota (ma esterna a plsql)
             elif v_riga == '':            
                 self.v_offset_numero_di_riga += 1
-            # se siamo all'interno di un commento multiplo, controllo se abbiamo raggiunto la fine
-            elif v_commento_multi and v_riga.find('*/') == -1:
+            # se siamo all'interno di un commento multiplo, controllo se abbiamo raggiunto la fine (se è un'istruzione non faccio pulizia dei commenti)
+            elif v_commento_multi and v_riga.find('*/') == -1 and v_istruzione_str == '':
                 self.v_offset_numero_di_riga += 1
-            elif v_commento_multi and v_riga.find('*/') != -1:        
+            elif v_commento_multi and v_riga.find('*/') != -1 and v_istruzione_str == '':        
                 self.v_offset_numero_di_riga += 1
                 v_commento_multi = False
-            # commenti monoriga
-            elif v_riga[0:2] == '--' or v_riga[0:6] == 'PROMPT' or v_riga[0:2] == '/*' and v_riga.find('*/') != -1:                
+            # commenti monoriga (se è un'istruzione non faccio pulizia dei commenti)
+            elif (v_riga[0:2] == '--' or v_riga[0:6] == 'PROMPT' or (v_riga[0:2] == '/*' and v_riga.find('*/') != -1)) and v_istruzione_str == '':                
                 self.v_offset_numero_di_riga += 1
-            # commento multi multiriga
-            elif v_riga[0:2] == '/*':
+            # commento multi multiriga (se è un'istruzione non faccio pulizia dei commenti)
+            elif v_riga[0:2] == '/*' and v_istruzione_str == '':
                 self.v_offset_numero_di_riga += 1
                 v_commento_multi = True            
             # continuazione di una select, insert, update, delete....
@@ -2650,14 +2651,14 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                     return 'ko'
                 v_istruzione_str = ''
             # inizio select, insert, update, delete.... monoriga
-            elif not v_istruzione and v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','GRANT','ALTER','DROP') and v_riga[-1] == ';':
+            elif not v_istruzione and v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','GRANT','ALTER','DROP','COMMENT') and v_riga[-1] == ';':
                 v_istruzione_str = v_riga[0:len(v_riga)-1]
                 v_ok = self.esegui_istruzione(v_istruzione_str)
                 if v_ok == 'ko':
                     return 'ko'
                 v_istruzione_str = ''
             # inizio select, insert, update, delete.... multiriga
-            elif v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','GRANT','ALTER','DROP'):
+            elif v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','GRANT','ALTER','DROP','COMMENT'):
                 v_istruzione = True
                 v_istruzione_str = v_riga
             # riga di codice pl-sql (da notare come lo script verrà composto con v_riga_raw)       
@@ -2874,7 +2875,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         global v_global_connesso
         global o_global_preferences
 
-        if v_global_connesso:            
+        if v_global_connesso:                        
             # pulisco elenco
             self.slot_clear('RES')            
             # pulisco la matrice che conterrà elenco delle celle modificate
@@ -3756,6 +3757,11 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         
         # visualizzo il segnale di ritorno a capo in base alle preferenze
         self.e_sql.setEolVisibility(o_global_preferences.end_of_line)        
+        # visualizzo anche i caratteri invisibili (spazi e tabulazioni)
+        if o_global_preferences.end_of_line:            
+            self.e_sql.SendScintilla(QsciScintillaBase.SCI_SETVIEWWS,QsciScintillaBase.SCWS_VISIBLEALWAYS)           
+        else:
+            self.e_sql.SendScintilla(QsciScintillaBase.SCI_SETVIEWWS,QsciScintillaBase.SCWS_INVISIBLE)           
 
     def aggiorna_statusbar(self):
         """
