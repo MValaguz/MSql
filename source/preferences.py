@@ -78,8 +78,15 @@ class preferences_class():
                 self.auto_column_resize = True
             else:
                 self.auto_column_resize = False
+            # indentation guide
+            if v_json['indentation_guide'] == 1:            
+                self.indentation_guide = True
+            else:
+                self.indentation_guide = False
             # csv separator
             self.csv_separator = v_json['csv_separator']
+            # tab size
+            self.tab_size = v_json['tab_size']
             # server
             self.elenco_server = v_json['server']
             # users
@@ -97,7 +104,9 @@ class preferences_class():
             self.font_result = 'Segoe UI, 8'
             self.editable = False
             self.auto_column_resize = False
+            self.indentation_guide = False
             self.csv_separator = '|'
+            self.tab_size = '2'
             # elenco server è composto da Titolo, TNS e Colore
             self.elenco_server = [('Server Prod (ICOM_815)','ICOM_815','#aaffff'),
                                   ('Server Dev (BACKUP_815)','BACKUP_815','#ffffff')]
@@ -139,7 +148,9 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         self.e_default_font_result.setText(self.preferences.font_result)
         self.e_default_editable.setChecked(self.preferences.editable)   
         self.e_default_auto_column_resize.setChecked(self.preferences.auto_column_resize)
+        self.e_default_indentation_guide.setChecked(self.preferences.indentation_guide)
         self.e_default_csv_separator.setText(self.preferences.csv_separator)
+        self.e_tab_size.setText(self.preferences.tab_size)
 
         # preparo elenco server        
         self.o_server.setColumnCount(4)
@@ -316,6 +327,12 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         else:
             v_auto_column_resize = 0
 
+        # il default per indentation guide va convertito
+        if self.e_default_indentation_guide.isChecked():
+            v_indentation_guide = 1
+        else:
+            v_indentation_guide = 0
+
         # elenco dei server
         v_server = []
         for i in range(0,self.o_server.rowCount()):
@@ -325,6 +342,10 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         v_users = []
         for i in range(0,self.o_users.rowCount()):
             v_users.append( ( self.o_users.item(i,0).text(), self.o_users.item(i,1).text() , self.o_users.item(i,2).text()) )            
+
+        # se il tabsize è vuoto --> imposto 2
+        if self.e_tab_size.text() == '':
+            self.e_tab_size.setText('2')
 	
 		# scrivo nel file un elemento json contenente le informazioni inseriti dell'utente
         v_json ={'remember_window_pos': v_remember_window_pos,
@@ -338,7 +359,9 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
 		         'font_result' : self.e_default_font_result.text(),
                  'editable' : v_editable,
                  'auto_column_resize': v_auto_column_resize,
+                 'indentation_guide': v_indentation_guide,
                  'csv_separator': self.e_default_csv_separator.text(),
+                 'tab_size': self.e_tab_size.text(),
                  'server': v_server,
                  'users': v_users
                 }

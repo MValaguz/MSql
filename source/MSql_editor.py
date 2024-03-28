@@ -109,14 +109,14 @@ class My_MSql_Lexer(QsciLexerSQL):
         self.p_editor = p_editor      
 
         # attivo le righe verticali che segnano le indentazioni
-        self.p_editor.setIndentationGuides(True)                
+        self.p_editor.setIndentationGuides(o_global_preferences.indentation_guide)                
         # attivo i margini con + e - 
         self.p_editor.setFolding(p_editor.BoxedTreeFoldStyle, 2)
         # indentazione
-        self.p_editor.setIndentationWidth(4)
+        self.p_editor.setIndentationWidth(int(o_global_preferences.tab_size))
         self.p_editor.setAutoIndent(True)
-        # tabulatore a 4 caratteri
-        self.p_editor.setTabWidth(4)   
+        # tabulatore (in base alle preferenze...di base 2 caratteri)
+        self.p_editor.setTabWidth(int(o_global_preferences.tab_size))   
         # evidenzia l'intera riga dove posizionato il cursore (grigio scuro e cursore bianco se il tema è dark)
         self.p_editor.setCaretLineVisible(True)
         if o_global_preferences.dark_theme:
