@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>848</width>
-    <height>601</height>
+    <width>1000</width>
+    <height>1037</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowIcon">
    <iconset resource="resource.qrc">
@@ -21,20 +27,11 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <property name="leftMargin">
-     <number>7</number>
-    </property>
-    <property name="topMargin">
-     <number>7</number>
-    </property>
+   <layout class="QGridLayout" name="gridLayout">
     <property name="rightMargin">
-     <number>7</number>
-    </property>
-    <property name="bottomMargin">
      <number>0</number>
     </property>
-    <item>
+    <item row="0" column="0">
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
@@ -129,6 +126,12 @@
    </layout>
   </widget>
   <widget class="QDockWidget" name="dockMapWidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <property name="font">
     <font>
      <family>Segoe UI</family>
@@ -154,26 +157,11 @@
     <property name="minimumSize">
      <size>
       <width>140</width>
-      <height>574</height>
+      <height>400</height>
      </size>
     </property>
-    <layout class="QGridLayout" name="gridLayout">
-     <property name="leftMargin">
-      <number>3</number>
-     </property>
-     <property name="topMargin">
-      <number>3</number>
-     </property>
-     <property name="rightMargin">
-      <number>3</number>
-     </property>
-     <property name="bottomMargin">
-      <number>3</number>
-     </property>
-     <property name="verticalSpacing">
-      <number>4</number>
-     </property>
-     <item row="0" column="0">
+    <layout class="QGridLayout" name="gridLayout_3">
+     <item row="0" column="0" colspan="2">
       <widget class="QPushButton" name="b_refresh_map">
        <property name="text">
         <string>Refresh map</string>
@@ -185,27 +173,23 @@
       </widget>
      </item>
      <item row="1" column="0">
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <item>
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>Search</string>
-         </property>
-         <property name="buddy">
-          <cstring>e_map_search</cstring>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="e_map_search">
-         <property name="clearButtonEnabled">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Search</string>
+       </property>
+       <property name="buddy">
+        <cstring>e_map_search</cstring>
+       </property>
+      </widget>
      </item>
-     <item row="2" column="0">
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="e_map_search">
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0" colspan="2">
       <widget class="QTableView" name="o_map">
        <property name="font">
         <font>
@@ -241,6 +225,181 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QDockWidget" name="dockFindWidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
+   </property>
+   <property name="windowTitle">
+    <string>Find string</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_2">
+    <layout class="QGridLayout" name="gridLayout_4">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Text to find</string>
+       </property>
+       <property name="buddy">
+        <cstring>e_find</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="e_find">
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" colspan="2">
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QPushButton" name="b_find_next">
+         <property name="text">
+          <string>Find next (F3)</string>
+         </property>
+         <property name="shortcut">
+          <string>F3</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="b_find_all">
+         <property name="text">
+          <string>Find all</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="2" column="0" colspan="2">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Search result</string>
+       </property>
+       <property name="buddy">
+        <cstring>o_find_all_result</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0" colspan="2">
+      <widget class="QListView" name="o_find_all_result">
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockReplaceWidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
+   </property>
+   <property name="windowTitle">
+    <string>Replace</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_3">
+    <layout class="QGridLayout" name="gridLayout_5">
+     <item row="0" column="0">
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Text to find</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="e_replace_search">
+         <property name="clearButtonEnabled">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>Text to replace</string>
+         </property>
+         <property name="buddy">
+          <cstring>e_replace</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="e_replace">
+         <property name="clearButtonEnabled">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="1" column="0">
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QPushButton" name="b_find_e_replace_next">
+         <property name="text">
+          <string>Find next</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="b_replace_next">
+         <property name="text">
+          <string>Replace</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="b_replace_all">
+         <property name="text">
+          <string>Replace all</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="2" column="0">
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <zorder>dockFindWidget</zorder>
  </widget>
  <customwidgets>
   <customwidget>
@@ -256,6 +415,15 @@
   <tabstop>b_refresh_map</tabstop>
   <tabstop>e_map_search</tabstop>
   <tabstop>o_map</tabstop>
+  <tabstop>e_find</tabstop>
+  <tabstop>b_find_next</tabstop>
+  <tabstop>b_find_all</tabstop>
+  <tabstop>o_find_all_result</tabstop>
+  <tabstop>e_replace_search</tabstop>
+  <tabstop>e_replace</tabstop>
+  <tabstop>b_find_e_replace_next</tabstop>
+  <tabstop>b_replace_next</tabstop>
+  <tabstop>b_replace_all</tabstop>
   <tabstop>o_output</tabstop>
  </tabstops>
  <resources>
@@ -269,8 +437,8 @@
    <slot>slot_refresh_map()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>591</x>
-     <y>50</y>
+     <x>988</x>
+     <y>58</y>
     </hint>
     <hint type="destinationlabel">
      <x>622</x>
@@ -285,8 +453,8 @@
    <slot>slot_o_map_selected()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>651</x>
-     <y>181</y>
+     <x>988</x>
+     <y>195</y>
     </hint>
     <hint type="destinationlabel">
      <x>599</x>
@@ -301,12 +469,108 @@
    <slot>slot_refresh_map()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>704</x>
-     <y>74</y>
+     <x>988</x>
+     <y>86</y>
     </hint>
     <hint type="destinationlabel">
      <x>749</x>
-     <y>-9</y>
+     <y>0</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>b_find_next</sender>
+   <signal>clicked()</signal>
+   <receiver>MSql_win2</receiver>
+   <slot>slot_find_next()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>857</x>
+     <y>532</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1376</x>
+     <y>556</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>b_find_all</sender>
+   <signal>clicked()</signal>
+   <receiver>MSql_win2</receiver>
+   <slot>slot_find_all()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>987</x>
+     <y>532</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1374</x>
+     <y>547</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>o_find_all_result</sender>
+   <signal>clicked(QModelIndex)</signal>
+   <receiver>MSql_win2</receiver>
+   <slot>slot_find_all_click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>988</x>
+     <y>759</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1375</x>
+     <y>705</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>b_find_e_replace_next</sender>
+   <signal>clicked()</signal>
+   <receiver>MSql_win2</receiver>
+   <slot>slot_find_e_replace_find()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>875</x>
+     <y>898</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>716</x>
+     <y>841</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>b_replace_next</sender>
+   <signal>clicked()</signal>
+   <receiver>MSql_win2</receiver>
+   <slot>slot_find_e_replace_next()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>805</x>
+     <y>929</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>710</x>
+     <y>915</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>b_replace_all</sender>
+   <signal>clicked()</signal>
+   <receiver>MSql_win2</receiver>
+   <slot>slot_find_e_replace_all()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>763</x>
+     <y>962</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>714</x>
+     <y>962</y>
     </hint>
    </hints>
   </connection>
@@ -314,5 +578,11 @@
  <slots>
   <slot>slot_refresh_map()</slot>
   <slot>slot_o_map_selected()</slot>
+  <slot>slot_find_next()</slot>
+  <slot>slot_find_all()</slot>
+  <slot>slot_find_all_click()</slot>
+  <slot>slot_find_e_replace_find()</slot>
+  <slot>slot_find_e_replace_next()</slot>
+  <slot>slot_find_e_replace_all()</slot>
  </slots>
 </ui>

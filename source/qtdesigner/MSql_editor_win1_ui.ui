@@ -570,7 +570,7 @@
        <item>
         <widget class="QLabel" name="label">
          <property name="text">
-          <string>Like:</string>
+          <string>Like</string>
          </property>
         </widget>
        </item>
@@ -1150,6 +1150,9 @@
    </property>
    <property name="text">
     <string>Map procedures/functions</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+M</string>
    </property>
   </action>
   <action name="actionFormat_SQL_instruction">

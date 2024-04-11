@@ -46,8 +46,6 @@ from MSql_editor_win1_ui import Ui_MSql_win1
 from MSql_editor_win2_ui import Ui_MSql_win2
 from MSql_editor_win3_ui import Ui_MSql_win3
 # Classi qtdesigner per la ricerca e la sostituzione di stringhe di testo, per il posizionamento...
-from find_ui import Ui_FindWindow
-from find_e_replace_ui import Ui_Find_e_Replace_Window
 from goto_line_ui import Ui_GotoLineWindow
 from history import history_class
 from preferred_sql import preferred_sql_class
@@ -138,7 +136,7 @@ class My_MSql_Lexer(QsciLexerSQL):
         # sul funzionamento di alcuni aspetti dell'autocompletamento....quindi ad un certo punto mi sono arreso con quello che
         # sono riuscito a fare
         self.v_api_lexer = QsciAPIs(self)            
-        # aggiungo tutti i termini di autocompletamento (si trovanon all'interno di una tabella che viene generata a comando)
+        # aggiungo tutti i termini di autocompletamento (si trovano all'interno di una tabella che viene generata a comando)
         self.p_editor.setAutoCompletionSource(QsciScintilla.AcsAll)                
         self.carica_dizionario_per_autocompletamento()                
         # indico dopo quanti caratteri che sono stati digitati dall'utente, si deve attivare l'autocompletamento
@@ -447,7 +445,8 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
     """       
     def __init__(self, p_nome_file_da_caricare):
         global o_global_preferences    
-        global v_global_main_geometry    
+        global v_global_main_geometry   
+        global v_global_work_dir 
 
         # incapsulo la classe grafica da qtdesigner
         super(MSql_win1_class, self).__init__()        
@@ -615,7 +614,15 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         else:
             v_azione = QtWidgets.QAction()
             v_azione.setText('New')
-            self.smistamento_voci_menu(v_azione)                 
+            self.smistamento_voci_menu(v_azione)      
+
+        ###
+        # Se è presente il file dei termini di dizionario, controllo se più vecchio di 2 settimane e avverto che andrebbe rigenerato
+        ###        
+        if os.path.isfile(v_global_work_dir + 'MSql_autocompletion.ini'):  
+            v_data_ultima_modifica = datetime.datetime.fromtimestamp(os.stat(v_global_work_dir + 'MSql_autocompletion.ini').st_mtime)
+            if (datetime.datetime.now() - v_data_ultima_modifica) > datetime.timedelta(days=14):
+                message_info("The dictionary is more than two weeks old!" + chr(10) + "Remember to regenerate it!" + chr(10) + "See the menu Tools/Autocomplete dictionary ;-)")            
 
     def oggetto_win2_attivo(self):
         """
@@ -1128,7 +1135,14 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             # controllo se ci sono delle transazioni in sospeso
             v_cursore = v_global_connection.cursor()
             v_select = 'SELECT COUNT(*) CONTA FROM (SELECT DBMS_TRANSACTION.STEP_ID STEP_ID FROM DUAL) WHERE STEP_ID IS NOT NULL'
-            v_cursore.execute(v_select)
+            try:
+                v_cursore.execute(v_select)
+            # se riscontrato errore (persa connessione al db) --> emetto sia codice che messaggio
+            except cx_Oracle.Error as e:                                                            
+                errorObj, = e.args    
+                message_error("Error: " + errorObj.message)                                            
+                return 'ko'
+
             v_conta = v_cursore.fetchone()[0]            
             # se ci sono transazioni in sospeso richiedo come procedere
             if v_conta != 0:
@@ -1252,11 +1266,11 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                     obj_win2.o_map.setStyleSheet("QTableView {background-color: " + v_color + ";}")
                     self.oggetti_db_elenco.setStyleSheet("QListView {background-color: " + v_color + ";}")
                     self.db_oggetto_tree.setStyleSheet("QTreeView {background-color: " + v_color + ";}")                
-                # aggiorno il lexer aggiungendo tutte le nuove keywords
-                if len(v_global_my_lexer_keywords) > 0:                                        
-                    obj_win2.v_lexer = My_MSql_Lexer(obj_win2.e_sql)
-                    # attivo il lexer sull'editor
-                    obj_win2.e_sql.setLexer(obj_win2.v_lexer)
+                                
+                # aggiorno il lexer aggiungendo tutte le nuove keywords                
+                if len(v_global_my_lexer_keywords) > 0:                          
+                    obj_win2.v_lexer.keywords(6)
+                    obj_win2.v_lexer.carica_dizionario_per_autocompletamento()
         
     def slot_oggetti_db_scelta(self):
         """
@@ -1625,16 +1639,25 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             ###
             v_root_fk = QStandardItem('Constraints')
 
-            self.v_cursor_db_obj.execute("""SELECT CONSTRAINT_NAME,
-                                                   (SELECT LISTAGG(COLUMN_NAME,',') WITHIN GROUP (ORDER BY POSITION) FROM ALL_CONS_COLUMNS WHERE OWNER=ALL_CONSTRAINTS.OWNER AND CONSTRAINT_NAME=ALL_CONSTRAINTS.CONSTRAINT_NAME) COLONNE 
+            self.v_cursor_db_obj.execute("""SELECT CONSTRAINT_NAME,                                                   
+                                                   CASE WHEN SEARCH_CONDITION_VC IS NOT NULL THEN
+                                                        LTrim(REPLACE(SEARCH_CONDITION_VC,Chr(10),NULL))
+                                                   ELSE
+                                                        (SELECT LISTAGG(COLUMN_NAME,',') WITHIN GROUP (ORDER BY POSITION) 
+                                                         FROM   ALL_CONS_COLUMNS 
+                                                         WHERE  OWNER=ALL_CONSTRAINTS.OWNER AND 
+                                                                CONSTRAINT_NAME=ALL_CONSTRAINTS.CONSTRAINT_NAME) 
+                                                   END AS REGOLA
                                             FROM   ALL_CONSTRAINTS 
                                             WHERE  OWNER='"""+self.owner_oggetto+"""' AND 
-                                                   TABLE_NAME='"""+self.nome_oggetto+"""'""")
+                                                   TABLE_NAME='"""+self.nome_oggetto+"""' AND
+                                                   CONSTRAINT_NAME NOT LIKE 'SYS%'
+                                            ORDER BY Decode(CONSTRAINT_TYPE,'P','1','R','2','3'), CONSTRAINT_NAME""")
 
             # carico elenco constraints
             for result in self.v_cursor_db_obj:                       
                 v_campo_col0 = QStandardItem(result[0])
-                v_campo_col1 = None
+                v_campo_col1 = None 
                 v_campo_col2 = None
                 v_campo_col3 = QStandardItem(result[1])
                 v_root_fk.appendRow([v_campo_col0,v_campo_col1,v_campo_col2,v_campo_col3])                
@@ -1984,16 +2007,20 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         except:
             # inizializzo le strutture grafiche e visualizzo la dialog 
             self.win_history = history_class(v_global_work_dir+'MSql.db')        
-            # aggiungo l'evento doppio click per l'import dell'istruzione nell'editor
-            self.win_history.o_lst1.doubleClicked.connect(self.slot_history_doppio_click)
+            # aggiungo l'evento click per l'import dell'istruzione nell'editor
+            self.win_history.b_insert_in_editor.clicked.connect(self.slot_history_insert_in_editor)
             self.win_history.show()     
 
-    def slot_history_doppio_click(self):
+    def slot_history_insert_in_editor(self):
         """
            Prende la riga selezionata nell'history e la porta dentro l'editor corrente
         """       
         # prendo indice dalla tabella
-        index = self.win_history.o_lst1.selectedIndexes()[2]           
+        try:
+            index = self.win_history.o_lst1.selectedIndexes()[2]           
+        except:
+            message_error('Select a row!')
+            return 'ko'
         # il valore della colonna istruction viene caricato nell'editor corrente
         o_MSql_win2 = self.oggetto_win2_attivo()
         if o_MSql_win2 != None:            
@@ -2066,8 +2093,10 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.setObjectName(p_titolo)
         self.setWindowTitle(titolo_window(self.objectName()))
 
-        # il widget della mappa lo nascondo
+        # i widget della mappa, del find stringa e del replace stringa, li nascondo
         self.dockMapWidget.hide()
+        self.dockFindWidget.hide()
+        self.dockReplaceWidget.hide()
 
         # var che indica che è attiva-disattiva la sovrascrittura (tasto insert della tastiera)
         self.v_overwrite_enabled = False
@@ -2593,6 +2622,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         # leggo riga per riga
         v_commento_multi = False
         v_istruzione = False
+        v_istruzione_str = ''
         v_plsql = False
         v_plsql_idx = 0
         v_ok = ""
@@ -2909,7 +2939,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             except cx_Oracle.Error as e:                                                
                 # ripristino icona freccia del mouse
                 Freccia_Mouse(False)
-                # emetto errore sulla barra di stato 
+                # emetto errore nella sezione di output
                 errorObj, = e.args    
                 self.scrive_output("Error: " + errorObj.message, "E")                                            
                 return 'ko'
@@ -3300,56 +3330,19 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.o_output.setFont(font)
             # imposto var generale che indica l'altezza del font
             self.v_altezza_font_output = font.pointSize()
-
-    def calcola_pos_win(self, p_QDialog):
-        """
-           Restituisce un oggetto QRect con la posizione e la dimensione della window ricevuta in input
-           rispetto alla main window. Viene usata per le funzioni di trova e trova-sostituisci per posizionare
-           la finestra a lato della main window.
-           Il parametro p_QDialog è l'oggetto window che si vuole modificare
-        """
-        global v_global_main_geometry    
-        
-        v_dialog_dimension = p_QDialog.frameGeometry()                    
-        o_rect = QRect()
-        o_rect.setRect( v_global_main_geometry.x() + v_global_main_geometry.width() - v_dialog_dimension.width(), 
-                        (v_global_main_geometry.y() + v_global_main_geometry.height() - v_dialog_dimension.height())//2, 
-                        v_dialog_dimension.width(),
-                        v_dialog_dimension.height())
-
-        return o_rect                
     
     def slot_find(self):
         """
-           Apre la window per la ricerca del testo (se già inizializzata la visualizzo e basta)           
+           Apre la dock per la ricerca del testo 
         """            
-        try:
-            # visualizzo la finestra di ricerca
-            self.dialog_find.show()            
-            self.dialog_find.activateWindow() 
-            self.win_find.e_find.setFocus()  
-            # mi è risultato più comodo pulire il campo di ricerca quando riapro la finestra
-            self.win_find.e_find.clear()                 
-        except:
-            # inizializzo le strutture grafiche e visualizzo la dialog per la ricerca del testo
-            self.dialog_find = QtWidgets.QDialog()            
-            self.dialog_find.setWindowFlags(Qt.WindowStaysOnTopHint) # fisso la finestra in primo piano
-            self.win_find = Ui_FindWindow()        
-            self.win_find.setupUi(self.dialog_find)                                        
-            # reimposto il titolo perché nel caso di più editor aperti non si capisce a chi faccia riferimento la window
-            self.dialog_find.setWindowTitle('Find (' + self.objectName() + ')')
-            # da notare come il collegamento delle funzioni venga fatto in questo punto e non nella ui            
-            self.win_find.b_next.clicked.connect(self.slot_find_next)                
-            self.win_find.b_find_all.clicked.connect(self.slot_find_all)                
-            self.win_find.o_find_all_result.clicked.connect(self.slot_find_all_click)
-            # visualizzo la finestra di ricerca
-            self.dialog_find.show()
-            # definizione della struttura per elenco dei risultati (valido solo per find all)       
-            self.find_all_model = QtGui.QStandardItemModel()        
-            self.win_find.o_find_all_result.setModel(self.find_all_model)
-
-        # reimposto la posizione e le dimensioni della window 
-        self.dialog_find.setGeometry(self.calcola_pos_win(self.dialog_find))                
+        self.dockFindWidget.show()
+        self.e_find.setFocus()  
+        # mi è risultato più comodo pulire il campo di ricerca quando riaccedo alla finestra passando dal menu
+        self.e_find.clear()                 
+                
+        # definizione della struttura per elenco dei risultati (valido solo per find all)       
+        self.find_all_model = QtGui.QStandardItemModel()        
+        self.o_find_all_result.setModel(self.find_all_model)
 
     def slot_find_all(self):
         """
@@ -3359,7 +3352,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.find_all_model.clear()
 
         # prelevo la stringa da ricercare
-        v_string_to_search = self.win_find.e_find.text()
+        v_string_to_search = self.e_find.text()
         # se inserito una stringa di ricerca...
         if v_string_to_search != '':                        
             # lancio la ricerca su tutto e senza effetti a video (da notare come findFirst è un metodo di QScintilla)...
@@ -3392,7 +3385,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
            Partendo dalla selezione di find_all, si posiziona sulla specifica riga di testo dell'editor
         """
         # prelevo la stringa da ricercare
-        v_string_to_search = self.win_find.e_find.text()
+        v_string_to_search = self.e_find.text()
         # prendo elemento dell'elenco selezionato
         v_selindex = self.find_all_model.itemFromIndex(p_index)
         v_stringa = v_selindex.text()               
@@ -3409,15 +3402,14 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         """
            Ricerca la prossima ricorrenza verso il basso
         """        
-        v_string_to_search = self.win_find.e_find.text()
+        v_string_to_search = self.e_find.text()
         # se inserito una stringa di ricerca...
         if v_string_to_search != '':                       
             # lancio la ricerca dicendo di posizionarsi sulla prossima ricorrenza 
             v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, -1, -1, True, False, False)
             # se sono arrivato alla fine, chiedo se si desidera ripartire dall'inizio...da notare come viene poi richiamata questa stessa funzione!
             if not v_found:
-                if message_question_yes_no('Passed the end of file!'+chr(10)+'Move to the beginnig?') == 'Yes':
-                    print('ciao')
+                if message_question_yes_no('Passed the end of file!'+chr(10)+'Move to the beginnig?') == 'Yes':                    
                     self.e_sql.setCursorPosition(1,0)
                     self.slot_find_next()
 
@@ -3425,35 +3417,15 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         """
            Ricerca e sostituisci
         """
-        global v_global_main_geometry
-
-        try:
-            # visualizzo la finestra di ricerca
-            self.dialog_find_e_replace.show()
-        except:
-            # inizializzo le strutture grafiche e visualizzo la dialog per la ricerca del testo
-            self.dialog_find_e_replace = QtWidgets.QDialog()
-            self.win_find_e_replace = Ui_Find_e_Replace_Window()        
-            self.win_find_e_replace.setupUi(self.dialog_find_e_replace)                
-            # reimposto il titolo perché nel caso di più editor aperti non si capisce a chi faccia riferimento la window
-            self.dialog_find_e_replace.setWindowTitle('Find and Replace (' + self.objectName() + ')')
-            # da notare come il collegamento delle funzioni venga fatto in questo punto e non nella ui                                    
-            self.win_find_e_replace.b_find_next.clicked.connect(self.slot_find_e_replace_find)                
-            self.win_find_e_replace.b_replace_next.clicked.connect(self.slot_find_e_replace_next)                
-            self.win_find_e_replace.b_replace_all.clicked.connect(self.slot_find_e_replace_all)                            
-            # visualizzo la finestra di ricerca
-            self.dialog_find_e_replace.show()
-            # posiziono il cursore sul campo di trova
-            self.win_find_e_replace.e_find.setFocus()
-        
-        # reimposto la posizione e le dimensioni della window 
-        self.dialog_find_e_replace.setGeometry(self.calcola_pos_win(self.dialog_find_e_replace))                
+        self.dockReplaceWidget.show()
+        # posiziono il cursore sul campo di trova
+        self.e_replace_search.setFocus()
 
     def slot_find_e_replace_find(self):
         """
            Ricerca la prossima ricorrenza verso il basso
         """        
-        v_string_to_search = self.win_find_e_replace.e_find.text()
+        v_string_to_search = self.e_replace_search.text()
         # se inserito una stringa di ricerca...
         if v_string_to_search != '':                       
             # lancio la ricerca dicendo di posizionarsi sulla prossima ricorrenza 
@@ -3464,9 +3436,9 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
            Sostituisce la ricorrenza attuale (ignora differenze tra maiuscole e minuscole)
         """
         # testo da ricercare
-        v_string_to_search = self.win_find_e_replace.e_find.text().upper()
+        v_string_to_search = self.e_replace_search.text().upper()
         # nuovo testo
-        v_string_to_replace = self.win_find_e_replace.e_replace.text()
+        v_string_to_replace = self.e_replace.text()
 
         # se inserito una stringa di ricerca...
         if v_string_to_search != '' and v_string_to_replace != '':    
@@ -3486,9 +3458,9 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
            Sostituisce tutte le ricorrenze (ignora differenze tra maiuscole e minuscole)
         """
         # testo da ricercare
-        v_string_to_search = self.win_find_e_replace.e_find.text().upper()
+        v_string_to_search = self.e_replace_search.text().upper()
         # nuovo testo
-        v_string_to_replace = self.win_find_e_replace.e_replace.text()
+        v_string_to_replace = self.e_replace.text()
 
         # se inserito una stringa di ricerca...
         if v_string_to_search != '' and v_string_to_replace != '':                        

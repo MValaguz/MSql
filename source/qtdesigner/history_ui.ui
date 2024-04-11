@@ -25,6 +25,31 @@
     </sizepolicy>
    </property>
    <layout class="QGridLayout" name="gridLayout">
+    <item row="3" column="0">
+     <widget class="QTableView" name="o_lst1">
+      <property name="font">
+       <font>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::SingleSelection</enum>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>Result (double click to import instruction into current editor:</string>
+      </property>
+      <property name="buddy">
+       <cstring>o_lst1</cstring>
+      </property>
+     </widget>
+    </item>
     <item row="0" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
@@ -67,31 +92,6 @@
      </layout>
     </item>
     <item row="1" column="0">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>Result (double click to import instruction into current editor:</string>
-      </property>
-      <property name="buddy">
-       <cstring>o_lst1</cstring>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="0">
-     <widget class="QTableView" name="o_lst1">
-      <property name="font">
-       <font>
-        <pointsize>8</pointsize>
-       </font>
-      </property>
-      <property name="selectionMode">
-       <enum>QAbstractItemView::SingleSelection</enum>
-      </property>
-      <property name="selectionBehavior">
-       <enum>QAbstractItemView::SelectRows</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="0">
      <widget class="QPushButton" name="b_purge">
       <property name="text">
        <string>Delete history</string>
@@ -102,11 +102,26 @@
       </property>
      </widget>
     </item>
+    <item row="4" column="0">
+     <widget class="QPushButton" name="b_insert_in_editor">
+      <property name="text">
+       <string>Insert SQL in editor</string>
+      </property>
+      <property name="icon">
+       <iconset resource="resource.qrc">
+        <normaloff>:/icons/icons/indent.png</normaloff>:/icons/icons/indent.png</iconset>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
  </widget>
  <tabstops>
+  <tabstop>e_where_cond</tabstop>
+  <tabstop>b_start</tabstop>
+  <tabstop>b_purge</tabstop>
   <tabstop>o_lst1</tabstop>
+  <tabstop>b_insert_in_editor</tabstop>
  </tabstops>
  <resources>
   <include location="resource.qrc"/>
@@ -135,8 +150,8 @@
    <slot>slot_purge()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>541</x>
-     <y>750</y>
+     <x>552</x>
+     <y>98</y>
     </hint>
     <hint type="destinationlabel">
      <x>632</x>
@@ -146,9 +161,7 @@
   </connection>
  </connections>
  <slots>
-  <slot>slot_select_sqlite_db()</slot>
   <slot>slot_start()</slot>
-  <slot>slot_elenco_tabelle_sqlite()</slot>
   <slot>slot_purge()</slot>
  </slots>
 </ui>
