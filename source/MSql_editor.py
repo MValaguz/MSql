@@ -2897,9 +2897,14 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                     if v_num_lines < v_chunk:
                         break
                 
-                # se richiesto porto in output il numero di record elaborati (insert, update, delete...)
+                # se richiesto output del numero di record...
                 if p_rowcount:
-                    self.scrive_output(p_plsql.split()[0] + ' ' + str(v_tot_record) + ' row(s)', 'I')    
+                    # il numero lo riporto solo per (insert, update, delete...)
+                    if p_plsql.split()[0].upper() in ('INSERT','UPDATE','DELETE'):
+                        self.scrive_output(p_plsql.split()[0] + ' ' + str(v_tot_record) + ' row(s)', 'I')    
+                    # altrimenti (es. comment on table) emetto semplice messaggio di esecuzione
+                    else:
+                        self.scrive_output(p_plsql.split()[0] + ' EXECUTED!', 'I')    
                 else:
                     # porto l'output a video (tipico è quello di script che contengono dbms_output)
                     if v_dbms_ret != '':
