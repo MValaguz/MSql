@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MSql_win2(object):
     def setupUi(self, MSql_win2):
         MSql_win2.setObjectName("MSql_win2")
-        MSql_win2.resize(1000, 1037)
+        MSql_win2.resize(1000, 884)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -73,6 +73,17 @@ class Ui_MSql_win2(object):
         self.o_output.setObjectName("o_output")
         self.verticalLayout_3.addWidget(self.o_output)
         self.o_tab_widget.addTab(self.t_output, "")
+        self.t_bind = QtWidgets.QWidget()
+        self.t_bind.setObjectName("t_bind")
+        self.gridLayout_6 = QtWidgets.QGridLayout(self.t_bind)
+        self.gridLayout_6.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout_6.setObjectName("gridLayout_6")
+        self.o_bind = QtWidgets.QTableView(self.t_bind)
+        self.o_bind.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.o_bind.setSortingEnabled(True)
+        self.o_bind.setObjectName("o_bind")
+        self.gridLayout_6.addWidget(self.o_bind, 0, 0, 1, 1)
+        self.o_tab_widget.addTab(self.t_bind, "")
         self.gridLayout.addWidget(self.splitter, 0, 0, 1, 1)
         MSql_win2.setCentralWidget(self.centralwidget)
         self.dockMapWidget = QtWidgets.QDockWidget(MSql_win2)
@@ -230,6 +241,7 @@ class Ui_MSql_win2(object):
         self.b_find_e_replace_next.clicked.connect(MSql_win2.slot_find_e_replace_find) # type: ignore
         self.b_replace_next.clicked.connect(MSql_win2.slot_find_e_replace_next) # type: ignore
         self.b_replace_all.clicked.connect(MSql_win2.slot_find_e_replace_all) # type: ignore
+        self.e_find.returnPressed.connect(self.b_find_all.click) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(MSql_win2)
         MSql_win2.setTabOrder(self.e_sql, self.o_tab_widget)
         MSql_win2.setTabOrder(self.o_tab_widget, self.o_table)
@@ -251,6 +263,7 @@ class Ui_MSql_win2(object):
         _translate = QtCore.QCoreApplication.translate
         self.o_tab_widget.setTabText(self.o_tab_widget.indexOf(self.t_result), _translate("MSql_win2", "Result"))
         self.o_tab_widget.setTabText(self.o_tab_widget.indexOf(self.t_output), _translate("MSql_win2", "Output"))
+        self.o_tab_widget.setTabText(self.o_tab_widget.indexOf(self.t_bind), _translate("MSql_win2", ":Binds"))
         self.dockMapWidget.setWindowTitle(_translate("MSql_win2", "Map procedure/function"))
         self.b_refresh_map.setText(_translate("MSql_win2", "Refresh map"))
         self.label.setText(_translate("MSql_win2", "Search"))

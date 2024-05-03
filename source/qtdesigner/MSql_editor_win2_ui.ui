@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1000</width>
-    <height>1037</height>
+    <height>884</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -114,6 +114,35 @@
             </font>
            </property>
            <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="t_bind">
+        <attribute name="title">
+         <string>:Binds</string>
+        </attribute>
+        <layout class="QGridLayout" name="gridLayout_6">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item row="0" column="0">
+          <widget class="QTableView" name="o_bind">
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
+           </property>
+           <property name="sortingEnabled">
             <bool>true</bool>
            </property>
           </widget>
@@ -571,6 +600,22 @@
     <hint type="destinationlabel">
      <x>714</x>
      <y>962</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>e_find</sender>
+   <signal>returnPressed()</signal>
+   <receiver>b_find_all</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>929</x>
+     <y>485</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>922</x>
+     <y>524</y>
     </hint>
    </hints>
   </connection>

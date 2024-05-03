@@ -18,8 +18,8 @@
  Note..........: La classe principale è MSql_win1_class che apre la window di menu e che contiene l'area mdi dove poi si raggrupperranno
                  le varie finestre dell'editor (gestito dalla classe MSql_win2_class). La window principale si collega con la 
                  secondaria dell'editor utilizzando un array che contiene i puntatori all'oggetto editor (MSql_win2_class). 
-                 Quindi in MSql_win1_class vi è una continua ricerca all'oggetto editor di riferimento in modo da lavorare in modo corretto.
-                 Tutta la parte di definizione grafica è stata creata tramite QtDesigner e i file da lui prodotti, convertiti tramite un'utilità 
+                 Quindi in MSql_win1_class vi è una continua ricerca all'oggetto editor di riferimento in modo da lavorare sull'editor corrente.
+                 Tutta la parte di definizione grafica è stata creata tramite QtDesigner e i file da lui prodotti, convertiti tramite un'utilità, 
                  in classi Python da dare poi in pasto alla libreria QT.
 """
 
@@ -29,6 +29,7 @@ import os
 import datetime 
 import locale
 import re
+import traceback
 # Librerie di data base
 import cx_Oracle, oracle_my_lib
 # Librerie grafiche QT
@@ -1615,7 +1616,8 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
 
             self.v_cursor_db_obj.execute("""SELECT A.COLUMN_NAME AS NOME,
                                                    Decode(A.DATA_TYPE,'NUMBER',Lower(A.DATA_TYPE) || '(' || A.DATA_PRECISION || ',' || A.DATA_SCALE || ')',Lower(A.DATA_TYPE) || '(' || A.CHAR_LENGTH || ')')  AS TIPO,
-                                                   Decode(A.NULLABLE,'Y',' not null','') AS COLONNA_NULLA,
+                                                   Decode(A.NULLABLE,'N',' not null','') AS COLONNA_NULLA,
+                                                   DATA_DEFAULT AS VALORE_DEFAULT,
                                                    B.COMMENTS AS COMMENTO
                                             FROM   ALL_TAB_COLUMNS A, ALL_COL_COMMENTS B 
                                             WHERE  A.OWNER='"""+self.owner_oggetto+"""' AND 
@@ -1630,7 +1632,9 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 v_campo_col0 = QStandardItem(result[0])
                 v_campo_col1 = QStandardItem(result[1])
                 v_campo_col2 = QStandardItem(result[2])
-                v_campo_col3 = QStandardItem(result[3])
+                if result[3] != None:
+                    v_campo_col2.setText( v_campo_col2.text() + ' default ' + str(result[3]) )                                    
+                v_campo_col3 = QStandardItem(result[4])
                 v_root_campi.appendRow([v_campo_col0,v_campo_col1,v_campo_col2,v_campo_col3])                
             self.db_oggetto_tree_model.appendRow(v_root_campi)
 
@@ -2159,6 +2163,11 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.nomi_intestazioni = []
         # salva l'altezza del font usato nella sezione result e output e viene usata per modificare l'altezza della cella
         self.v_altezza_font_output = 9
+        # inizializzo la struttura che conterrà eventuali variabili bind. Attenzione! La struttura che verrà passata a Oracle è self.v_variabili_bind_dizionario
+        self.v_variabili_bind_nome = []
+        self.v_variabili_bind_tipo = []
+        self.v_variabili_bind_valore = []        
+        self.v_variabili_bind_dizionario = {}
         # settaggio dei font di risultato e output (il font è una stringa con il nome del font e separato da virgola l'altezza)
         if o_global_preferences.font_result != '':
             v_split = o_global_preferences.font_result.split(',')
@@ -2672,6 +2681,9 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             # continuazione di una select, insert, update, delete....
             elif v_istruzione and v_riga.find(';') == -1:
                  v_istruzione_str += chr(10) + v_riga
+            # continuazione di una select dove la riga inizia con una costante
+            elif v_istruzione and v_riga[0] == "'":
+                v_istruzione_str += v_riga
             # fine di una select, insert, update, delete.... con punto e virgola
             elif v_istruzione and v_riga[-1] == ';':
                 v_istruzione = False
@@ -2697,6 +2709,13 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                 v_plsql = True
                 v_plsql_idx += 1
                 v_plsql_str = v_riga_raw
+            # dichiarazione di una bind variabile (secondo lo standard definito da sql developer es. VARIABLE v_nome_var VARCHAR2(100))
+            # sono accettati solo i tipi VARCHAR2, NUMBER e DATE
+            elif v_riga.split()[0].upper() in ('VARIABLE','VAR'):                                
+                v_split = v_riga.split()
+                # chiamo la procedura che si occupa di aggiornare la lista delle bind, passando il nome della var e il suo tipo
+                # e ne visualizzo il contenuto
+                self.bind_variable(p_function='ADD', p_variabile_nome=v_split[1].upper(), p_variabile_tipo=v_split[2].upper())
             else:
                 message_error('Unknown command type: ' + v_riga_raw + '.....')
                 return 'ko'                
@@ -2755,7 +2774,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                         il risultato al di fuori di queste tre casistiche è imprevedibile!
         """
         global v_global_connesso
-    
+
         if v_global_connesso:            
             # sostituisce la freccia del mouse con icona "clessidra"
             Freccia_Mouse(True)
@@ -2771,11 +2790,12 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             ###
             v_tot_record = 0
             try:                
-                self.v_cursor.execute(p_plsql)
+                self.bind_variable(p_function='DIC',p_testo_sql=p_plsql)
+                self.v_cursor.execute(p_plsql,self.v_variabili_bind_dizionario)
                 v_tot_record = self.v_cursor.rowcount
                 self.v_esecuzione_ok = True
             # se riscontrato errore di primo livello --> emetto sia codice che messaggio ed esco
-            except cx_Oracle.Error as e:                                                                
+            except cx_Oracle.Error as e:                                                                                            
                 # ripristino icona freccia del mouse
                 Freccia_Mouse(False)
                 # emetto errore 
@@ -2894,6 +2914,11 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         
         # tutto ok ... aggiungo istruzione all'history
         write_sql_history(v_global_work_dir+'MSql.db','SCRIPT',p_plsql)
+
+        # refresh della sezione variabili bind
+        if len(self.v_variabili_bind_nome) != 0:            
+            self.bind_variable(p_function='SHOW')
+
         # esco con tutto ok
         return None
                 
@@ -2933,7 +2958,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
 
             # esegue sql contenuto nel campo a video                    
             try:                
-                self.v_cursor.execute(v_select)                            
+                self.bind_variable(p_function='DIC',p_testo_sql=v_select)
+                self.v_cursor.execute(v_select, self.v_variabili_bind_dizionario)                            
                 self.v_esecuzione_ok = True
             # se riscontrato errore --> emetto sia codice che messaggio
             except cx_Oracle.Error as e:                                                
@@ -2954,6 +2980,10 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
 
             # se tutto ok, posso procedere con il caricare la prima pagina            
             self.carica_pagina()   
+
+            # refresh della sezione variabili bind
+            if len(self.v_variabili_bind_nome) != 0:
+                self.bind_variable(p_function='SHOW')
 
             # posizionamento sulla parte di output risultati select
             self.o_tab_widget.setCurrentIndex(0) 
@@ -3040,7 +3070,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                     # se il contenuto è un clob...leggo sempre tramite metodo read e lo carico in un widget di testo largo
                     elif self.tipi_intestazioni[x][1] == cx_Oracle.CLOB:                        
                         qtext = QtWidgets.QTextEdit(field.read())    
-                        # da notare come prendeno qtext e trasformandolo in plaintext le prestazioni migliorino di molto                    
+                        # da notare come prendendo qtext e trasformandolo in plaintext le prestazioni migliorino di molto                    
                         self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( qtext.toPlainText() ) )                                                                                                                
                     x += 1
                 # conto le righe (il numeratore è partito da 0, quindi è corretto che venga incrementato a questo punto)
@@ -3610,7 +3640,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         # chiamo la reindentazione del testo (trasformando tutto in mauiscolo)
         v_testo_sel = format_sql(v_testo_sel).upper()
         # inserisco il nuovo testo al posto di quello eliminato
-        self.e_sql.insert(v_testo_sel)        
+        self.e_sql.insert(v_testo_sel)      
 
     def slot_commenta(self):
         """
@@ -3735,6 +3765,114 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         else:
             self.e_sql.SendScintilla(QsciScintillaBase.SCI_SETVIEWWS,QsciScintillaBase.SCWS_INVISIBLE)           
 
+    def bind_variable(self, p_function, p_variabile_nome=None, p_variabile_tipo=None, p_testo_sql=None):
+        """
+           Gestione delle struttura delle variabili bind
+           La gestione delle variabili bind si avvale di diverse strutture di cui le principali solo le liste:
+             - v_variabili_bind_nome
+             - v_variabili_bind_nome
+             - v_variabili_bind_valore
+             queste liste sono passate al codice PL-SQL e servono da supporto per la visualizzazione a video
+           
+           Se p_function = 'ADD'  aggiunge alla struttura la variabile p_variable_name del tipo p_variabile_type; al termine esegue la funzione SHOW
+              p_function = 'SHOW' esegue solo il refresh a video              
+              p_function = 'DIC'  crea-ricrea il dizionario da passare alle istruzioni SQL che è contenuto nella proprietà self.v_variabili_bind_dizionario
+                                  Attenzione! Lato esecuzione istruzioni SQL e PL-SQL si farà riferimento solo e unicamente al contenuto di self.v_variabili_bind_dizionario!!!!           
+        """        
+        # Aggiornamento delle strutture interne per la gestione delle variabili bind
+        if p_function == 'ADD':
+            if p_variabile_tipo.find('VARCHAR2') == -1 and p_variabile_tipo.find('NUMBER') == -1 and p_variabile_tipo.find('DATE') == -1:
+                message_error(p_variabile_tipo + ' - Unrecognized type')
+                return 'ko'
+            # Se la var bind non esiste la aggiungo e siccome non esco dalla procedura, eseguo il refresh a video
+            if p_variabile_nome not in self.v_variabili_bind_nome:
+                self.v_variabili_bind_nome.append(p_variabile_nome)
+                self.v_variabili_bind_tipo.append(p_variabile_tipo)
+                self.v_variabili_bind_valore.append(None)
+
+        # Crea-aggiorna la struttura dizionario self.v_variabili_bind_dizionario che verrà utilizzata per il richiamo delle istruzioni sql e pl-sql
+        # Il funzionamento delle bind è particolare perché all'istruzione execute del motore di database è possibile passare una struttura dizionario con nome-valore
+        # Ad esempio se ho due bind di nome V_AZIENDA e V_DIPENDENTE con valori 'TEC' e '00035' viene creato il dizionario con {'V_AZIENDA':'TEC','V_DIPENDENTE':'00035'}
+        # Il motore di database ricevendo in input tale dizionario, cercherà di accoppiare per nome (e non per riferimento) le var dichiarate e inoltre gli passerà in input-output il valore
+        if p_function == 'DIC':                        
+            # se il dizionario non è vuoto prendo solo i valori del dizionario e li porto nelle strutture di appoggio (da notare la getvalue...è un metodo che appartiene all'oggetto var di cx_Oracle)
+            if len(self.v_variabili_bind_dizionario) != 0:                
+                for chiave, valore in self.v_variabili_bind_dizionario.items():                    
+                    v_index = self.v_variabili_bind_nome.index(chiave)                    
+                    self.v_variabili_bind_valore[v_index] = valore.getvalue(0)                    
+            # pulisco il dizionario        
+            self.v_variabili_bind_dizionario.clear()
+            # creo il dizionario con le bind da passare al comando sql (il comando è una execute che si trova fuori da questa procedura)
+            # per problemi tecnici il dizionario deve contenere solo la coppia chiave-valori delle variabili bind effettivamente presenti nel codice sql...quindi
+            # bisogna scansionare l'istruzione p_testo_sql e creare il dizionario solo delle var bind effettive
+            for i in range(0,len(self.v_variabili_bind_nome)):                
+                v_nome_bind = ':' + self.v_variabili_bind_nome[i]
+                if v_nome_bind in p_testo_sql.upper():
+                    if self.v_variabili_bind_tipo[i].find('VARCHAR2') != -1: 
+                        # creo una var di cx_Oracle! e gli assegno il valore della bind che sto copiando nel dizionario
+                        v_valore = self.v_cursor.var(str)
+                        v_valore.setvalue(0,self.v_variabili_bind_valore[i])
+                        # carico elemento del dizionario composto da nome della bind e dal suo valore che è espresso con un oggetto cx_Oracle.var
+                        self.v_variabili_bind_dizionario.update( {self.v_variabili_bind_nome[i] : v_valore } )
+                    if self.v_variabili_bind_tipo[i].find('NUMBER') != -1: 
+                        # creo una var di cx_Oracle! e gli assegno il valore della bind che sto copiando nel dizionario
+                        v_valore = self.v_cursor.var(int)
+                        v_valore.setvalue(0,self.v_variabili_bind_valore[i])
+                        # carico elemento del dizionario composto da nome della bind e dal suo valore che è espresso con un oggetto cx_Oracle.var
+                        self.v_variabili_bind_dizionario.update( {self.v_variabili_bind_nome[i] : v_valore } )
+                    if self.v_variabili_bind_tipo[i].find('DATE') != -1:                         
+                        # creo una var di cx_Oracle! e gli assegno il valore della bind che sto copiando nel dizionario
+                        v_valore = self.v_cursor.var(datetime.date)
+                        v_valore.setvalue(0,self.v_variabili_bind_valore[i])
+                        # carico elemento del dizionario composto da nome della bind e dal suo valore che è espresso con un oggetto cx_Oracle.var
+                        self.v_variabili_bind_dizionario.update( {self.v_variabili_bind_nome[i] : v_valore } )            
+                print('Creazione dizionario variabili bind...')
+                print(self.v_variabili_bind_dizionario)
+                print('-'*50)
+            # esco --> tutto ok
+            return 'ok'
+                                    
+        # Aggiornamento a video variabili bind
+        # lista contenente le intestazioni
+        if p_function in ('SHOW','ADD'):
+            # se il dizionario non è vuoto prendo solo i valori del dizionario e li porto nelle strutture di appoggio (da notare la getvalue...è un metodo che appartiene all'oggetto var di cx_Oracle)
+            if len(self.v_variabili_bind_dizionario) != 0:                
+                for chiave, valore in self.v_variabili_bind_dizionario.items():                    
+                    v_index = self.v_variabili_bind_nome.index(chiave)                    
+                    self.v_variabili_bind_valore[v_index] = valore.getvalue(0)                    
+
+            # preparo la struttura della tabella che visualizza l'oggetto :binds
+            intestazioni = ['Name','Type','Value' ]                                
+            self.bind_risultati = QtGui.QStandardItemModel()        
+            self.bind_risultati.setHorizontalHeaderLabels(intestazioni)                
+            self.bind_risultati.setColumnCount(len(intestazioni))                
+            self.bind_risultati.setRowCount(0)                        
+
+            for y in range(0,len(self.v_variabili_bind_nome)):            
+                # colonna Name
+                v_item = QtGui.QStandardItem()                
+                v_item.setText(str(self.v_variabili_bind_nome[y]))            
+                self.bind_risultati.setItem(y, 0, v_item )  
+                # colonna Tipo di dato
+                v_item = QtGui.QStandardItem()                
+                v_item.setText(str(self.v_variabili_bind_tipo[y]))            
+                self.bind_risultati.setItem(y, 1, v_item )  
+                # colonna Valore
+                v_item = QtGui.QStandardItem()                
+                v_item.setText(str(self.v_variabili_bind_valore[y]))            
+                self.bind_risultati.setItem(y, 2, v_item )  
+
+            # carico il modello nel widget        
+            self.o_bind.setModel(self.bind_risultati)                                           
+            self.o_bind.resizeColumnsToContents()
+
+        # porto in primo piano la visualizzazione del tab variabili bind (operazione forzata ogni volta si aggiunge una variabile)
+        if p_function == 'ADD':
+            self.o_tab_widget.setCurrentIndex(2)                 
+
+        # esco --> tutto ok
+        return 'ok'
+
     def aggiorna_statusbar(self):
         """
            Aggiorna i dati della statusbar 
@@ -3778,6 +3916,21 @@ class MSql_win3_class(QtWidgets.QDialog, Ui_MSql_win3):
         self.setupUi(self)
 
 #
+#  _______  ______ _____ ____ _____ 
+# | ____\ \/ / ___| ____|  _ \_   _|
+# |  _|  \  / |   |  _| | |_) || |  
+# | |___ /  \ |___| |___|  __/ | |  
+# |_____/_/\_\____|_____|_|    |_|  
+#                                                              
+def excepthook(exc_type, exc_value, exc_tb):
+    """
+       Intercetta errori-eccezioni imprevisti (es. divisione per zero, e cose del genere....) e li emette come messaggio...
+       in questo modo si evita la maggior parte dei fastidiosi crash di programma di cui non si capisce cosa sia successo!
+    """   
+    tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
+    message_error(tb)    
+
+#
 #  ____ _____  _    ____ _____ 
 # / ___|_   _|/ \  |  _ \_   _|
 # \___ \ | | / _ \ | |_) || |  
@@ -3802,7 +3955,10 @@ if __name__ == "__main__":
     # controllo se esiste dir di lavoro (servirà per salvare le preferenze, ecc....)        
     if not os.path.isdir(v_global_work_dir):
         os.makedirs(v_global_work_dir)
-    
+
+    # sovrascrive l'hook delle eccezioni; in pratica se avverrà un errore imprevisto, dovrebbe uscire un messaggio a video...
+    sys.excepthook = excepthook
+
     # inizializzazione ambiente grafico
     app = QtWidgets.QApplication([])    
 

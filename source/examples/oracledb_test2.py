@@ -19,34 +19,49 @@ except Exception as err:
 
 
 #v_password = getpass.getpass('SMILE')
-v_lista_bind = {':AZIENDA':'',':DIPENDENTE':''}
+#v_lista_bind = {':AZIENDA':'',':DIPENDENTE':''}
 v_con = cx_Oracle.connect(user='SMILE', password='SMILE', dsn='BACKUP_815')        
 v_cur = v_con.cursor()
 v_cur.callproc("dbms_output.enable", [1000000])        
 #v_cur.execute("SELECT DIPEN_DE FROM CP_DIPEN WHERE AZIEN_CO=:AZIENDA AND DIPEN_CO=:DIPENDENTE",v_lista_bind)
 #v1_azienda = v_cur.var(str)
 #v1_dipendente = v_cur.var(str)
-v_lista_var =[]
-v_lista_var.append(v_cur.var(str))
-v_lista_var.append(v_cur.var(str))
+
+# creazione di un dizionario con nome var (che corrisponde alla bind) e valore
+v_elenco_bind = ['V_DIPENDENTE','V_AZIENDA']
+v_valori_bind = ['00035','TEC']
+v_lista_var ={v_elenco_bind[i] : v_cur.var(str) for i in range(len(v_elenco_bind))}
+#v_lista_var.append(v_cur.var(str))
+#v_lista_var.append(v_cur.var(str))
+print(v_lista_var)
 #v_dipendente = v_cur.var(str)
-v_cur.execute("""DECLARE
-  v_output VARCHAR2(100);
-BEGIN
+v_cur.execute("""
+BEGIN  
   :V_AZIENDA := 'TEC'; 
   :V_DIPENDENTE := '00035';
+END;
+""", v_lista_var)
+
+print(v_lista_var)
+
+v_cur.execute("""
+DECLARE
+  v_output VARCHAR2(100);
+BEGIN
   select DIPEN_DE
   into   v_output
   from   CP_DIPEN
   where  AZIEN_CO=:V_AZIENDA AND
          DIPEN_CO=:V_DIPENDENTE;
   Dbms_Output.Put_Line(v_output);
+  Dbms_Output.Put_Line('output interno a pl-sql ' || :V_DIPENDENTE);
+  Dbms_Output.Put_Line('output interno a pl-sql ' || :V_AZIENDA);  
 END;""", v_lista_var)
 
 #v_azienda=v1_azienda,v_dipendente=v1_dipendente)
 
-print(v_lista_var[0].getvalue())
-print(v_lista_var[1].getvalue())
+#print(v_lista_var[0].getvalue())
+#print(v_lista_var[1].getvalue())
 
 # preparo le var per leggere l'output dello script
 v_chunk = 100
