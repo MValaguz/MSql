@@ -496,12 +496,19 @@ class Ui_MSql_win1(object):
         icon61.addPixmap(QtGui.QPixmap(":/icons/icons/preferiti.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionMy_preferred_SQL.setIcon(icon61)
         self.actionMy_preferred_SQL.setObjectName("actionMy_preferred_SQL")
+        self.actionClose = QtWidgets.QAction(MSql_win1)
+        self.actionClose.setObjectName("actionClose")
+        self.actionClose_all = QtWidgets.QAction(MSql_win1)
+        self.actionClose_all.setObjectName("actionClose_all")
         self.menuFiles.addAction(self.actionNew)
         self.menuFiles.addAction(self.actionOpen)
         self.menuFiles.addAction(self.menuRecent_file.menuAction())
         self.menuFiles.addSeparator()
         self.menuFiles.addAction(self.actionSave)
         self.menuFiles.addAction(self.actionSave_as)
+        self.menuFiles.addSeparator()
+        self.menuFiles.addAction(self.actionClose)
+        self.menuFiles.addAction(self.actionClose_all)
         self.menuFiles.addSeparator()
         self.menuFiles.addAction(self.actionUTF_8_Coding)
         self.menuFiles.addSeparator()
@@ -615,8 +622,6 @@ class Ui_MSql_win1(object):
         self.db_oggetto_tree.expanded['QModelIndex'].connect(MSql_win1.slot_db_oggetto_tree_expand) # type: ignore
         self.e_view_description.clicked.connect(MSql_win1.slot_oggetti_db_scelta) # type: ignore
         self.oggetti_db_elenco.clicked['QModelIndex'].connect(MSql_win1.slot_oggetti_db_click) # type: ignore
-        self.oggetti_db_elenco.doubleClicked['QModelIndex'].connect(MSql_win1.slot_oggetti_db_doppio_click) # type: ignore
-        self.db_oggetto_tree.doubleClicked['QModelIndex'].connect(MSql_win1.slot_db_oggetto_tree_doppio_click) # type: ignore
         self.e_object_viewer_find.editingFinished.connect(MSql_win1.slot_object_viewer_find) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(MSql_win1)
         MSql_win1.setTabOrder(self.oggetti_db_scelta, self.e_view_description)
@@ -742,6 +747,9 @@ class Ui_MSql_win1(object):
         self.actionUncomment_selection.setShortcut(_translate("MSql_win1", "Ctrl+Alt+U"))
         self.actionQuick_query.setText(_translate("MSql_win1", "Quick query"))
         self.actionMy_preferred_SQL.setText(_translate("MSql_win1", "My preferred SQL"))
+        self.actionClose.setText(_translate("MSql_win1", "Close"))
+        self.actionClose.setShortcut(_translate("MSql_win1", "Ctrl+W"))
+        self.actionClose_all.setText(_translate("MSql_win1", "Close all"))
 import resource_rc
 
 

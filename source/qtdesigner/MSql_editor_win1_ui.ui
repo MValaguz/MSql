@@ -80,6 +80,9 @@
     <addaction name="actionSave"/>
     <addaction name="actionSave_as"/>
     <addaction name="separator"/>
+    <addaction name="actionClose"/>
+    <addaction name="actionClose_all"/>
+    <addaction name="separator"/>
     <addaction name="actionUTF_8_Coding"/>
     <addaction name="separator"/>
     <addaction name="actionPreferences"/>
@@ -1209,6 +1212,19 @@
     <string>My preferred SQL</string>
    </property>
   </action>
+  <action name="actionClose">
+   <property name="text">
+    <string>Close</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
+   </property>
+  </action>
+  <action name="actionClose_all">
+   <property name="text">
+    <string>Close all</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>oggetti_db_scelta</tabstop>
@@ -1231,8 +1247,8 @@
    <slot>slot_oggetti_db_scelta()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1137</x>
-     <y>74</y>
+     <x>1182</x>
+     <y>119</y>
     </hint>
     <hint type="destinationlabel">
      <x>1253</x>
@@ -1247,8 +1263,8 @@
    <slot>slot_oggetti_db_scelta()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1022</x>
-     <y>104</y>
+     <x>1099</x>
+     <y>154</y>
     </hint>
     <hint type="destinationlabel">
      <x>1055</x>
@@ -1263,8 +1279,8 @@
    <slot>slot_oggetti_db_scelta()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1108</x>
-     <y>106</y>
+     <x>1243</x>
+     <y>154</y>
     </hint>
     <hint type="destinationlabel">
      <x>961</x>
@@ -1279,8 +1295,8 @@
    <slot>slot_oggetti_db_scelta()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1234</x>
-     <y>71</y>
+     <x>1243</x>
+     <y>119</y>
     </hint>
     <hint type="destinationlabel">
      <x>1159</x>
@@ -1295,8 +1311,8 @@
    <slot>slot_db_oggetto_tree_expand()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1248</x>
-     <y>854</y>
+     <x>1244</x>
+     <y>855</y>
     </hint>
     <hint type="destinationlabel">
      <x>995</x>
@@ -1311,8 +1327,8 @@
    <slot>slot_oggetti_db_scelta()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1207</x>
-     <y>75</y>
+     <x>1205</x>
+     <y>119</y>
     </hint>
     <hint type="destinationlabel">
      <x>1219</x>
@@ -1337,46 +1353,14 @@
    </hints>
   </connection>
   <connection>
-   <sender>oggetti_db_elenco</sender>
-   <signal>doubleClicked(QModelIndex)</signal>
-   <receiver>MSql_win1</receiver>
-   <slot>slot_oggetti_db_doppio_click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>1066</x>
-     <y>246</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>733</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>db_oggetto_tree</sender>
-   <signal>doubleClicked(QModelIndex)</signal>
-   <receiver>MSql_win1</receiver>
-   <slot>slot_db_oggetto_tree_doppio_click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>1248</x>
-     <y>854</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>547</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>e_object_viewer_find</sender>
    <signal>editingFinished()</signal>
    <receiver>MSql_win1</receiver>
    <slot>slot_object_viewer_find()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1133</x>
-     <y>516</y>
+     <x>1243</x>
+     <y>543</y>
     </hint>
     <hint type="destinationlabel">
      <x>800</x>
@@ -1386,12 +1370,10 @@
   </connection>
  </connections>
  <slots>
-  <slot>slot_oggetti_db_doppio_click()</slot>
   <slot>slot_oggetti_db_scelta()</slot>
   <slot>slot_oggetti_db_click()</slot>
   <slot>slot_resize_MSql_win1()</slot>
   <slot>slot_db_oggetto_tree_expand()</slot>
-  <slot>slot_db_oggetto_tree_doppio_click()</slot>
   <slot>slot_object_viewer_find()</slot>
  </slots>
 </ui>

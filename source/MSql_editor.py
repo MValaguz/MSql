@@ -406,6 +406,8 @@ def salvataggio_editor(p_save_as, p_nome, p_testo):
         # se nel nome del file non è presente un suffisso --> imposto .msql            
         if p_nome.find('.') == -1:
             p_nome += '.msql'
+        # reimposto la dir di default in modo che in questa sessione del programma rimanga quella che l'utente ha scelto per salvare il file
+        o_global_preferences.save_dir = os.path.split( p_nome )[0]
 
     # procedo con il salvataggio
     try:
@@ -458,6 +460,8 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         self.showNormal()      
         # dimensioni della window
         self.carico_posizione_window()  
+        # attivo il drag&drop (viene gestito per quanto da esplora risorse si trascina un file sull'app)
+        self.setAcceptDrops(True)        
 
         ###
         # Dalle preferenze carico il menu con elenco dei server e degli user
@@ -501,17 +505,18 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
 
         ###
         # Aggiunta di windget alla statusbar con: flag editabilità, numero di caratteri, indicatore di overwrite, ecc..
+        # Da notare come l'allineamento a destra sia effettuato tramite un addPermanentWidget e a sinistra con il addWidget
         ###                                        
+        # Informazioni sulla connessione
+        self.l_connection = QLabel("Connection:")
+        self.l_connection.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        self.l_connection.setStyleSheet('color: black;')
+        self.statusBar.addWidget(self.l_connection)                                
         # Coordinate cursore dell'editor di testo
         self.l_cursor_pos = QLabel()
         self.l_cursor_pos.setFrameStyle(QFrame.Panel | QFrame.Sunken)
         self.statusBar.addPermanentWidget(self.l_cursor_pos)                
         self.l_cursor_pos.setText("Ln: 1  Col: 1")
-        # Indicatore editabilità
-        self.l_tabella_editabile = QLabel("Editable table: Disabled")
-        self.l_tabella_editabile.setFrameStyle(QFrame.Panel | QFrame.Sunken)
-        self.l_tabella_editabile.setStyleSheet('color: black;')
-        self.statusBar.addPermanentWidget(self.l_tabella_editabile)                
         # Numero totale di righe di testo
         self.l_num_righe_e_char = QLabel()
         self.l_num_righe_e_char.setFrameStyle(QFrame.Panel | QFrame.Sunken)
@@ -528,12 +533,12 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         # Stato end of line
         self.l_eol = QLabel()
         self.l_eol.setFrameStyle(QFrame.Panel | QFrame.Sunken)
-        self.statusBar.addPermanentWidget(self.l_eol)        
-        # Informazioni sulla connessione
-        self.l_connection = QLabel("Connection:")
-        self.l_connection.setFrameStyle(QFrame.Panel | QFrame.Sunken)
-        self.l_connection.setStyleSheet('color: black;')
-        self.statusBar.addPermanentWidget(self.l_connection)                
+        self.statusBar.addPermanentWidget(self.l_eol)                
+        # Indicatore editabilità
+        self.l_tabella_editabile = QLabel("Editable table: Disabled")
+        self.l_tabella_editabile.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        self.l_tabella_editabile.setStyleSheet('color: black;')
+        self.statusBar.addPermanentWidget(self.l_tabella_editabile)                
 
         ###
         # definizione della dimensioni dei dock laterali (sono 3, vengono raggruppati e definite le proporzioni)
@@ -570,12 +575,22 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         ###
         self.oggetti_db_lista = QtGui.QStandardItemModel()        
         self.oggetti_db_elenco.setModel(self.oggetti_db_lista)
+        # attivo la gestione del tasto destro e relativo richiamo menu popup
+        self.oggetti_db_elenco.setContextMenuPolicy(Qt.CustomContextMenu) 
+        self.oggetti_db_elenco.customContextMenuRequested.connect(self.slot_popup_menu_db_elenco)             
         # per default carico l'elenco di tutte le tabelle (selezionando la voce Tables=1 nell'elenco)
         self.oggetti_db_scelta.setCurrentIndex(1)
         # per object viewer e nel caso di package, riporta la struttura delle procedure-funzioni che il package contiene
         # per la struttura di questa var fare riferimento alla funzione estrai_procedure_function che si trova in utilita_testo.py
-        self.oggetti_db_lista_proc_func = object        
-
+        self.oggetti_db_lista_proc_func = object       
+        self.v_nome_oggetto = ''        
+        self.v_tipo_oggetto = ''        
+        # attivo la gestione del tasto destro e relativo richiamo menu popup
+        self.db_oggetto_tree.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.db_oggetto_tree.customContextMenuRequested.connect(self.slot_popup_menu_oggetto_tree)
+        # creo le variabili che serviranno come appoggio al menu popup (punto in cui il popup è stato attivato)
+        self.v_popup_menu_zone = ''        
+ 
         ###
         # Imposto default in base alle preferenze (setto anche le opzioni sulle voci di menu)
         ###                
@@ -596,7 +611,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         # Carico elenco dei file recenti
         ###
         self.aggiorna_elenco_file_recenti(None)
-        
+
         ###
         # Se è stato indicato un nome di file da caricare all'avvio
         ###
@@ -623,8 +638,31 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         if os.path.isfile(v_global_work_dir + 'MSql_autocompletion.ini'):  
             v_data_ultima_modifica = datetime.datetime.fromtimestamp(os.stat(v_global_work_dir + 'MSql_autocompletion.ini').st_mtime)
             if (datetime.datetime.now() - v_data_ultima_modifica) > datetime.timedelta(days=14):
-                message_info("The dictionary is more than two weeks old!" + chr(10) + "Remember to regenerate it!" + chr(10) + "See the menu Tools/Autocomplete dictionary ;-)")            
+                message_info("The dictionary is more than two weeks old!" + chr(10) + "Remember to regenerate it!" + chr(10) + "See the menu Tools/Autocomplete dictionary ;-)")                    
 
+    def dragEnterEvent(self, event):
+        """
+           Sovrascrivo la funzione nativa e intercetto l'evento drag che proviene dall'esterno dell'app (es. da esplora risorse si trascina in MSql un file)
+        """        
+        # se il drag contiene un nome di file, allora lo accetto! Se non lo accettassi il conseguente drop non produrrebbe risultato
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
+
+    def dropEvent(self, event):
+        """
+           Sovrascrivo la funzione nativa e intercetto l'evento di drop; se è stato accettato il nome di un file, apro un nuovo editor con il nome di quel file
+        """
+        # se il drop contiene un nome di file, allora lo accetto e apro un nuovo editor con quel file         
+        for url in event.mimeData().urls():
+            if url.isLocalFile():
+                v_filepath = url.toLocalFile()
+                if v_filepath is not None:
+                    # apro un file            
+                    v_titolo, v_contenuto_file = self.openfile(v_filepath)        
+                    v_azione = QtWidgets.QAction()
+                    v_azione.setText('Open_db_obj')            
+                    self.smistamento_voci_menu(v_azione, v_titolo, v_contenuto_file)        
+    
     def oggetto_win2_attivo(self):
         """
             Restituisce l'oggetto di classe MSql_win2_class riferito alla window di editor attiva
@@ -790,6 +828,12 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                     o_MSql_win2.setWindowTitle(titolo_window(v_nome_file))
                     self.aggiorna_elenco_file_recenti(v_nome_file)                    
                     self.window_attiva.setObjectName(v_nome_file) # notare come il nome della window va forzato anche sulla window attiva
+            # Chiusura dell'editor
+            elif p_slot.text() == 'Close':
+                self.mdiArea.closeActiveSubWindow()
+            # Chiusura di tutti gli editor aperti 
+            elif p_slot.text() == 'Close all':
+                self.mdiArea.closeAllSubWindows()
             # Creazione del dizionario termini per autocompletamento dell'editor
             elif p_slot.text() == 'Autocomplete dictionary':
                 self.crea_dizionario_per_autocompletamento()
@@ -1027,6 +1071,10 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
 
             # dialog box per richiesta file
             v_fileName = QFileDialog.getOpenFileName(self, "Open File", v_default_open_dir ,"MSql files (*.msql);;SQL files (*.sql *.pls *.plb *.trg);;All files (*.*)")                
+            # reimposto la dir di default in modo che in questa sessione del programma rimanga quella che l'utente ha scelto per aprire il file                        
+            if v_fileName[0] != '':                               
+                o_global_preferences.open_dir = os.path.split( v_fileName[0] )[0]
+
         # .. altrimenti ricevuto in input un file specifico
         else:
             v_fileName = []
@@ -1307,7 +1355,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 v_select = """SELECT CONSTRAINT_NAME OBJECT_NAME, DECODE(INVALID,NULL,0,1) INVALID, STATUS FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND CONSTRAINT_TYPE='R' AND SUBSTR(CONSTRAINT_NAME,1,4) != 'BIN$'"""    
             # check
             elif v_tipo_oggetto == 'CHECK_KEY':
-                v_select = """SELECT CONSTRAINT_NAME OBJECT_NAME, DECODE(INVALID,NULL,0,1) INVALID, STATUS FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND CONSTRAINT_TYPE='C' AND SUBSTR(CONSTRAINT_NAME,1,4) != 'BIN$'"""    
+                v_select = """SELECT CONSTRAINT_NAME OBJECT_NAME, DECODE(INVALID,NULL,0,1) INVALID, STATUS FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND CONSTRAINT_TYPE='C' AND SUBSTR(CONSTRAINT_NAME,1,4) != 'BIN$' AND GENERATED != 'GENERATED NAME'"""    
             # indici
             elif v_tipo_oggetto == 'INDEXES':                
                 v_select = """SELECT INDEX_NAME OBJECT_NAME, 0 INVALID, 'ENABLED' STATUS FROM ALL_INDEXES WHERE OWNER='"""+self.e_user_name+"""'"""
@@ -1416,25 +1464,78 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 v_icon.addPixmap(QtGui.QPixmap(":/icons/icons/disabled.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
                 v_item.setIcon(v_icon)                
 
-            self.oggetti_db_lista.appendRow(v_item)                        
+            self.oggetti_db_lista.appendRow(v_item)                                   
 
         # Ripristino icona freccia del mouse
         Freccia_Mouse(False)        
 
-    def slot_oggetti_db_doppio_click(self, p_index):
+    def slot_popup_menu_db_elenco(self,p_position):
         """
-           Carica il sorgente dell'oggetto selezionato (facendo doppio click), dentro l'editor
-        """                
-        # prendo il tipo di oggetto scelto dall'utente
-        try:            
-            v_tipo_oggetto = Tipi_Oggetti_DB[self.oggetti_db_scelta.currentText()]                
-        except:
-            v_tipo_oggetto = ''
-        # prendo il nome dell'oggetto scelto dall'utente
-        v_selindex = self.oggetti_db_lista.itemFromIndex(p_index)
-        v_nome_oggetto = v_selindex.text()               
+           Visualizza popup menu quando si preme il tasto destro del mouse sulla riga elenco oggetti
+        """
+        # imposto var che identifica in che zona ci troviamo
+        self.v_popup_menu_zone = 'LISTA_OGGETTI'
+        # prendo il nome dell'oggetto scelto dall'utente dalla lista degli oggetti       
+        v_selindex = self.oggetti_db_elenco.selectedIndexes()[0]        
+        self.v_nome_oggetto = v_selindex.data()
+        # prendo il tipo di oggetto scelto dall'utente        
+        self.v_tipo_oggetto = Tipi_Oggetti_DB[self.oggetti_db_scelta.currentText()]                        
+        # richiamo la creazione del popup menu
+        self.popup_menu_object(p_position)
+
+    def popup_menu_object(self,p_position):
+        """
+           Visualizza popup menu quando si preme il tasto destro del mouse.
+           Nel caso si sia premuto il tasto destro sull'object viewer e il sottostante sia un package,
+           viene visualizzata solo la voce "Insert function in editor"
+        """        
+        v_menu = QMenu(self)        
+        if self.v_popup_menu_zone == 'FOGLIA_ALBERO' and self.v_tipo_oggetto == 'FUNCTION':            
+            # azione insert function in editor
+            v_azione_insert_in_editor = QAction('Insert in editor')
+            v_azione_insert_in_editor.triggered.connect(self.slot_popup_menu_insert_in_editor)
+            v_menu.addAction(v_azione_insert_in_editor)
+        else:
+            # azione load ddl
+            v_azione_load_ddl = QAction('Load DDL')
+            v_azione_load_ddl.triggered.connect(self.slot_popup_menu_load_ddl)
+            v_menu.addAction(v_azione_load_ddl)
+            # separatore
+            v_menu.addSeparator()
+            # azione enable
+            v_azione_enable = QAction('Enable')
+            v_azione_enable.triggered.connect(self.slot_popup_menu_enable)
+            v_menu.addAction(v_azione_enable)
+            # azione disable
+            v_azione_disable = QAction('Disable')
+            v_azione_disable.triggered.connect(self.slot_popup_menu_disable)
+            v_menu.addAction(v_azione_disable)
+            # separatore
+            v_menu.addSeparator()
+            # azione drop
+            v_azione_drop = QAction('Drop')
+            v_azione_drop.triggered.connect(self.slot_popup_menu_drop)
+            v_menu.addAction(v_azione_drop)
+        # visualizzo il menu sopra la riga selezionata (della lista oggetti)
+        if self.v_popup_menu_zone == 'LISTA_OGGETTI':
+            v_menu.exec_(self.oggetti_db_elenco.viewport().mapToGlobal(p_position))    
+        # oppure sopra un elemeno dell'albero dell'object viewer
+        elif self.v_popup_menu_zone == 'FOGLIA_ALBERO':
+            v_menu.exec_(self.db_oggetto_tree.viewport().mapToGlobal(p_position))    
+
+    def slot_popup_menu_load_ddl(self):
+        """
+           Carica il sorgente dell'oggetto selezionato (menu popup sull'elenco) dentro l'editor
+           Viene usata la variabile generale self.v_nome_oggetto che contiene il nome dell'oggetto corrente           
+        """     
+        # prendo il nome dell'oggetto scelto dall'utente dalla lista degli oggetti       
+        #v_selindex = self.oggetti_db_elenco.selectedIndexes()[0]        
+        #v_nome_oggetto = v_selindex.data()
+        # imposto var interna per select 
         v_select = ''
-        if v_nome_oggetto != '' and v_tipo_oggetto != '':
+        
+        # se c'è un oggetto da elaborare...
+        if self.v_nome_oggetto != '' and self.v_tipo_oggetto != '':
             # imposto var che conterrà il testo dell'oggetto DB 
             v_testo_oggetto_db = ''
             # sostituisce la freccia del mouse con icona "clessidra"
@@ -1442,63 +1543,63 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
 
             # richiamo la procedura di oracle che mi restituisce la ddl dell'oggetto
             # se richiesto di aprire il o il package body, allora devo fare una chiamata specifica
-            if v_tipo_oggetto == 'PACKAGE BODY': 
-                v_select = "SELECT DBMS_METADATA.GET_DDL('PACKAGE_BODY','"+v_nome_oggetto+"') FROM DUAL"
-            elif v_tipo_oggetto == 'PACKAGE':
-                v_select = """SELECT DBMS_METADATA.GET_DDL('PACKAGE_SPEC','"""+v_nome_oggetto+"""') FROM DUAL 
+            if self.v_tipo_oggetto == 'PACKAGE BODY': 
+                v_select = "SELECT DBMS_METADATA.GET_DDL('PACKAGE_BODY','"+self.v_nome_oggetto+"') FROM DUAL"
+            elif self.v_tipo_oggetto == 'PACKAGE':
+                v_select = """SELECT DBMS_METADATA.GET_DDL('PACKAGE_SPEC','"""+self.v_nome_oggetto+"""') FROM DUAL 
                               UNION ALL
                               SELECT TO_CLOB('\n/\n') FROM DUAL
                               UNION ALL
-                              SELECT DBMS_METADATA.GET_DDL('PACKAGE_BODY','"""+v_nome_oggetto+"""') FROM DUAL
+                              SELECT DBMS_METADATA.GET_DDL('PACKAGE_BODY','"""+self.v_nome_oggetto+"""') FROM DUAL
                            """
-            elif v_tipo_oggetto == 'TABLE':
-                v_select = """SELECT DBMS_METADATA.GET_DDL('"""+v_tipo_oggetto+"""','"""+v_nome_oggetto+"""') FROM DUAL
+            elif self.v_tipo_oggetto == 'TABLE':
+                v_select = """SELECT DBMS_METADATA.GET_DDL('"""+self.v_tipo_oggetto+"""','"""+self.v_nome_oggetto+"""') FROM DUAL
                               UNION ALL
                               SELECT TO_CLOB('\n/\n') FROM DUAL
                               UNION ALL
-                              SELECT DBMS_METADATA.GET_DEPENDENT_DDL('INDEX','"""+v_nome_oggetto+"""') FROM DUAL
-                              WHERE (SELECT COUNT(*) FROM ALL_INDEXES WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+v_nome_oggetto+"""') > 0													   
+                              SELECT DBMS_METADATA.GET_DEPENDENT_DDL('INDEX','"""+self.v_nome_oggetto+"""') FROM DUAL
+                              WHERE (SELECT COUNT(*) FROM ALL_INDEXES WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+self.v_nome_oggetto+"""') > 0													   
                               UNION ALL
                               SELECT TO_CLOB('\n/\n') FROM DUAL
                               UNION ALL                                                
-                              SELECT DBMS_METADATA.GET_DEPENDENT_DDL('CONSTRAINT','"""+v_nome_oggetto+"""') FROM DUAL
-                              WHERE (SELECT COUNT(*) FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+v_nome_oggetto+"""' AND R_CONSTRAINT_NAME IS NULL) > 0													   
+                              SELECT DBMS_METADATA.GET_DEPENDENT_DDL('CONSTRAINT','"""+self.v_nome_oggetto+"""') FROM DUAL
+                              WHERE (SELECT COUNT(*) FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+self.v_nome_oggetto+"""' AND R_CONSTRAINT_NAME IS NULL) > 0													   
                               UNION ALL
                               SELECT TO_CLOB('\n/\n') FROM DUAL
                               UNION ALL
                               /*
-                               SELECT DBMS_METADATA.GET_DEPENDENT_DDL('REF_CONSTRAINT','"""+v_nome_oggetto+"""') FROM DUAL
-                               WHERE (SELECT COUNT(*) FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+v_nome_oggetto+"""' AND R_CONSTRAINT_NAME IS NOT NULL) > 0													   
+                               SELECT DBMS_METADATA.GET_DEPENDENT_DDL('REF_CONSTRAINT','"""+self.v_nome_oggetto+"""') FROM DUAL
+                               WHERE (SELECT COUNT(*) FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+self.v_nome_oggetto+"""' AND R_CONSTRAINT_NAME IS NOT NULL) > 0													   
                                UNION ALL
                                SELECT TO_CLOB('\n/\n') FROM DUAL
                               UNION ALL*/
-                              SELECT DBMS_METADATA.GET_DEPENDENT_DDL('TRIGGER','"""+v_nome_oggetto+"""') FROM DUAL
-                              WHERE (SELECT COUNT(*) FROM ALL_TRIGGERS WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+v_nome_oggetto+"""') > 0													                                 
+                              SELECT DBMS_METADATA.GET_DEPENDENT_DDL('TRIGGER','"""+self.v_nome_oggetto+"""') FROM DUAL
+                              WHERE (SELECT COUNT(*) FROM ALL_TRIGGERS WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+self.v_nome_oggetto+"""') > 0													                                 
                               UNION ALL 
                               SELECT TO_CLOB('\n/\n') FROM DUAL                              
                               UNION ALL
                               SELECT TO_CLOB('COMMENT ON TABLE ' || TABLE_NAME || ' IS ''' || REPLACE(COMMENTS,'''','''''') || ''';')
                               FROM   ALL_TAB_COMMENTS
                               WHERE  ALL_TAB_COMMENTS.OWNER = '"""+self.e_user_name+"""'
-                                AND  ALL_TAB_COMMENTS.TABLE_NAME = '"""+v_nome_oggetto+"""'   
+                                AND  ALL_TAB_COMMENTS.TABLE_NAME = '"""+self.v_nome_oggetto+"""'   
                               UNION ALL 
                               SELECT TO_CLOB('\n/\n') FROM DUAL                              
                               UNION ALL
                               SELECT TO_CLOB('COMMENT ON COLUMN '|| TABLE_NAME || '.' || COLUMN_NAME || ' IS ''' || REPLACE(COMMENTS,'''','''''') || ''';\n')
                               FROM   ALL_COL_COMMENTS
                               WHERE  ALL_COL_COMMENTS.OWNER = '"""+self.e_user_name+"""'
-                                AND  ALL_COL_COMMENTS.TABLE_NAME = '"""+v_nome_oggetto+"""'   
+                                AND  ALL_COL_COMMENTS.TABLE_NAME = '"""+self.v_nome_oggetto+"""'   
                            """
-            elif v_tipo_oggetto in ('PRIMARY_KEY','UNIQUE_KEY','CHECK_KEY'):
-                v_select = "SELECT DBMS_METADATA.GET_DDL('CONSTRAINT','"+v_nome_oggetto+"') FROM DUAL"
-            elif v_tipo_oggetto == 'FOREIGN_KEY':
-                v_select = "SELECT DBMS_METADATA.GET_DDL('REF_CONSTRAINT','"+v_nome_oggetto+"') FROM DUAL"
-            elif v_tipo_oggetto == 'INDEXES':
-                v_select = "SELECT DBMS_METADATA.GET_DDL('INDEX','"+v_nome_oggetto+"') FROM DUAL"
-            elif v_tipo_oggetto == 'SYNONYM':
-                v_select = "SELECT DBMS_METADATA.GET_DDL('SYNONYM','"+v_nome_oggetto+"') FROM DUAL"
-            elif v_tipo_oggetto in ('PROCEDURE','FUNCTION','TRIGGER','VIEW','SEQUENCE'):                    
-                v_select = "SELECT DBMS_METADATA.GET_DDL('"+v_tipo_oggetto+"','"+v_nome_oggetto+"') FROM DUAL"
+            elif self.v_tipo_oggetto in ('PRIMARY_KEY','UNIQUE_KEY','CHECK_KEY'):
+                v_select = "SELECT DBMS_METADATA.GET_DDL('CONSTRAINT','"+self.v_nome_oggetto+"') FROM DUAL"
+            elif self.v_tipo_oggetto == 'FOREIGN_KEY':
+                v_select = "SELECT DBMS_METADATA.GET_DDL('REF_CONSTRAINT','"+self.v_nome_oggetto+"') FROM DUAL"
+            elif self.v_tipo_oggetto == 'INDEXES':
+                v_select = "SELECT DBMS_METADATA.GET_DDL('INDEX','"+self.v_nome_oggetto+"') FROM DUAL"
+            elif self.v_tipo_oggetto == 'SYNONYM':
+                v_select = "SELECT DBMS_METADATA.GET_DDL('SYNONYM','"+self.v_nome_oggetto+"') FROM DUAL"
+            elif self.v_tipo_oggetto in ('PROCEDURE','FUNCTION','TRIGGER','VIEW','SEQUENCE'):                    
+                v_select = "SELECT DBMS_METADATA.GET_DDL('"+self.v_tipo_oggetto+"','"+self.v_nome_oggetto+"') FROM DUAL"
             else:
                 message_error('Invalid object!')
                 return 'ko'
@@ -1522,7 +1623,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                                      LISTAGG(PRIVILEGE, ',') WITHIN GROUP (ORDER BY PRIVILEGE) AS PRIVILEGE,
                                      GRANTABLE
                               FROM   ALL_TAB_PRIVS 
-                              WHERE  TABLE_NAME = '"""+v_nome_oggetto+"""' 
+                              WHERE  TABLE_NAME = '"""+self.v_nome_oggetto+"""' 
                                  AND GRANTOR='"""+self.e_user_name+"""'
                               GROUP BY GRANTEE, GRANTABLE
                               ORDER BY GRANTEE
@@ -1532,7 +1633,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 # aggiungo la parte di grant solo se presente
                 v_testo_grant_db = ''
                 for v_record in self.v_cursor_db_obj:
-                    v_testo_grant_db += 'GRANT ' + str(v_record[1]) + ' ON ' + v_nome_oggetto + ' TO ' + str(v_record[0]) 
+                    v_testo_grant_db += 'GRANT ' + str(v_record[1]) + ' ON ' + self.v_nome_oggetto + ' TO ' + str(v_record[0]) 
                     if v_record[2] == 'YES':
                         v_testo_grant_db += ' WITH GRANT OPTION; \n'
                     else:
@@ -1548,11 +1649,95 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             # Attenzione! I file caricati da Oracle hanno come eol solo LF => formato Unix
             v_azione = QtWidgets.QAction()
             v_azione.setText('Open_db_obj')
-            self.smistamento_voci_menu(v_azione, '!' + v_nome_oggetto + '.msql', v_testo_oggetto_db)        
+            self.smistamento_voci_menu(v_azione, '!' + self.v_nome_oggetto + '.msql', v_testo_oggetto_db)        
                                         
             # Ripristino icona freccia del mouse
             Freccia_Mouse(False)
 
+    def slot_popup_menu_enable(self):
+        """
+           Crea il comando di attivazione dell'oggetto selezionato e lo inserisce nell'editor
+        """                
+        self.oggetti_db_elenco_esegui_voce_menu('ENABLE')
+
+    def slot_popup_menu_disable(self):
+        """
+           Crea il comando di disattivazione dell'oggetto selezionato e lo inserisce nell'editor
+        """                
+        self.oggetti_db_elenco_esegui_voce_menu('DISABLE')
+
+    def slot_popup_menu_drop(self):
+        """
+           Crea il comando di drop dell'oggetto selezionato e lo inserisce nell'editor
+        """                
+        self.oggetti_db_elenco_esegui_voce_menu('DROP')
+
+    def oggetti_db_elenco_esegui_voce_menu(self, p_function):
+        """
+           Crea il comando dell'oggetto selezionato e lo inserisce nell'editor (es. alter table...)                     
+           Viene usata la variabile generale self.v_nome_oggetto che contiene il nome dell'oggetto corrente           
+        """        
+        # prendo editor corrente
+        o_MSql_win2 = self.oggetto_win2_attivo()
+        if o_MSql_win2 == None:            
+            message_error('Open a editor!')
+            return 'ko'
+                                
+        # preparo comando da inserire in editor; in pratica inserisco un ritorno a capo
+        # va convertito in Windows (a seconda dell'impostazione dell'editor di destinazione)
+        if o_MSql_win2.setting_eol == 'W':
+            v_comando = '\r\n'
+        else:
+            v_comando = '\n'                                   
+                    
+        # operazioni di abilitazione-disabilitazione
+        if self.v_nome_oggetto != '' and self.v_tipo_oggetto != '' and p_function in ('ENABLE','DISABLE'):
+            if self.v_tipo_oggetto == 'PRIMARY_KEY':
+                v_comando += "ALTER TABLE "+self.v_nome_oggetto+" "+p_function+" PRIMARY KEY;"                    
+            elif self.v_tipo_oggetto in ('FOREIGN_KEY','UNIQUE_KEY','CHECK_KEY'):
+                try:                            
+                    # prendo il primo campo, del primo record e lo trasformo in stringa ricavandone il nome della tabella di riferimento
+                    v_nome_tabella = self.v_cursor_db_obj.execute("SELECT TABLE_NAME FROM ALL_CONSTRAINTS WHERE OWNER='"+self.e_user_name+"' AND CONSTRAINT_NAME='"+self.v_nome_oggetto+"'").fetchone()[0]                                                            
+                    v_comando += "ALTER TABLE "+v_nome_tabella+" "+p_function+" CONSTRAINT "+self.v_nome_oggetto+";"                
+                except:                    
+                    message_error('Error to retrive referenced table name!')                                
+                    return 'ko'
+            elif self.v_tipo_oggetto == 'INDEXES':
+                try:                            
+                    # prendo il primo campo, del primo record e lo trasformo in stringa ricavandone il nome della tabella di riferimento
+                    v_nome_tabella = self.v_cursor_db_obj.execute("SELECT TABLE_NAME FROM ALL_INDEXES WHERE OWNER='"+self.e_user_name+"' AND INDEX_NAME='"+self.v_nome_oggetto+"'").fetchone()[0]                                                                                
+                    v_comando += "ALTER INDEX "+self.v_nome_oggetto+" ON "+v_nome_tabella+" "+p_function+";"            
+                except:                    
+                    message_error('Error to retrive referenced table name!')                                
+                    return 'ko'
+            elif self.v_tipo_oggetto == 'TRIGGER':                    
+                v_comando += "ALTER TRIGGER "+self.v_nome_oggetto+" "+p_function+";"            
+            else:
+                message_error('Invalid object!')
+                return 'ko'
+
+        # operazione di cancellazione
+        if self.v_nome_oggetto != '' and self.v_tipo_oggetto != '' and p_function in ('DROP'):                
+            if self.v_tipo_oggetto in ('TABLE','FUNCTION','PROCEDURE','PACKAGE','PACKAGE BODY','SYNONYM','INDEXES','TRIGGER','VIEW','SEQUENCE'):
+                if self.v_tipo_oggetto == 'INDEXES':
+                    v_comando += "DROP INDEX "+self.v_nome_oggetto+";"            
+                else:
+                    v_comando += "DROP "+self.v_tipo_oggetto+" "+self.v_nome_oggetto+";"            
+            elif self.v_tipo_oggetto in ('PRIMARY_KEY','FOREIGN_KEY','UNIQUE_KEY','CHECK_KEY'):
+                try:                            
+                    # prendo il primo campo, del primo record e lo trasformo in stringa ricavandone il nome della tabella di riferimento
+                    v_nome_tabella = self.v_cursor_db_obj.execute("SELECT TABLE_NAME FROM ALL_CONSTRAINTS WHERE OWNER='"+self.e_user_name+"' AND CONSTRAINT_NAME='"+self.v_nome_oggetto+"'").fetchone()[0]                                                            
+                    v_comando += "ALTER TABLE "+v_nome_tabella+" DROP CONSTRAINT "+self.v_nome_oggetto+";"                
+                except:                    
+                    message_error('Error to retrive referenced table name!')                                
+                    return 'ko'            
+            else:
+                message_error('Invalid object!')
+                return 'ko'
+
+        # inserisco il comando nell'editor corrente
+        o_MSql_win2.e_sql.append(v_comando)            
+        
     def slot_oggetti_db_click(self, p_index):
         """
            Carica nella sezione "object viewer" i dati dell'oggetto selezionato
@@ -1579,9 +1764,9 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
            Funzione che si occupa di caricare i dati dell'object viewer
         """        
         # queste due variabili che sono comuni all'oggetto main permettono di contenere i dati principali dell'oggetto
-        # che è in visualizzazione nell'object viewer
-        self.tipo_oggetto = p_tipo_oggetto
-        self.nome_oggetto = p_nome_oggetto        
+        # che è in visualizzazione nell'object viewer        
+        self.v_tipo_oggetto = p_tipo_oggetto
+        self.v_nome_oggetto = p_nome_oggetto        
         # sostituisce la freccia del mouse con icona "clessidra"
         Freccia_Mouse(True)
 
@@ -1589,25 +1774,25 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         self.oggetti_db_lista_proc_func = ''
 
         # se l'oggetto selezionato è una tabella o una vista --> preparo select per estrarre i nomi dei campi
-        if self.tipo_oggetto == 'TABLE' or self.tipo_oggetto == 'VIEW':
-            print('Start loading object viewer of --> ' + self.nome_oggetto + ' - ' + self.tipo_oggetto)
+        if self.v_tipo_oggetto == 'TABLE' or self.v_tipo_oggetto == 'VIEW':
+            print('Start loading object viewer of --> ' + self.v_nome_oggetto + ' - ' + self.v_tipo_oggetto)
             # ricerco il proprietario dell'oggetto
-            self.v_cursor_db_obj.execute("SELECT OWNER FROM ALL_OBJECTS WHERE OBJECT_NAME='"+self.nome_oggetto+"' AND OBJECT_TYPE='"+self.tipo_oggetto+"'")            
+            self.v_cursor_db_obj.execute("SELECT OWNER FROM ALL_OBJECTS WHERE OBJECT_NAME='"+self.v_nome_oggetto+"' AND OBJECT_TYPE='"+self.v_tipo_oggetto+"'")            
             v_record = self.v_cursor_db_obj.fetchone()
             if v_record is not None:
                 self.owner_oggetto = v_record[0]
             else:
                 self.owner_oggetto = ''
             # ricerco la descrizione dell'oggetto
-            self.v_cursor_db_obj.execute("SELECT COMMENTS FROM ALL_TAB_COMMENTS WHERE owner='"+self.owner_oggetto+"' AND TABLE_NAME='"+self.nome_oggetto+"'")
+            self.v_cursor_db_obj.execute("SELECT COMMENTS FROM ALL_TAB_COMMENTS WHERE owner='"+self.owner_oggetto+"' AND TABLE_NAME='"+self.v_nome_oggetto+"'")
             v_record = self.v_cursor_db_obj.fetchone()
             if v_record is not None:
-                self.tipo_oggetto_commento = v_record[0]
+                self.v_tipo_oggetto_commento = v_record[0]
             else:
-                self.tipo_oggetto_commento = ''
+                self.v_tipo_oggetto_commento = ''
             # creo un modello dati con 4 colonne (dove nell'intestazione ci metto il nome della tabella e la sua descrizione)
             self.db_oggetto_tree_model = QStandardItemModel()
-            self.db_oggetto_tree_model.setHorizontalHeaderLabels([self.nome_oggetto, self.owner_oggetto, '', self.tipo_oggetto_commento])
+            self.db_oggetto_tree_model.setHorizontalHeaderLabels([self.v_nome_oggetto, self.owner_oggetto, '', self.v_tipo_oggetto_commento])
 
             ###
             # prima radice con il nome della tabella
@@ -1621,7 +1806,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                                                    B.COMMENTS AS COMMENTO
                                             FROM   ALL_TAB_COLUMNS A, ALL_COL_COMMENTS B 
                                             WHERE  A.OWNER='"""+self.owner_oggetto+"""' AND 
-                                                   A.TABLE_NAME ='"""+self.nome_oggetto+"""' AND 
+                                                   A.TABLE_NAME ='"""+self.v_nome_oggetto+"""' AND 
                                                    A.OWNER=B.OWNER AND 
                                                    A.TABLE_NAME=B.TABLE_NAME AND 
                                                    A.COLUMN_NAME=B.COLUMN_NAME 
@@ -1654,7 +1839,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                                                    END AS REGOLA
                                             FROM   ALL_CONSTRAINTS 
                                             WHERE  OWNER='"""+self.owner_oggetto+"""' AND 
-                                                   TABLE_NAME='"""+self.nome_oggetto+"""' AND
+                                                   TABLE_NAME='"""+self.v_nome_oggetto+"""' AND
                                                    CONSTRAINT_NAME NOT LIKE 'SYS%'
                                             ORDER BY Decode(CONSTRAINT_TYPE,'P','1','R','2','3'), CONSTRAINT_NAME""")
 
@@ -1678,7 +1863,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                                                    (SELECT LISTAGG(COLUMN_NAME,',') WITHIN GROUP (ORDER BY COLUMN_POSITION) COLONNE FROM ALL_IND_COLUMNS WHERE INDEX_OWNER=ALL_INDEXES.OWNER AND INDEX_NAME=ALL_INDEXES.INDEX_NAME) COLONNE
                                             FROM   ALL_INDEXES 
                                             WHERE  OWNER='"""+self.owner_oggetto+"""' AND 
-                                                    TABLE_NAME='"""+self.nome_oggetto+"""'
+                                                    TABLE_NAME='"""+self.v_nome_oggetto+"""'
                                                     ORDER BY INDEX_NAME""")
 
             # carico elenco indici
@@ -1700,7 +1885,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                                                    TRIGGERING_EVENT 
                                             FROM   ALL_TRIGGERS 
                                             WHERE  OWNER='"""+self.owner_oggetto+"""' AND 
-                                                   TABLE_NAME='"""+self.nome_oggetto+"""'
+                                                   TABLE_NAME='"""+self.v_nome_oggetto+"""'
                                             ORDER BY TRIGGER_NAME""")
 
             # carico elenco indici
@@ -1734,9 +1919,9 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             self.db_oggetto_tree.expand(v_index)
 
         # se l'oggetto selezionato è un package, funzioni e procedure ...
-        elif self.tipo_oggetto in ('PACKAGE','PACKAGE BODY','FUNCTION','PROCEDURE') :
+        elif self.v_tipo_oggetto in ('PACKAGE','PACKAGE BODY','FUNCTION','PROCEDURE') :
             # ricerco il proprietario dell'oggetto
-            self.v_cursor_db_obj.execute("SELECT OWNER FROM ALL_OBJECTS WHERE OBJECT_NAME='"+self.nome_oggetto+"' AND OBJECT_TYPE='"+self.tipo_oggetto+"'")            
+            self.v_cursor_db_obj.execute("SELECT OWNER FROM ALL_OBJECTS WHERE OBJECT_NAME='"+self.v_nome_oggetto+"' AND OBJECT_TYPE='"+self.v_tipo_oggetto+"'")            
             v_record = self.v_cursor_db_obj.fetchone()
             if v_record is not None:
                 self.owner_oggetto = v_record[0]
@@ -1745,7 +1930,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
 
             # creo un modello dati con 1 colonna (dove nell'intestazione ci metto il nome dell'oggetto)
             self.db_oggetto_tree_model = QStandardItemModel()
-            self.db_oggetto_tree_model.setHorizontalHeaderLabels([self.nome_oggetto])            
+            self.db_oggetto_tree_model.setHorizontalHeaderLabels([self.v_nome_oggetto])            
 
             ###
             # prima radice con il nome dell'oggetto
@@ -1753,7 +1938,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             v_root_codice = QStandardItem('Code')
 
             # leggo il sorgente e lo metto dentro una lista!
-            self.v_cursor_db_obj.execute("""SELECT UPPER(TEXT) as TEXT, LINE FROM ALL_SOURCE WHERE OWNER='"""+self.owner_oggetto+"""' AND NAME='"""+self.nome_oggetto+"""' AND TYPE='"""+self.tipo_oggetto+"""' ORDER BY LINE""")
+            self.v_cursor_db_obj.execute("""SELECT UPPER(TEXT) as TEXT, LINE FROM ALL_SOURCE WHERE OWNER='"""+self.owner_oggetto+"""' AND NAME='"""+self.v_nome_oggetto+"""' AND TYPE='"""+self.v_tipo_oggetto+"""' ORDER BY LINE""")
             v_lista_testo = []
             for result in self.v_cursor_db_obj:                       
                 v_lista_testo.append(result[0])
@@ -1863,7 +2048,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                                                    CONSTRAINT_TYPE='R' AND 
                                                    R_CONSTRAINT_NAME IN (SELECT CONSTRAINT_NAME
                                                                          FROM   ALL_CONSTRAINTS
-                                                                         WHERE  TABLE_NAME='"""+self.nome_oggetto+"""' AND 
+                                                                         WHERE  TABLE_NAME='"""+self.v_nome_oggetto+"""' AND 
                                                                                 CONSTRAINT_TYPE IN ('U', 'P') )
                                             ORDER BY TABLE_NAME""")
 
@@ -1882,28 +2067,28 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             # Ripristino icona freccia del mouse
             Freccia_Mouse(False)
 
-    def slot_db_oggetto_tree_doppio_click(self, p_model):
+    def slot_popup_menu_insert_in_editor(self):
         """
-           Evento che si scatena quando faccio doppio click sull'albero.
+           Evento che si scatena quando sull'albero dell'object viewer si preme il tasto destro su una funzione di package e si seleziona la voce "Insert in editor".
            Se il tipo di oggetto presente in object viewer è del tipo procedura-funzione e package, viene presa la procedura-funzione
            selezionata e viene riportata all'interno dell'editor attivo, scrivendo il nome del package, seguito dal nome della procedura-funzione
            e dall'elenco dei parametri
            Attenzione! Se la stessa procedura-funzione è presente più volte all'interno del package, ne verrà presa solo la prima ricorrenza
         """        
-        if self.tipo_oggetto not in ('PACKAGE BODY','PACKAGE','PROCEDURE','FUNCTION'):            
+        if self.v_tipo_oggetto not in ('PACKAGE BODY','PACKAGE','PROCEDURE','FUNCTION'):            
             return 'ko'
 
         # carico l'oggetto di classe MSql_win2_class attivo in questo momento (così ho tutte le sue proprietà)        
         o_MSql_win2 = self.oggetto_win2_attivo()
 
-        if p_model.data() != '' and o_MSql_win2 != None:                        
+        if self.v_nome_oggetto != '' and o_MSql_win2 != None:                        
             # imposto le var di lavoro
-            v_risultato = self.nome_oggetto + '.'
+            v_risultato = self.v_nome_oggetto + '.'
             v_spazi = 0
             # leggo l'oggetto che contiene procedure-funzioni alla ricerca dell'elemento che ha selezionato l'utente
             for ele in self.oggetti_db_lista_proc_func:                                
                 # se trovo l'elemento selezionato....inizio a caricarlo nella stringa di risultato
-                if ele.nome_definizione == p_model.data():                                        
+                if ele.nome_definizione == self.v_nome_oggetto:                                        
                     v_risultato += ele.nome_definizione 
                     v_1a_volta = True
                     # scorro tutti i parametri e li carico (per i parametri successivi al primo, cerco di fare indentazione)
@@ -1931,6 +2116,40 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                     o_MSql_win2.e_sql.insert('\r\n' + v_risultato)
                 else:
                     o_MSql_win2.e_sql.insert('\n' + v_risultato)
+    
+    def slot_popup_menu_oggetto_tree(self, p_position):
+        """
+           Apre il menu popup sulle righe del tree dell'object viewer
+        """
+        v_indexes = self.db_oggetto_tree.selectedIndexes()
+        if len(v_indexes) > 0:                    
+            v_current_index = v_indexes[0]            
+            v_parent_index = v_current_index.parent()
+            # l'apertura del menu avviene solo se siamo sotto una determinata serie di rami
+            # e viene riciclato il codice già scritto per il la sezione dell'elenco oggetti
+            if v_parent_index.data() in ('Constraints','Triggers','Indexes'):                                
+                self.v_popup_menu_zone = 'FOGLIA_ALBERO'
+                self.v_nome_oggetto = v_current_index.data()
+                # determino il tipo dell'oggetto
+                if v_parent_index.data() == 'Constraints':
+                    self.v_tipo_oggetto = 'CHECK_KEY'
+                elif v_parent_index.data() == 'Triggers':
+                    self.v_tipo_oggetto = 'TRIGGER'
+                elif v_parent_index.data() == 'Indexes':
+                    self.v_tipo_oggetto = 'INDEXES'
+                else:
+                    message_error('Error during decode object type!')
+                # richiamo la creazione e gestione del popup menu
+                # notare come all'interno di questa gestione verranno usate le var di nome e tipo oggetto                
+                self.popup_menu_object(p_position)
+            # in questo caso siamo nell'object viewer del package
+            elif v_parent_index.data() in ('Code'):
+                self.v_popup_menu_zone = 'FOGLIA_ALBERO'
+                self.v_nome_oggetto = v_current_index.data()
+                self.v_tipo_oggetto = 'FUNCTION'                
+                # richiamo la creazione e gestione del popup menu
+                # notare come all'interno di questa gestione verranno usate le var di nome e tipo oggetto                
+                self.popup_menu_object(p_position)                                
     
     def richiesta_connessione_specifica(self):    
         """
@@ -2209,8 +2428,13 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.e_sql.textChanged.connect(self.slot_e_sql_modificato)    
         self.e_sql.cursorPositionChanged.connect(self.aggiorna_statusbar)            
             
-        # attivo il drop sulla parte di editor        
-        self.e_sql.setAcceptDrops(True)    
+        # attivo il drop sulla parte di editor 
+        # Attenzione! L'attivazione del drop delega la gestione a QScintilla che non è per niente bella!
+        #             Per cui il drag&drop dall'object navigator o altri elementi interni viene gestita tramite
+        #             la funzione sottostante eventFilter.
+        #             Il drag&drop di qualcosa che viene dall'esterno (tipicamente l'apertura di un file da esplora risorse)
+        #             avviene disattivando il drop sull'editor quando si disattiva la finestra per poi riattivarlo quando si attiva....
+        self.e_sql.setAcceptDrops(True)                     
         # attivo il filtro di eventi sull'oggetto editor; ogni evento passerà dalla funzione eventFilter
         self.e_sql.installEventFilter(self)   
 
@@ -2226,7 +2450,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         # definizione del menu di ricerca sulle colonne dei risultati
         self.o_table_hH = self.o_table.horizontalHeader()
         self.o_table_hH.sectionClicked.connect(self.slot_click_colonna_risultati)        
-
+        
     def eventFilter(self, source, event):
         """
            Gestione di eventi personalizzati sull'editor (overwrite, drag&drop, F12) e sulla tabella dei risultati
@@ -2234,6 +2458,15 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         """      
         global v_global_connection
 
+        # individio la disattivazione della window e disattivo il drop sulla parte di editor in modo possa gestire 
+        # i drop di un file che viene trascinato sull'app. Il drop del file viene gestito tramite il controllo dell'evento sulla window principale
+        if event.type() == QEvent.WindowDeactivate:
+            self.e_sql.setAcceptDrops(False)                     
+
+        # individio l'attivazione della window e riattivo la gestione del drop sulla parte di editor in modo possa gestire         
+        if event.type() == QEvent.WindowActivate:
+            self.e_sql.setAcceptDrops(True)                     
+        
         # individuo tasto destro del muose sulla tabella dei risultati        
         if event.type() == QEvent.MouseButtonPress and event.buttons() == Qt.RightButton and source is self.o_table.viewport():
             self.tasto_desto_o_table(event)      
@@ -2261,9 +2494,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             if event.key() == Qt.Key_F3:                                 
                 self.slot_find_next()   
                 return True
-
-        # individuo il drag sull'editor e...
-        if event.type() == QEvent.DragEnter and source is self.e_sql:                  
+            
+        if event.type() == QEvent.DragEnter and source is self.e_sql:                                          
             # il drag contiene elenco di item...
             # se il drag non contiene elenco di item, quindi ad esempio del semplice testo, lascio le cose cosi come sono            
             if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
@@ -2285,9 +2517,9 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             return True                                            
         
         # individuo il drop sull'editor               
-        if event.type() == QEvent.Drop and source is self.e_sql:            
+        if event.type() == QEvent.Drop and source is self.e_sql:                            
             # e richiamo direttamente la funzione che accetta il drop di QScintilla
-            # da notare come durante il drag siano stato cambiato il contenuto dei dati nel caso 
+            # da notare come durante il drag sia stato cambiato il contenuto dei dati nel caso 
             # la sorgente fossero degli item (in questo caso l'object viewer)
             self.e_sql.dropEvent(event)                
             return True        
