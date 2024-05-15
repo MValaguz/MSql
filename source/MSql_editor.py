@@ -42,10 +42,11 @@ from PyQt5.Qsci import *
 from preferences import preferences_class
 # Definizione del solo tema dark
 from dark_theme import dark_theme_definition
-# Classi qtdesigner (win1 è la window principale, win2 la window dell'editor e win3 quella delle info di programma)
+# Classi qtdesigner (win1 è la window principale, win2 la window dell'editor)
 from MSql_editor_win1_ui import Ui_MSql_win1
 from MSql_editor_win2_ui import Ui_MSql_win2
-from MSql_editor_win3_ui import Ui_MSql_win3
+# Classe qtdesigner per informazioni di programma
+from program_info_ui import Ui_program_info
 # Classi qtdesigner per la ricerca e la sostituzione di stringhe di testo, per il posizionamento...
 from goto_line_ui import Ui_GotoLineWindow
 from history import history_class
@@ -790,7 +791,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             os.system("start help\\MSql_help.html")
         # Visualizzo program info
         elif p_slot.text() == 'Program info':            
-            self.program_info = MSql_win3_class()
+            self.program_info = program_info_class()
             self.program_info.show()
         # visualizza l'objects navigator
         elif p_slot.text() == 'Objects Navigator':
@@ -2535,7 +2536,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
     def tasto_desto_o_table(self, event):
         """
            Gestione del menu contestuale con tasto destro su tabella dei risultati
-        """                    
+        """          
         self.v_o_table_current_item = self.o_table.itemAt(event.pos())        
         if self.v_o_table_current_item is not None:
             # creazione del menu popup
@@ -2651,19 +2652,33 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             else:
                 print('Not found ' + v_oggetto)
     
-    def slot_click_colonna_risultati(self, index):       
+    def slot_click_colonna_risultati(self, p_index):       
         """
             Gestione menu popup all'interno dei risultati        
             Al click su una delle intestazioni di colonna della sezione "risultati" viene presentato un menu popup che permette di
             ordinare i risultati su quella colonna e di effettuare delle ricerche parziali
         """ 
+        # prendo l'item dell'header di tabella             
+        v_header_item = self.o_table.horizontalHeaderItem(p_index)
+
+        # controllo se per questo item è già presente un filtro
+        v_pos = -1
+        v_where_filter = ''
+        for nome_colonna in self.nomi_intestazioni:
+            v_pos += 1
+            if nome_colonna == v_header_item.text():
+                v_where_filter = self.valori_intestazioni[v_pos]
+                break
+            
         # creazione del menu popup
         self.o_table_popup = QMenu(self)
-        self.o_table_popup_index = index        
+        self.o_table_popup_index = p_index        
         
         # creazione del campo di input per la where
-        self.e_popup_where = QLineEdit()
+        self.e_popup_where = QLineEdit()        
         self.e_popup_where.setPlaceholderText('where...')
+        if v_where_filter != '':
+            self.e_popup_where.setText(v_where_filter)
         self.e_popup_where.editingFinished.connect(self.slot_where_popup)
         v_action = QWidgetAction(self.o_table_popup)
         v_action.setDefaultWidget(self.e_popup_where)        
@@ -2716,24 +2731,48 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         # calcolo la posizione dove deve essere visualizzato il menu popup in base alle proprietà dell'header di tabella
         headerPos = self.o_table.mapToGlobal(self.o_table_hH.pos())
         posY = headerPos.y() + self.o_table_hH.height()
-        posX = headerPos.x() + self.o_table_hH.sectionPosition(index) - self.o_table_hH.offset()
+        posX = headerPos.x() + self.o_table_hH.sectionPosition(p_index) - self.o_table_hH.offset()
         self.o_table_popup.exec_(QPoint(posX, posY))        
 
+    def get_where_filtri_colonne(self):
+        """
+           Restituisce la where in base ai filtri che sono presenti in questo momento sulle colonne (tramite il menu popup di colonna)
+        """        
+        v_pos = -1
+        v_where = ''
+        for nome_colonna in self.nomi_intestazioni:
+            v_pos += 1
+            if self.valori_intestazioni[v_pos] != '':
+                if v_where != '':
+                    v_where += ' AND '
+                v_where += "(UPPER(" + nome_colonna + ") LIKE '%" + self.valori_intestazioni[v_pos].upper() + "%')"
+        
+        return v_where
+    
     def slot_where_popup(self):
         """
            Gestione menu popup all'interno dei risultati
            Esecuzione della where specifica
-        """
-        if self.e_popup_where.text() != '':
-            # prendo l'item dell'header di tabella             
-            v_header_item = self.o_table.horizontalHeaderItem(self.o_table_popup_index)
-        
-            # wrap dell'attuale select con altra order by
-            v_new_select = "SELECT * FROM (" + self.v_select_corrente + ") WHERE (UPPER(" + v_header_item.text() + ") LIKE '%" + self.e_popup_where.text().upper() + "%')"
-        
+        """        
+        # prendo l'item dell'header di tabella             
+        v_header_item = self.o_table.horizontalHeaderItem(self.o_table_popup_index)
+
+        # salvo il valore nella rispettiva lista (per poterlo riprende in visualizzazione) e anche per creare la select con tutti i filtri
+        v_pos = -1
+        for nome_colonna in self.nomi_intestazioni:
+            v_pos += 1
+            if nome_colonna == v_header_item.text():
+                self.valori_intestazioni[v_pos] = self.e_popup_where.text()
+                break                
+            
+        # wrap dell'attuale select aggiungendo specifica where
+        v_where = self.get_where_filtri_colonne()
+        if v_where != '':            
+            v_new_select = "SELECT * FROM (" + self.v_select_corrente + ") WHERE " + v_where            
+
             # rieseguo la select
             self.esegui_select(v_new_select, False)
-        
+                    
         # chiudo il menu popup
         self.o_table_popup.close()
 
@@ -2759,8 +2798,13 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         # prendo l'item dell'header di tabella 
         v_header_item = self.o_table.horizontalHeaderItem(self.o_table_popup_index)
         
-        # wrap dell'attuale select con altra order by
-        v_new_select = 'SELECT * FROM (' + self.v_select_corrente + ') ORDER BY ' + v_header_item.text() + ' ' + p_tipo_ordinamento
+        # compongo eventuale where con i filtri attivi in questo momento
+        v_where = self.get_where_filtri_colonne()
+        if v_where != '':
+            v_where = 'WHERE ' + v_where
+        
+        # nuova select che wrappa quella di partenza
+        v_new_select = 'SELECT * FROM (' + self.v_select_corrente + ') ' + v_where + ' ORDER BY ' + v_header_item.text() + ' ' + p_tipo_ordinamento
                 
         # rieseguo la select
         self.esegui_select(v_new_select, False)
@@ -2775,9 +2819,14 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         """
         # prendo l'item dell'header di tabella 
         v_header_item = self.o_table.horizontalHeaderItem(self.o_table_popup_index)
+
+        # compongo eventuale where con i filtri attivi in questo momento
+        v_where = self.get_where_filtri_colonne()
+        if v_where != '':
+            v_where = 'WHERE ' + v_where
         
-        # wrap dell'attuale select con altra order by
-        v_new_select = 'SELECT ' + v_header_item.text() + ', COUNT(*) FROM (' + self.v_select_corrente + ') GROUP BY ' +  v_header_item.text() + ' ORDER BY ' + v_header_item.text()
+        # nuova select che wrappa quella di partenza
+        v_new_select = 'SELECT ' + v_header_item.text() + ', COUNT(*) FROM (' + self.v_select_corrente + ') ' + v_where + ' GROUP BY ' +  v_header_item.text() + ' ORDER BY ' + v_header_item.text()
                 
         # rieseguo la select
         self.esegui_select(v_new_select, False)
@@ -2793,8 +2842,13 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         # prendo l'item dell'header di tabella 
         v_header_item = self.o_table.horizontalHeaderItem(self.o_table_popup_index)
         
+        # compongo eventuale where con i filtri attivi in questo momento
+        v_where = self.get_where_filtri_colonne()
+        if v_where != '':
+            v_where = 'WHERE ' + v_where
+        
         # wrap dell'attuale select con altra order by
-        v_new_select = 'SELECT COUNT(*) FROM (' + self.v_select_corrente + ')'
+        v_new_select = 'SELECT COUNT(*) FROM (' + self.v_select_corrente + ')' + v_where
                 
         # rieseguo la select
         self.esegui_select(v_new_select, False)
@@ -3211,10 +3265,29 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.nomi_intestazioni = nomi_colonne_istruzione_sql(self.v_cursor)                                    
             self.o_table.setColumnCount(len(self.nomi_intestazioni))                                                    
             # lista contenente i tipi delle colonne 
-            self.tipi_intestazioni = self.v_cursor.description                        
-            # setto le intestazioni e imposto il numero di righe a 1
+            self.tipi_intestazioni = self.v_cursor.description   
+            # setto le intestazioni con i nomi restituiti dalla select
             self.o_table.setHorizontalHeaderLabels(self.nomi_intestazioni)                                    
-
+            # se la select è eseguita partendo da editor...
+            if p_corrente:                                
+                # pulisco la lista che contiene i valori dei filtri di intestazione 
+                self.valori_intestazioni = []
+                for i in range(0,len(self.nomi_intestazioni)):                
+                    self.valori_intestazioni.append('')
+            # se la select è eseguita partendo dal menu popup sulla intestazione di colonna...
+            # faccio in modo che tutte le colonne dove è stato impostato un filtro, abbiano l'icona dell'imbuto accanto al rispettivo titolo
+            else:
+                v_pos = -1
+                for nome_colonna in self.nomi_intestazioni:
+                    v_pos += 1
+                    # è presente un filtro...
+                    if self.valori_intestazioni[v_pos] != '':                        
+                        # creo un item che contiene icona imbuto e nome colonna corrente e rigenero la rispettiva intestazione
+                        v_new_header_item = QTableWidgetItem()
+                        v_new_header_item.setIcon(QIcon(QPixmap(":/icons/icons/filter.png")))
+                        v_new_header_item.setText(nome_colonna)
+                        self.o_table.setHorizontalHeaderItem(v_pos,v_new_header_item)
+                             
             # se tutto ok, posso procedere con il caricare la prima pagina            
             self.carica_pagina()   
 
@@ -4144,12 +4217,12 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
 # |___|_| \_|_|   \___/ 
 # 
 # Classe che contiene finestra info di programma                      
-class MSql_win3_class(QtWidgets.QDialog, Ui_MSql_win3):
+class program_info_class(QtWidgets.QDialog, Ui_program_info):
     """
         Visualizza le info del programma
     """                
     def __init__(self):
-        super(MSql_win3_class, self).__init__()        
+        super(program_info_class, self).__init__()        
         self.setupUi(self)
 
 #

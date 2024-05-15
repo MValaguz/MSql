@@ -634,7 +634,7 @@ class Ui_MSql_win1(object):
 
     def retranslateUi(self, MSql_win1):
         _translate = QtCore.QCoreApplication.translate
-        MSql_win1.setWindowTitle(_translate("MSql_win1", "MSql Editor v1.0"))
+        MSql_win1.setWindowTitle(_translate("MSql_win1", "MSql Editor"))
         self.menuFiles.setTitle(_translate("MSql_win1", "&File"))
         self.menuRecent_file.setTitle(_translate("MSql_win1", "Recent file"))
         self.menuServer.setTitle(_translate("MSql_win1", "&Connection"))
