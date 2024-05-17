@@ -236,6 +236,10 @@ class Ui_preferences_window(object):
         self.b_restore.setIcon(icon7)
         self.b_restore.setObjectName("b_restore")
         self.horizontalLayout.addWidget(self.b_restore)
+        self.b_open_pref_dir = QtWidgets.QPushButton(self.centralwidget)
+        self.b_open_pref_dir.setIcon(icon4)
+        self.b_open_pref_dir.setObjectName("b_open_pref_dir")
+        self.horizontalLayout.addWidget(self.b_open_pref_dir)
         self.b_save = QtWidgets.QPushButton(self.centralwidget)
         icon8 = QtGui.QIcon()
         icon8.addPixmap(QtGui.QPixmap(":/icons/icons/disk.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -271,6 +275,7 @@ class Ui_preferences_window(object):
         self.b_server_remove.clicked.connect(preferences_window.slot_b_server_remove) # type: ignore
         self.b_user_add.clicked.connect(preferences_window.slot_b_user_add) # type: ignore
         self.b_user_remove.clicked.connect(preferences_window.slot_b_user_remove) # type: ignore
+        self.b_open_pref_dir.clicked.connect(preferences_window.slot_b_open_pref_dir) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(preferences_window)
         preferences_window.setTabOrder(self.o_tab_widget, self.e_remember_window_pos)
         preferences_window.setTabOrder(self.e_remember_window_pos, self.e_default_open_dir)
@@ -326,8 +331,9 @@ class Ui_preferences_window(object):
         self.b_user_add.setToolTip(_translate("preferences_window", "Add user"))
         self.b_user_remove.setToolTip(_translate("preferences_window", "Remove selected user"))
         self.o_tab_widget.setTabText(self.o_tab_widget.indexOf(self.connections), _translate("preferences_window", "Connections"))
-        self.b_restore.setText(_translate("preferences_window", "Restore default preferences"))
-        self.b_save.setText(_translate("preferences_window", "Save preferences"))
+        self.b_restore.setText(_translate("preferences_window", "Restore default"))
+        self.b_open_pref_dir.setText(_translate("preferences_window", "Open pref. dir"))
+        self.b_save.setText(_translate("preferences_window", "Save"))
 import resource_rc
 
 

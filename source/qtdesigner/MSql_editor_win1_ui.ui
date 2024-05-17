@@ -127,6 +127,8 @@
     <addaction name="actionCommit"/>
     <addaction name="actionRollback"/>
     <addaction name="separator"/>
+    <addaction name="actionExplain_Plan"/>
+    <addaction name="separator"/>
     <addaction name="actionFind_object"/>
     <addaction name="actionQuick_query"/>
    </widget>
@@ -746,7 +748,7 @@
     <string>Make table editable</string>
    </property>
    <property name="shortcut">
-    <string>F9</string>
+    <string>F10</string>
    </property>
   </action>
   <action name="actionSave_modified_data">
@@ -1223,6 +1225,18 @@
   <action name="actionClose_all">
    <property name="text">
     <string>Close all</string>
+   </property>
+  </action>
+  <action name="actionExplain_Plan">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/explain_plan.png</normaloff>:/icons/icons/explain_plan.png</iconset>
+   </property>
+   <property name="text">
+    <string>Explain plan</string>
+   </property>
+   <property name="shortcut">
+    <string>F9</string>
    </property>
   </action>
  </widget>

@@ -11,8 +11,7 @@
  Creato da.....: Marco Valaguzza
  Piattaforma...: Python3.11 con libreria pyqt5
  Data..........: 01/01/2023
- Descrizione...: Questo programma ha la "pretesa" di essere una sorta di piccolo editor SQL per ambiente Oracle....            
-                 al momento si tratta più di un esperimento che di qualcosa di utilizzabile.
+ Descrizione...: Questo programma ha la "pretesa" di essere editor SQL per ambiente Oracle....                             
                  In questo programma sono state sperimentate diverse tecniche tra cui quelle per comprendere meglio la programmazione ad oggetti.
                  
  Note..........: La classe principale è MSql_win1_class che apre la window di menu e che contiene l'area mdi dove poi si raggrupperranno
@@ -85,8 +84,9 @@ Tipi_Oggetti_DB = { 'Tables':'TABLE',
 v_global_connection = cx_Oracle
 # Indica se si è connessi al DB
 v_global_connesso = False
-# Directory di lavoro del programma
-v_global_work_dir = 'C:\\MSql\\'
+# Directory di lavoro del programma (per sistema operativo Windows...)
+# Attenzione! Questa dir è possibile aprirla dalla gestione delle preferenze e in quel programma è riportata ancora la stessa dir
+v_global_work_dir = os.path.expanduser('~\\AppData\\Local\\MSql\\')
 # Lista di parole aggiuntive al lexer che evidenzia le parole nell'editor
 v_global_my_lexer_keywords = []
 # Oggetto che carica le preferenze tramite l'apposita classe (notare che già a questa istruzione le preferenze vengono caricate!)
@@ -906,9 +906,14 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 o_MSql_win2.slot_goto_line()
             # Esecuzione dell'sql
             elif p_slot.text() == 'Execute':                
-                v_ok = o_MSql_win2.slot_esegui()
+                v_ok = o_MSql_win2.slot_esegui(False)
                 if v_ok == 'ko':
                     message_error('Script stopped for error!')
+            # Esecuzione dell'sql in modalità piano di esecuzione
+            elif p_slot.text() == 'Explain plan':                
+                v_ok = o_MSql_win2.slot_esegui(True)
+                if v_ok == 'ko':
+                    message_error('Error to analyze query!')
             # Commit
             elif p_slot.text() == 'Commit':
                 o_MSql_win2.slot_commit_rollback('Commit')
@@ -2878,12 +2883,13 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         # aggiorno i dati della statusbar
         self.aggiorna_statusbar()
                                                                        
-    def slot_esegui(self):
+    def slot_esegui(self, p_explain):
         """
            Prende tutto il testo selezionato ed inizia ad eseguirlo step by step
            Nota Bene! Nell'editor sql l'utente può aver scritto PL-SQL, SQL o entrambe le cose, intervvallati
                       da segni di separazione come / e ;
            Se si attiva v_debug, variabile interna, verrà eseguito l'output di tutte le righe processate
+           Se si attiva p_explain la select verrà eseguita come se fosse uno script che crea il "piano di esecuzione"
         """
         # se metto a true v_debug usciranno tutti i messaggi di diagnostica della ricerca delle istruzioni
         v_debug = False
@@ -2971,17 +2977,17 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             elif v_istruzione and v_riga[0] == "'":
                 v_istruzione_str += v_riga
             # fine di una select, insert, update, delete.... con punto e virgola
-            elif v_istruzione and v_riga[-1] == ';':
+            elif v_istruzione and v_riga.find(';') != -1:
                 v_istruzione = False
                 v_istruzione_str += chr(10) + v_riga[0:len(v_riga)-1]
-                v_ok = self.esegui_istruzione(v_istruzione_str)
+                v_ok = self.esegui_istruzione(v_istruzione_str, p_explain)
                 if v_ok == 'ko':
                     return 'ko'
                 v_istruzione_str = ''
             # inizio select, insert, update, delete.... monoriga
             elif not v_istruzione and v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','GRANT','ALTER','DROP','COMMENT') and v_riga[-1] == ';':
                 v_istruzione_str = v_riga[0:len(v_riga)-1]
-                v_ok = self.esegui_istruzione(v_istruzione_str)
+                v_ok = self.esegui_istruzione(v_istruzione_str, p_explain)
                 if v_ok == 'ko':
                     return 'ko'
                 v_istruzione_str = ''
@@ -3012,40 +3018,70 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         
         # se a fine scansione mi ritrovo che v_istruzione è ancora attiva, vuol dire che ho ancora un'istruzione in canna, e quindi la eseguo          
         if v_istruzione and v_istruzione_str != '':
-            v_ok = self.esegui_istruzione(v_istruzione_str)  
+            v_ok = self.esegui_istruzione(v_istruzione_str, p_explain)  
 
         return v_ok
 
-    def esegui_istruzione(self, p_istruzione):
+    def esegui_istruzione(self, p_istruzione, p_explain):
         """
            Esegue istruzione p_istruzione
+           Se p_explain è attivo, vuol dire che è stata richiesta la explain plan (tasto F9 da menu)...
         """
         global v_global_work_dir        
 
-        v_ok = ''                
-        # se trovo select eseguo select
-        if p_istruzione[0:6].upper() == 'SELECT':
-            v_tipo = 'SELECT'
-            v_ok = self.esegui_select(p_istruzione, True)
-        # ..altrimenti esegue come script
-        else: 
-            v_tipo = 'SCRIPT'
-            v_ok = self.esegui_script(p_istruzione, True)        
-                
-        # aggiungo l'istruzione all'history
-        write_sql_history(v_global_work_dir+'MSql.db',v_tipo,p_istruzione)
+        v_ok = ''                    
+        # esecuzione normale...
+        if not p_explain:    
+            # se trovo select eseguo select
+            if p_istruzione[0:6].upper() == 'SELECT':
+                v_tipo = 'SELECT'            
+                v_ok = self.esegui_select(p_istruzione, True)
+            # ..altrimenti esegue come script
+            else: 
+                v_tipo = 'SCRIPT'
+                v_ok = self.esegui_script(p_istruzione, True)        
+            
+            # aggiungo l'istruzione all'history
+            write_sql_history(v_global_work_dir+'MSql.db',v_tipo,p_istruzione)
 
-        return v_ok
+            # esco
+            return v_ok
+        # è stato richiesto di fare l'analisi del piano di esecuzione
+        else:
+            v_tipo = 'PLAN'            
+            # l'istruzione viene eseguita come script pl-sql e non viene registrata nel log
+            v_ok = self.esegui_plsql('EXPLAIN PLAN FOR ' + p_istruzione, False)        
+            if v_ok is None:
+                # leggo il risultato dell'analisi, usando un altro cursore                
+                v_cursor_db_plan = v_global_connection.cursor()            
+                v_cursor_db_plan.execute("SELECT PLAN_TABLE_OUTPUT FROM TABLE(DBMS_XPLAN.DISPLAY('PLAN_TABLE',NULL,'TYPICAL'))")                
+                # pulisco l'oggetto a video che contiene l'output
+                self.o_plan.clear()                
+                # carico a video il risultato dell'analisi
+                for result in v_cursor_db_plan:                       
+                    self.o_plan.appendPlainText(result[0])
+                # mi posiziono all'inizio del testo
+                self.o_plan.moveCursor(QtGui.QTextCursor.Start)                    
+                # porto in primo piano la visualizzazione del tab di plan
+                self.o_tab_widget.setCurrentIndex(3)          
+
+            # esco
+            return v_ok 
 
     def esegui_script(self, p_plsql, p_rowcount):
         """
            Esegue script p_plsql. Se p_rowcount è true allora vengono conteggiate le righe processate (es. update)
         """              
         if p_plsql != '':
-            return self.esegui_plsql(p_plsql, p_rowcount)
+            # eseguo lo script
+            v_ok = self.esegui_plsql(p_plsql, p_rowcount)
+            # tutto ok ... aggiungo istruzione all'history
+            if v_ok is None:                        
+                write_sql_history(v_global_work_dir+'MSql.db','SCRIPT',p_plsql)
         else:
             message_error('No script!')
-            return None
+        # esco
+        return None
 
     def esegui_plsql(self, p_plsql, p_rowcount):
         """
@@ -3058,9 +3094,39 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                          - Codice PL-SQL puro che va eseguito e basta (al limite contiene istruzioni dbms_output)                         
                         Queste tre macro categorie vengono quindi interpretate ed eseguite da questa funzione;
                         il risultato al di fuori di queste tre casistiche è imprevedibile!
+                        Inoltre va tenuto conto che la libreria cx_oracle ha delle sue classi specifiche per la gestione dei vari aspetti
         """
         global v_global_connesso
 
+        def get_dbms_output_flow():
+            """
+               Funzione interna che restituisce il flusso generato dal package dbms_output, durante l'esecuzione dello script pl-sql
+            """
+            # preparo le var per leggere l'output dello script
+            v_chunk = 100
+            v_dbms_ret = ''            
+            v_m_line = self.v_cursor.arrayvar(str, v_chunk)
+            v_m_num_lines = self.v_cursor.var(int)
+            v_m_num_lines.setvalue(0, v_chunk)
+
+            # leggo output dello script
+            while True:
+                self.v_cursor.callproc("dbms_output.get_lines", (v_m_line, v_m_num_lines))    
+                v_num_lines = int(v_m_num_lines.getvalue())
+                v_lines = v_m_line.getvalue()[:v_num_lines]
+                v_pos = 0
+                for line in v_lines:
+                    v_pos += 1
+                    v_dbms_ret += str(line) 
+                    # aggiungo il ritorno a capo                    
+                    if v_pos < v_num_lines:
+                        v_dbms_ret += '\n'
+                if v_num_lines < v_chunk:
+                    break
+            # restituisco la lista delle righe di dbms_output
+            return v_dbms_ret
+
+        # solo se sono connesso al DB....
         if v_global_connesso:            
             # sostituisce la freccia del mouse con icona "clessidra"
             Freccia_Mouse(True)
@@ -3084,11 +3150,17 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             except cx_Oracle.Error as e:                                                                                            
                 # ripristino icona freccia del mouse
                 Freccia_Mouse(False)
-                # emetto errore 
-                errorObj, = e.args                     
+                # leggo la parte di dbms_output
+                v_dbms_ret = get_dbms_output_flow()
+                # per prima cosa porto l'output a video (tipico è quello di script che contengono dbms_output e che vanno in errore durante l'esecuzione)
+                if v_dbms_ret != '':
+	                self.scrive_output(v_dbms_ret, 'I')
+                # catturo errore che si è generato a livello Oracle
+                errorObj, = e.args                                     
+                # output dell'errore
                 self.scrive_output("Error: " + errorObj.message, "E")                                 
                 # per posizionarmi alla riga in errore ho solo la variabile offset che riporta il numero di carattere a cui l'errore si è verificato
-                v_riga, v_colonna = x_y_from_offset_text(p_plsql, errorObj.offset, self.setting_eol)                
+                v_riga, v_colonna =x_y_from_offset_text(p_plsql, errorObj.offset, self.setting_eol)                                
                 v_riga += self.v_offset_numero_di_riga
                 self.e_sql.setCursorPosition(v_riga,v_colonna)                
                 # ripristino icona freccia del mouse    
@@ -3101,8 +3173,9 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             # var che indica se siamo in uno script di "CREATE"
             v_create = False
             # controllo se eravamo di fronte ad uno script di "CREATE"...inizio con il prendere i primi 500 caratteri (è una cifra aleatoria!)
-            v_testo = p_plsql[0:500].upper()            
-            if 'CREATE' in v_testo or 'REPLACE' in v_testo or 'ALTER' in v_testo or 'DROP' in v_testo:
+            # da notare come la stringa che si ricerca abbia uno spazio finale in modo non venga confusa con altro (ad esempio la funzione replace())
+            v_testo = p_plsql[0:500].upper()               
+            if 'CREATE ' in v_testo or 'REPLACE ' in v_testo or 'ALTER ' in v_testo or 'DROP ' in v_testo:
                 v_create = True
                 # nettifica del testo, togliendo spazi e ritorni a capo
                 v_testo = v_testo.upper().lstrip().replace('\n',' ')                
@@ -3165,24 +3238,10 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                     self.scrive_output(extract_word_from_cursor_pos(v_testo,1)  + ' ' + v_tipo_script + ' ' + v_nome_script + ' SUCCESSFULLY!','I')
             
             # altrimenti siamo di fronte ad uno script di pl-sql interno o di insert,update,delete,grant che vanno gestiti con apposito output
-            else:
-                # preparo le var per leggere l'output dello script
-                v_chunk = 100
-                v_dbms_ret = ''            
-                v_m_line = self.v_cursor.arrayvar(str, v_chunk)
-                v_m_num_lines = self.v_cursor.var(int)
-                v_m_num_lines.setvalue(0, v_chunk)
+            else:                
+                # leggo la parte di dbms_output
+                v_dbms_ret = get_dbms_output_flow()
 
-                # leggo output dello script
-                while True:
-                    self.v_cursor.callproc("dbms_output.get_lines", (v_m_line, v_m_num_lines))    
-                    v_num_lines = int(v_m_num_lines.getvalue())
-                    v_lines = v_m_line.getvalue()[:v_num_lines]
-                    for line in v_lines:
-                        v_dbms_ret += str(line) + '\n'
-                    if v_num_lines < v_chunk:
-                        break
-                
                 # se richiesto output del numero di record...
                 if p_rowcount:
                     # il numero lo riporto solo per (insert, update, delete...)
@@ -3202,9 +3261,6 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             Freccia_Mouse(False)
             # aumento il numero di riga di offset (serve per eventuale script successivo di questo gruppo di esecuzione)            
             self.v_offset_numero_di_riga += len(p_plsql.split(chr(10)))
-        
-        # tutto ok ... aggiungo istruzione all'history
-        write_sql_history(v_global_work_dir+'MSql.db','SCRIPT',p_plsql)
 
         # refresh della sezione variabili bind
         if len(self.v_variabili_bind_nome) != 0:            
@@ -3219,7 +3275,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                se p_corrente è True la var v_select_corrente verrà rimpiazzata
         """
         global v_global_connesso
-        global o_global_preferences
+        global o_global_preferences        
 
         if v_global_connesso:                        
             # pulisco elenco
@@ -3491,7 +3547,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             Funzione che viene richiamata quando un item della tabella viene modificato (solo quando attiva la modifica)
         """        
         if not self.v_carico_pagina_in_corso:            
-            print('ciao' + str(x) + str(y))
+            print('Updated cell ' + str(x) + str(y))
             # memorizzo nella matrice la coppia x,y della cella modificata
             self.v_matrice_dati_modificati.append((x,y))            
 
@@ -4252,7 +4308,7 @@ if __name__ == "__main__":
     # Nota bene! Quando tramite pyinstaller verrà creato l'eseguibile, tutti i file della cartella qtdesigner verranno messi 
     #            nella cartella principale e questa istruzione di cambio path di fatto non avrà alcun senso. Serve dunque solo
     #            in fase di sviluppo. 
-    sys.path.append('qtdesigner')
+    sys.path.append('qtdesigner')    
         
     # controllo se programma è stato richiamato da linea di comando passando il nome di un file    
     v_nome_file_da_caricare = ''

@@ -210,6 +210,12 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
             message_info('Preferences restored! Restart MSql to see the changes ;-)')
             # esco dal programma delle preferenze
             self.close()
+
+    def slot_b_open_pref_dir(self):
+        """
+           Apre la cartella di lavoro di MSql 
+        """
+        os.startfile(os.path.expanduser('~\\AppData\\Local\\MSql\\'))        
     
     def slot_b_default_open_dir(self):
         """

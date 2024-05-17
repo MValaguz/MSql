@@ -500,6 +500,11 @@ class Ui_MSql_win1(object):
         self.actionClose.setObjectName("actionClose")
         self.actionClose_all = QtWidgets.QAction(MSql_win1)
         self.actionClose_all.setObjectName("actionClose_all")
+        self.actionExplain_Plan = QtWidgets.QAction(MSql_win1)
+        icon62 = QtGui.QIcon()
+        icon62.addPixmap(QtGui.QPixmap(":/icons/icons/explain_plan.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionExplain_Plan.setIcon(icon62)
+        self.actionExplain_Plan.setObjectName("actionExplain_Plan")
         self.menuFiles.addAction(self.actionNew)
         self.menuFiles.addAction(self.actionOpen)
         self.menuFiles.addAction(self.menuRecent_file.menuAction())
@@ -538,6 +543,8 @@ class Ui_MSql_win1(object):
         self.menuRun.addAction(self.actionRun_selected_area)
         self.menuRun.addAction(self.actionCommit)
         self.menuRun.addAction(self.actionRollback)
+        self.menuRun.addSeparator()
+        self.menuRun.addAction(self.actionExplain_Plan)
         self.menuRun.addSeparator()
         self.menuRun.addAction(self.actionFind_object)
         self.menuRun.addAction(self.actionQuick_query)
@@ -681,7 +688,7 @@ class Ui_MSql_win1(object):
         self.actionRun_selected_area.setText(_translate("MSql_win1", "Execute"))
         self.actionRun_selected_area.setShortcut(_translate("MSql_win1", "F5"))
         self.actionMake_table_editable.setText(_translate("MSql_win1", "Make table editable"))
-        self.actionMake_table_editable.setShortcut(_translate("MSql_win1", "F9"))
+        self.actionMake_table_editable.setShortcut(_translate("MSql_win1", "F10"))
         self.actionSave_modified_data.setText(_translate("MSql_win1", "Script the changed data"))
         self.actionGo_to_Top.setText(_translate("MSql_win1", "Go to Top"))
         self.actionGo_to_Top.setShortcut(_translate("MSql_win1", "F7"))
@@ -750,6 +757,8 @@ class Ui_MSql_win1(object):
         self.actionClose.setText(_translate("MSql_win1", "Close"))
         self.actionClose.setShortcut(_translate("MSql_win1", "Ctrl+W"))
         self.actionClose_all.setText(_translate("MSql_win1", "Close all"))
+        self.actionExplain_Plan.setText(_translate("MSql_win1", "Explain plan"))
+        self.actionExplain_Plan.setShortcut(_translate("MSql_win1", "F9"))
 import resource_rc
 
 
