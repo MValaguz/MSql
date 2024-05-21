@@ -110,13 +110,17 @@ class My_MSql_Lexer(QsciLexerSQL):
 
         # attivo le righe verticali che segnano le indentazioni
         self.p_editor.setIndentationGuides(o_global_preferences.indentation_guide)                
+        
         # attivo i margini con + e - 
         self.p_editor.setFolding(p_editor.BoxedTreeFoldStyle, 2)
+        
         # indentazione
         self.p_editor.setIndentationWidth(int(o_global_preferences.tab_size))
         self.p_editor.setAutoIndent(True)
+        
         # tabulatore (in base alle preferenze...di base 2 caratteri)
         self.p_editor.setTabWidth(int(o_global_preferences.tab_size))   
+        
         # evidenzia l'intera riga dove posizionato il cursore (grigio scuro e cursore bianco se il tema è dark)
         self.p_editor.setCaretLineVisible(True)
         if o_global_preferences.dark_theme:
@@ -124,14 +128,25 @@ class My_MSql_Lexer(QsciLexerSQL):
             self.p_editor.setCaretForegroundColor(QColor("white"))
         else:
             self.p_editor.setCaretLineBackgroundColor(QColor("#FFFF99"))        
-            self.p_editor.setCaretForegroundColor(QColor("black"))
+            self.p_editor.setCaretForegroundColor(QColor("black"))        
+        
         # attivo il margine 0 con la numerazione delle righe
         self.p_editor.setMarginType(0, QsciScintilla.NumberMargin)        
-        self.p_editor.setMarginsFont(QFont("Courier New",9))                           
+        self.p_editor.setMarginsFont(QFont("Courier New",9))                                   
+        
         # attivo il matching sulle parentesi con uno specifico colore
         self.p_editor.setBraceMatching(QsciScintilla.BraceMatch.SloppyBraceMatch)
         self.p_editor.setMatchedBraceBackgroundColor(QColor("#80ff9900"))
-                        
+        
+        # attivo il multiediting (cioè la possibilità, una volta fatta una selezione verticale, di fare un edit multiplo)        
+        self.p_editor.SendScintilla(self.p_editor.SCI_SETADDITIONALSELECTIONTYPING, 1)        
+        v_offset = self.p_editor.positionFromLineIndex(0, 7) 
+        self.p_editor.SendScintilla(self.p_editor.SCI_SETSELECTION, v_offset, v_offset)        
+        v_offset = self.p_editor.positionFromLineIndex(1, 5)
+        self.p_editor.SendScintilla(self.p_editor.SCI_ADDSELECTION, v_offset, v_offset)
+        v_offset = self.p_editor.positionFromLineIndex(2, 5)
+        self.p_editor.SendScintilla(self.p_editor.SCI_ADDSELECTION, v_offset, v_offset)                
+        
         # attivo autocompletamento durante la digitazione 
         # (comprende sia le parole del documento corrente che quelle aggiunte da un elenco specifico)
         # attenzione! Da quanto ho capito, il fatto di avere attivo il lexer con linguaggio specifico (sql) questo prevale
