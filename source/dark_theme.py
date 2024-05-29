@@ -16,9 +16,10 @@
 # #242424 = "Nero"
 # #4a5157 = "Grigio"
 # #667078 = "Grigio chiaro"
-# #003333 = "Verde petrolio scuro"
-# #006666 = "Verde petrolio chiaro"
-#
+# #003333 = "Verde petrolio scuro" sostituito dal blu
+# #006666 = "Verde petrolio chiaro" sostituito dal blu
+# #0068AD = "Blu scuro"
+# #007ACC = "Blu chiaro"
 # Nota! Attenzione! L'editor che si basa sulla libreria QScintilla non è sottomesso alle regole del tema (penso per ignoranza mia
 #       nel costruire la classe) quindi l'applicazione del tema-dark viene effettuata direttamente nella definizione della classe
 #       del lexer ripetendo i codici colori utilizzati in questa definizione.
@@ -60,15 +61,15 @@ QMenuBar::item
 
 QMenuBar::item:selected 
 {
-	background-color: #003333;
-	border: 1px solid #006666;
+	background-color: #0068AD;
+	border: 1px solid #007ACC;
 	color: #fff;
 }
 
 QMenuBar::item:pressed 
 {
-	background-color: #006666;
-	border: 1px solid #006666;
+	background-color: #007ACC;
+	border: 1px solid #007ACC;
 	color: #fff;
 }
 
@@ -103,7 +104,7 @@ QMenu::item:disabled
 
 QMenu::item:selected
 {
-	background-color: #006666;	
+	background-color: #007ACC;	
 	color: #fff;
 }
 
@@ -163,7 +164,7 @@ QLineEdit
 {
 	background-color: #4a5157;
 	color : #fff;
-	border: 1px solid #006666;
+	border: 1px solid #007ACC;
 	padding: 1px;
 	padding-left: 5px;
 }
@@ -172,7 +173,7 @@ QLineEdit
 QComboBox
 {
     background-color: #4a5157;
-    border: 1px solid #006666;
+    border: 1px solid #007ACC;
     padding-left: 6px;
     color: #fff;
     height: 20px;
@@ -196,7 +197,7 @@ QComboBox QAbstractItemView
     background-color: #4a5157;
     color: #ffffff;
     border: 1px solid black;
-    selection-background-color: #003333;
+    selection-background-color: #0068AD;
 	selection-color: #ffffff;
     outline: 0;
 }
@@ -205,7 +206,7 @@ QComboBox QAbstractItemView
 QPushButton
 {
 	/*background-color: #4891b4;*/
-	background-color: #006666;
+	background-color: #007ACC;
 	color: #fff;	
 	border-radius: 4px;
 	padding: 5px;
@@ -261,7 +262,7 @@ QTabBar::tab
 QTabWidget::pane 
 {
 	background-color: red;
-	border: 1px solid #006666;
+	border: 1px solid #007ACC;
 	top: 1px;
 	bottom: 1px
 }
@@ -289,13 +290,13 @@ QTabBar::tab:selected
 {
     color: white;
 	border-bottom-style: solid;
-	background-color: #006666;
+	background-color: #007ACC;
 }
 
 /*-----QDockWidget------------------------------------------------------------*/
 QDockWidget::title 
 {
-	background-color: #006666;	
+	background-color: #007ACC;	
 	border: 1px solid;
 	padding: 7px;
 }
@@ -328,7 +329,7 @@ QTableView::item:hover
 QTableView::item:selected 
 {
     background-color: #484c58;
-    border: 2px groove #006666;
+    border: 2px groove #007ACC;
     color: #F0F0F0;
 }
 
@@ -361,7 +362,7 @@ QHeaderView::section:disabled
 
 QHeaderView::section:checked
 {
-    background-color: #006666;
+    background-color: #007ACC;
 }
 
 QHeaderView::section:checked:disabled
@@ -550,7 +551,7 @@ QCheckBox{
 
 QCheckBox::indicator
 {    
-    background-color: #006666; 
+    background-color: #007ACC; 
 }
 
 
