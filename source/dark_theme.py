@@ -20,6 +20,7 @@
 # #006666 = "Verde petrolio chiaro" sostituito dal blu
 # #0068AD = "Blu scuro"
 # #007ACC = "Blu chiaro"
+#
 # Nota! Attenzione! L'editor che si basa sulla libreria QScintilla non è sottomesso alle regole del tema (penso per ignoranza mia
 #       nel costruire la classe) quindi l'applicazione del tema-dark viene effettuata direttamente nella definizione della classe
 #       del lexer ripetendo i codici colori utilizzati in questa definizione.
@@ -564,6 +565,18 @@ QCheckBox::indicator:checked
 QCheckBox::indicator:unchecked:hover
 {
     border: 1px solid white;
+}
+
+/*-----QProgressBar------------------------------------------------------------*/
+QProgressBar {
+    border: 2px solid grey;
+    border-radius: 5px;
+    text-align: center;
+}
+
+QProgressBar::chunk {
+    background-color: #007ACC;
+    width: 20px;
 }
 
 /*-----QMdiArea---------------------------------------------------------
