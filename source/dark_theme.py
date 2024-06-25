@@ -9,7 +9,7 @@
 #
 # QSS è l'acronimo che indica il "linguaggio" di definizione stile degli oggetti offerti dalla libreria grafica QT
 # Normalmente queste info potrebbero essere lette dal file di testo, al momento dell'apertura del programma....ma
-# ho scoperto che una volta reso esguibile e pacchettizzato il tutto, il file do questa definizione non veniva recuperato
+# ho scoperto che una volta reso eseguibile e pacchettizzato il tutto, il file con questa definizione non veniva recuperato
 # presumibilmente per un problema di pathname. A questo punto è stato inserita come var di testo.
 #
 # Definizione dei colori principali usati da questo tema

@@ -30,7 +30,6 @@ class Ui_MSql_win1(object):
         self.verticalLayout.setObjectName("verticalLayout")
         self.mdiArea = QtWidgets.QMdiArea(self.centralwidget)
         self.mdiArea.setViewMode(QtWidgets.QMdiArea.TabbedView)
-        self.mdiArea.setDocumentMode(True)
         self.mdiArea.setTabsClosable(True)
         self.mdiArea.setTabsMovable(True)
         self.mdiArea.setObjectName("mdiArea")
@@ -505,6 +504,11 @@ class Ui_MSql_win1(object):
         icon62.addPixmap(QtGui.QPixmap(":/icons/icons/explain_plan.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionExplain_Plan.setIcon(icon62)
         self.actionExplain_Plan.setObjectName("actionExplain_Plan")
+        self.actionTabbed = QtWidgets.QAction(MSql_win1)
+        icon63 = QtGui.QIcon()
+        icon63.addPixmap(QtGui.QPixmap(":/icons/icons/tab.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionTabbed.setIcon(icon63)
+        self.actionTabbed.setObjectName("actionTabbed")
         self.menuFiles.addAction(self.actionNew)
         self.menuFiles.addAction(self.actionOpen)
         self.menuFiles.addAction(self.menuRecent_file.menuAction())
@@ -561,6 +565,8 @@ class Ui_MSql_win1(object):
         self.menuSql.addAction(self.actionFont_output_selector)
         self.menuWindow.addAction(self.actionCascade)
         self.menuWindow.addAction(self.actionTile)
+        self.menuWindow.addSeparator()
+        self.menuWindow.addAction(self.actionTabbed)
         self.menuWindow.addSeparator()
         self.menuHelp.addAction(self.actionHelp)
         self.menuHelp.addAction(self.actionProgram_info)
@@ -759,6 +765,7 @@ class Ui_MSql_win1(object):
         self.actionClose_all.setText(_translate("MSql_win1", "Close all"))
         self.actionExplain_Plan.setText(_translate("MSql_win1", "Explain plan"))
         self.actionExplain_Plan.setShortcut(_translate("MSql_win1", "F9"))
+        self.actionTabbed.setText(_translate("MSql_win1", "Tabbed"))
 import resource_rc
 
 

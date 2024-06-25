@@ -601,6 +601,8 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         self.oggetti_db_lista_proc_func = object       
         self.v_nome_oggetto = ''        
         self.v_tipo_oggetto = ''        
+        self.v_nome_foglia = ''
+        self.v_tipo_foglia = ''
         # attivo la gestione del tasto destro e relativo richiamo menu popup
         self.db_oggetto_tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.db_oggetto_tree.customContextMenuRequested.connect(self.slot_popup_menu_oggetto_tree)
@@ -797,10 +799,15 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             self.closeEvent(v_event_close)        
         # Riorganizzo le window in modalità cascata
         elif p_slot.text() == 'Cascade':
+            self.mdiArea.setViewMode(QtWidgets.QMdiArea.SubWindowView)
             self.mdiArea.cascadeSubWindows()
         # Riorganizzo le window in modalità piastrelle
         elif p_slot.text() == 'Tile':
+            self.mdiArea.setViewMode(QtWidgets.QMdiArea.SubWindowView)
             self.mdiArea.tileSubWindows()           
+        # Riorganizzo le window in modalità tab
+        elif p_slot.text() == 'Tabbed':
+            self.mdiArea.setViewMode(QtWidgets.QMdiArea.TabbedView)            
         # Apro file di help
         elif p_slot.text() == 'Help':
             os.system("start help\\MSql_help.html")
@@ -1502,16 +1509,25 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         # prendo il tipo di oggetto scelto dall'utente        
         self.v_tipo_oggetto = Tipi_Oggetti_DB[self.oggetti_db_scelta.currentText()]                        
         # richiamo la creazione del popup menu
-        self.popup_menu_object(p_position)
+        self.popup_menu_object(p_position,'RAMO')
 
-    def popup_menu_object(self,p_position):
+    def popup_menu_object(self,p_position,p_tipo_ela):
         """
            Visualizza popup menu quando si preme il tasto destro del mouse.
            Nel caso si sia premuto il tasto destro sull'object viewer e il sottostante sia un package,
            viene visualizzata solo la voce "Insert function in editor"
         """        
+        if p_tipo_ela == 'RAMO':
+            v_nome_obj = self.v_nome_oggetto
+            v_tipo_obj = self.v_tipo_oggetto
+        elif p_tipo_ela == 'FOGLIA':
+            v_nome_obj = self.v_nome_foglia
+            v_tipo_obj = self.v_tipo_foglia
+        else:
+            message_error('Error to create popupmenu!')
+
         v_menu = QMenu(self)        
-        if self.v_popup_menu_zone == 'FOGLIA_ALBERO' and self.v_tipo_oggetto == 'FUNCTION':            
+        if self.v_popup_menu_zone == 'FOGLIA_ALBERO' and v_tipo_obj == 'FUNCTION':            
             # azione insert function in editor
             v_azione_insert_in_editor = QAction('Insert in editor')
             v_azione_insert_in_editor.triggered.connect(self.slot_popup_menu_insert_in_editor)
@@ -1696,8 +1712,16 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
     def oggetti_db_elenco_esegui_voce_menu(self, p_function):
         """
            Crea il comando dell'oggetto selezionato e lo inserisce nell'editor (es. alter table...)                     
-           Viene usata la variabile generale self.v_nome_oggetto che contiene il nome dell'oggetto corrente           
-        """        
+           Apposite variabili fanno comprendere in che contesto ci si trova per capire come comporre il comando
+        """                
+        # se siamo su una foglia, prendo il nome della foglia, altrimenti dell'oggetto principale
+        if self.v_popup_menu_zone == 'FOGLIA_ALBERO':
+            v_nome_obj = self.v_nome_foglia
+            v_tipo_obj = self.v_tipo_foglia
+        else:
+            v_nome_obj = self.v_nome_oggetto
+            v_nome_obj = self.v_tipo_oggetto
+
         # prendo editor corrente
         o_MSql_win2 = self.oggetto_win2_attivo()
         if o_MSql_win2 == None:            
@@ -1712,43 +1736,43 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             v_comando = '\n'                                   
                     
         # operazioni di abilitazione-disabilitazione
-        if self.v_nome_oggetto != '' and self.v_tipo_oggetto != '' and p_function in ('ENABLE','DISABLE'):
-            if self.v_tipo_oggetto == 'PRIMARY_KEY':
-                v_comando += "ALTER TABLE "+self.v_nome_oggetto+" "+p_function+" PRIMARY KEY;"                    
-            elif self.v_tipo_oggetto in ('FOREIGN_KEY','UNIQUE_KEY','CHECK_KEY'):
+        if v_nome_obj != '' and self.v_tipo_oggetto != '' and p_function in ('ENABLE','DISABLE'):
+            if v_tipo_obj == 'PRIMARY_KEY':
+                v_comando += "ALTER TABLE "+v_nome_obj+" "+p_function+" PRIMARY KEY;"                    
+            elif v_tipo_obj in ('FOREIGN_KEY','UNIQUE_KEY','CHECK_KEY'):
                 try:                            
                     # prendo il primo campo, del primo record e lo trasformo in stringa ricavandone il nome della tabella di riferimento
-                    v_nome_tabella = self.v_cursor_db_obj.execute("SELECT TABLE_NAME FROM ALL_CONSTRAINTS WHERE OWNER='"+self.e_user_name+"' AND CONSTRAINT_NAME='"+self.v_nome_oggetto+"'").fetchone()[0]                                                            
-                    v_comando += "ALTER TABLE "+v_nome_tabella+" "+p_function+" CONSTRAINT "+self.v_nome_oggetto+";"                
+                    v_nome_tabella = self.v_cursor_db_obj.execute("SELECT TABLE_NAME FROM ALL_CONSTRAINTS WHERE OWNER='"+self.e_user_name+"' AND CONSTRAINT_NAME='"+v_nome_obj+"'").fetchone()[0]                                                            
+                    v_comando += "ALTER TABLE "+v_nome_tabella+" "+p_function+" CONSTRAINT "+v_nome_obj+";"                
                 except:                    
                     message_error('Error to retrive referenced table name!')                                
                     return 'ko'
-            elif self.v_tipo_oggetto == 'INDEXES':
+            elif v_tipo_obj == 'INDEXES':
                 try:                            
                     # prendo il primo campo, del primo record e lo trasformo in stringa ricavandone il nome della tabella di riferimento
-                    v_nome_tabella = self.v_cursor_db_obj.execute("SELECT TABLE_NAME FROM ALL_INDEXES WHERE OWNER='"+self.e_user_name+"' AND INDEX_NAME='"+self.v_nome_oggetto+"'").fetchone()[0]                                                                                
-                    v_comando += "ALTER INDEX "+self.v_nome_oggetto+" ON "+v_nome_tabella+" "+p_function+";"            
+                    v_nome_tabella = self.v_cursor_db_obj.execute("SELECT TABLE_NAME FROM ALL_INDEXES WHERE OWNER='"+self.e_user_name+"' AND INDEX_NAME='"+v_nome_obj+"'").fetchone()[0]                                                                                
+                    v_comando += "ALTER INDEX "+v_nome_obj+" ON "+v_nome_tabella+" "+p_function+";"            
                 except:                    
                     message_error('Error to retrive referenced table name!')                                
                     return 'ko'
-            elif self.v_tipo_oggetto == 'TRIGGER':                    
-                v_comando += "ALTER TRIGGER "+self.v_nome_oggetto+" "+p_function+";"            
+            elif v_tipo_obj == 'TRIGGER':                    
+                v_comando += "ALTER TRIGGER "+v_nome_obj+" "+p_function+";"            
             else:
                 message_error('Invalid object!')
                 return 'ko'
 
         # operazione di cancellazione
-        if self.v_nome_oggetto != '' and self.v_tipo_oggetto != '' and p_function in ('DROP'):                
-            if self.v_tipo_oggetto in ('TABLE','FUNCTION','PROCEDURE','PACKAGE','PACKAGE BODY','SYNONYM','INDEXES','TRIGGER','VIEW','SEQUENCE'):
-                if self.v_tipo_oggetto == 'INDEXES':
-                    v_comando += "DROP INDEX "+self.v_nome_oggetto+";"            
+        if v_nome_obj != '' and v_tipo_obj != '' and p_function in ('DROP'):                
+            if v_tipo_obj in ('TABLE','FUNCTION','PROCEDURE','PACKAGE','PACKAGE BODY','SYNONYM','INDEXES','TRIGGER','VIEW','SEQUENCE'):
+                if v_tipo_obj == 'INDEXES':
+                    v_comando += "DROP INDEX "+v_nome_obj+";"            
                 else:
-                    v_comando += "DROP "+self.v_tipo_oggetto+" "+self.v_nome_oggetto+";"            
-            elif self.v_tipo_oggetto in ('PRIMARY_KEY','FOREIGN_KEY','UNIQUE_KEY','CHECK_KEY'):
+                    v_comando += "DROP "+v_tipo_obj+" "+v_nome_obj+";"            
+            elif v_tipo_obj in ('PRIMARY_KEY','FOREIGN_KEY','UNIQUE_KEY','CHECK_KEY'):
                 try:                            
                     # prendo il primo campo, del primo record e lo trasformo in stringa ricavandone il nome della tabella di riferimento
-                    v_nome_tabella = self.v_cursor_db_obj.execute("SELECT TABLE_NAME FROM ALL_CONSTRAINTS WHERE OWNER='"+self.e_user_name+"' AND CONSTRAINT_NAME='"+self.v_nome_oggetto+"'").fetchone()[0]                                                            
-                    v_comando += "ALTER TABLE "+v_nome_tabella+" DROP CONSTRAINT "+self.v_nome_oggetto+";"                
+                    v_nome_tabella = self.v_cursor_db_obj.execute("SELECT TABLE_NAME FROM ALL_CONSTRAINTS WHERE OWNER='"+self.e_user_name+"' AND CONSTRAINT_NAME='"+v_nome_obj+"'").fetchone()[0]                                                            
+                    v_comando += "ALTER TABLE "+v_nome_tabella+" DROP CONSTRAINT "+v_nome_obj+";"                
                 except:                    
                     message_error('Error to retrive referenced table name!')                                
                     return 'ko'            
@@ -1787,7 +1811,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         # queste due variabili che sono comuni all'oggetto main permettono di contenere i dati principali dell'oggetto
         # che è in visualizzazione nell'object viewer        
         self.v_tipo_oggetto = p_tipo_oggetto
-        self.v_nome_oggetto = p_nome_oggetto        
+        self.v_nome_oggetto = p_nome_oggetto                
         # sostituisce la freccia del mouse con icona "clessidra"
         Freccia_Mouse(True)
 
@@ -2100,16 +2124,19 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             return 'ko'
 
         # carico l'oggetto di classe MSql_win2_class attivo in questo momento (così ho tutte le sue proprietà)        
-        o_MSql_win2 = self.oggetto_win2_attivo()
+        o_MSql_win2 = self.oggetto_win2_attivo()        
 
         if self.v_nome_oggetto != '' and o_MSql_win2 != None:                        
-            # imposto le var di lavoro
-            v_risultato = self.v_nome_oggetto + '.'
+            # imposto le var di lavoro (nel caso di funzione-procedura che viene presa da un package, nel risultato ci metto il nome del package)
+            if self.v_tipo_oggetto in ('PACKAGE BODY','PACKAGE'):
+                v_risultato = self.v_nome_oggetto + '.'
+            else:
+                v_risultato = ''
             v_spazi = 0
             # leggo l'oggetto che contiene procedure-funzioni alla ricerca dell'elemento che ha selezionato l'utente
             for ele in self.oggetti_db_lista_proc_func:                                
                 # se trovo l'elemento selezionato....inizio a caricarlo nella stringa di risultato
-                if ele.nome_definizione == self.v_nome_oggetto:                                        
+                if ele.nome_definizione == self.v_nome_foglia:                                        
                     v_risultato += ele.nome_definizione 
                     v_1a_volta = True
                     # scorro tutti i parametri e li carico (per i parametri successivi al primo, cerco di fare indentazione)
@@ -2143,6 +2170,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
            Apre il menu popup sulle righe del tree dell'object viewer
         """
         v_indexes = self.db_oggetto_tree.selectedIndexes()
+        
         if len(v_indexes) > 0:                    
             v_current_index = v_indexes[0]            
             v_parent_index = v_current_index.parent()
@@ -2150,27 +2178,27 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             # e viene riciclato il codice già scritto per il la sezione dell'elenco oggetti
             if v_parent_index.data() in ('Constraints','Triggers','Indexes'):                                
                 self.v_popup_menu_zone = 'FOGLIA_ALBERO'
-                self.v_nome_oggetto = v_current_index.data()
+                self.v_nome_foglia = v_current_index.data()
                 # determino il tipo dell'oggetto
                 if v_parent_index.data() == 'Constraints':
-                    self.v_tipo_oggetto = 'CHECK_KEY'
+                    self.v_tipo_foglia = 'CHECK_KEY'
                 elif v_parent_index.data() == 'Triggers':
-                    self.v_tipo_oggetto = 'TRIGGER'
+                    self.v_tipo_foglia = 'TRIGGER'
                 elif v_parent_index.data() == 'Indexes':
-                    self.v_tipo_oggetto = 'INDEXES'
+                    self.v_tipo_foglia = 'INDEXES'
                 else:
                     message_error('Error during decode object type!')
                 # richiamo la creazione e gestione del popup menu
                 # notare come all'interno di questa gestione verranno usate le var di nome e tipo oggetto                
-                self.popup_menu_object(p_position)
+                self.popup_menu_object(p_position,'FOGLIA')
             # in questo caso siamo nell'object viewer del package
             elif v_parent_index.data() in ('Code'):
                 self.v_popup_menu_zone = 'FOGLIA_ALBERO'
-                self.v_nome_oggetto = v_current_index.data()
-                self.v_tipo_oggetto = 'FUNCTION'                
+                self.v_nome_foglia = v_current_index.data()
+                self.v_tipo_foglia = 'FUNCTION'                
                 # richiamo la creazione e gestione del popup menu
                 # notare come all'interno di questa gestione verranno usate le var di nome e tipo oggetto                
-                self.popup_menu_object(p_position)                                
+                self.popup_menu_object(p_position,'FOGLIA')                                
     
     def richiesta_connessione_specifica(self):    
         """
@@ -3000,14 +3028,14 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                     return 'ko'
                 v_istruzione_str = ''
             # inizio select, insert, update, delete.... monoriga
-            elif not v_istruzione and v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','GRANT','ALTER','DROP','COMMENT') and v_riga[-1] == ';':
+            elif not v_istruzione and v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','GRANT','ALTER','DROP','COMMENT','TRUNCATE') and v_riga[-1] == ';':
                 v_istruzione_str = v_riga[0:len(v_riga)-1]
                 v_ok = self.esegui_istruzione(v_istruzione_str, p_explain)
                 if v_ok == 'ko':
                     return 'ko'
                 v_istruzione_str = ''
             # inizio select, insert, update, delete.... multiriga
-            elif v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','GRANT','ALTER','DROP','COMMENT'):
+            elif v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','GRANT','ALTER','DROP','COMMENT','TRUNCATE'):
                 v_istruzione = True
                 v_istruzione_str = v_riga
             # riga di codice pl-sql (da notare come lo script verrà composto con v_riga_raw)       

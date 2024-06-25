@@ -42,9 +42,6 @@
       <property name="viewMode">
        <enum>QMdiArea::TabbedView</enum>
       </property>
-      <property name="documentMode">
-       <bool>true</bool>
-      </property>
       <property name="tabsClosable">
        <bool>true</bool>
       </property>
@@ -159,6 +156,8 @@
     </property>
     <addaction name="actionCascade"/>
     <addaction name="actionTile"/>
+    <addaction name="separator"/>
+    <addaction name="actionTabbed"/>
     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -1237,6 +1236,15 @@
    </property>
    <property name="shortcut">
     <string>F9</string>
+   </property>
+  </action>
+  <action name="actionTabbed">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/tab.png</normaloff>:/icons/icons/tab.png</iconset>
+   </property>
+   <property name="text">
+    <string>Tabbed</string>
    </property>
   </action>
  </widget>
