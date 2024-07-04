@@ -509,6 +509,9 @@ class Ui_MSql_win1(object):
         icon63.addPixmap(QtGui.QPixmap(":/icons/icons/tab.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionTabbed.setIcon(icon63)
         self.actionTabbed.setObjectName("actionTabbed")
+        self.actionAuto_clear_output = QtWidgets.QAction(MSql_win1)
+        self.actionAuto_clear_output.setCheckable(True)
+        self.actionAuto_clear_output.setObjectName("actionAuto_clear_output")
         self.menuFiles.addAction(self.actionNew)
         self.menuFiles.addAction(self.actionOpen)
         self.menuFiles.addAction(self.menuRecent_file.menuAction())
@@ -561,6 +564,7 @@ class Ui_MSql_win1(object):
         self.menuSql.addAction(self.actionAutoColumnResize)
         self.menuSql.addSeparator()
         self.menuSql.addAction(self.actionClear_output)
+        self.menuSql.addAction(self.actionAuto_clear_output)
         self.menuSql.addSeparator()
         self.menuSql.addAction(self.actionFont_output_selector)
         self.menuWindow.addAction(self.actionCascade)
@@ -766,6 +770,7 @@ class Ui_MSql_win1(object):
         self.actionExplain_Plan.setText(_translate("MSql_win1", "Explain plan"))
         self.actionExplain_Plan.setShortcut(_translate("MSql_win1", "F9"))
         self.actionTabbed.setText(_translate("MSql_win1", "Tabbed"))
+        self.actionAuto_clear_output.setText(_translate("MSql_win1", "Auto clear output"))
 import resource_rc
 
 

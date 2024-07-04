@@ -18,280 +18,319 @@
     <normaloff>:/icons/icons/MSql.ico</normaloff>:/icons/icons/MSql.ico</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_3">
-    <item>
+   <layout class="QGridLayout" name="gridLayout_3">
+    <item row="0" column="0">
      <widget class="QTabWidget" name="o_tab_widget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="general">
        <attribute name="title">
         <string>General</string>
        </attribute>
-       <widget class="QWidget" name="layoutWidget">
-        <property name="geometry">
-         <rect>
-          <x>8</x>
-          <y>9</y>
-          <width>401</width>
-          <height>421</height>
-         </rect>
-        </property>
-        <layout class="QGridLayout" name="gridLayout_2">
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_2">
-           <property name="text">
-            <string>Default Save Directory:</string>
-           </property>
-           <property name="buddy">
-            <cstring>e_default_save_dir</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
-          <widget class="QCheckBox" name="e_default_utf_8"/>
-         </item>
-         <item row="6" column="0">
-          <widget class="QLabel" name="label_4">
-           <property name="text">
-            <string>Default font editor:</string>
-           </property>
-           <property name="buddy">
-            <cstring>e_default_font_editor</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="e_default_open_dir"/>
-         </item>
-         <item row="6" column="1">
-          <widget class="QLineEdit" name="e_default_font_editor">
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QCheckBox" name="e_remember_window_pos"/>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_10">
-           <property name="text">
-            <string>Remember window position:</string>
-           </property>
-           <property name="buddy">
-            <cstring>e_remember_window_pos</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QLineEdit" name="e_default_save_dir"/>
-         </item>
-         <item row="7" column="0">
-          <widget class="QLabel" name="label_5">
-           <property name="text">
-            <string>Default font result:</string>
-           </property>
-           <property name="buddy">
-            <cstring>e_default_font_result</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="2">
-          <widget class="QPushButton" name="b_default_font_editor">
-           <property name="icon">
-            <iconset resource="resource.qrc">
-             <normaloff>:/icons/icons/font_type.png</normaloff>:/icons/icons/font_type.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="1">
-          <widget class="QCheckBox" name="e_default_end_of_line">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>:/icons/icons/end_of_line.gif</normaloff>:/icons/icons/end_of_line.gif</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="10" column="0">
-          <widget class="QLabel" name="label_12">
-           <property name="text">
-            <string>CSV column separator:</string>
-           </property>
-           <property name="buddy">
-            <cstring>e_default_csv_separator</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="8" column="0">
-          <widget class="QLabel" name="label_6">
-           <property name="text">
-            <string>Make table editable:</string>
-           </property>
-           <property name="buddy">
-            <cstring>e_default_editable</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="7" column="1">
-          <widget class="QLineEdit" name="e_default_font_result">
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="7" column="2">
-          <widget class="QPushButton" name="b_default_font_result">
-           <property name="icon">
-            <iconset resource="resource.qrc">
-             <normaloff>:/icons/icons/font_type.png</normaloff>:/icons/icons/font_type.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="0">
-          <widget class="QLabel" name="label_9">
-           <property name="text">
-            <string>Show end of line:</string>
-           </property>
-           <property name="buddy">
-            <cstring>e_default_end_of_line</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="14" column="0">
-          <widget class="QLabel" name="label_8">
-           <property name="text">
-            <string>Dark theme:</string>
-           </property>
-           <property name="buddy">
-            <cstring>e_dark_theme</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="8" column="1">
-          <widget class="QCheckBox" name="e_default_editable">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item row="14" column="1">
-          <widget class="QCheckBox" name="e_dark_theme">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item row="13" column="1">
-          <widget class="QCheckBox" name="e_remember_text_pos">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item row="9" column="1">
-          <widget class="QCheckBox" name="e_default_auto_column_resize">
-           <property name="icon">
-            <iconset>
-             <normaloff>:/icons/icons/fix_column.gif</normaloff>:/icons/icons/fix_column.gif</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="13" column="0">
-          <widget class="QLabel" name="label_7">
-           <property name="text">
-            <string>Remember text position:</string>
-           </property>
-           <property name="buddy">
-            <cstring>e_remember_text_pos</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="11" column="0">
-          <widget class="QLabel" name="label_15">
-           <property name="text">
-            <string>Tab size:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="11" column="1">
-          <widget class="QLineEdit" name="e_tab_size">
-           <property name="inputMask">
-            <string>9</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="2">
-          <widget class="QPushButton" name="b_default_open_dir">
-           <property name="icon">
-            <iconset resource="resource.qrc">
-             <normaloff>:/icons/icons/folder.png</normaloff>:/icons/icons/folder.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="10" column="1">
-          <widget class="QLineEdit" name="e_default_csv_separator"/>
-         </item>
-         <item row="9" column="0">
-          <widget class="QLabel" name="label_11">
-           <property name="text">
-            <string>Auto Column Resize:</string>
-           </property>
-           <property name="buddy">
-            <cstring>e_default_auto_column_resize</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="label_3">
-           <property name="text">
-            <string>UTF-8 Encoding:</string>
-           </property>
-           <property name="buddy">
-            <cstring>e_default_utf_8</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="2">
-          <widget class="QPushButton" name="b_default_save_dir">
-           <property name="icon">
-            <iconset resource="resource.qrc">
-             <normaloff>:/icons/icons/folder.png</normaloff>:/icons/icons/folder.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string>Default Open Directory:</string>
-           </property>
-           <property name="buddy">
-            <cstring>e_default_open_dir</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="12" column="0">
-          <widget class="QLabel" name="label_16">
-           <property name="text">
-            <string>Indentation guide:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="12" column="1">
-          <widget class="QCheckBox" name="e_default_indentation_guide">
-           <property name="toolTip">
-            <string>Indent guides are vertical dotted lines that indicate the indent level of text in the edit window </string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
+       <layout class="QGridLayout" name="gridLayout_5">
+        <item row="0" column="0">
+         <layout class="QGridLayout" name="gridLayout_4">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_10">
+            <property name="text">
+             <string>Remember window position:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_remember_window_pos</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="e_remember_window_pos"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Default Open Directory:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_default_open_dir</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="e_default_open_dir"/>
+          </item>
+          <item row="1" column="2">
+           <widget class="QPushButton" name="b_default_open_dir">
+            <property name="icon">
+             <iconset resource="resource.qrc">
+              <normaloff>:/icons/icons/folder.png</normaloff>:/icons/icons/folder.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Default Save Directory:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_default_save_dir</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="e_default_save_dir"/>
+          </item>
+          <item row="2" column="2">
+           <widget class="QPushButton" name="b_default_save_dir">
+            <property name="icon">
+             <iconset resource="resource.qrc">
+              <normaloff>:/icons/icons/folder.png</normaloff>:/icons/icons/folder.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>Dark theme:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_dark_theme</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QCheckBox" name="e_dark_theme">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="editor">
+       <attribute name="title">
+        <string>Editor</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_7">
+        <item row="0" column="0">
+         <layout class="QGridLayout" name="gridLayout_6">
+          <item row="0" column="0" colspan="2">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>UTF-8 Encoding:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_default_utf_8</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="2">
+           <widget class="QLabel" name="label_9">
+            <property name="text">
+             <string>Show end of line:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_default_end_of_line</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="2">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Default font editor:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_default_font_editor</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="5">
+           <widget class="QPushButton" name="b_default_font_editor">
+            <property name="icon">
+             <iconset resource="resource.qrc">
+              <normaloff>:/icons/icons/font_type.png</normaloff>:/icons/icons/font_type.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0" colspan="2">
+           <widget class="QLabel" name="label_16">
+            <property name="text">
+             <string>Indentation guide:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_default_indentation_guide</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QLineEdit" name="e_default_font_editor">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QCheckBox" name="e_default_end_of_line">
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>:/icons/icons/end_of_line.gif</normaloff>:/icons/icons/end_of_line.gif</iconset>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QCheckBox" name="e_default_utf_8"/>
+          </item>
+          <item row="4" column="2">
+           <widget class="QCheckBox" name="e_default_indentation_guide">
+            <property name="toolTip">
+             <string>Indent guides are vertical dotted lines that indicate the indent level of text in the edit window </string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0" colspan="2">
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Remember text position:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_remember_text_pos</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="2">
+           <widget class="QCheckBox" name="e_remember_text_pos">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0" colspan="2">
+           <widget class="QLabel" name="label_15">
+            <property name="text">
+             <string>Tab size:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_tab_size</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2">
+           <widget class="QLineEdit" name="e_tab_size">
+            <property name="inputMask">
+             <string>9</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="result">
+       <attribute name="title">
+        <string>Result/Output</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_8">
+        <item row="0" column="0">
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="1" column="0" colspan="2">
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>Make table editable:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_default_editable</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="2">
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>Default font result:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_default_font_result</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2">
+           <widget class="QLineEdit" name="e_default_csv_separator"/>
+          </item>
+          <item row="1" column="2">
+           <widget class="QCheckBox" name="e_default_editable">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="4">
+           <widget class="QPushButton" name="b_default_font_result">
+            <property name="icon">
+             <iconset resource="resource.qrc">
+              <normaloff>:/icons/icons/font_type.png</normaloff>:/icons/icons/font_type.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0" colspan="2">
+           <widget class="QLabel" name="label_12">
+            <property name="text">
+             <string>CSV column separator:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_default_csv_separator</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0" colspan="2">
+           <widget class="QLabel" name="label_11">
+            <property name="text">
+             <string>Auto Column Resize:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_default_auto_column_resize</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QCheckBox" name="e_default_auto_column_resize">
+            <property name="icon">
+             <iconset>
+              <normaloff>:/icons/icons/fix_column.gif</normaloff>:/icons/icons/fix_column.gif</iconset>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QLineEdit" name="e_default_font_result">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0" colspan="2">
+           <widget class="QLabel" name="label_17">
+            <property name="text">
+             <string>Auto-Clear output:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_default_auto_clear_output</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="2">
+           <widget class="QCheckBox" name="e_default_auto_clear_output">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="connections">
        <attribute name="title">
@@ -449,7 +488,7 @@
       </widget>
      </widget>
     </item>
-    <item>
+    <item row="1" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QPushButton" name="b_restore">
@@ -496,18 +535,6 @@
   <tabstop>b_default_open_dir</tabstop>
   <tabstop>e_default_save_dir</tabstop>
   <tabstop>b_default_save_dir</tabstop>
-  <tabstop>e_default_utf_8</tabstop>
-  <tabstop>e_default_end_of_line</tabstop>
-  <tabstop>e_default_font_editor</tabstop>
-  <tabstop>b_default_font_editor</tabstop>
-  <tabstop>e_default_font_result</tabstop>
-  <tabstop>b_default_font_result</tabstop>
-  <tabstop>e_default_editable</tabstop>
-  <tabstop>e_default_auto_column_resize</tabstop>
-  <tabstop>e_default_csv_separator</tabstop>
-  <tabstop>e_tab_size</tabstop>
-  <tabstop>e_default_indentation_guide</tabstop>
-  <tabstop>e_remember_text_pos</tabstop>
   <tabstop>e_dark_theme</tabstop>
   <tabstop>b_server_add</tabstop>
   <tabstop>b_server_remove</tabstop>
@@ -530,7 +557,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>420</x>
-     <y>99</y>
+     <y>219</y>
     </hint>
     <hint type="destinationlabel">
      <x>410</x>
@@ -546,43 +573,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>420</x>
-     <y>136</y>
+     <y>315</y>
     </hint>
     <hint type="destinationlabel">
      <x>413</x>
      <y>123</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>b_default_font_editor</sender>
-   <signal>clicked()</signal>
-   <receiver>preferences_window</receiver>
-   <slot>slot_b_default_font_editor()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>420</x>
-     <y>229</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>417</x>
-     <y>140</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>b_default_font_result</sender>
-   <signal>clicked()</signal>
-   <receiver>preferences_window</receiver>
-   <slot>slot_b_default_font_result()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>420</x>
-     <y>266</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>417</x>
-     <y>271</y>
     </hint>
    </hints>
   </connection>
@@ -625,8 +620,8 @@
    <slot>slot_b_server_add()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>378</x>
-     <y>78</y>
+     <x>123</x>
+     <y>76</y>
     </hint>
     <hint type="destinationlabel">
      <x>445</x>
@@ -641,8 +636,8 @@
    <slot>slot_b_server_remove()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>418</x>
-     <y>78</y>
+     <x>123</x>
+     <y>76</y>
     </hint>
     <hint type="destinationlabel">
      <x>442</x>
@@ -657,8 +652,8 @@
    <slot>slot_b_user_add()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>378</x>
-     <y>288</y>
+     <x>123</x>
+     <y>76</y>
     </hint>
     <hint type="destinationlabel">
      <x>445</x>
@@ -673,8 +668,8 @@
    <slot>slot_b_user_remove()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>404</x>
-     <y>266</y>
+     <x>123</x>
+     <y>76</y>
     </hint>
     <hint type="destinationlabel">
      <x>443</x>
@@ -695,6 +690,38 @@
     <hint type="destinationlabel">
      <x>441</x>
      <y>473</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>b_default_font_editor</sender>
+   <signal>clicked()</signal>
+   <receiver>preferences_window</receiver>
+   <slot>slot_b_default_font_editor()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>401</x>
+     <y>226</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>452</x>
+     <y>152</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>b_default_font_result</sender>
+   <signal>clicked()</signal>
+   <receiver>preferences_window</receiver>
+   <slot>slot_b_default_font_result()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>405</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>445</x>
+     <y>203</y>
     </hint>
    </hints>
   </connection>

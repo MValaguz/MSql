@@ -147,6 +147,7 @@
     <addaction name="actionAutoColumnResize"/>
     <addaction name="separator"/>
     <addaction name="actionClear_output"/>
+    <addaction name="actionAuto_clear_output"/>
     <addaction name="separator"/>
     <addaction name="actionFont_output_selector"/>
    </widget>
@@ -1245,6 +1246,14 @@
    </property>
    <property name="text">
     <string>Tabbed</string>
+   </property>
+  </action>
+  <action name="actionAuto_clear_output">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Auto clear output</string>
    </property>
   </action>
  </widget>

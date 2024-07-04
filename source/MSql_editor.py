@@ -619,6 +619,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         self.actionShow_end_of_line.setChecked(o_global_preferences.end_of_line)
         self.slot_end_of_file()
         self.actionAutoColumnResize.setChecked(o_global_preferences.auto_column_resize)        
+        self.actionAuto_clear_output.setChecked(o_global_preferences.auto_clear_output)        
         
         ###
         # Imposto var con la geometria della window principale
@@ -959,7 +960,14 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 o_MSql_win2.slot_export_to_excel_csv()
             # Pulizia di tutto l'output
             elif p_slot.text() == 'Clear result,output':                 
-                o_MSql_win2.slot_clear('ALL')                               
+                o_MSql_win2.slot_clear('ALL')    
+            # Attiva l'auto pulizia ad ogni esecuzione di codice pl-sql
+            elif p_slot.text() == 'Auto clear output':
+                # riporto la preferenza di menu dentro l'oggetto delle preferenze 
+                if self.actionAuto_clear_output.isChecked():                
+                    o_global_preferences.auto_clear_output = True
+                else:
+                    o_global_preferences.auto_clear_output = False
             # Selezione del font per l'editor
             elif p_slot.text() == 'Font editor selector':
                 o_MSql_win2.slot_font_editor_selector(None)
@@ -1454,13 +1462,13 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         # se necessario applico il filtro di ricerca
         if self.oggetti_db_ricerca.text() != '' or self.oggetti_db_tipo_ricerca.currentText() in ('Only invalid','Only disabled'):
             if self.oggetti_db_tipo_ricerca.currentText() == 'Start with':
-                v_select += " WHERE UPPER(OBJECT_NAME) LIKE '" + self.oggetti_db_ricerca.text().upper() + "%'"
+                v_select += " WHERE UPPER(OBJECT_NAME) LIKE '" + self.oggetti_db_ricerca.text().upper().rstrip() + "%'"
             elif self.oggetti_db_tipo_ricerca.currentText() == 'Like':
-                v_select += " WHERE UPPER(OBJECT_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%'"
+                v_select += " WHERE UPPER(OBJECT_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper().rstrip() + "%'"
             elif self.oggetti_db_tipo_ricerca.currentText() == 'Only invalid': 
-                v_select += " WHERE UPPER(OBJECT_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%' AND INVALID > 0"
+                v_select += " WHERE UPPER(OBJECT_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper().rstrip() + "%' AND INVALID > 0"
             elif self.oggetti_db_tipo_ricerca.currentText() == 'Only disabled': 
-                v_select += " WHERE UPPER(OBJECT_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper() + "%' AND STATUS = 'DISABLED'"
+                v_select += " WHERE UPPER(OBJECT_NAME) LIKE '%" + self.oggetti_db_ricerca.text().upper().rstrip() + "%' AND STATUS = 'DISABLED'"
         # aggiungo order by
         v_select += " ORDER BY OBJECT_NAME"                                
                 
@@ -1589,7 +1597,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                               UNION ALL
                               SELECT DBMS_METADATA.GET_DDL('PACKAGE_BODY','"""+self.v_nome_oggetto+"""') FROM DUAL
                            """
-            elif self.v_tipo_oggetto == 'TABLE':
+            elif self.v_tipo_oggetto in ('TABLE','VIEW'):
                 v_select = """SELECT DBMS_METADATA.GET_DDL('"""+self.v_tipo_oggetto+"""','"""+self.v_nome_oggetto+"""') FROM DUAL
                               UNION ALL
                               SELECT TO_CLOB('\n/\n') FROM DUAL
@@ -1635,7 +1643,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 v_select = "SELECT DBMS_METADATA.GET_DDL('INDEX','"+self.v_nome_oggetto+"') FROM DUAL"
             elif self.v_tipo_oggetto == 'SYNONYM':
                 v_select = "SELECT DBMS_METADATA.GET_DDL('SYNONYM','"+self.v_nome_oggetto+"') FROM DUAL"
-            elif self.v_tipo_oggetto in ('PROCEDURE','FUNCTION','TRIGGER','VIEW','SEQUENCE'):                    
+            elif self.v_tipo_oggetto in ('PROCEDURE','FUNCTION','TRIGGER','SEQUENCE'):                    
                 v_select = "SELECT DBMS_METADATA.GET_DDL('"+self.v_tipo_oggetto+"','"+self.v_nome_oggetto+"') FROM DUAL"
             else:
                 message_error('Invalid object!')
@@ -2934,6 +2942,12 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
            Se si attiva v_debug, variabile interna, verrà eseguito l'output di tutte le righe processate
            Se si attiva p_explain la select verrà eseguita come se fosse uno script che crea il "piano di esecuzione"
         """
+        global o_global_preferences  
+
+        # se indicato dalla preferenza, prima di partire ad eseguire, pulisco l'output
+        if o_global_preferences.auto_clear_output:
+            self.slot_clear('OUT')
+
         # se metto a true v_debug usciranno tutti i messaggi di diagnostica della ricerca delle istruzioni
         v_debug = False
         def debug_interno(p_message):
@@ -2991,7 +3005,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                     self.v_offset_numero_di_riga += 1
                 # la chiusura trovata era l'ultima (oppure trovato chiusura dello script tramite slash) --> quindi eseguo lo script
                 if v_plsql_idx <= 0 or v_riga == '/':                           
-                    v_ok = self.esegui_script(v_plsql_str, False)
+                    v_ok = self.esegui_script(v_plsql_str, False)                    
                     if v_ok == 'ko':                        
                         return 'ko'
                     v_plsql = False
@@ -3121,6 +3135,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             # tutto ok ... aggiungo istruzione all'history
             if v_ok is None:                        
                 write_sql_history(v_global_work_dir+'MSql.db','SCRIPT',p_plsql)
+            else:                
+                return 'ko'
         else:
             message_error('No script!')
         # esco
@@ -3265,12 +3281,12 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                     v_1a_volta = True
                     for info in v_errori:
                         # emetto gli errori riscontrati
-                        self.scrive_output("Error at line " + str(info[0]) + " position " + str(info[1]) + " " + info[2], 'E')                        
+                        self.scrive_output("Error at line " + str(info[0]) + " position " + str(info[1]) + " " + info[2], 'E')                                                
                         # solo per il primo errore mi posiziono sull'editor alle coordinate indicate
                         if v_1a_volta:                            
                             v_riga = info[0]-1 + self.v_offset_numero_di_riga
-                            v_colonna = info[1]-1                            
-                            self.e_sql.setCursorPosition(v_riga,v_colonna)
+                            v_colonna = info[1]-1                                                        
+                            self.e_sql.setCursorPosition(v_riga,v_colonna)                            
                             v_1a_volta = False
                     # ripristino icona freccia del mouse    
                     Freccia_Mouse(False)

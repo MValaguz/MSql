@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/clear.png</file>
     <file>icons/tab.png</file>
     <file>icons/explain_plan.png</file>
     <file>icons/filter.png</file>

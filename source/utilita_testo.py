@@ -186,11 +186,18 @@ def estrai_procedure_function(p_testo):
             # elaboro la sezione che contiene i parametri della procedura-funzione
             if v_start_sezione and v_riga.find(')') != -1:                        
                 v_text_sezione = v_text_sezione[v_text_sezione.find('(')+1:v_text_sezione.find(')')]                        
-                v_elenco_parametri = v_text_sezione.split(',')
+                v_elenco_parametri = v_text_sezione.split(',')                
                 for v_txt_parametro in v_elenco_parametri:                            
-                    v_stringa = v_txt_parametro.lstrip()
-                    v_parametro = v_stringa[0:v_stringa.find(' ')]
-                    v_definizione.aggiungi_parametro(v_parametro)                                        
+                    v_stringa = v_txt_parametro.lstrip().rstrip()                    
+                    # se trovo che il fine parametro è uno spazio prendo solo fino allo spazio 
+                    # eliminando di fatto il tipo parametro! Questo perché la struttura verrà usata anche
+                    # per fare l'import all'interno dell'editor e quindi meglio non avere il parametro
+                    v_pos = v_stringa.find(' ')
+                    if v_pos != -1:
+                        v_parametro = v_stringa[0:v_pos]
+                    else:
+                        v_parametro = v_stringa                    
+                    v_definizione.aggiungi_parametro(v_parametro)                                                            
                 v_text_sezione = ''
                 v_start = False
                 v_start_sezione = False
@@ -202,7 +209,7 @@ def estrai_procedure_function(p_testo):
 # TEST DELLA FUNZIONE CHE PARTENDO DA CODICE PL-SQL, RESTITUISCE UN OGGETTO CHE CONTIENE TUTTE LE DEFINIZIONI TROVATE
 ######################################################################################################################
 if __name__ == "__main__":       
-    v_file = open('c:\Msql\CG$SM_MAFOR.msql','r', newline='').read()   
+    v_file = open('c:\Msql\APEX_AJAX_UPLOAD.msql','r', newline='').read()   
     v_lista_def = estrai_procedure_function(v_file.split(chr(10)))
     # emetto a video il contenuto di tutto quello che ho trovato nel testo
     v_write = open('c:\\Msql\\output.txt','w', newline='')

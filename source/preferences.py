@@ -83,6 +83,11 @@ class preferences_class():
                 self.indentation_guide = True
             else:
                 self.indentation_guide = False
+            # clear output result when run pl-sql command
+            if 'auto_clear_output' in v_json and v_json['auto_clear_output'] == 1:            
+                self.auto_clear_output = True
+            else:
+                self.auto_clear_output = False
             # csv separator
             self.csv_separator = v_json['csv_separator']
             # tab size
@@ -105,6 +110,7 @@ class preferences_class():
             self.editable = False
             self.auto_column_resize = False
             self.indentation_guide = False
+            self.auto_clear_output = True
             self.csv_separator = '|'
             self.tab_size = '2'
             # elenco server è composto da Titolo, TNS e Colore
@@ -149,6 +155,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         self.e_default_editable.setChecked(self.preferences.editable)   
         self.e_default_auto_column_resize.setChecked(self.preferences.auto_column_resize)
         self.e_default_indentation_guide.setChecked(self.preferences.indentation_guide)
+        self.e_default_auto_clear_output.setChecked(self.preferences.auto_clear_output)
         self.e_default_csv_separator.setText(self.preferences.csv_separator)
         self.e_tab_size.setText(self.preferences.tab_size)
 
@@ -338,6 +345,12 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
             v_indentation_guide = 1
         else:
             v_indentation_guide = 0
+        
+        # il default per clear output va convertito
+        if self.e_default_auto_clear_output.isChecked():
+            v_auto_clear_output = 1
+        else:
+            v_auto_clear_output = 0
 
         # elenco dei server
         v_server = []
@@ -368,6 +381,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
                  'indentation_guide': v_indentation_guide,
                  'csv_separator': self.e_default_csv_separator.text(),
                  'tab_size': self.e_tab_size.text(),
+                 'auto_clear_output': v_auto_clear_output,
                  'server': v_server,
                  'users': v_users
                 }
