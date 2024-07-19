@@ -53,7 +53,7 @@ class history_class(QMainWindow, Ui_history_window):
 
         # creo un modello di dati su query
         v_modello = QSqlQueryModel()
-        v_modello.setQuery('select TIPO TYPE, ORARIO TIME, UPPER(ISTRUZIONE) INSTRUCTION from SQL_HISTORY ' + v_where.upper() + ' order by ORARIO desc')
+        v_modello.setQuery("select TIPO TYPE, strftime('%d/%m/%Y %H:%S',ORARIO) TIME, UPPER(ISTRUZIONE) INSTRUCTION, ROUND(EXEC_TIME,2) 'SEC.TIME' from SQL_HISTORY " + v_where.upper() + " order by ORARIO desc")
 
         # imposto l'oggetto di visualizzazione con il modello 
         self.o_lst1.setModel(v_modello)
@@ -61,8 +61,9 @@ class history_class(QMainWindow, Ui_history_window):
         #self.o_lst1.resizeColumnsToContents()        
         # larghezza delle colonne fissa
         self.o_lst1.setColumnWidth(0, 60)
-        self.o_lst1.setColumnWidth(1, 180)        
+        self.o_lst1.setColumnWidth(1, 120)        
         self.o_lst1.setColumnWidth(2, 440)        
+        self.o_lst1.setColumnWidth(3, 70)           
         # intestazioni automatiche in base alla query
         v_horizontal_header = self.o_lst1.horizontalHeader()
         v_horizontal_header.setDefaultAlignment(Qt.AlignLeft)
@@ -86,6 +87,6 @@ class history_class(QMainWindow, Ui_history_window):
 # ----------------------------------------
 if __name__ == "__main__":    
     app = QApplication([])    
-    application = history_class('C:\MSql\MSql.db') 
+    application = history_class('C:\\Users\\MValaguz\\AppData\\Local\\MSql\\MSql.db') 
     application.show()
     sys.exit(app.exec())      

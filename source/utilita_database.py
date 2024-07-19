@@ -482,10 +482,11 @@ def table_exists_sqlite(p_cursor,
     else:
         return False       
 
-def write_sql_history(p_db_name, p_tipo, p_testo):
+def write_sql_history(p_db_name, p_tipo, p_testo, p_time_in_seconds):
     """
        Usata per scrivere dentro un db SQLite tabella HISTORY, l'istruzione l'sql
        Il parametro p_tipo, indica il tipo (istruzione sql, comandi ddl, codice pl-sql)
+       Il parametro p_time_in_seconds riporta il numero di secondi
     """ 
     if p_testo != '':
         v_conn = sqlite3.connect(database=p_db_name)
@@ -494,11 +495,11 @@ def write_sql_history(p_db_name, p_tipo, p_testo):
                           SQL_HISTORY (ID         INTEGER PRIMARY KEY AUTOINCREMENT,
                                        TIPO       VARCHAR(20) NOT NULL,
                                        ORARIO     DATETIME    NOT NULL,
-                                       ISTRUZIONE BLOB        NOT NULL
-                              )""")     
-
+                                       ISTRUZIONE BLOB        NOT NULL,
+                                       EXEC_TIME  REAL
+                              )""")             
         try:
-            v_curs.execute("""INSERT INTO SQL_HISTORY(TIPO,ORARIO,ISTRUZIONE) VALUES(?,?,?)""", (p_tipo, datetime.datetime.now(), p_testo) )
+            v_curs.execute("""INSERT INTO SQL_HISTORY(TIPO,ORARIO,ISTRUZIONE,EXEC_TIME) VALUES(?,?,?,?)""", (p_tipo, datetime.datetime.now(), p_testo, p_time_in_seconds) )
             v_conn.commit()
         except sqlite3.OperationalError:
             message_error('Error while writing in history log!' + chr(10) + 'Probably the file MSql.db is locked!')        

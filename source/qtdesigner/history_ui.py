@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_history_window(object):
     def setupUi(self, history_window):
         history_window.setObjectName("history_window")
-        history_window.resize(692, 775)
+        history_window.resize(735, 776)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/icons/icons/MSql.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         history_window.setWindowIcon(icon)

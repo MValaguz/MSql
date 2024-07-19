@@ -93,6 +93,8 @@ v_global_my_lexer_keywords = []
 o_global_preferences = preferences_class(v_global_work_dir + 'MSql.ini')
 # Contiene le coordinate della main window
 v_global_main_geometry = object
+# Contiene il tempo di esecuzione ultima istruzione
+v_global_exec_time = 0
 
 class My_MSql_Lexer(QsciLexerSQL):
     """
@@ -555,6 +557,10 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         self.l_tabella_editabile.setFrameStyle(QFrame.Panel | QFrame.Sunken)
         self.l_tabella_editabile.setStyleSheet('color: black;')
         self.statusBar.addPermanentWidget(self.l_tabella_editabile)                
+        # Informazioni sul tempo di esecuzione dell'ultima istruzione
+        self.l_exec_time = QLabel("Last execution time:")
+        self.l_exec_time.setFrameStyle(QFrame.Panel | QFrame.Sunken)        
+        self.statusBar.addPermanentWidget(self.l_exec_time)                                
 
         ###
         # definizione della dimensioni dei dock laterali (sono 3, vengono raggruppati e definite le proporzioni)
@@ -2524,8 +2530,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         if event.type() == QEvent.WindowActivate:
             self.e_sql.setAcceptDrops(True)                     
         
-        # individuo tasto destro del muose sulla tabella dei risultati        
-        if event.type() == QEvent.MouseButtonPress and event.buttons() == Qt.RightButton and source is self.o_table.viewport():
+        # individuo tasto destro del mouse sulla tabella dei risultati        
+        if event.type() == QEvent.MouseButtonPress and event.buttons() == Qt.RightButton and source is self.o_table.viewport():            
             self.tasto_desto_o_table(event)      
             return True      
 
@@ -2593,8 +2599,9 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         """
            Gestione del menu contestuale con tasto destro su tabella dei risultati
         """          
-        self.v_o_table_current_item = self.o_table.itemAt(event.pos())        
-        if self.v_o_table_current_item is not None:
+        self.v_o_table_current_item = self.o_table.itemAt(event.pos())                
+        # item di tipo testo
+        if self.v_o_table_current_item is not None:            
             # creazione del menu popup
             self.o_table_cont_menu = QMenu(self)            
             
@@ -2621,7 +2628,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.o_table_cont_menu.addAction(v_action)
 
             # visualizzo il menu alla posizione del cursore
-            self.o_table_cont_menu.exec_(event.globalPos())            
+            self.o_table_cont_menu.exec_(event.globalPos())    
     
     def o_table_copia_valore(self):
         """
@@ -3084,7 +3091,11 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
            Esegue istruzione p_istruzione
            Se p_explain è attivo, vuol dire che è stata richiesta la explain plan (tasto F9 da menu)...
         """
-        global v_global_work_dir        
+        global v_global_work_dir       
+        global v_global_exec_time         
+        
+        # salvo tempo inizio istruzione
+        v_orario_inizio = datetime.datetime.now()
 
         v_ok = ''                    
         # esecuzione normale...
@@ -3098,9 +3109,14 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                 v_tipo = 'SCRIPT'
                 v_ok = self.esegui_script(p_istruzione, True)        
             
-            # aggiungo l'istruzione all'history
-            write_sql_history(v_global_work_dir+'MSql.db',v_tipo,p_istruzione)
+            # calcolo tempo esecuzione e aggiorno a video
+            v_exec_time = datetime.datetime.now() - v_orario_inizio            
+            v_global_exec_time = v_exec_time.total_seconds()
+            self.aggiorna_statusbar()
 
+            # aggiungo l'istruzione all'history
+            write_sql_history(v_global_work_dir+'MSql.db',v_tipo,p_istruzione,v_global_exec_time)
+            
             # esco
             return v_ok
         # è stato richiesto di fare l'analisi del piano di esecuzione
@@ -3128,15 +3144,26 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
     def esegui_script(self, p_plsql, p_rowcount):
         """
            Esegue script p_plsql. Se p_rowcount è true allora vengono conteggiate le righe processate (es. update)
-        """              
+        """    
+        global v_global_exec_time         
+               
+        # salvo tempo inizio istruzione
+        v_orario_inizio = datetime.datetime.now()
+           
         if p_plsql != '':
             # eseguo lo script
             v_ok = self.esegui_plsql(p_plsql, p_rowcount)
+
+            # calcolo tempo esecuzione e aggiorno a video
+            v_exec_time = datetime.datetime.now() - v_orario_inizio            
+            v_global_exec_time = v_exec_time.total_seconds()
+            self.aggiorna_statusbar()
+            
             # tutto ok ... aggiungo istruzione all'history
             if v_ok is None:                        
-                write_sql_history(v_global_work_dir+'MSql.db','SCRIPT',p_plsql)
+                write_sql_history(v_global_work_dir+'MSql.db','SCRIPT',p_plsql,v_global_exec_time)
             else:                
-                return 'ko'
+                return 'ko'                        
         else:
             message_error('No script!')
         # esco
@@ -3486,11 +3513,19 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                         self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( field.hex().upper() ) )       
                     # se il contenuto è un blob...utilizzo il metodo read sul campo field, poi lo inserisco in una immagine
                     # che poi carico una label e finisce dentro la cella a video
-                    elif self.tipi_intestazioni[x][1] == cx_Oracle.BLOB:
+                    elif self.tipi_intestazioni[x][1] == cx_Oracle.BLOB:                        
                         qimg = QImage.fromData(field.read())
-                        pixmap = QPixmap.fromImage(qimg)   
+                        # se nel blob non è presente un'immagine, allora carico icona di non-immagine
+                        if qimg.Format() == QImage.Format_Invalid:                            
+                            pixmap = QPixmap(":/icons/icons/no_image.png")                                                        
+                        # se è presente un'immagine, carico immagine del blob...
+                        else:
+                            pixmap = QPixmap.fromImage(qimg)                           
                         label = QLabel()
-                        label.setPixmap(pixmap)                        
+                        label.setPixmap(pixmap)      
+                        # metto sfondo bianco se è attivo il tema scuro
+                        if o_global_preferences.dark_theme:
+                            label.setStyleSheet('background-color:white')                  
                         self.o_table.setCellWidget(self.v_pos_y, x, label )                
                     # se il contenuto è un clob...leggo sempre tramite metodo read e lo carico in un widget di testo largo
                     elif self.tipi_intestazioni[x][1] == cx_Oracle.CLOB:                        
@@ -3792,8 +3827,18 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         """            
         self.dockFindWidget.show()
         self.e_find.setFocus()  
-        # mi è risultato più comodo pulire il campo di ricerca quando riaccedo alla finestra passando dal menu
-        self.e_find.clear()                 
+        
+        # ricavo numero riga e posizione del cursore
+        v_num_line, v_num_pos = self.e_sql.getCursorPosition()                
+        # estraggo l'intera riga dove è posizionato il cursore
+        self.e_sql.setSelection(v_num_line, 0, v_num_line+1, -1)
+        v_line = self.e_sql.selectedText()
+        # riposiziono il cursore allo stato originario
+        self.e_sql.setSelection(v_num_line, v_num_pos, v_num_line, v_num_pos)
+        # utilizzando la posizione del cursore sulla riga, estraggo la parola più prossima al cursore stesso                
+        v_oggetto = extract_word_from_cursor_pos(v_line.upper(), v_num_pos)                
+        # preimposto il campo di ricerca con la parola dove è posizionato il cursore in quel momento        
+        self.e_find.setText(v_oggetto.strip())        
                 
         # definizione della struttura per elenco dei risultati (valido solo per find all)       
         self.find_all_model = QtGui.QStandardItemModel()        
@@ -3873,8 +3918,20 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
            Ricerca e sostituisci
         """
         self.dockReplaceWidget.show()
-        # posiziono il cursore sul campo di trova
-        self.e_replace_search.setFocus()
+        
+        # ricavo numero riga e posizione del cursore
+        v_num_line, v_num_pos = self.e_sql.getCursorPosition()                
+        # estraggo l'intera riga dove è posizionato il cursore
+        self.e_sql.setSelection(v_num_line, 0, v_num_line+1, -1)
+        v_line = self.e_sql.selectedText()
+        # riposiziono il cursore allo stato originario
+        self.e_sql.setSelection(v_num_line, v_num_pos, v_num_line, v_num_pos)
+        # utilizzando la posizione del cursore sulla riga, estraggo la parola più prossima al cursore stesso                
+        v_oggetto = extract_word_from_cursor_pos(v_line.upper(), v_num_pos)                
+        # preimposto il campo di ricerca con la parola dove è posizionato il cursore in quel momento        
+        self.e_replace_search.setText(v_oggetto.strip())        
+        # posiziono il cursore sul campo di sostituisci
+        self.e_replace.setFocus()
 
     def slot_find_e_replace_find(self):
         """
@@ -4323,6 +4380,10 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         # posizione del cursore
         v_y, v_x = self.e_sql.getCursorPosition()
         self.link_to_MSql_win1_class.l_cursor_pos.setText("Ln: " + str(v_y+1) + "  Col: " + str(v_x+1))
+
+        # tempo di esecuzione ultima istruzione
+        v_secondi_str = str(round(v_global_exec_time,2))
+        self.link_to_MSql_win1_class.l_exec_time.setText("Last execution time: sec. " + v_secondi_str)
 
 #
 #  ___ _   _ _____ ___  
