@@ -14,7 +14,7 @@ import datetime
 # Libreria oracle
 import cx_Oracle
 import oracle_my_lib
-#Librerie interne MGrep
+# Librerie interne MGrep
 from utilita import message_error, message_question_yes_no, message_info
 
 def nomi_colonne_istruzione_sql(p_db_cursor):

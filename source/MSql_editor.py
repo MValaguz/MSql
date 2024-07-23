@@ -701,7 +701,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                     if self.o_lst_window2[i].objectName() == self.window_attiva.objectName():
                         return self.o_lst_window2[i]
         return None                    
-
+    
     def smistamento_voci_menu(self, p_slot, p_oggetto_titolo_db=None, p_oggetto_testo_db=None):
         """
             Contrariamente al solito, le voci di menù non sono pilotate da qtdesigner ma direttamente
@@ -934,8 +934,8 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             elif p_slot.text() == 'Go To Line':
                 o_MSql_win2.slot_goto_line()
             # Esecuzione dell'sql
-            elif p_slot.text() == 'Execute':                
-                v_ok = o_MSql_win2.slot_esegui(False)
+            elif p_slot.text() == 'Execute':                 
+                v_ok = o_MSql_win2.slot_esegui(False)                
                 if v_ok == 'ko':
                     message_error('Script stopped for error!')
             # Esecuzione dell'sql in modalità piano di esecuzione
@@ -2532,7 +2532,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         
         # individuo tasto destro del mouse sulla tabella dei risultati        
         if event.type() == QEvent.MouseButtonPress and event.buttons() == Qt.RightButton and source is self.o_table.viewport():            
-            self.tasto_desto_o_table(event)      
+            self.tasto_destro_o_table(event)      
             return True      
 
         # individuo la pressione di un tasto sull'editor
@@ -2595,17 +2595,18 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         # fine senza alcuna elaborazione e quindi si procede con esecuzione dei segnali nativi del framework       
         return False
            
-    def tasto_desto_o_table(self, event):
+    def tasto_destro_o_table(self, event):
         """
            Gestione del menu contestuale con tasto destro su tabella dei risultati
         """          
-        self.v_o_table_current_item = self.o_table.itemAt(event.pos())                
+        self.v_o_table_current_item = self.o_table.itemAt(event.pos())                        
         # item di tipo testo
+        # viene creato un menu popup con le voci di copia, zoom...
         if self.v_o_table_current_item is not None:            
             # creazione del menu popup
             self.o_table_cont_menu = QMenu(self)            
             
-            # bottone per copia valore
+            # voce per copia valore
             icon1 = QtGui.QIcon()
             icon1.addPixmap(QtGui.QPixmap(":/icons/icons/copy.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)        
             v_copia = QPushButton()
@@ -2616,7 +2617,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             v_action.setDefaultWidget(v_copia)        
             self.o_table_cont_menu.addAction(v_action)
 
-            # bottone per aprire window dove viene visualizzato il contenuto della cella in modo amplificato
+            # voce per aprire window dove viene visualizzato il contenuto della cella in modo amplificato
             icon2 = QtGui.QIcon()
             icon2.addPixmap(QtGui.QPixmap(":/icons/icons/zoom_avanti.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)        
             v_zoom = QPushButton()
@@ -2629,6 +2630,109 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
 
             # visualizzo il menu alla posizione del cursore
             self.o_table_cont_menu.exec_(event.globalPos())    
+        # item non è di tipo testo...si presume sia un blob...cosa non certa...ma al momento non trovato modo per capirlo
+        # viene creato il menu popup con la voce per il download
+        else:
+            # creazione del menu popup
+            self.o_table_cont_menu = QMenu(self)            
+            
+            # voce per download
+            icon1 = QtGui.QIcon()
+            icon1.addPixmap(QtGui.QPixmap(":/icons/icons/download.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)        
+            v_download = QPushButton()
+            v_download.setText('Download blob')
+            v_download.setIcon(icon1)        
+            v_download.clicked.connect(self.o_table_download_blob)
+            v_action = QWidgetAction(self.o_table_cont_menu)
+            v_action.setDefaultWidget(v_download)        
+            self.o_table_cont_menu.addAction(v_action)
+
+            # visualizzo il menu alla posizione del cursore
+            self.o_table_cont_menu.exec_(event.globalPos())    
+    
+    def o_table_download_blob(self):
+        """
+            Download del blob 
+            Il download viene determinato creando una select della colonna blob e usando come chiave di ricerca
+            tutti i valori delle colonne a video (quelle che si trovano a sinistra della colonna blob selezionata)...
+            se la select restituisce più di un record, viene emesso errore perché la "chiave" così creata non è univoca
+        """
+        # chiudo il menu popup
+        self.o_table_cont_menu.close()
+        # ricerco le coordinate dell'item selezionato
+        v_x = self.o_table.currentRow()        
+        v_y = self.o_table.currentColumn()        
+        # imposto var di partenza
+        v_where = ''        
+        v_1a_volta = True
+        v_nome_file = ''
+        # costruisco la select che mi permetterà di effettuare la ricerca e il download dell'item
+        # in pratica prendo i valori del contenuto di tutte le celle della riga selezionata, e le mixo con i relativi nomi di colonna 
+        # prendendo però solo le colonne che hanno tipo stringa e numero
+        # la "chiave" viene determinata dalle colonne a sinistra della colonna blob 
+        # (es. SELECT FILEN_NU, FILES_FI, BYTE FROM TA_FILES, dove FILES_FI è il blobconsidera solo la colonna prima di FILES_FI)
+        for v_i in range(0,len(self.tipi_intestazioni)):
+            if v_i > v_y:
+                break
+            if self.tipi_intestazioni[v_i][1] not in (cx_Oracle.DATETIME,cx_Oracle.DB_TYPE_RAW,cx_Oracle.BLOB,cx_Oracle.CLOB):                
+                if v_1a_volta:
+                    v_1a_volta = False
+                    v_where = self.nomi_intestazioni[v_i]
+                else:
+                    v_where += ' AND ' + self.nomi_intestazioni[v_i]
+                v_valore_item = self.o_table.item(v_x,v_i).text()                
+                if v_valore_item != '':
+                    v_nome_file += v_valore_item
+                    v_where += "='" + v_valore_item + "'"
+                else:
+                    v_where += " IS NULL"
+        # estrae il nome della tabella dalla select corrente
+        v_nome_tabella = extract_table_name_from_select(self.v_select_corrente)
+        # creo la select che estrae il campo blob selezionato a video, con il nome della tabella e la where composta dai campi della riga
+        v_select = 'SELECT ' + self.nomi_intestazioni[v_y] + ' FROM ' + v_nome_tabella + ' WHERE ' + v_where
+        print(v_select)
+        # sostituisce la freccia del mouse con icona "clessidra"
+        Freccia_Mouse(True)
+        # apro nuovo cursore
+        v_cursor = v_global_connection.cursor()            
+        # eseguo la select che va ad estrarre il blob (se errore --> esco)        
+        try:
+            v_cursor.execute(v_select)
+        except:         
+            # sostituisce la freccia del mouse con icona "clessidra"
+            Freccia_Mouse(False)   
+            message_error('Error blob fetching using the statement:' + chr(10) + v_select)                    
+            return ''
+        
+        # controllo che sia estratta solo una riga!
+        v_count = 0
+        for row in v_cursor:
+            v_count += 1        
+        # se la select restituisce + di un risultato o nessun risultato --> errore        
+        if v_count != 1:
+            # sostituisce la freccia del mouse con icona "clessidra"
+            Freccia_Mouse(False)
+            message_error('Error blob fetching using the statement:' + chr(10) + v_select)            
+        else:
+            # eseguo la select che va ad estrarre il blob
+            v_cursor.execute(v_select)    
+            for row in v_cursor:                  
+                for count, column in enumerate(row):                   
+                    # stabilisco il nome del file di destinazione che andrà nella dir dei downloads con nome del file composto dal nome della tabella + i primi 20 caratteri della "chiave"
+                    v_file_download = os.path.join(os.path.expanduser("~"), "Downloads") + '\\' + v_nome_tabella.upper() + '_' + v_nome_file[0:20]
+                    # apro il file in scrittura
+                    v_file_allegato = open(v_file_download,'wb')
+                    # scrivo il blob
+                    v_file_allegato.write(column.read())
+                    # chiudo il file
+                    v_file_allegato.close()                                                            
+                    # sostituisce la freccia del mouse con icona "clessidra"
+                    Freccia_Mouse(False)
+                    # messaggio di fine
+                    message_info('Blob downloaded in Downloads directory!')
+            
+        # chiudo il cursore
+        v_cursor.close()
     
     def o_table_copia_valore(self):
         """
@@ -2941,7 +3045,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         # aggiorno i dati della statusbar
         self.aggiorna_statusbar()
                                                                        
-    def slot_esegui(self, p_explain):
+    def slot_esegui(self, p_explain=False):
         """
            Prende tutto il testo selezionato ed inizia ad eseguirlo step by step
            Nota Bene! Nell'editor sql l'utente può aver scritto PL-SQL, SQL o entrambe le cose, intervvallati
@@ -3102,7 +3206,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         if not p_explain:    
             # se trovo select eseguo select
             if p_istruzione[0:6].upper() == 'SELECT':
-                v_tipo = 'SELECT'            
+                v_tipo = 'SELECT'                                                                     
                 v_ok = self.esegui_select(p_istruzione, True)
             # ..altrimenti esegue come script
             else: 
@@ -3361,7 +3465,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                se p_corrente è True la var v_select_corrente verrà rimpiazzata
         """
         global v_global_connesso
-        global o_global_preferences        
+        global o_global_preferences   
 
         if v_global_connesso:                        
             # pulisco elenco
@@ -3391,7 +3495,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
 
             # esegue sql contenuto nel campo a video                    
             try:                
-                self.bind_variable(p_function='DIC',p_testo_sql=v_select)
+                self.bind_variable(p_function='DIC',p_testo_sql=v_select)                                
                 self.v_cursor.execute(v_select, self.v_variabili_bind_dizionario)                            
                 self.v_esecuzione_ok = True
             # se riscontrato errore --> emetto sia codice che messaggio
@@ -3514,9 +3618,9 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                     # se il contenuto è un blob...utilizzo il metodo read sul campo field, poi lo inserisco in una immagine
                     # che poi carico una label e finisce dentro la cella a video
                     elif self.tipi_intestazioni[x][1] == cx_Oracle.BLOB:                        
-                        qimg = QImage.fromData(field.read())
-                        # se nel blob non è presente un'immagine, allora carico icona di non-immagine
-                        if qimg.Format() == QImage.Format_Invalid:                            
+                        qimg = QImage.fromData(field.read())                        
+                        # se nel blob non è presente un'immagine (lo capisco in base alla profondità-colore), allora carico icona di non-immagine
+                        if qimg.depth() == 0:                            
                             pixmap = QPixmap(":/icons/icons/no_image.png")                                                        
                         # se è presente un'immagine, carico immagine del blob...
                         else:
@@ -3526,7 +3630,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                         # metto sfondo bianco se è attivo il tema scuro
                         if o_global_preferences.dark_theme:
                             label.setStyleSheet('background-color:white')                  
-                        self.o_table.setCellWidget(self.v_pos_y, x, label )                
+                        # carico immagine nella cella di tabella 
+                        self.o_table.setCellWidget(self.v_pos_y, x, label )                                        
                     # se il contenuto è un clob...leggo sempre tramite metodo read e lo carico in un widget di testo largo
                     elif self.tipi_intestazioni[x][1] == cx_Oracle.CLOB:                        
                         qtext = QtWidgets.QTextEdit(field.read())    

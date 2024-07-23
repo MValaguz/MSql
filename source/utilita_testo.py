@@ -69,6 +69,17 @@ def extract_word_from_cursor_pos(p_string, p_pos):
 
     return v_word
 
+def extract_table_name_from_select(p_string):
+    """
+       Data istruzione sql in p_string, restituisce nome della tabella interessata da istruzione from
+       (es. SELECT AZIEN_CO FROM TA_AZIEN WHERE AZIEN_CO='PROVA' restituisce TA_AZIEN)
+    """
+    v_split = p_string.split()
+    for v_i in range(0,len(v_split)):
+        if v_split[v_i].upper() == 'FROM':
+            return v_split[v_i+1]
+    return ''
+
 def x_y_from_offset_text(p_text, p_offset, p_setting_eol):
     """
        Analizzando il testo presente in p_text, restituisce il numero riga e colonna
