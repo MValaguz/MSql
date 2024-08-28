@@ -25,7 +25,7 @@
     </sizepolicy>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <item row="3" column="0">
+    <item row="2" column="0">
      <widget class="QTableView" name="o_lst1">
       <property name="font">
        <font>
@@ -40,13 +40,25 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="0">
-     <widget class="QLabel" name="label">
+    <item row="1" column="0">
+     <widget class="QPushButton" name="b_purge">
       <property name="text">
-       <string>Result (double click to import instruction into current editor:</string>
+       <string>Delete history</string>
       </property>
-      <property name="buddy">
-       <cstring>o_lst1</cstring>
+      <property name="icon">
+       <iconset resource="resource.qrc">
+        <normaloff>:/icons/icons/failed.png</normaloff>:/icons/icons/failed.png</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QPushButton" name="b_insert_in_editor">
+      <property name="text">
+       <string>Insert SQL in editor</string>
+      </property>
+      <property name="icon">
+       <iconset resource="resource.qrc">
+        <normaloff>:/icons/icons/indent.png</normaloff>:/icons/icons/indent.png</iconset>
       </property>
      </widget>
     </item>
@@ -90,28 +102,6 @@
        </widget>
       </item>
      </layout>
-    </item>
-    <item row="1" column="0">
-     <widget class="QPushButton" name="b_purge">
-      <property name="text">
-       <string>Delete history</string>
-      </property>
-      <property name="icon">
-       <iconset resource="resource.qrc">
-        <normaloff>:/icons/icons/failed.png</normaloff>:/icons/icons/failed.png</iconset>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="0">
-     <widget class="QPushButton" name="b_insert_in_editor">
-      <property name="text">
-       <string>Insert SQL in editor</string>
-      </property>
-      <property name="icon">
-       <iconset resource="resource.qrc">
-        <normaloff>:/icons/icons/indent.png</normaloff>:/icons/icons/indent.png</iconset>
-      </property>
-     </widget>
     </item>
    </layout>
   </widget>

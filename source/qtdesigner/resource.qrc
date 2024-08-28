@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/sum.png</file>
     <file>icons/download.png</file>
     <file>icons/no_image.png</file>
     <file>icons/clear.png</file>

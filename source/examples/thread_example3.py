@@ -15,14 +15,15 @@ class ServerThread(QThread):
 
     def run(self):        
         print('invio comando al server')
-        time.sleep(10)        
+        time.sleep(20)        
         print('comando al server completato')
         self.completato = True
 
-class WorkerThread(QThread):
-    signalStatus = pyqtSignal(str)
+class Worker(QObject):
+    progress = pyqtSignal(str)
+    completed = pyqtSignal(int)
 
-    def run(self):
+    def do_work(self):
         # inizio lavoro
         start_time = datetime.datetime.now()             
         v_1a_volta = True
@@ -40,23 +41,31 @@ class WorkerThread(QThread):
                 prec_elapsed_seconds = elapsed_time.total_seconds()
                         
             if round(elapsed_time.total_seconds() - prec_elapsed_seconds) == 1:                                 
-                minuti, secondi = divmod(elapsed_time.seconds + elapsed_time.days * 86400, 60)                                
-                self.signalStatus.emit(f"Exec time: {minuti:02}:{secondi:02} secs")
+                minuti, secondi = divmod(elapsed_time.seconds + elapsed_time.days * 86400, 60)                                                
+                self.progress.emit(f"Exec time: {minuti:02}:{secondi:02} secs")
                 prec_elapsed_seconds = elapsed_time.total_seconds()
                 if self.server_thread.completato:
                     v_fine_lavoro = True
             
             # attesa di 100 millisecondi per non impegnare troppo la cpu su questo ciclo
-            self.msleep(100)  
-        
-        # lavoro terminato emetto segnale di fine
-        self.signalStatus.emit("END_JOB_OK")
+            time.sleep(0.01)  
 
-class Window(QWidget):
+        self.completed.emit(0)
+
+class MainWindow(QMainWindow):
+    work_requested = pyqtSignal(int)
+
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Thread con Barra di Progressione e Label")
-        self.setGeometry(100, 100, 400, 100)
+        
+        self.setGeometry(100, 100, 300, 70)
+        self.setWindowTitle('QThread Demo')
+
+        # setup widget
+        self.widget = QWidget()
+        layout = QVBoxLayout()
+        self.widget.setLayout(layout)
+        self.setCentralWidget(self.widget)       
 
         self.progress_bar = QProgressBar(self)
         self.progress_bar.setTextVisible(False)        
@@ -69,50 +78,60 @@ class Window(QWidget):
 
         #self.button_start = QPushButton("Avvia", self)
         self.button_cancel = QPushButton("Annulla", self)
+        self.btn_start = QPushButton('Start', clicked=self.start)
 
-        layout = QVBoxLayout()
+        #layout = QVBoxLayout()
         layout.addWidget(self.progress_bar)
         #layout.addWidget(self.label_time)
         #layout.addWidget(self.button_start)
         layout.addWidget(self.button_cancel)
-        self.setLayout(layout)
-
-        self.worker_thread = WorkerThread()
-        self.worker_thread.signalStatus.connect(self.update_progress)
-
-        #self.button_start.clicked.connect(self.start_worker)
+        layout.addWidget(self.btn_start)
+        #self.setLayout(layout)
         self.button_cancel.clicked.connect(self.cancel_worker)
 
-        #self.start_worker()
+        #self.worker_thread = WorkerThread()
+        
+        self.worker = Worker()
+        self.worker_thread = QThread()
+        self.worker.progress.connect(self.update_progress)
+        self.worker.completed.connect(self.complete)        
+        self.work_requested.connect(self.worker.do_work)
+        self.worker.moveToThread(self.worker_thread)
         self.worker_thread.start()
 
-    #def start_worker(self):        
-        
+        self.show()       
+
+    def start(self):
+        print('passo di qua')
+        self.work_requested.emit(1) 
+
     def cancel_worker(self):
         self.worker_thread.terminate()
         self.progress_bar.setValue(0)
         self.close()
         #self.label_time.setText("Exec time: 0.00 secs")
 
+    def complete(self):
+        print('lavoro completato --> chiusura')
+        self.close()
+
     def update_progress(self, status):
-        if status == 'END_JOB_OK':
-            self.close()
+        #print('status')
+        #print(status)
+        if not self.progress_bar.isTextVisible():
+             self.progress_bar.setTextVisible(True)        
+        v_value = self.progress_bar.value()
+        if v_value >= 99:
+            v_value = 10
         else:
-            if not self.progress_bar.isTextVisible():
-                self.progress_bar.setTextVisible(True)        
-            v_value = self.progress_bar.value()
-            if v_value >= 99:
-                v_value = 10
-            else:
-                v_value += 10
-            self.progress_bar.setValue(v_value)
-            self.progress_bar.setFormat(status) 
-            # setting alignment to centre
-            self.progress_bar.setAlignment(Qt.AlignCenter)
-            #self.label_time.setText(status)        
+            v_value += 10
+        self.progress_bar.setValue(v_value)
+        self.progress_bar.setFormat(status) 
+        # setting alignment to centre
+        self.progress_bar.setAlignment(Qt.AlignCenter)
+        #self.label_time.setText(status)        
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = Window()
-    window.show()
+    window = MainWindow()    
     sys.exit(app.exec_())

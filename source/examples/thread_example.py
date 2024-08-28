@@ -44,16 +44,10 @@ class MainWindow(QMainWindow):
 
         self.worker = Worker()
         self.worker_thread = QThread()
-
         self.worker.progress.connect(self.update_progress)
         self.worker.completed.connect(self.complete)        
-        
         self.work_requested.connect(self.worker.do_work)
-
-        # move worker to the worker thread
         self.worker.moveToThread(self.worker_thread)
-
-        # start the thread
         self.worker_thread.start()
 
         # show the window

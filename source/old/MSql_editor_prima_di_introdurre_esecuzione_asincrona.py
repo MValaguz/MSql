@@ -12,15 +12,14 @@
  Piattaforma...: Python3.11 con libreria pyqt5
  Data..........: 01/01/2023
  Descrizione...: Questo programma ha la "pretesa" di essere editor SQL per ambiente Oracle....                             
-                 In questo programma sono state sperimentate diverse tecniche per la soluzione di particolari problemi...e quindi è di fatto una sorta
-                 di super esercizio....
+                 In questo programma sono state sperimentate diverse tecniche tra cui quelle per comprendere meglio la programmazione ad oggetti.
                  
- Funzionamento : La classe principale è MSql_win1_class che apre la window di menu e che contiene l'area mdi dove poi si raggrupperranno
+ Note..........: La classe principale è MSql_win1_class che apre la window di menu e che contiene l'area mdi dove poi si raggrupperranno
                  le varie finestre dell'editor (gestito dalla classe MSql_win2_class). La window principale si collega con la 
                  secondaria dell'editor utilizzando un array che contiene i puntatori all'oggetto editor (MSql_win2_class). 
                  Quindi in MSql_win1_class vi è una continua ricerca all'oggetto editor di riferimento in modo da lavorare sull'editor corrente.
                  Tutta la parte di definizione grafica è stata creata tramite QtDesigner e i file da lui prodotti, convertiti tramite un'utilità, 
-                 in classi Python da dare poi in pasto alla libreria QT.                 
+                 in classi Python da dare poi in pasto alla libreria QT.
 """
 
 # Librerie di base
@@ -30,8 +29,8 @@ import datetime
 import locale
 import re
 import traceback
-# Librerie di data base Oracle
-import cx_Oracle, oracle_my_lib, oracle_executer
+# Librerie di data base
+import cx_Oracle, oracle_my_lib
 # Librerie grafiche QT
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -97,6 +96,303 @@ v_global_main_geometry = object
 # Contiene il tempo di esecuzione ultima istruzione
 v_global_exec_time = 0
 
+class My_MSql_Lexer(QsciLexerSQL):
+    """
+        Questa classe amplifica il dizionario di default del linguaggio SQL presente in QScintilla.
+        In pratica aggiunge tutti i nomi di tabelle, viste, procedure, ecc. in modo vengano evidenziati
+        Si basa sulla lista v_global_my_lexer_keywords che viene caricata quando ci si connette al DB
+        In base al valore di index è possibile settare parole chiave di una determinata categoria
+        1=parole primarie, 2=parole secondarie, 3=commenti, 4=classi, ecc.. usato 8 (boh!) 
+    """
+    def __init__(self, p_editor):        
+        super(My_MSql_Lexer, self).__init__()  
+
+        # salvo il puntatore all'editor all'interno del lexer
+        self.p_editor = p_editor      
+
+        # attivo le righe verticali che segnano le indentazioni
+        self.p_editor.setIndentationGuides(o_global_preferences.indentation_guide)                
+        
+        # attivo i margini con + e - 
+        self.p_editor.setFolding(p_editor.BoxedTreeFoldStyle, 2)
+        
+        # indentazione
+        self.p_editor.setIndentationWidth(int(o_global_preferences.tab_size))
+        self.p_editor.setAutoIndent(True)
+        
+        # tabulatore (in base alle preferenze...di base 2 caratteri)
+        self.p_editor.setTabWidth(int(o_global_preferences.tab_size))   
+        
+        # evidenzia l'intera riga dove posizionato il cursore (grigio scuro e cursore bianco se il tema è dark)
+        self.p_editor.setCaretLineVisible(True)
+        if o_global_preferences.dark_theme:
+            self.p_editor.setCaretLineBackgroundColor(QColor("#4a5157"))
+            self.p_editor.setCaretForegroundColor(QColor("white"))
+        else:
+            self.p_editor.setCaretLineBackgroundColor(QColor("#FFFF99"))        
+            self.p_editor.setCaretForegroundColor(QColor("black"))        
+        
+        # attivo il margine 0 con la numerazione delle righe
+        self.p_editor.setMarginType(0, QsciScintilla.NumberMargin)        
+        self.p_editor.setMarginsFont(QFont("Courier New",9))                                   
+        
+        # attivo il matching sulle parentesi con uno specifico colore
+        self.p_editor.setBraceMatching(QsciScintilla.BraceMatch.SloppyBraceMatch)
+        self.p_editor.setMatchedBraceBackgroundColor(QColor("#80ff9900"))
+        
+        # attivo il multiediting (cioè la possibilità, una volta fatta una selezione verticale, di fare un edit multiplo)        
+        self.p_editor.SendScintilla(self.p_editor.SCI_SETADDITIONALSELECTIONTYPING, 1)        
+        v_offset = self.p_editor.positionFromLineIndex(0, 7) 
+        self.p_editor.SendScintilla(self.p_editor.SCI_SETSELECTION, v_offset, v_offset)        
+        v_offset = self.p_editor.positionFromLineIndex(1, 5)
+        self.p_editor.SendScintilla(self.p_editor.SCI_ADDSELECTION, v_offset, v_offset)
+        v_offset = self.p_editor.positionFromLineIndex(2, 5)
+        self.p_editor.SendScintilla(self.p_editor.SCI_ADDSELECTION, v_offset, v_offset)                
+        
+        # attivo autocompletamento durante la digitazione 
+        # (comprende sia le parole del documento corrente che quelle aggiunte da un elenco specifico)
+        # attenzione! Da quanto ho capito, il fatto di avere attivo il lexer con linguaggio specifico (sql) questo prevale
+        # sul funzionamento di alcuni aspetti dell'autocompletamento....quindi ad un certo punto mi sono arreso con quello che
+        # sono riuscito a fare
+        self.v_api_lexer = QsciAPIs(self)            
+        # aggiungo tutti i termini di autocompletamento (si trovano all'interno di una tabella che viene generata a comando)
+        self.p_editor.setAutoCompletionSource(QsciScintilla.AcsAll)                
+        self.carica_dizionario_per_autocompletamento()                
+        # indico dopo quanti caratteri che sono stati digitati dall'utente, si deve attivare l'autocompletamento
+        self.p_editor.setAutoCompletionThreshold(3)  
+        # attivo autocompletamento sia per la parte del contenuto del documento che per la parte di parole chiave specifiche
+        self.p_editor.autoCompleteFromAll()
+
+        # imposto il font dell'editor in base alle preferenze 
+        if o_global_preferences.font_editor != '':
+            v_split = o_global_preferences.font_editor.split(',')            
+            v_font = QFont(str(v_split[0]),int(v_split[1]))
+            if len(v_split) > 2 and v_split[2] == ' BOLD':
+                v_font.setBold(True)
+            self.setFont(v_font)    
+
+        self.setFoldCompact(False)
+        self.setFoldComments(True)
+        self.setFoldAtElse(True)     
+
+        # imposto gli elementi che servono all'interno dell'editor per attivare la funzione
+        # tale per cui quando utente fa doppio click su una parola, vengono evidenziate tutte 
+        # le parole uguali presenti nel testo!         
+        self.p_editor.selectionChanged.connect(self.cambio_di_selezione_testo)        
+        self.selection_lock = False
+        self.SELECTION_INDICATOR = 4 
+
+        # se è stato scelto il tema colori scuro --> reimposto i colori della sezione qscintilla
+        # non sono riuscito a trovare altre strade per fare questa cosa
+        if o_global_preferences.dark_theme:
+            # colori di sfondo
+            self.p_editor.setMarginsForegroundColor(QColor('white'))
+            self.p_editor.setMarginsBackgroundColor(QColor('#242424'))
+            self.p_editor.setFoldMarginColors(QColor('grey'),QColor('#242424'))
+            self.setDefaultPaper(QColor('#242424'))
+            self.setPaper(QColor('#242424'))  
+            # colori delle parole
+            self.setColor(QColor('white'), QsciLexerSQL.Default) 
+            self.setColor(QColor('#608B4E'), QsciLexerSQL.Comment)
+            self.setColor(QColor('#608B4E'), QsciLexerSQL.CommentLine)
+            self.setColor(QColor('#608B4E'), QsciLexerSQL.CommentDoc) 
+            self.setColor(QColor('#b5cea8'), QsciLexerSQL.Number)
+            #self.setColor(QColor('#BA231E'), QsciLexerSQL.Keyword)            
+            self.setColor(QColor('#00cb62'), QsciLexerSQL.Keyword)
+            self.setColor(QColor('#00aaff'), QsciLexerSQL.DoubleQuotedString) 
+            self.setColor(QColor('#ECBB76'), QsciLexerSQL.SingleQuotedString) 
+            self.setColor(QColor('green'), QsciLexerSQL.PlusKeyword)
+            self.setColor(QColor('green'), QsciLexerSQL.PlusPrompt) 
+            self.setColor(QColor('cyan'), QsciLexerSQL.Operator) 
+            self.setColor(QColor('#D4D4D4'), QsciLexerSQL.Identifier)
+            self.setColor(QColor('green'), QsciLexerSQL.PlusComment) 
+            self.setColor(QColor('green'), QsciLexerSQL.CommentLineHash) 
+            self.setColor(QColor('green'), QsciLexerSQL.CommentDocKeyword)
+            self.setColor(QColor('green'), QsciLexerSQL.CommentDocKeywordError) 
+            self.setColor(QColor('#ac98ca'), QsciLexerSQL.KeywordSet5) 
+            self.setColor(QColor('#ac98ca'), QsciLexerSQL.KeywordSet6)
+            self.setColor(QColor('#ac98ca'), QsciLexerSQL.KeywordSet7) 
+            self.setColor(QColor('#ac98ca'), QsciLexerSQL.KeywordSet8) 
+            self.setColor(QColor('green'), QsciLexerSQL.QuotedIdentifier)
+            self.setColor(QColor('green'), QsciLexerSQL.QuotedOperator)
+
+    def keywords(self, index):
+        """
+           Funzione interna di QScintilla che viene automaticamente richiamata e carica le keyword di primo livello
+           queste keyword sono le parole che QScintilla evidenzia con un colore specifico
+        """
+        global v_global_my_lexer_keywords        
+
+        keywords = QsciLexerSQL.keywords(self, index) or ''        
+        
+        # l'indice 6 è stato messo dopo che sono iniziati gli esperimenti per evidenziare la parola selezionata con doppio click...prima era 8
+        # anche se non compreso il significato di questa posizione!
+        if index == 6:            
+            if len(v_global_my_lexer_keywords) > 0:                                            
+                v_new_keywords = ''
+                for v_keyword in v_global_my_lexer_keywords:
+                     v_new_keywords += v_keyword.lower() + ' '                                     
+                return  v_new_keywords + keywords
+        
+        return keywords
+
+    def carica_dizionario_per_autocompletamento(self):
+        """
+           Partendo dal file che contiene elenco termini di autocompletamento, ne leggo il contenuto e lo aggiungo all'editor
+           Da notare come viene caricato di fatto un elenco sia con caratteri minuscoli che maiuscoli perché non sono riuscito
+           a far funzionare la sua preferenza 
+        """
+        global v_global_my_lexer_keywords
+                
+        # come termini di autocompletamento prendo tutti gli oggetti che ho nella lista usata a sua volta per evidenziare le parole
+        #for v_keywords in v_global_my_lexer_keywords:
+        #    self.v_api_lexer.add(v_keywords.upper())                                    
+        #    self.v_api_lexer.add(v_keywords.lower())                                    
+
+        # carico il file con i termini per l'autocompletamento
+        if os.path.isfile(v_global_work_dir + 'MSql_autocompletion.ini'):
+            # carico i dati presenti nel file di testo (questo è stato creato con la voce di menu dello stesso MSql che si chiama "Create autocomplete dictonary")
+            with open(v_global_work_dir + 'MSql_autocompletion.ini','r') as file:
+                for v_riga in file:                                    
+                    self.v_api_lexer.add(v_riga.upper())                                    
+                    self.v_api_lexer.add(v_riga.lower())                                    
+        
+        self.v_api_lexer.prepare()        
+
+    def autoCompletionWordSeparators(self):
+        """
+           Questa funzione è molto importante perché aggiunge al lexer il separatore delle parole (il punto) quando si usa l'autocompletamento!!!!!
+           E' stato molto difficile trovare questa cosa!!!
+        """
+        return ['.']
+
+    def cambio_di_selezione_testo(self):
+        """
+           Viene richiamata ogni volta che viene selezionato del testo
+           E' usata per quando utente facendo doppio click su una parola, il programma evidenzia tutti i punti dove quella parola è presente nel testo
+        """
+        # la variabile lock viene usata per evitare problemi di ricorsione
+        if self.selection_lock == False:
+            self.selection_lock = True
+            selected_text = self.p_editor.selectedText()
+            self.clear_selection_highlights()
+            if selected_text.isidentifier():
+                self._highlight_selected_text(selected_text,case_sensitive=False,regular_expression=True)
+            self.selection_lock = False        
+
+    def clear_selection_highlights(self):
+        """
+           Pulisce gli indicatori delle parole 
+        """        
+        self.p_editor.clearIndicatorRange(0,0,self.p_editor.lines(),self.p_editor.lineLength(self.p_editor.lines()-1),self.SELECTION_INDICATOR)
+
+    def _highlight_selected_text(self,
+                                 highlight_text,
+                                 case_sensitive=False,
+                                 regular_expression=False):
+        """
+           Same as the highlight_text function, but adapted for the use
+           with the __selection_changed functionality.
+        """
+        # Setup the indicator style, the highlight indicator will be 0
+        self.set_indicator("selection")
+        # Get all instances of the text using list comprehension and the re module
+        matches = self.find_all(highlight_text,case_sensitive,regular_expression,text_to_bytes=True,whole_words=True)
+        # Check if the match list is empty
+        if matches:
+            # Use the raw highlight function to set the highlight indicators
+            self.highlight_raw(matches)
+
+    def highlight_raw(self, highlight_list):
+        """
+           Core highlight function that uses Scintilla messages to style indicators.
+           QScintilla's fillIndicatorRange function is to slow for large numbers of
+           highlights!
+           INFO:   This is done using the scintilla "INDICATORS" described in the official
+                   scintilla API (http://www.scintilla.org/ScintillaDoc.html#Indicators)
+        """
+        scintilla_command = QsciScintillaBase.SCI_INDICATORFILLRANGE
+        for highlight in highlight_list:
+            start   = highlight[1]
+            length  = highlight[3] - highlight[1]
+            self.p_editor.SendScintilla(scintilla_command,start,length)
+
+    def _set_indicator(self,
+                       indicator,
+                       fore_color):
+        """
+           Set the indicator settings
+        """
+        self.p_editor.indicatorDefine(QsciScintilla.IndicatorStyle.StraightBoxIndicator,indicator)
+        self.p_editor.setIndicatorForegroundColor(QColor(fore_color),indicator)
+        self.p_editor.SendScintilla(QsciScintillaBase.SCI_SETINDICATORCURRENT,indicator)
+
+    def set_indicator(self, indicator):
+        """
+          Select the indicator that will be used for use with
+          Scintilla's indicator functionality
+        """                
+        if indicator == "selection":
+            # indica il colore da dare alla selezione
+            self._set_indicator(self.SELECTION_INDICATOR,'#643A93FF')        
+
+    def find_all(self,
+                 search_text,
+                 case_sensitive=False,
+                 regular_expression=False,
+                 text_to_bytes=False,
+                 whole_words=False):
+        """
+           Find all instances of a string and return a list of (line, index_start, index_end)
+        """
+        #Find all instances of the search string and return the list
+        matches = self.index_strings_in_text(search_text,self.p_editor.text(),case_sensitive,regular_expression,text_to_bytes,whole_words)
+        return matches
+
+    def index_strings_in_text(self,
+                              search_text, 
+                              text, 
+                              case_sensitive=False, 
+                              regular_expression=False, 
+                              text_to_bytes=False,
+                              whole_words=False):
+        """ 
+           Return all instances of the searched text in the text string
+           as a list of tuples(0, match_start_position, 0, match_end_position).
+        
+           Parameters:
+               - search_text:
+                   the text/expression to search for in the text parameter
+               - text:
+                   the text that will be searched through
+               - case_sensitive:
+                   case sensitivity of the performed search
+               - regular_expression:
+                   selection of whether the search string is a regular expression or not
+               - text_to_bytes:
+                   whether to transform the search_text and text parameters into byte objects
+               - whole_words:
+                   match only whole words
+        """
+        # Check if whole words only should be matched
+        if whole_words == True:
+            search_text = r"\b(" + search_text + r")\b"
+        # Convert text to bytes so that utf-8 characters will be parsed correctly
+        if text_to_bytes == True:
+            search_text = bytes(search_text, "utf-8")
+            text = bytes(text, "utf-8")
+        # Set the search text according to the regular expression selection
+        if regular_expression == False:
+            search_text = re.escape(search_text)
+        # Compile expression according to case sensitivity flag
+        if case_sensitive == True:
+            compiled_search_re = re.compile(search_text)
+        else:
+            compiled_search_re = re.compile(search_text, re.IGNORECASE)
+        # Create the list with all of the matches
+        list_of_matches = [(0, match.start(), 0, match.end()) for match in re.finditer(compiled_search_re, text)]
+        return list_of_matches
+
 def salvataggio_editor(p_save_as, p_nome, p_testo):
     """
         Salvataggio di p_testo dentro il file p_nome        
@@ -154,7 +450,7 @@ def titolo_window(p_titolo_file):
     v_solo_nome_file_senza_suffisso = os.path.splitext(v_solo_nome_file)[0]
 
     return v_solo_nome_file_senza_suffisso
-
+    
 #
 #  __  __    _    ___ _   _  __        _____ _   _ ____   _____        __
 # |  \/  |  / \  |_ _| \ | | \ \      / /_ _| \ | |  _ \ / _ \ \      / /
@@ -2005,9 +2301,9 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         """
            Prende la riga selezionata nell'history e la porta dentro l'editor corrente
         """       
-        # prendo indice dalla tabella (in pratica la cella che contiene l'istruzione)
+        # prendo indice dalla tabella
         try:
-            index = self.win_history.o_lst1.selectedIndexes()[1]           
+            index = self.win_history.o_lst1.selectedIndexes()[2]           
         except:
             message_error('Select a row!')
             return 'ko'
@@ -2055,310 +2351,6 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 v_risultato = v_risultato.replace('\r\n','\n')                                    
 
             o_MSql_win2.e_sql.insert(v_risultato)        
-
-#  _     _______  _______ ____  
-# | |   | ____\ \/ / ____|  _ \ 
-# | |   |  _|  \  /|  _| | |_) |
-# | |___| |___ /  \| |___|  _ < 
-# |_____|_____/_/\_\_____|_| \_\
-#                              
-# Classe che personalizza il comportamento del lexer di qscintilla 
-class My_MSql_Lexer(QsciLexerSQL):
-    """
-        Questa classe amplifica il dizionario di default del linguaggio SQL presente in QScintilla.
-        In pratica aggiunge tutti i nomi di tabelle, viste, procedure, ecc. in modo vengano evidenziati
-        Si basa sulla lista v_global_my_lexer_keywords che viene caricata quando ci si connette al DB
-        In base al valore di index è possibile settare parole chiave di una determinata categoria
-        1=parole primarie, 2=parole secondarie, 3=commenti, 4=classi, ecc.. usato 8 (boh!) 
-    """
-    def __init__(self, p_editor):        
-        super(My_MSql_Lexer, self).__init__()  
-
-        # salvo il puntatore all'editor all'interno del lexer
-        self.p_editor = p_editor      
-
-        # attivo le righe verticali che segnano le indentazioni
-        self.p_editor.setIndentationGuides(o_global_preferences.indentation_guide)                
-        
-        # attivo i margini con + e - 
-        self.p_editor.setFolding(p_editor.BoxedTreeFoldStyle, 2)
-        
-        # indentazione
-        self.p_editor.setIndentationWidth(int(o_global_preferences.tab_size))
-        self.p_editor.setAutoIndent(True)
-        
-        # tabulatore (in base alle preferenze...di base 2 caratteri)
-        self.p_editor.setTabWidth(int(o_global_preferences.tab_size))   
-        
-        # evidenzia l'intera riga dove posizionato il cursore (grigio scuro e cursore bianco se il tema è dark)
-        self.p_editor.setCaretLineVisible(True)
-        if o_global_preferences.dark_theme:
-            self.p_editor.setCaretLineBackgroundColor(QColor("#4a5157"))
-            self.p_editor.setCaretForegroundColor(QColor("white"))
-        else:
-            self.p_editor.setCaretLineBackgroundColor(QColor("#FFFF99"))        
-            self.p_editor.setCaretForegroundColor(QColor("black"))        
-        
-        # attivo il margine 0 con la numerazione delle righe
-        self.p_editor.setMarginType(0, QsciScintilla.NumberMargin)        
-        self.p_editor.setMarginsFont(QFont("Courier New",9))                                   
-        
-        # attivo il matching sulle parentesi con uno specifico colore
-        self.p_editor.setBraceMatching(QsciScintilla.BraceMatch.SloppyBraceMatch)
-        self.p_editor.setMatchedBraceBackgroundColor(QColor("#80ff9900"))
-        
-        # attivo il multiediting (cioè la possibilità, una volta fatta una selezione verticale, di fare un edit multiplo)        
-        self.p_editor.SendScintilla(self.p_editor.SCI_SETADDITIONALSELECTIONTYPING, 1)        
-        v_offset = self.p_editor.positionFromLineIndex(0, 7) 
-        self.p_editor.SendScintilla(self.p_editor.SCI_SETSELECTION, v_offset, v_offset)        
-        v_offset = self.p_editor.positionFromLineIndex(1, 5)
-        self.p_editor.SendScintilla(self.p_editor.SCI_ADDSELECTION, v_offset, v_offset)
-        v_offset = self.p_editor.positionFromLineIndex(2, 5)
-        self.p_editor.SendScintilla(self.p_editor.SCI_ADDSELECTION, v_offset, v_offset)                
-        
-        # attivo autocompletamento durante la digitazione 
-        # (comprende sia le parole del documento corrente che quelle aggiunte da un elenco specifico)
-        # attenzione! Da quanto ho capito, il fatto di avere attivo il lexer con linguaggio specifico (sql) questo prevale
-        # sul funzionamento di alcuni aspetti dell'autocompletamento....quindi ad un certo punto mi sono arreso con quello che
-        # sono riuscito a fare
-        self.v_api_lexer = QsciAPIs(self)            
-        # aggiungo tutti i termini di autocompletamento (si trovano all'interno di una tabella che viene generata a comando)
-        self.p_editor.setAutoCompletionSource(QsciScintilla.AcsAll)                
-        self.carica_dizionario_per_autocompletamento()                
-        # indico dopo quanti caratteri che sono stati digitati dall'utente, si deve attivare l'autocompletamento
-        self.p_editor.setAutoCompletionThreshold(3)  
-        # attivo autocompletamento sia per la parte del contenuto del documento che per la parte di parole chiave specifiche
-        self.p_editor.autoCompleteFromAll()
-
-        # imposto il font dell'editor in base alle preferenze 
-        if o_global_preferences.font_editor != '':
-            v_split = o_global_preferences.font_editor.split(',')            
-            v_font = QFont(str(v_split[0]),int(v_split[1]))
-            if len(v_split) > 2 and v_split[2] == ' BOLD':
-                v_font.setBold(True)
-            self.setFont(v_font)    
-
-        self.setFoldCompact(False)
-        self.setFoldComments(True)
-        self.setFoldAtElse(True)     
-
-        # imposto gli elementi che servono all'interno dell'editor per attivare la funzione
-        # tale per cui quando utente fa doppio click su una parola, vengono evidenziate tutte 
-        # le parole uguali presenti nel testo!         
-        self.p_editor.selectionChanged.connect(self.cambio_di_selezione_testo)        
-        self.selection_lock = False
-        self.SELECTION_INDICATOR = 4 
-
-        # se è stato scelto il tema colori scuro --> reimposto i colori della sezione qscintilla
-        # non sono riuscito a trovare altre strade per fare questa cosa
-        if o_global_preferences.dark_theme:
-            # colori di sfondo
-            self.p_editor.setMarginsForegroundColor(QColor('white'))
-            self.p_editor.setMarginsBackgroundColor(QColor('#242424'))
-            self.p_editor.setFoldMarginColors(QColor('grey'),QColor('#242424'))
-            self.setDefaultPaper(QColor('#242424'))
-            self.setPaper(QColor('#242424'))  
-            # colori delle parole
-            self.setColor(QColor('white'), QsciLexerSQL.Default) 
-            self.setColor(QColor('#608B4E'), QsciLexerSQL.Comment)
-            self.setColor(QColor('#608B4E'), QsciLexerSQL.CommentLine)
-            self.setColor(QColor('#608B4E'), QsciLexerSQL.CommentDoc) 
-            self.setColor(QColor('#b5cea8'), QsciLexerSQL.Number)
-            #self.setColor(QColor('#BA231E'), QsciLexerSQL.Keyword)            
-            self.setColor(QColor('#00cb62'), QsciLexerSQL.Keyword)
-            self.setColor(QColor('#00aaff'), QsciLexerSQL.DoubleQuotedString) 
-            self.setColor(QColor('#ECBB76'), QsciLexerSQL.SingleQuotedString) 
-            self.setColor(QColor('green'), QsciLexerSQL.PlusKeyword)
-            self.setColor(QColor('green'), QsciLexerSQL.PlusPrompt) 
-            self.setColor(QColor('cyan'), QsciLexerSQL.Operator) 
-            self.setColor(QColor('#D4D4D4'), QsciLexerSQL.Identifier)
-            self.setColor(QColor('green'), QsciLexerSQL.PlusComment) 
-            self.setColor(QColor('green'), QsciLexerSQL.CommentLineHash) 
-            self.setColor(QColor('green'), QsciLexerSQL.CommentDocKeyword)
-            self.setColor(QColor('green'), QsciLexerSQL.CommentDocKeywordError) 
-            self.setColor(QColor('#ac98ca'), QsciLexerSQL.KeywordSet5) 
-            self.setColor(QColor('#ac98ca'), QsciLexerSQL.KeywordSet6)
-            self.setColor(QColor('#ac98ca'), QsciLexerSQL.KeywordSet7) 
-            self.setColor(QColor('#ac98ca'), QsciLexerSQL.KeywordSet8) 
-            self.setColor(QColor('green'), QsciLexerSQL.QuotedIdentifier)
-            self.setColor(QColor('green'), QsciLexerSQL.QuotedOperator)
-
-    def keywords(self, index):
-        """
-           Funzione interna di QScintilla che viene automaticamente richiamata e carica le keyword di primo livello
-           queste keyword sono le parole che QScintilla evidenzia con un colore specifico
-        """
-        global v_global_my_lexer_keywords        
-
-        keywords = QsciLexerSQL.keywords(self, index) or ''        
-        
-        # l'indice 6 è stato messo dopo che sono iniziati gli esperimenti per evidenziare la parola selezionata con doppio click...prima era 8
-        # anche se non compreso il significato di questa posizione!
-        if index == 6:            
-            if len(v_global_my_lexer_keywords) > 0:                                            
-                v_new_keywords = ''
-                for v_keyword in v_global_my_lexer_keywords:
-                     v_new_keywords += v_keyword.lower() + ' '                                     
-                return  v_new_keywords + keywords
-        
-        return keywords
-
-    def carica_dizionario_per_autocompletamento(self):
-        """
-           Partendo dal file che contiene elenco termini di autocompletamento, ne leggo il contenuto e lo aggiungo all'editor
-           Da notare come viene caricato di fatto un elenco sia con caratteri minuscoli che maiuscoli perché non sono riuscito
-           a far funzionare la sua preferenza 
-        """
-        global v_global_my_lexer_keywords
-                
-        # come termini di autocompletamento prendo tutti gli oggetti che ho nella lista usata a sua volta per evidenziare le parole
-        #for v_keywords in v_global_my_lexer_keywords:
-        #    self.v_api_lexer.add(v_keywords.upper())                                    
-        #    self.v_api_lexer.add(v_keywords.lower())                                    
-
-        # carico il file con i termini per l'autocompletamento
-        if os.path.isfile(v_global_work_dir + 'MSql_autocompletion.ini'):
-            # carico i dati presenti nel file di testo (questo è stato creato con la voce di menu dello stesso MSql che si chiama "Create autocomplete dictonary")
-            with open(v_global_work_dir + 'MSql_autocompletion.ini','r') as file:
-                for v_riga in file:                                    
-                    self.v_api_lexer.add(v_riga.upper())                                    
-                    self.v_api_lexer.add(v_riga.lower())                                    
-        
-        self.v_api_lexer.prepare()        
-
-    def autoCompletionWordSeparators(self):
-        """
-           Questa funzione è molto importante perché aggiunge al lexer il separatore delle parole (il punto) quando si usa l'autocompletamento!!!!!
-           E' stato molto difficile trovare questa cosa!!!
-        """
-        return ['.']
-
-    def cambio_di_selezione_testo(self):
-        """
-           Viene richiamata ogni volta che viene selezionato del testo
-           E' usata per quando utente facendo doppio click su una parola, il programma evidenzia tutti i punti dove quella parola è presente nel testo
-        """
-        # la variabile lock viene usata per evitare problemi di ricorsione
-        if self.selection_lock == False:
-            self.selection_lock = True
-            selected_text = self.p_editor.selectedText()
-            self.clear_selection_highlights()
-            if selected_text.isidentifier():
-                self._highlight_selected_text(selected_text,case_sensitive=False,regular_expression=True)
-            self.selection_lock = False        
-
-    def clear_selection_highlights(self):
-        """
-           Pulisce gli indicatori delle parole 
-        """        
-        self.p_editor.clearIndicatorRange(0,0,self.p_editor.lines(),self.p_editor.lineLength(self.p_editor.lines()-1),self.SELECTION_INDICATOR)
-
-    def _highlight_selected_text(self,
-                                 highlight_text,
-                                 case_sensitive=False,
-                                 regular_expression=False):
-        """
-           Same as the highlight_text function, but adapted for the use
-           with the __selection_changed functionality.
-        """
-        # Setup the indicator style, the highlight indicator will be 0
-        self.set_indicator("selection")
-        # Get all instances of the text using list comprehension and the re module
-        matches = self.find_all(highlight_text,case_sensitive,regular_expression,text_to_bytes=True,whole_words=True)
-        # Check if the match list is empty
-        if matches:
-            # Use the raw highlight function to set the highlight indicators
-            self.highlight_raw(matches)
-
-    def highlight_raw(self, highlight_list):
-        """
-           Core highlight function that uses Scintilla messages to style indicators.
-           QScintilla's fillIndicatorRange function is to slow for large numbers of
-           highlights!
-           INFO:   This is done using the scintilla "INDICATORS" described in the official
-                   scintilla API (http://www.scintilla.org/ScintillaDoc.html#Indicators)
-        """
-        scintilla_command = QsciScintillaBase.SCI_INDICATORFILLRANGE
-        for highlight in highlight_list:
-            start   = highlight[1]
-            length  = highlight[3] - highlight[1]
-            self.p_editor.SendScintilla(scintilla_command,start,length)
-
-    def _set_indicator(self,
-                       indicator,
-                       fore_color):
-        """
-           Set the indicator settings
-        """
-        self.p_editor.indicatorDefine(QsciScintilla.IndicatorStyle.StraightBoxIndicator,indicator)
-        self.p_editor.setIndicatorForegroundColor(QColor(fore_color),indicator)
-        self.p_editor.SendScintilla(QsciScintillaBase.SCI_SETINDICATORCURRENT,indicator)
-
-    def set_indicator(self, indicator):
-        """
-          Select the indicator that will be used for use with
-          Scintilla's indicator functionality
-        """                
-        if indicator == "selection":
-            # indica il colore da dare alla selezione
-            self._set_indicator(self.SELECTION_INDICATOR,'#643A93FF')        
-
-    def find_all(self,
-                 search_text,
-                 case_sensitive=False,
-                 regular_expression=False,
-                 text_to_bytes=False,
-                 whole_words=False):
-        """
-           Find all instances of a string and return a list of (line, index_start, index_end)
-        """
-        #Find all instances of the search string and return the list
-        matches = self.index_strings_in_text(search_text,self.p_editor.text(),case_sensitive,regular_expression,text_to_bytes,whole_words)
-        return matches
-
-    def index_strings_in_text(self,
-                              search_text, 
-                              text, 
-                              case_sensitive=False, 
-                              regular_expression=False, 
-                              text_to_bytes=False,
-                              whole_words=False):
-        """ 
-           Return all instances of the searched text in the text string
-           as a list of tuples(0, match_start_position, 0, match_end_position).
-        
-           Parameters:
-               - search_text:
-                   the text/expression to search for in the text parameter
-               - text:
-                   the text that will be searched through
-               - case_sensitive:
-                   case sensitivity of the performed search
-               - regular_expression:
-                   selection of whether the search string is a regular expression or not
-               - text_to_bytes:
-                   whether to transform the search_text and text parameters into byte objects
-               - whole_words:
-                   match only whole words
-        """
-        # Check if whole words only should be matched
-        if whole_words == True:
-            search_text = r"\b(" + search_text + r")\b"
-        # Convert text to bytes so that utf-8 characters will be parsed correctly
-        if text_to_bytes == True:
-            search_text = bytes(search_text, "utf-8")
-            text = bytes(text, "utf-8")
-        # Set the search text according to the regular expression selection
-        if regular_expression == False:
-            search_text = re.escape(search_text)
-        # Compile expression according to case sensitivity flag
-        if case_sensitive == True:
-            compiled_search_re = re.compile(search_text)
-        else:
-            compiled_search_re = re.compile(search_text, re.IGNORECASE)
-        # Create the list with all of the matches
-        list_of_matches = [(0, match.start(), 0, match.end()) for match in re.finditer(compiled_search_re, text)]
-        return list_of_matches
 
 #
 #  _____ ____ ___ _____ ___  ____  
@@ -2443,8 +2435,6 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
 
         # inizializzo var che contiene la select corrente
         self.v_select_corrente = ''
-        self.v_plsql_corrente = ''
-        self.v_set_rowcount = False
         # inizializzo var che indica che l'esecuzione è andata ok
         self.v_esecuzione_ok = False  
         # inizializzo var che indica che si è in fase di caricamento dei dati
@@ -2680,7 +2670,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         # in pratica prendo i valori del contenuto di tutte le celle della riga selezionata, e le mixo con i relativi nomi di colonna 
         # prendendo però solo le colonne che hanno tipo stringa e numero
         # la "chiave" viene determinata dalle colonne a sinistra della colonna blob 
-        # (es. SELECT FILEN_NU, FILES_FI, BYTE FROM TA_FILES, dove FILES_FI è il blob considera solo la colonna prima di FILES_FI)
+        # (es. SELECT FILEN_NU, FILES_FI, BYTE FROM TA_FILES, dove FILES_FI è il blobconsidera solo la colonna prima di FILES_FI)
         for v_i in range(0,len(self.tipi_intestazioni)):
             if v_i > v_y:
                 break
@@ -2726,27 +2716,20 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         else:
             # eseguo la select che va ad estrarre il blob
             v_cursor.execute(v_select)    
-            v_desc_intestazioni = v_cursor.description   
-            # controllo che effettivamente sia stato selezionato un blob (siccome è una select monocolonna uso le coordinate 0 e 1)
-            print(v_desc_intestazioni[0][1])
-            if v_desc_intestazioni[0][1] != cx_Oracle.BLOB:
-                Freccia_Mouse(False)
-                message_error('You must select a blob cell!')
-            else:                
-                for row in v_cursor:                  
-                    for count, column in enumerate(row):                   
-                        # stabilisco il nome del file di destinazione che andrà nella dir dei downloads con nome del file composto dal nome della tabella + i primi 20 caratteri della "chiave"
-                        v_file_download = os.path.join(os.path.expanduser("~"), "Downloads") + '\\' + v_nome_tabella.upper() + '_' + v_nome_file[0:20].replace('.','_')
-                        # apro il file in scrittura
-                        v_file_allegato = open(v_file_download,'wb')
-                        # leggo e scrivo il blob
-                        v_file_allegato.write(column.read())
-                        # chiudo il file
-                        v_file_allegato.close()                                                            
-                        # sostituisce la freccia del mouse con icona "clessidra"
-                        Freccia_Mouse(False)
-                        # messaggio di fine
-                        message_info('Blob downloaded in Downloads directory of your PC!')
+            for row in v_cursor:                  
+                for count, column in enumerate(row):                   
+                    # stabilisco il nome del file di destinazione che andrà nella dir dei downloads con nome del file composto dal nome della tabella + i primi 20 caratteri della "chiave"
+                    v_file_download = os.path.join(os.path.expanduser("~"), "Downloads") + '\\' + v_nome_tabella.upper() + '_' + v_nome_file[0:20]
+                    # apro il file in scrittura
+                    v_file_allegato = open(v_file_download,'wb')
+                    # scrivo il blob
+                    v_file_allegato.write(column.read())
+                    # chiudo il file
+                    v_file_allegato.close()                                                            
+                    # sostituisce la freccia del mouse con icona "clessidra"
+                    Freccia_Mouse(False)
+                    # messaggio di fine
+                    message_info('Blob downloaded in Downloads directory!')
             
         # chiudo il cursore
         v_cursor.close()
@@ -2798,7 +2781,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             print('F11-Quick query on --> ' + v_oggetto)      
             # tento di eseguire la query dell'oggetto selezionato (dovrebbe essere una tabella)
             v_select = 'SELECT * FROM ' + v_oggetto
-            self.esegui_select(v_select, True)
+            self.esegui_select(v_select, v_select)
         
     def slot_f12(self):
         """
@@ -2911,17 +2894,6 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         v_action = QWidgetAction(self.o_table_popup)
         v_action.setDefaultWidget(v_count)        
         self.o_table_popup.addAction(v_action)
-                        
-        # bottone per la somma di colonna
-        icon5 = QtGui.QIcon()
-        icon5.addPixmap(QtGui.QPixmap(":/icons/icons/sum.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        v_count = QPushButton()
-        v_count.setText('Sum')
-        v_count.setIcon(icon5)
-        v_count.clicked.connect(self.slot_sum_popup)
-        v_action = QWidgetAction(self.o_table_popup)
-        v_action.setDefaultWidget(v_count)        
-        self.o_table_popup.addAction(v_action)
 
         # calcolo la posizione dove deve essere visualizzato il menu popup in base alle proprietà dell'header di tabella
         headerPos = self.o_table.mapToGlobal(self.o_table_hH.pos())
@@ -2948,28 +2920,25 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         """
            Gestione menu popup all'interno dei risultati
            Esecuzione della where specifica
-        """             
+        """        
         # prendo l'item dell'header di tabella             
-        v_header_item = self.o_table.horizontalHeaderItem(self.o_table_popup_index)        
+        v_header_item = self.o_table.horizontalHeaderItem(self.o_table_popup_index)
 
-        # se item esiste
-        if v_header_item != None:
-        
-            # salvo il valore nella rispettiva lista (per poterlo riprende in visualizzazione) e anche per creare la select con tutti i filtri
-            v_pos = -1
-            for nome_colonna in self.nomi_intestazioni:
-                v_pos += 1
-                if nome_colonna == v_header_item.text():
-                    self.valori_intestazioni[v_pos] = self.e_popup_where.text()
-                    break                
-                
-            # wrap dell'attuale select aggiungendo specifica where
-            v_where = self.get_where_filtri_colonne()
-            if v_where != '':            
-                v_new_select = "SELECT * FROM (" + self.v_select_corrente + ") WHERE " + v_where            
+        # salvo il valore nella rispettiva lista (per poterlo riprende in visualizzazione) e anche per creare la select con tutti i filtri
+        v_pos = -1
+        for nome_colonna in self.nomi_intestazioni:
+            v_pos += 1
+            if nome_colonna == v_header_item.text():
+                self.valori_intestazioni[v_pos] = self.e_popup_where.text()
+                break                
+            
+        # wrap dell'attuale select aggiungendo specifica where
+        v_where = self.get_where_filtri_colonne()
+        if v_where != '':            
+            v_new_select = "SELECT * FROM (" + self.v_select_corrente + ") WHERE " + v_where            
 
-                # rieseguo la select
-                self.esegui_select(v_new_select, False)
+            # rieseguo la select
+            self.esegui_select(v_new_select, False)
                     
         # chiudo il menu popup
         self.o_table_popup.close()
@@ -3047,28 +3016,6 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         
         # wrap dell'attuale select con altra order by
         v_new_select = 'SELECT COUNT(*) FROM (' + self.v_select_corrente + ')' + v_where
-                
-        # rieseguo la select
-        self.esegui_select(v_new_select, False)
-        
-        # chiudo il menu popup
-        self.o_table_popup.close()
-
-    def slot_sum_popup(self):
-        """
-           Gestione menu popup all'interno dei risultati
-           Riesegue la select corrente con la sum della colonna selezionata
-        """
-        # prendo l'item dell'header di tabella 
-        v_header_item = self.o_table.horizontalHeaderItem(self.o_table_popup_index)
-        
-        # compongo eventuale where con i filtri attivi in questo momento
-        v_where = self.get_where_filtri_colonne()
-        if v_where != '':
-            v_where = 'WHERE ' + v_where
-        
-        # wrap dell'attuale select con altra order by
-        v_new_select = 'SELECT SUM(' + v_header_item.text() + ') FROM (' + self.v_select_corrente + ')' + v_where
                 
         # rieseguo la select
         self.esegui_select(v_new_select, False)
@@ -3169,7 +3116,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                     self.v_offset_numero_di_riga += 1
                 # la chiusura trovata era l'ultima (oppure trovato chiusura dello script tramite slash) --> quindi eseguo lo script
                 if v_plsql_idx <= 0 or v_riga == '/':                           
-                    v_ok = self.esegui_plsql(v_plsql_str, False)                    
+                    v_ok = self.esegui_script(v_plsql_str, False)                    
                     if v_ok == 'ko':                        
                         return 'ko'
                     v_plsql = False
@@ -3235,7 +3182,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
 
         # se a fine scansione mi ritrovo che v_plsql è ancora attiva, vuol dire che ho ancora un'istruzione in canna, e quindi la eseguo
         if v_plsql and v_plsql_str != '':
-            v_ok = self.esegui_plsql(v_plsql_str, False)            
+            v_ok = self.esegui_script(v_plsql_str, False)            
         
         # se a fine scansione mi ritrovo che v_istruzione è ancora attiva, vuol dire che ho ancora un'istruzione in canna, e quindi la eseguo          
         if v_istruzione and v_istruzione_str != '':
@@ -3248,18 +3195,37 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
            Esegue istruzione p_istruzione
            Se p_explain è attivo, vuol dire che è stata richiesta la explain plan (tasto F9 da menu)...
         """
+        global v_global_work_dir       
+        global v_global_exec_time         
+        
+        # salvo tempo inizio istruzione
+        v_orario_inizio = datetime.datetime.now()
+
         v_ok = ''                    
         # esecuzione normale...
         if not p_explain:    
             # se trovo select eseguo select
-            if p_istruzione[0:6].upper() == 'SELECT':                
+            if p_istruzione[0:6].upper() == 'SELECT':
+                v_tipo = 'SELECT'                                                                     
                 v_ok = self.esegui_select(p_istruzione, True)
             # ..altrimenti esegue come script
-            else:                 
-                v_ok = self.esegui_plsql(p_istruzione, True)        
+            else: 
+                v_tipo = 'SCRIPT'
+                v_ok = self.esegui_script(p_istruzione, True)        
+            
+            # calcolo tempo esecuzione e aggiorno a video
+            v_exec_time = datetime.datetime.now() - v_orario_inizio            
+            v_global_exec_time = v_exec_time.total_seconds()
+            self.aggiorna_statusbar()
 
+            # aggiungo l'istruzione all'history
+            write_sql_history(v_global_work_dir+'MSql.db',v_tipo,p_istruzione,v_global_exec_time)
+            
+            # esco
+            return v_ok
         # è stato richiesto di fare l'analisi del piano di esecuzione
-        else:            
+        else:
+            v_tipo = 'PLAN'            
             # l'istruzione viene eseguita come script pl-sql e non viene registrata nel log
             v_ok = self.esegui_plsql('EXPLAIN PLAN FOR ' + p_istruzione, False)        
             if v_ok is None:
@@ -3276,8 +3242,36 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                 # porto in primo piano la visualizzazione del tab di plan
                 self.o_tab_widget.setCurrentIndex(3)          
 
+            # esco
+            return v_ok 
+
+    def esegui_script(self, p_plsql, p_rowcount):
+        """
+           Esegue script p_plsql. Se p_rowcount è true allora vengono conteggiate le righe processate (es. update)
+        """    
+        global v_global_exec_time         
+               
+        # salvo tempo inizio istruzione
+        v_orario_inizio = datetime.datetime.now()
+           
+        if p_plsql != '':
+            # eseguo lo script
+            v_ok = self.esegui_plsql(p_plsql, p_rowcount)
+
+            # calcolo tempo esecuzione e aggiorno a video
+            v_exec_time = datetime.datetime.now() - v_orario_inizio            
+            v_global_exec_time = v_exec_time.total_seconds()
+            self.aggiorna_statusbar()
+            
+            # tutto ok ... aggiungo istruzione all'history
+            if v_ok is None:                        
+                write_sql_history(v_global_work_dir+'MSql.db','SCRIPT',p_plsql,v_global_exec_time)
+            else:                
+                return 'ko'                        
+        else:
+            message_error('No script!')
         # esco
-        return v_ok 
+        return None
 
     def esegui_plsql(self, p_plsql, p_rowcount):
         """
@@ -3293,7 +3287,6 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                         Inoltre va tenuto conto che la libreria cx_oracle ha delle sue classi specifiche per la gestione dei vari aspetti
         """
         global v_global_connesso
-        global v_global_exec_time
 
         def get_dbms_output_flow():
             """
@@ -3323,11 +3316,6 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             # restituisco la lista delle righe di dbms_output
             return v_dbms_ret
 
-        # verifico che mi sia stato passato del testo
-        if p_plsql == '':
-            message_error('No script!')
-            return 'ko'
-
         # solo se sono connesso al DB....
         if v_global_connesso:            
             # sostituisce la freccia del mouse con icona "clessidra"
@@ -3343,163 +3331,142 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             # eseguo lo script così come è stato indicato!
             ###
             v_tot_record = 0
-            # esegue comando sql in modo asincrono!!! Al termine viene invocato un segnale e richiamata la funzione endSelectCommandToOracle
-            self.bind_variable(p_function='DIC',p_testo_sql=p_plsql)                                                        
-            v_start_time = datetime.datetime.now()
-            self.v_plsql_corrente = p_plsql
-            self.v_set_rowcount = p_rowcount
-            self.v_oracle_executer = oracle_executer.SendCommandToOracle(self.v_cursor, p_plsql, self.v_variabili_bind_dizionario)                                                                        
-        
-            # mi metto in attesa della fine del comando inviato a Oracle...questo perché non voglio accettare altri eventi nel frattempo se non la fine del comando
-            v_loop = QEventLoop()
-            self.v_oracle_executer.signalStatus.connect(v_loop.quit)  # Aspetto l'evento che mi restituisce l'executer
-            v_loop.exec_()  # Entra nel ciclo di attesa            
-        
-            # riattivo la freccia del mouse
-            Freccia_Mouse(False)       
-                                        
-            # chiudo la progressbar di esecuzione del comando
-            self.v_oracle_executer.close()                
-            
-            if self.v_oracle_executer.get_status() == 'CANCEL_JOB':               
-                # comando abortito --> cancello la connessione...unico modo per interrompere esecuzione 
-                v_global_connection.cancel()                                 
-                self.scrive_output("Error: command aborted", "E")                                                            
-
-            if self.v_oracle_executer.get_status() == 'END_JOB_KO':                
-                # comando terminato con errore --> emetto errore nella sezione di output
-                v_oracle_error = self.v_oracle_executer.get_error()                         
+            try:                
+                self.bind_variable(p_function='DIC',p_testo_sql=p_plsql)
+                self.v_cursor.execute(p_plsql,self.v_variabili_bind_dizionario)
+                v_tot_record = self.v_cursor.rowcount
+                self.v_esecuzione_ok = True
+            # se riscontrato errore di primo livello --> emetto sia codice che messaggio ed esco
+            except cx_Oracle.Error as e:                                                                                            
+                # ripristino icona freccia del mouse
+                Freccia_Mouse(False)
                 # leggo la parte di dbms_output
                 v_dbms_ret = get_dbms_output_flow()
                 # per prima cosa porto l'output a video (tipico è quello di script che contengono dbms_output e che vanno in errore durante l'esecuzione)
                 if v_dbms_ret != '':
-                    self.scrive_output(v_dbms_ret, 'I')
+	                self.scrive_output(v_dbms_ret, 'I')
+                # catturo errore che si è generato a livello Oracle
+                errorObj, = e.args                                     
                 # output dell'errore
-                self.scrive_output("Error: " + v_oracle_error.message, "E")                                 
+                self.scrive_output("Error: " + errorObj.message, "E")                                 
                 # per posizionarmi alla riga in errore ho solo la variabile offset che riporta il numero di carattere a cui l'errore si è verificato
-                v_riga, v_colonna =x_y_from_offset_text(self.v_plsql_corrente, v_oracle_error.offset, self.setting_eol)                                
+                v_riga, v_colonna =x_y_from_offset_text(p_plsql, errorObj.offset, self.setting_eol)                                
                 v_riga += self.v_offset_numero_di_riga
                 self.e_sql.setCursorPosition(v_riga,v_colonna)                
+                # ripristino icona freccia del mouse    
+                Freccia_Mouse(False)
                 # esco con errore
                 return 'ko'
 
-            if self.v_oracle_executer.get_status() == 'END_JOB_OK':   
-                # calcolo tempo esecuzione e aggiorno a video            
-                v_global_exec_time = (datetime.datetime.now() - v_start_time).total_seconds()
-                self.aggiorna_statusbar()
-                # aggiungo l'istruzione all'history            
-                write_sql_history(v_global_work_dir+'MSql.db',self.v_select_corrente,v_global_exec_time)                   
-                # conto record
-                v_tot_record = self.v_cursor.rowcount
-                self.v_esecuzione_ok = True            
-                ###
-                # da qui in poi vado alla ricerca di eventuali errori 
-                # var che indica se siamo in uno script di "CREATE"
-                v_create = False
-                # controllo se eravamo di fronte ad uno script di "CREATE"...inizio con il prendere i primi 500 caratteri (è una cifra aleatoria!)
-                # da notare come la stringa che si ricerca abbia uno spazio finale in modo non venga confusa con altro (ad esempio la funzione replace())
-                v_testo = self.v_plsql_corrente[0:500].upper()               
-                if 'CREATE ' in v_testo or 'REPLACE ' in v_testo or 'ALTER ' in v_testo or 'DROP ' in v_testo:
-                    v_create = True
-                    # nettifica del testo, togliendo spazi e ritorni a capo
-                    v_testo = v_testo.upper().lstrip().replace('\n',' ')                
-                    # cerco che tipo di oggetto è stato richiesto di creare                
-                    if 'PACKAGEBODY' in v_testo.replace(' ',''):
-                        v_tipo_script = 'PACKAGE BODY' 
-                    elif 'PACKAGE' in v_testo:
-                        v_tipo_script = 'PACKAGE' 
-                    elif 'PROCEDURE' in v_testo:
-                        v_tipo_script = 'PROCEDURE' 
-                    elif 'FUNCTION' in v_testo:
-                        v_tipo_script = 'FUNCTION' 
-                    elif 'TABLE' in v_testo:
-                        v_tipo_script = 'TABLE'
-                    elif 'VIEW' in v_testo:
-                        v_tipo_script = 'VIEW' 
-                    elif 'TRIGGER' in v_testo:
-                        v_tipo_script = 'TRIGGER' 
-                    elif 'SEQUENCE' in v_testo:
-                        v_tipo_script = 'SEQUENCE' 
-                    else:
-                        v_tipo_script = ''                        
-                    # ora devo cercare il nome del testo che è stato richiesto di creare....e quindi splitto il testo in parole
-                    v_split = v_testo.split()
-                    v_nome_script = ''
-                    # inizio a scorrere le parole presenti in questa parte di testo...
-                    for v_parola in v_split:                                        
-                        if v_parola not in ('CREATE','OR','REPLACE','ALTER','DROP','PACKAGE','BODY','EDITIONABLE','NONEDITIONABLE','TABLE','PROCEDURE','FUNCTION','TRIGGER','VIEW','SEQUENCE','PUBLIC','SYNONYM','TYPE'):
-                            v_nome_script = v_parola
-                            break
-                    # nettifico il nome dell'oggetto che potrebbe essere nel formato "SMILE"."NOME_OGGETTO"                
-                    v_nome_script = v_nome_script.replace('"','')
-                    if '.' in v_nome_script:
-                        v_nome_script = v_nome_script.split('.')[1]
+            ###
+            # da qui in poi vado alla ricerca di eventuali errori 
+            # var che indica se siamo in uno script di "CREATE"
+            v_create = False
+            # controllo se eravamo di fronte ad uno script di "CREATE"...inizio con il prendere i primi 500 caratteri (è una cifra aleatoria!)
+            # da notare come la stringa che si ricerca abbia uno spazio finale in modo non venga confusa con altro (ad esempio la funzione replace())
+            v_testo = p_plsql[0:500].upper()               
+            if 'CREATE ' in v_testo or 'REPLACE ' in v_testo or 'ALTER ' in v_testo or 'DROP ' in v_testo:
+                v_create = True
+                # nettifica del testo, togliendo spazi e ritorni a capo
+                v_testo = v_testo.upper().lstrip().replace('\n',' ')                
+                # cerco che tipo di oggetto è stato richiesto di creare                
+                if 'PACKAGEBODY' in v_testo.replace(' ',''):
+                    v_tipo_script = 'PACKAGE BODY' 
+                elif 'PACKAGE' in v_testo:
+                    v_tipo_script = 'PACKAGE' 
+                elif 'PROCEDURE' in v_testo:
+                    v_tipo_script = 'PROCEDURE' 
+                elif 'FUNCTION' in v_testo:
+                    v_tipo_script = 'FUNCTION' 
+                elif 'TABLE' in v_testo:
+                    v_tipo_script = 'TABLE'
+                elif 'VIEW' in v_testo:
+                    v_tipo_script = 'VIEW' 
+                elif 'TRIGGER' in v_testo:
+                    v_tipo_script = 'TRIGGER' 
+                elif 'SEQUENCE' in v_testo:
+                    v_tipo_script = 'SEQUENCE' 
+                else:
+                    v_tipo_script = ''                        
+                # ora devo cercare il nome del testo che è stato richiesto di creare....e quindi splitto il testo in parole
+                v_split = v_testo.split()
+                v_nome_script = ''
+                # inizio a scorrere le parole presenti in questa parte di testo...
+                for v_parola in v_split:                                        
+                    if v_parola not in ('CREATE','OR','REPLACE','ALTER','DROP','PACKAGE','BODY','EDITIONABLE','NONEDITIONABLE','TABLE','PROCEDURE','FUNCTION','TRIGGER','VIEW','SEQUENCE','PUBLIC','SYNONYM','TYPE'):
+                        v_nome_script = v_parola
+                        break
+                # nettifico il nome dell'oggetto che potrebbe essere nel formato "SMILE"."NOME_OGGETTO"                
+                v_nome_script = v_nome_script.replace('"','')
+                if '.' in v_nome_script:
+                    v_nome_script = v_nome_script.split('.')[1]
 
-                # quindi...se lo script era di "CREATE"...controllo se in compilazione ci sono stati errori...
-                if v_create:
-                    print('CREAZIONE DELLO SCRIPT --> Tipo: ' + v_tipo_script + ' Nome: ' + v_nome_script)
-                    # con questa select dico a Oracle di darmi eventuali errori presenti su un oggetto                  
-                    self.v_cursor.execute("SELECT LINE,POSITION,TEXT FROM USER_ERRORS WHERE NAME = '" + v_nome_script + "' and TYPE = '" + v_tipo_script + "' ORDER BY NAME, TYPE, LINE, POSITION")
-                    v_errori = self.v_cursor.fetchall()
-                    # errori riscontrati --> li emetto nella parte di output e mi posiziono sull'editor alla riga e colonna indicate
-                    if v_errori:
-                        v_1a_volta = True
-                        for info in v_errori:
-                            # emetto gli errori riscontrati
-                            self.scrive_output("Error at line " + str(info[0]) + " position " + str(info[1]) + " " + info[2], 'E')                                                
-                            # solo per il primo errore mi posiziono sull'editor alle coordinate indicate
-                            if v_1a_volta:                            
-                                v_riga = info[0]-1 + self.v_offset_numero_di_riga
-                                v_colonna = info[1]-1                                                        
-                                self.e_sql.setCursorPosition(v_riga,v_colonna)                            
-                                v_1a_volta = False
-                        # esco con errore
-                        return 'ko'
-                    # tutto ok! --> scrivo nell'output messaggio di buona riuscita operazione
-                    else:
-                        self.scrive_output(extract_word_from_cursor_pos(v_testo,1)  + ' ' + v_tipo_script + ' ' + v_nome_script + ' SUCCESSFULLY!','I')
-                
-                # altrimenti siamo di fronte ad uno script di pl-sql interno o di insert,update,delete,grant che vanno gestiti con apposito output
-                else:                
-                    # leggo la parte di dbms_output
-                    v_dbms_ret = get_dbms_output_flow()
-
-                    # se richiesto output del numero di record...
-                    if self.v_set_rowcount:
-                        # il numero lo riporto solo per (insert, update, delete...)
-                        if p_plsql.split()[0].upper() in ('INSERT','UPDATE','DELETE'):
-                            self.scrive_output(self.v_plsql_corrente.split()[0] + ' ' + str(v_tot_record) + ' row(s)', 'I')    
-                        # altrimenti (es. comment on table) emetto semplice messaggio di esecuzione
-                        else:
-                            self.scrive_output(self.v_plsql_corrente.split()[0] + ' EXECUTED!', 'I')    
-                    else:
-                        # porto l'output a video (tipico è quello di script che contengono dbms_output)
-                        if v_dbms_ret != '':
-                            self.scrive_output(v_dbms_ret, 'I')
-                        else:
-                            self.scrive_output('Script executed!', 'I')
-
-                # aumento il numero di riga di offset (serve per eventuale script successivo di questo gruppo di esecuzione)            
-                self.v_offset_numero_di_riga += len(self.v_plsql_corrente.split(chr(10)))
+            # quindi...se lo script era di "CREATE"...controllo se in compilazione ci sono stati errori...
+            if v_create:
+                print('CREAZIONE DELLO SCRIPT --> Tipo: ' + v_tipo_script + ' Nome: ' + v_nome_script)
+                # con questa select dico a Oracle di darmi eventuali errori presenti su un oggetto                  
+                self.v_cursor.execute("SELECT LINE,POSITION,TEXT FROM USER_ERRORS WHERE NAME = '" + v_nome_script + "' and TYPE = '" + v_tipo_script + "' ORDER BY NAME, TYPE, LINE, POSITION")
+                v_errori = self.v_cursor.fetchall()
+                # errori riscontrati --> li emetto nella parte di output e mi posiziono sull'editor alla riga e colonna indicate
+                if v_errori:
+                    v_1a_volta = True
+                    for info in v_errori:
+                        # emetto gli errori riscontrati
+                        self.scrive_output("Error at line " + str(info[0]) + " position " + str(info[1]) + " " + info[2], 'E')                                                
+                        # solo per il primo errore mi posiziono sull'editor alle coordinate indicate
+                        if v_1a_volta:                            
+                            v_riga = info[0]-1 + self.v_offset_numero_di_riga
+                            v_colonna = info[1]-1                                                        
+                            self.e_sql.setCursorPosition(v_riga,v_colonna)                            
+                            v_1a_volta = False
+                    # ripristino icona freccia del mouse    
+                    Freccia_Mouse(False)
+                    # esco con errore
+                    return 'ko'
+                # tutto ok! --> scrivo nell'output messaggio di buona riuscita operazione
+                else:
+                    self.scrive_output(extract_word_from_cursor_pos(v_testo,1)  + ' ' + v_tipo_script + ' ' + v_nome_script + ' SUCCESSFULLY!','I')
             
-            # refresh della sezione variabili bind
-            if len(self.v_variabili_bind_nome) != 0:            
-                self.bind_variable(p_function='SHOW')
+            # altrimenti siamo di fronte ad uno script di pl-sql interno o di insert,update,delete,grant che vanno gestiti con apposito output
+            else:                
+                # leggo la parte di dbms_output
+                v_dbms_ret = get_dbms_output_flow()
+
+                # se richiesto output del numero di record...
+                if p_rowcount:
+                    # il numero lo riporto solo per (insert, update, delete...)
+                    if p_plsql.split()[0].upper() in ('INSERT','UPDATE','DELETE'):
+                        self.scrive_output(p_plsql.split()[0] + ' ' + str(v_tot_record) + ' row(s)', 'I')    
+                    # altrimenti (es. comment on table) emetto semplice messaggio di esecuzione
+                    else:
+                        self.scrive_output(p_plsql.split()[0] + ' EXECUTED!', 'I')    
+                else:
+                    # porto l'output a video (tipico è quello di script che contengono dbms_output)
+                    if v_dbms_ret != '':
+                        self.scrive_output(v_dbms_ret, 'I')
+                    else:
+                        self.scrive_output('Script executed!', 'I')
+
+            # ripristino icona freccia del mouse
+            Freccia_Mouse(False)
+            # aumento il numero di riga di offset (serve per eventuale script successivo di questo gruppo di esecuzione)            
+            self.v_offset_numero_di_riga += len(p_plsql.split(chr(10)))
+
+        # refresh della sezione variabili bind
+        if len(self.v_variabili_bind_nome) != 0:            
+            self.bind_variable(p_function='SHOW')
 
         # esco con tutto ok
         return None
-    
+                
     def esegui_select(self, p_select, p_corrente):
         """
            Esegue p_select (solo il parser con carico della prima serie di record)
                se p_corrente è True la var v_select_corrente verrà rimpiazzata
-        """        
-        global v_global_connesso        
+        """
+        global v_global_connesso
         global o_global_preferences   
-        global v_global_exec_time
 
-        self.v_flag_testo_corrente = p_corrente
-                
         if v_global_connesso:                        
             # pulisco elenco
             self.slot_clear('RES')            
@@ -3515,7 +3482,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.v_pos_y = 0
 
             # prendo solo il testo che eventualmente l'utente ha evidenziato a video
-            if self.v_flag_testo_corrente:
+            if p_corrente:
                 self.v_select_corrente = p_select
             
             # se la tabella deve essere editabile
@@ -3526,83 +3493,61 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             else:
                 v_select = p_select
 
-            # esegue comando sql in modo asincrono!!! Al termine viene invocato un segnale e richiamata la funzione endSelectCommandToOracle
-            self.bind_variable(p_function='DIC',p_testo_sql=v_select)                                                        
-            v_start_time = datetime.datetime.now()
-            self.v_oracle_executer = oracle_executer.SendCommandToOracle(self.v_cursor, v_select, self.v_variabili_bind_dizionario)                                                                        
-            
-            # mi metto in attesa della fine del comando inviato a Oracle...questo perché non voglio accettare altri eventi nel frattempo se non la fine del comando
-            v_loop = QEventLoop()
-            self.v_oracle_executer.signalStatus.connect(v_loop.quit)  # Aspetto l'evento che mi restituisce l'executer
-            v_loop.exec_()  # Entra nel ciclo di attesa            
-
-            # riattivo la freccia del mouse
-            Freccia_Mouse(False)        
-
-            # controllo cosa mi ha restituito l'oggetto executer
-            if self.v_oracle_executer.get_status() == 'CANCEL_JOB':               
-                # comando abortito --> cancello la connessione...unico modo per interrompere esecuzione 
-                v_global_connection.cancel()                                 
-                self.scrive_output("Error: command aborted", "E")                                                            
-
-            if self.v_oracle_executer.get_status() == 'END_JOB_KO':                
-                # comando terminato con errore --> emetto errore nella sezione di output
-                v_oracle_error = self.v_oracle_executer.get_error()             
-                self.scrive_output("Error: " + v_oracle_error.message, "E")                                                            
-
-            if self.v_oracle_executer.get_status() == 'END_JOB_OK':   
-                # calcolo tempo esecuzione e aggiorno a video            
-                v_global_exec_time = (datetime.datetime.now() - v_start_time).total_seconds()
-                self.aggiorna_statusbar()
-                # aggiungo l'istruzione all'history            
-                write_sql_history(v_global_work_dir+'MSql.db',self.v_select_corrente,v_global_exec_time)                   
-                # comando eseguito correttamente --> imposto flag
+            # esegue sql contenuto nel campo a video                    
+            try:                
+                self.bind_variable(p_function='DIC',p_testo_sql=v_select)                                
+                self.v_cursor.execute(v_select, self.v_variabili_bind_dizionario)                            
                 self.v_esecuzione_ok = True
-                # prendo il cursore!
-                self.v_cursor = self.v_oracle_executer.get_cursor()                    
-                # lista contenente le intestazioni (tramite apposita funzione si ricavano i nomi delle colonne dall'sql che si intende eseguire)
-                self.nomi_intestazioni = nomi_colonne_istruzione_sql(self.v_cursor)                                    
-                self.o_table.setColumnCount(len(self.nomi_intestazioni))                                                    
-                # lista contenente i tipi delle colonne 
-                self.tipi_intestazioni = self.v_cursor.description   
-                # setto le intestazioni con i nomi restituiti dalla select
-                self.o_table.setHorizontalHeaderLabels(self.nomi_intestazioni)                                    
-                # se la select è eseguita partendo da editor...
-                if self.v_flag_testo_corrente:                                
-                    # pulisco la lista che contiene i valori dei filtri di intestazione 
-                    self.valori_intestazioni = []
-                    for i in range(0,len(self.nomi_intestazioni)):                
-                        self.valori_intestazioni.append('')
-                # se la select è eseguita partendo dal menu popup sulla intestazione di colonna...
-                # faccio in modo che tutte le colonne dove è stato impostato un filtro, abbiano l'icona dell'imbuto accanto al rispettivo titolo
-                else:
-                    v_pos = -1
-                    for nome_colonna in self.nomi_intestazioni:
-                        v_pos += 1
-                        # è presente un filtro...
-                        if self.valori_intestazioni[v_pos] != '':                        
-                            # creo un item che contiene icona imbuto e nome colonna corrente e rigenero la rispettiva intestazione
-                            v_new_header_item = QTableWidgetItem()
-                            v_new_header_item.setIcon(QIcon(QPixmap(":/icons/icons/filter.png")))
-                            v_new_header_item.setText(nome_colonna)
-                            self.o_table.setHorizontalHeaderItem(v_pos,v_new_header_item)
-                                
-                # se tutto ok, posso procedere con il caricare la prima pagina            
-                self.carica_pagina()   
+            # se riscontrato errore --> emetto sia codice che messaggio
+            except cx_Oracle.Error as e:                                                
+                # ripristino icona freccia del mouse
+                Freccia_Mouse(False)
+                # emetto errore nella sezione di output
+                errorObj, = e.args    
+                self.scrive_output("Error: " + errorObj.message, "E")                                            
+                return 'ko'
+                        
+            # lista contenente le intestazioni (tramite apposita funzione si ricavano i nomi delle colonne dall'sql che si intende eseguire)
+            self.nomi_intestazioni = nomi_colonne_istruzione_sql(self.v_cursor)                                    
+            self.o_table.setColumnCount(len(self.nomi_intestazioni))                                                    
+            # lista contenente i tipi delle colonne 
+            self.tipi_intestazioni = self.v_cursor.description   
+            # setto le intestazioni con i nomi restituiti dalla select
+            self.o_table.setHorizontalHeaderLabels(self.nomi_intestazioni)                                    
+            # se la select è eseguita partendo da editor...
+            if p_corrente:                                
+                # pulisco la lista che contiene i valori dei filtri di intestazione 
+                self.valori_intestazioni = []
+                for i in range(0,len(self.nomi_intestazioni)):                
+                    self.valori_intestazioni.append('')
+            # se la select è eseguita partendo dal menu popup sulla intestazione di colonna...
+            # faccio in modo che tutte le colonne dove è stato impostato un filtro, abbiano l'icona dell'imbuto accanto al rispettivo titolo
+            else:
+                v_pos = -1
+                for nome_colonna in self.nomi_intestazioni:
+                    v_pos += 1
+                    # è presente un filtro...
+                    if self.valori_intestazioni[v_pos] != '':                        
+                        # creo un item che contiene icona imbuto e nome colonna corrente e rigenero la rispettiva intestazione
+                        v_new_header_item = QTableWidgetItem()
+                        v_new_header_item.setIcon(QIcon(QPixmap(":/icons/icons/filter.png")))
+                        v_new_header_item.setText(nome_colonna)
+                        self.o_table.setHorizontalHeaderItem(v_pos,v_new_header_item)
+                             
+            # se tutto ok, posso procedere con il caricare la prima pagina            
+            self.carica_pagina()   
 
-                # refresh della sezione variabili bind
-                if len(self.v_variabili_bind_nome) != 0:
-                    self.bind_variable(p_function='SHOW')
+            # refresh della sezione variabili bind
+            if len(self.v_variabili_bind_nome) != 0:
+                self.bind_variable(p_function='SHOW')
 
-                # posizionamento sulla parte di output risultati select
-                self.o_tab_widget.setCurrentIndex(0) 
-                                            
-        # chiudo la progressbar di esecuzione del comando
-        self.v_oracle_executer.close()      
+            # posizionamento sulla parte di output risultati select
+            self.o_tab_widget.setCurrentIndex(0) 
 
-        # esco con tutto ok
-        return None
-    
+            # Ripristino icona freccia del mouse
+            Freccia_Mouse(False)
+            return None                     
+
     def carica_pagina(self):
         """
            Carica i dati del flusso record preparato da esegui_select
@@ -4541,14 +4486,9 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         v_y, v_x = self.e_sql.getCursorPosition()
         self.link_to_MSql_win1_class.l_cursor_pos.setText("Ln: " + str(v_y+1) + "  Col: " + str(v_x+1))
 
-        # tempo di esecuzione ultima istruzione                
-        v_total_seconds = datetime.timedelta(seconds=v_global_exec_time).total_seconds()
-        v_hours, v_remainder = divmod(v_total_seconds, 3600)
-        v_minutes, v_remainder = divmod(v_remainder, 60)
-        v_seconds, v_microseconds = divmod(v_remainder, 1)
-        v_tenths_of_second = int(v_microseconds * 100)
-        v_tempo_formattato = f"{int(v_hours):02}:{int(v_minutes):02}:{int(v_seconds):02}.{v_tenths_of_second:02}"
-        self.link_to_MSql_win1_class.l_exec_time.setText("Last execution time: " + v_tempo_formattato)
+        # tempo di esecuzione ultima istruzione
+        v_secondi_str = str(round(v_global_exec_time,2))
+        self.link_to_MSql_win1_class.l_exec_time.setText("Last execution time: sec. " + v_secondi_str)
 
 #
 #  ___ _   _ _____ ___  

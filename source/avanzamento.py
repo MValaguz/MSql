@@ -7,13 +7,16 @@
  Descrizione...: Classe per la gestione di una progressbar (è ad esempio utilizzato in oracle_my_sql.py)
 """
 # Librerie di sistema
-import sys, time
+import sys
+import time
 # Amplifico la pathname dell'applicazione in modo veda il contenuto della directory qtdesigner dove sono contenuti i layout
 sys.path.append('qtdesigner')
 # Librerie grafiche
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+# Libreria icone
+import resource_rc
 
 # Classe per la visualizzazione della progressbar
 class avanzamento_infinito_class(QProgressDialog):
@@ -57,7 +60,7 @@ class avanzamento_infinito_class(QProgressDialog):
     def chiudi(self):
         self.close()
 
-# Classe usata solo per lanciare il test
+# Classe usata solo per lanciare il test della progress infinita
 class Ui_Test(object):
     def setupUi(self, TestWindow):
         TestWindow.setObjectName("TestWindow")
@@ -79,9 +82,9 @@ class Ui_Test(object):
         # chiudo la barra di avanzamento
         v_progress.chiudi()
 
-# ----------------------------------------
-# TEST APPLICAZIONE
-# ----------------------------------------
+# ------------------------------------------------
+# TEST APPLICAZIONE BARRA DI AVANZAMENTO INFINITO
+# ------------------------------------------------
 if __name__ == "__main__":    
     app = QApplication(sys.argv)
     TestWindow = QMainWindow()
