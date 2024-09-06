@@ -88,6 +88,11 @@ class preferences_class():
                 self.auto_clear_output = True
             else:
                 self.auto_clear_output = False
+            # default format data
+            if 'date_format' in v_json:                        
+                self.date_format = v_json['date_format']
+            else:
+                self.date_format = '%d/%m/%Y %H:%M:%S'
             # csv separator
             self.csv_separator = v_json['csv_separator']
             # tab size
@@ -96,6 +101,11 @@ class preferences_class():
             self.elenco_server = v_json['server']
             # users
             self.elenco_user = v_json['users']
+            # autosave snapshoot (salvataggio degli editor aperti nella cartella backup)
+            if 'autosave_snapshoot_interval' in v_json:                        
+                self.autosave_snapshoot_interval = v_json['autosave_snapshoot_interval']
+            else:
+                self.autosave_snapshoot_interval = 60
         # imposto valori di default senza presenza dello specifico file
         else:
             self.remember_window_pos = True
@@ -107,10 +117,12 @@ class preferences_class():
             self.end_of_line = False
             self.font_editor = 'Courier New, 12, BOLD'
             self.font_result = 'Segoe UI, 8'
+            self.autosave_snapshoot_interval = 60
             self.editable = False
             self.auto_column_resize = False
             self.indentation_guide = False
             self.auto_clear_output = True
+            self.date_format = '%d/%m/%Y %H:%M:%S'
             self.csv_separator = '|'
             self.tab_size = '2'
             # elenco server è composto da Titolo, TNS e Colore
@@ -149,13 +161,15 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         self.e_default_open_dir.setText(self.preferences.open_dir)
         self.e_default_save_dir.setText(self.preferences.save_dir)        
         self.e_default_utf_8.setChecked(self.preferences.utf_8)        
-        self.e_default_end_of_line.setChecked(self.preferences.end_of_line)        
+        self.e_default_end_of_line.setChecked(self.preferences.end_of_line)                
+        self.e_autosave_snapshoot_interval.setValue(self.preferences.autosave_snapshoot_interval)
         self.e_default_font_editor.setText(self.preferences.font_editor)
         self.e_default_font_result.setText(self.preferences.font_result)
         self.e_default_editable.setChecked(self.preferences.editable)   
         self.e_default_auto_column_resize.setChecked(self.preferences.auto_column_resize)
         self.e_default_indentation_guide.setChecked(self.preferences.indentation_guide)
         self.e_default_auto_clear_output.setChecked(self.preferences.auto_clear_output)
+        self.e_default_date_format.setCurrentText(self.preferences.date_format)
         self.e_default_csv_separator.setText(self.preferences.csv_separator)
         self.e_tab_size.setText(self.preferences.tab_size)
 
@@ -374,6 +388,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
 		         'save_dir': self.e_default_save_dir.text(),
                  'utf_8': v_utf_8,
                  'eol': v_eol,
+                 'autosave_snapshoot_interval':self.e_autosave_snapshoot_interval.value(),
 		         'font_editor' :self.e_default_font_editor.text(),
 		         'font_result' : self.e_default_font_result.text(),
                  'editable' : v_editable,
@@ -382,6 +397,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
                  'csv_separator': self.e_default_csv_separator.text(),
                  'tab_size': self.e_tab_size.text(),
                  'auto_clear_output': v_auto_clear_output,
+                 'date_format': self.e_default_date_format.currentText(),
                  'server': v_server,
                  'users': v_users
                 }

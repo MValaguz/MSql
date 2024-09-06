@@ -284,15 +284,17 @@ def slot_on_click():
             print(v_oracle_error.message)    
             # chiudo la progressbar
             v_oracle_executer.close()    
+    
+    v_bind = []
     # esecuzione della funzione con creazione della classe ed esecuzione della medesima
     # in questo modo le classi di thread vedono i parametri ricevuti in input e la dialog blocca 
     # tutto il programma fino al termine del thread principale    
     # v_oracle_executer = SendCommandToOracle(v_cursor, """begin
     #                                                      MW_MAGAZZINI.PREPARA_PRELIEVO_ORDINI('SMI','B1');
     #                                                      MW_MAGAZZINI.DISPONIBILE_PRELIEVO_ORDINI('SMI','B1');
-    #                                                     end;""", None)        
-    v_oracle_executer = SendCommandToOracle(v_cursor, """select * from va_op_da_versare""", None)                                                                
-    #v_oracle_executer = SendCommandToOracle(v_cursor, """select * from cp_dipen""", None)                                                                    
+    #                                                     end;""", v_bind)        
+    v_oracle_executer = SendCommandToOracle(v_cursor, """select * from va_op_da_versare""", v_bind)                                                                
+    #v_oracle_executer = SendCommandToOracle(v_cursor, """select * from cp_dipen""", v_bind)                                                                    
 
     v_oracle_executer.signalStatus.connect(endCommandToOracle)    
 

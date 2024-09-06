@@ -39,6 +39,9 @@
     </property>
     <item>
      <widget class="QMdiArea" name="mdiArea">
+      <property name="activationOrder">
+       <enum>QMdiArea::ActivationHistoryOrder</enum>
+      </property>
       <property name="viewMode">
        <enum>QMdiArea::TabbedView</enum>
       </property>
@@ -148,6 +151,8 @@
     <addaction name="separator"/>
     <addaction name="actionClear_output"/>
     <addaction name="actionAuto_clear_output"/>
+    <addaction name="separator"/>
+    <addaction name="actionExtract_sql_from_output"/>
     <addaction name="separator"/>
     <addaction name="actionFont_output_selector"/>
    </widget>
@@ -1256,6 +1261,15 @@
     <string>Auto clear output</string>
    </property>
   </action>
+  <action name="actionExtract_sql_from_output">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/sql.png</normaloff>:/icons/icons/sql.png</iconset>
+   </property>
+   <property name="text">
+    <string>Extract sql from output</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>oggetti_db_scelta</tabstop>
@@ -1300,22 +1314,6 @@
     <hint type="destinationlabel">
      <x>1055</x>
      <y>-12</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>oggetti_db_ricerca</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>MSql_win1</receiver>
-   <slot>slot_oggetti_db_scelta()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>1243</x>
-     <y>154</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>961</x>
-     <y>-11</y>
     </hint>
    </hints>
   </connection>
@@ -1399,6 +1397,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>oggetti_db_ricerca</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>MSql_win1</receiver>
+   <slot>slot_object_navigator_start_timer()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1147</x>
+     <y>147</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1139</x>
+     <y>-23</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>slot_oggetti_db_scelta()</slot>
@@ -1406,5 +1420,6 @@
   <slot>slot_resize_MSql_win1()</slot>
   <slot>slot_db_oggetto_tree_expand()</slot>
   <slot>slot_object_viewer_find()</slot>
+  <slot>slot_object_navigator_start_timer()</slot>
  </slots>
 </ui>

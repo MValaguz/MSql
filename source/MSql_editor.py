@@ -96,6 +96,9 @@ o_global_preferences = preferences_class(v_global_work_dir + 'MSql.ini')
 v_global_main_geometry = object
 # Contiene il tempo di esecuzione ultima istruzione
 v_global_exec_time = 0
+# Contiene il colore personalizzato del server
+v_global_color = '#ffffff'
+v_global_background = 'black'
 
 def salvataggio_editor(p_save_as, p_nome, p_testo):
     """
@@ -368,6 +371,13 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             v_data_ultima_modifica = datetime.datetime.fromtimestamp(os.stat(v_global_work_dir + 'MSql_autocompletion.ini').st_mtime)
             if (datetime.datetime.now() - v_data_ultima_modifica) > datetime.timedelta(days=14):
                 message_info("The dictionary is more than two weeks old!" + chr(10) + "Remember to regenerate it!" + chr(10) + "See the menu Tools/Autocomplete dictionary ;-)")                    
+
+        ###
+        # imposto il timer che permette all'object navigator di attivare la ricerca automatica dopo 0,8 secondi dalla digitazione del testo
+        ###
+        self.object_navigator_search_timer = QTimer(self)
+        self.object_navigator_search_timer.setSingleShot(True)
+        self.object_navigator_search_timer.timeout.connect(self.slot_oggetti_db_scelta)
 
     def dragEnterEvent(self, event):
         """
@@ -690,6 +700,9 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             # Prendo il testo selezionato e lo riformatto (esempio istruzione SQL che viene reindentata)
             elif p_slot.text() == 'Format SQL statement':
                 o_MSql_win2.slot_format_sql_statement()
+            # Estraggo dall'output una nuova select e la inserisco nell'editor (questo ha senso se utente ha inserito parametri usando il popup menu sulle colonne)
+            elif p_slot.text() == 'Extract sql from output':
+                o_MSql_win2.slot_extract_sql_from_output()
 
     def slot_utf8(self):
         """
@@ -954,11 +967,9 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         global v_global_connesso   
         global v_global_connection
         global v_global_my_lexer_keywords
-        global o_global_preferences   
-
-        # Default del colore (viene poi superato da eventuali preferenze)
-        v_color = '#ffffff'
-        v_background = 'black'
+        global v_global_color
+        global v_global_background
+        global o_global_preferences           
         
         ###
         # Refresh del menu
@@ -976,7 +987,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 for action in self.action_elenco_server:            
                     if action.text() == rec[0]:
                         action.setChecked(True)            
-                        v_color = rec[2]                                                      
+                        v_global_color = rec[2]                                                      
 
         # ricerco posizione nei preferiti e attivo la corrispondente voce di menu (elenco user)
         # notare come attraverso una triangolazione trovo quale voce attivare (usando quanto contenuto nelle preferenze)
@@ -1023,14 +1034,14 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
 
         # Se mi collego come SYSDBA coloro di rosso
         if self.e_user_mode == 'SYSDBA':
-            v_background = 'red'
+            v_global_background = 'red'
 
         # sulla statusbar, aggiorno la label della connessione        
         self.l_connection.setText("Connection: " + self.e_server_name + "/" + self.e_user_name)     
         if o_global_preferences.dark_theme:                       
-            self.l_connection.setStyleSheet('background-color: ' + v_color + ';color: "' + v_background + '";')              
+            self.l_connection.setStyleSheet('background-color: ' + v_global_color + ';color: "' + v_global_background + '";')              
         else:
-            self.l_connection.setStyleSheet('background-color: ' + v_background + ';color: "' + v_color + '";')              
+            self.l_connection.setStyleSheet('background-color: ' + v_global_background + ';color: "' + v_global_color + '";')              
 
         # se la connessione è andata a buon fine, richiedo elenco degli oggetti in modo da aggiornare il dizionario dell'editor con nuove parole chiave
         # in questa sezione viene caricata la lista v_global_my_lexer_keywords con tutti i nomi di tabelle, viste, procedure, ecc.
@@ -1056,17 +1067,23 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 # Imposto il colore di sfondo su tutti gli oggetti principali (l'editor è stato tolto volutamente per un effetto grafico non piacevole)                               
                 # Questa reimpostazione vale solo per il tema di colori chiaro e non per il tema scuro
                 if not o_global_preferences.dark_theme:
-                    obj_win2.o_table.setStyleSheet("QTableWidget {background-color: " + v_color + ";}")
-                    obj_win2.o_output.setStyleSheet("QPlainTextEdit {background-color: " + v_color + ";}")
-                    obj_win2.o_map.setStyleSheet("QTableView {background-color: " + v_color + ";}")
-                    self.oggetti_db_elenco.setStyleSheet("QListView {background-color: " + v_color + ";}")
-                    self.db_oggetto_tree.setStyleSheet("QTreeView {background-color: " + v_color + ";}")                
+                    # imposto i colori sugli oggetti che fanno parte dell'editor
+                    obj_win2.set_Color()
+                    # imposto i colori dell'object navigator
+                    self.oggetti_db_elenco.setStyleSheet("QListView {background-color: " + v_global_color + ";}")
+                    self.db_oggetto_tree.setStyleSheet("QTreeView {background-color: " + v_global_color + ";}")                
                                 
                 # aggiorno il lexer aggiungendo tutte le nuove keywords                
                 if len(v_global_my_lexer_keywords) > 0:                          
                     obj_win2.v_lexer.keywords(6)
                     obj_win2.v_lexer.carica_dizionario_per_autocompletamento()
         
+    def slot_object_navigator_start_timer(self):
+        """
+           Attiva il timer che attende 0,8 secondi prima di richiamare effettivamente la ricerca
+        """
+        self.object_navigator_search_timer.start(800)  
+            
     def slot_oggetti_db_scelta(self):
         """
            In base alla voce scelta, viene caricata la lista con elenco degli oggetti pertinenti
@@ -1307,7 +1324,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                               UNION ALL
                               SELECT DBMS_METADATA.GET_DDL('PACKAGE_BODY','"""+self.v_nome_oggetto+"""') FROM DUAL
                            """
-            elif self.v_tipo_oggetto in ('TABLE','VIEW'):
+            elif self.v_tipo_oggetto in ('TABLE'):
                 v_select = """SELECT DBMS_METADATA.GET_DDL('"""+self.v_tipo_oggetto+"""','"""+self.v_nome_oggetto+"""') FROM DUAL
                               UNION ALL
                               SELECT TO_CLOB('\n/\n') FROM DUAL
@@ -1321,13 +1338,29 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                               WHERE (SELECT COUNT(*) FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+self.v_nome_oggetto+"""' AND R_CONSTRAINT_NAME IS NULL) > 0													   
                               UNION ALL
                               SELECT TO_CLOB('\n/\n') FROM DUAL
+                              UNION ALL                              
+                              SELECT DBMS_METADATA.GET_DEPENDENT_DDL('TRIGGER','"""+self.v_nome_oggetto+"""') FROM DUAL
+                              WHERE (SELECT COUNT(*) FROM ALL_TRIGGERS WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+self.v_nome_oggetto+"""') > 0													                                 
+                              UNION ALL 
+                              SELECT TO_CLOB('\n/\n') FROM DUAL                              
                               UNION ALL
-                              /*
-                               SELECT DBMS_METADATA.GET_DEPENDENT_DDL('REF_CONSTRAINT','"""+self.v_nome_oggetto+"""') FROM DUAL
-                               WHERE (SELECT COUNT(*) FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+self.v_nome_oggetto+"""' AND R_CONSTRAINT_NAME IS NOT NULL) > 0													   
-                               UNION ALL
-                               SELECT TO_CLOB('\n/\n') FROM DUAL
-                              UNION ALL*/
+                              SELECT TO_CLOB('COMMENT ON TABLE ' || TABLE_NAME || ' IS ''' || REPLACE(COMMENTS,'''','''''') || ''';')
+                              FROM   ALL_TAB_COMMENTS
+                              WHERE  ALL_TAB_COMMENTS.OWNER = '"""+self.e_user_name+"""'
+                                AND  ALL_TAB_COMMENTS.TABLE_NAME = '"""+self.v_nome_oggetto+"""'   
+                              UNION ALL 
+                              SELECT TO_CLOB('\n/\n') FROM DUAL                              
+                              UNION ALL
+                              SELECT TO_CLOB('COMMENT ON COLUMN '|| TABLE_NAME || '.' || COLUMN_NAME || ' IS ''' || REPLACE(COMMENTS,'''','''''') || ''';\n')
+                              FROM   ALL_COL_COMMENTS
+                              WHERE  ALL_COL_COMMENTS.OWNER = '"""+self.e_user_name+"""'
+                                AND  ALL_COL_COMMENTS.TABLE_NAME = '"""+self.v_nome_oggetto+"""'   
+                           """
+            elif self.v_tipo_oggetto in ('VIEW'):
+                v_select = """SELECT DBMS_METADATA.GET_DDL('"""+self.v_tipo_oggetto+"""','"""+self.v_nome_oggetto+"""') FROM DUAL
+                              UNION ALL
+                              SELECT TO_CLOB('\n/\n') FROM DUAL                              
+                              UNION ALL                              
                               SELECT DBMS_METADATA.GET_DEPENDENT_DDL('TRIGGER','"""+self.v_nome_oggetto+"""') FROM DUAL
                               WHERE (SELECT COUNT(*) FROM ALL_TRIGGERS WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+self.v_nome_oggetto+"""') > 0													                                 
                               UNION ALL 
@@ -1360,7 +1393,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 return 'ko'
             
             try:                            
-                # prendo il primo campo, del primo record e lo trasformo in stringa ricavandone tutto il sorgente
+                # prendo il primo campo, del primo record e lo trasformo in stringa ricavandone tutto il sorgente                
                 self.v_cursor_db_obj.execute(v_select)
                 v_testo_oggetto_db = ''
                 for v_record in self.v_cursor_db_obj:
@@ -1438,7 +1471,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             v_tipo_obj = self.v_tipo_foglia
         else:
             v_nome_obj = self.v_nome_oggetto
-            v_nome_obj = self.v_tipo_oggetto
+            v_tipo_obj = self.v_tipo_oggetto
 
         # prendo editor corrente
         o_MSql_win2 = self.oggetto_win2_attivo()
@@ -1539,15 +1572,8 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         # se l'oggetto selezionato è una tabella o una vista --> preparo select per estrarre i nomi dei campi
         if self.v_tipo_oggetto == 'TABLE' or self.v_tipo_oggetto == 'VIEW':
             print('Start loading object viewer of --> ' + self.v_nome_oggetto + ' - ' + self.v_tipo_oggetto)
-            # ricerco il proprietario dell'oggetto
-            self.v_cursor_db_obj.execute("SELECT OWNER FROM ALL_OBJECTS WHERE OBJECT_NAME='"+self.v_nome_oggetto+"' AND OBJECT_TYPE='"+self.v_tipo_oggetto+"'")            
-            v_record = self.v_cursor_db_obj.fetchone()
-            if v_record is not None:
-                self.owner_oggetto = v_record[0]
-            else:
-                self.owner_oggetto = ''
             # ricerco la descrizione dell'oggetto
-            self.v_cursor_db_obj.execute("SELECT COMMENTS FROM ALL_TAB_COMMENTS WHERE owner='"+self.owner_oggetto+"' AND TABLE_NAME='"+self.v_nome_oggetto+"'")
+            self.v_cursor_db_obj.execute("SELECT COMMENTS FROM ALL_TAB_COMMENTS WHERE owner='"+self.e_user_name+"' AND TABLE_NAME='"+self.v_nome_oggetto+"'")
             v_record = self.v_cursor_db_obj.fetchone()
             if v_record is not None:
                 self.v_tipo_oggetto_commento = v_record[0]
@@ -1555,12 +1581,12 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 self.v_tipo_oggetto_commento = ''
             # creo un modello dati con 4 colonne (dove nell'intestazione ci metto il nome della tabella e la sua descrizione)
             self.db_oggetto_tree_model = QStandardItemModel()
-            self.db_oggetto_tree_model.setHorizontalHeaderLabels([self.v_nome_oggetto, self.owner_oggetto, '', self.v_tipo_oggetto_commento])
+            self.db_oggetto_tree_model.setHorizontalHeaderLabels([self.v_nome_oggetto, self.e_user_name, '', self.v_tipo_oggetto_commento])
 
             ###
             # prima radice con il nome della tabella
             ###
-            v_root_campi = QStandardItem('Fields')
+            v_root_campi = QStandardItem('Fields')            
 
             self.v_cursor_db_obj.execute("""SELECT A.COLUMN_NAME AS NOME,
                                                    Decode(A.DATA_TYPE,'NUMBER',Lower(A.DATA_TYPE) || '(' || A.DATA_PRECISION || ',' || A.DATA_SCALE || ')',Lower(A.DATA_TYPE) || '(' || A.CHAR_LENGTH || ')')  AS TIPO,
@@ -1568,7 +1594,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                                                    DATA_DEFAULT AS VALORE_DEFAULT,
                                                    B.COMMENTS AS COMMENTO
                                             FROM   ALL_TAB_COLUMNS A, ALL_COL_COMMENTS B 
-                                            WHERE  A.OWNER='"""+self.owner_oggetto+"""' AND 
+                                            WHERE  A.OWNER='"""+self.e_user_name+"""' AND 
                                                    A.TABLE_NAME ='"""+self.v_nome_oggetto+"""' AND 
                                                    A.OWNER=B.OWNER AND 
                                                    A.TABLE_NAME=B.TABLE_NAME AND 
@@ -1576,7 +1602,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                                             ORDER BY A.COLUMN_ID""")
     
             # prendo i vari campi della tabella o vista e li carico nel modello di dati
-            for result in self.v_cursor_db_obj:                       
+            for result in self.v_cursor_db_obj:                        
                 v_campo_col0 = QStandardItem(result[0])
                 v_campo_col1 = QStandardItem(result[1])
                 v_campo_col2 = QStandardItem(result[2])
@@ -1601,7 +1627,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                                                                 CONSTRAINT_NAME=ALL_CONSTRAINTS.CONSTRAINT_NAME) 
                                                    END AS REGOLA
                                             FROM   ALL_CONSTRAINTS 
-                                            WHERE  OWNER='"""+self.owner_oggetto+"""' AND 
+                                            WHERE  OWNER='"""+self.e_user_name+"""' AND 
                                                    TABLE_NAME='"""+self.v_nome_oggetto+"""' AND
                                                    CONSTRAINT_NAME NOT LIKE 'SYS%'
                                             ORDER BY Decode(CONSTRAINT_TYPE,'P','1','R','2','3'), CONSTRAINT_NAME""")
@@ -1625,7 +1651,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                                                    CASE WHEN UNIQUENESS='UNIQUE' THEN 'unique' END UNICO, 
                                                    (SELECT LISTAGG(COLUMN_NAME,',') WITHIN GROUP (ORDER BY COLUMN_POSITION) COLONNE FROM ALL_IND_COLUMNS WHERE INDEX_OWNER=ALL_INDEXES.OWNER AND INDEX_NAME=ALL_INDEXES.INDEX_NAME) COLONNE
                                             FROM   ALL_INDEXES 
-                                            WHERE  OWNER='"""+self.owner_oggetto+"""' AND 
+                                            WHERE  OWNER='"""+self.e_user_name+"""' AND 
                                                     TABLE_NAME='"""+self.v_nome_oggetto+"""'
                                                     ORDER BY INDEX_NAME""")
 
@@ -1647,7 +1673,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                                                    TRIGGER_TYPE, 
                                                    TRIGGERING_EVENT 
                                             FROM   ALL_TRIGGERS 
-                                            WHERE  OWNER='"""+self.owner_oggetto+"""' AND 
+                                            WHERE  OWNER='"""+self.e_user_name+"""' AND 
                                                    TABLE_NAME='"""+self.v_nome_oggetto+"""'
                                             ORDER BY TRIGGER_NAME""")
 
@@ -1683,14 +1709,6 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
 
         # se l'oggetto selezionato è un package, funzioni e procedure ...
         elif self.v_tipo_oggetto in ('PACKAGE','PACKAGE BODY','FUNCTION','PROCEDURE') :
-            # ricerco il proprietario dell'oggetto
-            self.v_cursor_db_obj.execute("SELECT OWNER FROM ALL_OBJECTS WHERE OBJECT_NAME='"+self.v_nome_oggetto+"' AND OBJECT_TYPE='"+self.v_tipo_oggetto+"'")            
-            v_record = self.v_cursor_db_obj.fetchone()
-            if v_record is not None:
-                self.owner_oggetto = v_record[0]
-            else:
-                self.owner_oggetto = ''
-
             # creo un modello dati con 1 colonna (dove nell'intestazione ci metto il nome dell'oggetto)
             self.db_oggetto_tree_model = QStandardItemModel()
             self.db_oggetto_tree_model.setHorizontalHeaderLabels([self.v_nome_oggetto])            
@@ -1701,7 +1719,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             v_root_codice = QStandardItem('Code')
 
             # leggo il sorgente e lo metto dentro una lista!
-            self.v_cursor_db_obj.execute("""SELECT UPPER(TEXT) as TEXT, LINE FROM ALL_SOURCE WHERE OWNER='"""+self.owner_oggetto+"""' AND NAME='"""+self.v_nome_oggetto+"""' AND TYPE='"""+self.v_tipo_oggetto+"""' ORDER BY LINE""")
+            self.v_cursor_db_obj.execute("""SELECT UPPER(TEXT) as TEXT, LINE FROM ALL_SOURCE WHERE OWNER='"""+self.e_user_name+"""' AND NAME='"""+self.v_nome_oggetto+"""' AND TYPE='"""+self.v_tipo_oggetto+"""' ORDER BY LINE""")
             v_lista_testo = []
             for result in self.v_cursor_db_obj:                       
                 v_lista_testo.append(result[0])
@@ -1807,7 +1825,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             # preparo la select per ricerca tutte le tabelle referenziate
             self.v_cursor_db_obj.execute("""SELECT DISTINCT TABLE_NAME
                                             FROM   ALL_CONSTRAINTS
-                                            WHERE  OWNER = '"""+self.owner_oggetto+"""' AND
+                                            WHERE  OWNER = '"""+self.e_user_name+"""' AND
                                                    CONSTRAINT_TYPE='R' AND 
                                                    R_CONSTRAINT_NAME IN (SELECT CONSTRAINT_NAME
                                                                          FROM   ALL_CONSTRAINTS
@@ -2241,9 +2259,10 @@ class My_MSql_Lexer(QsciLexerSQL):
         # la variabile lock viene usata per evitare problemi di ricorsione
         if self.selection_lock == False:
             self.selection_lock = True
-            selected_text = self.p_editor.selectedText()
+            selected_text = self.p_editor.selectedText()            
             self.clear_selection_highlights()
-            if selected_text.isidentifier():
+            # la funzione isidentifier non riconosce i numeri!
+            if selected_text.isidentifier():                            
                 self._highlight_selected_text(selected_text,case_sensitive=False,regular_expression=True)
             self.selection_lock = False        
 
@@ -2442,8 +2461,12 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         ###
 
         # inizializzo var che contiene la select corrente
+        # la select corrente è quella che l'utente seleziona nell'editor e da cui si parte per aggiungere 
+        # altre caratteristiche tramite i popup menu sulle colonne
         self.v_select_corrente = ''
         self.v_plsql_corrente = ''
+        # select effettivamente eseguita dal motore Oracle
+        self.v_select_eseguita = ''
         self.v_set_rowcount = False
         # inizializzo var che indica che l'esecuzione è andata ok
         self.v_esecuzione_ok = False  
@@ -2520,9 +2543,18 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         else:
             self.v_cursor = None
 
+        # imposto i colori
+        self.set_Color()
+
         # definizione del menu di ricerca sulle colonne dei risultati
         self.o_table_hH = self.o_table.horizontalHeader()
         self.o_table_hH.sectionClicked.connect(self.slot_click_colonna_risultati)        
+
+        # se richiesto dalle preferenze, creazione di un timer per la creazione di un backup del testo 
+        if o_global_preferences.autosave_snapshoot_interval != 0:             
+            self.autosave_snapshoot_timer = QTimer(self)
+            self.autosave_snapshoot_timer.timeout.connect(self.slot_save_snapshoot)
+            self.autosave_snapshoot_timer.start(o_global_preferences.autosave_snapshoot_interval*1000) 
         
     def eventFilter(self, source, event):
         """
@@ -2777,6 +2809,28 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.win_dialog_zoom_lineEdit.setPlainText(self.v_o_table_current_item.text())
         self.win_dialog_zoom_item.show()
 
+    def slot_save_snapshoot(self):
+        """
+           Esegue il backup del testo presente nell'editor corrente all'interno della cartella backup
+        """        
+        global v_global_work_dir
+
+        print('AUTOSAVE ' + self.objectName())
+
+        # se la directory backup non esiste la creo
+        if not os.path.isdir(v_global_work_dir + 'backup'):
+            os.mkdir(v_global_work_dir + 'backup')
+        
+        # creo il backup dell'editor corrente (Attenzione! Ogni editor aperto avrà il suo timer di salvataggio!)
+        if o_global_preferences.utf_8:
+            # scrittura usando utf-8 (il newline come parametro è molto importante per la gestione corretta degli end of line)                                                            
+            v_file = open(v_global_work_dir + 'backup\\' + titolo_window(self.objectName()) ,'w',encoding='utf-8', newline='')
+        else:
+            # scrittura usando ansi (il newline come parametro è molto importante per la gestione corretta degli end of line)                                        
+            v_file = open(v_global_work_dir + 'backup\\' + titolo_window(self.objectName()),'w', newline='')
+        v_file.write(self.e_sql.text())
+        v_file.close()                                
+    
     def slot_f11(self):
         """
            Premendo F11 viene estratto dalla posizione del cursore dell'editor, il nome dell'oggetto
@@ -3496,9 +3550,9 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         """        
         global v_global_connesso        
         global o_global_preferences   
-        global v_global_exec_time
+        global v_global_exec_time        
 
-        self.v_flag_testo_corrente = p_corrente
+        self.v_flag_testo_corrente = p_corrente        
                 
         if v_global_connesso:                        
             # pulisco elenco
@@ -3525,7 +3579,10 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                 v_select = 'SELECT ROWID, MY_SQL.* FROM (' + p_select + ') MY_SQL'    
             else:
                 v_select = p_select
-
+            
+            # per la funzionalità "extract sql from output" mi salvo la select effettivamente eseguita
+            self.v_select_eseguita = v_select
+            
             # esegue comando sql in modo asincrono!!! Al termine viene invocato un segnale e richiamata la funzione endSelectCommandToOracle
             self.bind_variable(p_function='DIC',p_testo_sql=v_select)                                                        
             v_start_time = datetime.datetime.now()
@@ -3534,7 +3591,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             # mi metto in attesa della fine del comando inviato a Oracle...questo perché non voglio accettare altri eventi nel frattempo se non la fine del comando
             v_loop = QEventLoop()
             self.v_oracle_executer.signalStatus.connect(v_loop.quit)  # Aspetto l'evento che mi restituisce l'executer
-            v_loop.exec_()  # Entra nel ciclo di attesa            
+            v_loop.exec_()  # Entra nel ciclo di attesa                        
 
             # riattivo la freccia del mouse
             Freccia_Mouse(False)        
@@ -3597,8 +3654,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                 # posizionamento sulla parte di output risultati select
                 self.o_tab_widget.setCurrentIndex(0) 
                                             
-        # chiudo la progressbar di esecuzione del comando
-        self.v_oracle_executer.close()      
+        # chiudo la progressbar di esecuzione del comando        
+        self.v_oracle_executer.close()             
 
         # esco con tutto ok
         return None
@@ -3665,8 +3722,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                     elif field == None:                                 
                         self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( "" ) )                
                     # campo data
-                    elif self.tipi_intestazioni[x][1] == cx_Oracle.DATETIME:                                                                            
-                        self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( str(field) ) )       
+                    elif self.tipi_intestazioni[x][1] == cx_Oracle.DATETIME:                                     
+                        self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( f"{field:{o_global_preferences.date_format}}" ) )       
                     # campo raw (si tratta di byte che vengono convertiti in stringa in formato hex)
                     elif self.tipi_intestazioni[x][1] == cx_Oracle.DB_TYPE_RAW:                          
                         self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( field.hex().upper() ) )       
@@ -3985,21 +4042,17 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         """
            Apre la dock per la ricerca del testo 
         """            
+        # se è stato selezionato del testo lo utilizzo come base per la ricerca
+        v_testo_selezionato = self.e_sql.selectedText()
+        if len(v_testo_selezionato) > 0:            
+            self.e_find.setText(v_testo_selezionato.split()[0])        
+        else:
+            self.e_find.setText('')        
+
+        # apro la sezione di ricerca e posiziono il fuoco del cursore
         self.dockFindWidget.show()
         self.e_find.setFocus()  
-        
-        # ricavo numero riga e posizione del cursore
-        v_num_line, v_num_pos = self.e_sql.getCursorPosition()                
-        # estraggo l'intera riga dove è posizionato il cursore
-        self.e_sql.setSelection(v_num_line, 0, v_num_line+1, -1)
-        v_line = self.e_sql.selectedText()
-        # riposiziono il cursore allo stato originario
-        self.e_sql.setSelection(v_num_line, v_num_pos, v_num_line, v_num_pos)
-        # utilizzando la posizione del cursore sulla riga, estraggo la parola più prossima al cursore stesso                
-        v_oggetto = extract_word_from_cursor_pos(v_line.upper(), v_num_pos)                
-        # preimposto il campo di ricerca con la parola dove è posizionato il cursore in quel momento        
-        self.e_find.setText(v_oggetto.strip())        
-                
+                        
         # definizione della struttura per elenco dei risultati (valido solo per find all)       
         self.find_all_model = QtGui.QStandardItemModel()        
         self.o_find_all_result.setModel(self.find_all_model)
@@ -4077,20 +4130,15 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         """
            Ricerca e sostituisci
         """
-        self.dockReplaceWidget.show()
+        # se è stato selezionato del testo lo utilizzo come base per la ricerca
+        v_testo_selezionato = self.e_sql.selectedText()
+        if len(v_testo_selezionato) > 0:            
+            self.e_replace_search.setText(v_testo_selezionato.split()[0])        
+        else:
+            self.e_replace_search.setText('')        
         
-        # ricavo numero riga e posizione del cursore
-        v_num_line, v_num_pos = self.e_sql.getCursorPosition()                
-        # estraggo l'intera riga dove è posizionato il cursore
-        self.e_sql.setSelection(v_num_line, 0, v_num_line+1, -1)
-        v_line = self.e_sql.selectedText()
-        # riposiziono il cursore allo stato originario
-        self.e_sql.setSelection(v_num_line, v_num_pos, v_num_line, v_num_pos)
-        # utilizzando la posizione del cursore sulla riga, estraggo la parola più prossima al cursore stesso                
-        v_oggetto = extract_word_from_cursor_pos(v_line.upper(), v_num_pos)                
-        # preimposto il campo di ricerca con la parola dove è posizionato il cursore in quel momento        
-        self.e_replace_search.setText(v_oggetto.strip())        
-        # posiziono il cursore sul campo di sostituisci
+        # apro la sezione di ricerca e posiziono il fuoco del cursore
+        self.dockReplaceWidget.show()        
         self.e_replace.setFocus()
 
     def slot_find_e_replace_find(self):
@@ -4284,6 +4332,13 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         # inserisco il nuovo testo al posto di quello eliminato
         self.e_sql.insert(v_testo_sel)      
 
+    def slot_extract_sql_from_output(self):
+        """
+           Creo una nuova select partendo dall'output. Questa cosa ha un senso solo quando
+           l'utente inserisce dei filtri a livello di colonne di output
+        """        
+        self.e_sql.insert(self.v_select_eseguita)      
+
     def slot_commenta(self):
         """
            Commenta la riga selezionata
@@ -4393,6 +4448,20 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             # disattivo le modifiche sulla tabella
             self.o_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)            
 
+    def set_Color(self):
+        """
+           Imposto i colori di sfondo degli oggetti dell'editor
+        """
+        global v_global_color
+
+        # Questa reimpostazione vale solo per il tema di colori chiaro e non per il tema scuro
+        if not o_global_preferences.dark_theme:        
+            self.o_table.setStyleSheet("QTableWidget {background-color: " + v_global_color + ";}")
+            self.o_output.setStyleSheet("QPlainTextEdit {background-color: " + v_global_color + ";}")
+            self.o_map.setStyleSheet("QTableView {background-color: " + v_global_color + ";}")
+            self.o_bind.setStyleSheet("QTableView {background-color: " + v_global_color + ";}")
+            self.o_plan.setStyleSheet("QPlainTextEdit {background-color: " + v_global_color + ";}")
+    
     def set_show_end_of_line(self):
         """
            Rende visibile o meno il carattere di end of line
