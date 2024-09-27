@@ -232,11 +232,15 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         # Aggiunta di windget alla statusbar con: flag editabilità, numero di caratteri, indicatore di overwrite, ecc..
         # Da notare come l'allineamento a destra sia effettuato tramite un addPermanentWidget e a sinistra con il addWidget
         ###                                        
+        # Informazioni sul tempo di esecuzione dell'ultima istruzione
+        self.l_exec_time = QLabel("Last execution time:")
+        self.l_exec_time.setFrameStyle(QFrame.Panel | QFrame.Sunken)        
+        self.statusBar.addWidget(self.l_exec_time)                                
         # Informazioni sulla connessione
         self.l_connection = QLabel("Connection:")
         self.l_connection.setFrameStyle(QFrame.Panel | QFrame.Sunken)
         self.l_connection.setStyleSheet('color: black;')
-        self.statusBar.addWidget(self.l_connection)                                
+        self.statusBar.addWidget(self.l_connection)                                        
         # Coordinate cursore dell'editor di testo
         self.l_cursor_pos = QLabel()
         self.l_cursor_pos.setFrameStyle(QFrame.Panel | QFrame.Sunken)
@@ -264,10 +268,6 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         self.l_tabella_editabile.setFrameStyle(QFrame.Panel | QFrame.Sunken)
         self.l_tabella_editabile.setStyleSheet('color: black;')
         self.statusBar.addPermanentWidget(self.l_tabella_editabile)                
-        # Informazioni sul tempo di esecuzione dell'ultima istruzione
-        self.l_exec_time = QLabel("Last execution time:")
-        self.l_exec_time.setFrameStyle(QFrame.Panel | QFrame.Sunken)        
-        self.statusBar.addPermanentWidget(self.l_exec_time)                                
 
         ###
         # definizione della dimensioni dei dock laterali (sono 3, vengono raggruppati e definite le proporzioni)
