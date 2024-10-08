@@ -1943,9 +1943,20 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         # inizializzo le strutture grafice e visualizzo la dialog per richiedere una password di conferma prima di procedere
         self.dialog_connect = QtWidgets.QDialog()
         self.win_dialog_connect = Ui_connect_window()
-        self.win_dialog_connect.setupUi(self.dialog_connect)        
+        self.win_dialog_connect.setupUi(self.dialog_connect)       
+        
+        # imposto la maschera di editazione sul campo user in modo sia maiuscolo                        
+        self.win_dialog_connect.e_user.textEdited.connect(self.slot_e_user_to_upper) 
+
+        # creo evento riferito al bottone di connessione
         self.win_dialog_connect.b_connect.clicked.connect(self.richiesta_connessione_specifica_accept)                
         self.dialog_connect.show()        
+
+    def slot_e_user_to_upper(self):
+        """
+           Il nome utente viene impostato sempre maiuscolo
+        """
+        self.win_dialog_connect.e_user.setText(self.win_dialog_connect.e_user.text().upper())
 
     def richiesta_connessione_specifica_accept(self):
         """
@@ -2986,16 +2997,24 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
     def get_where_filtri_colonne(self):
         """
            Restituisce la where in base ai filtri che sono presenti in questo momento sulle colonne (tramite il menu popup di colonna)
+           Vengono considerate IS NULL e IS NOT NULL come istruzioni a se stanti
         """        
         v_pos = -1
         v_where = ''
         for nome_colonna in self.nomi_intestazioni:
             v_pos += 1
-            if self.valori_intestazioni[v_pos] != '':
+            # estraggo il testo che utente ha inserito nell'item della where e lo metto tutto maiuscolo
+            v_where_item_value = self.valori_intestazioni[v_pos].upper()
+            if v_where_item_value != '':
                 if v_where != '':
                     v_where += ' AND '
-                v_where += "(UPPER(" + nome_colonna + ") LIKE '%" + self.valori_intestazioni[v_pos].upper() + "%')"
-        
+                if v_where_item_value.lstrip().rstrip() == 'IS NULL':
+                    v_where += "(" + nome_colonna + " IS NULL)"
+                elif v_where_item_value.lstrip().rstrip() == 'IS NOT NULL':
+                    v_where += "(" + nome_colonna + " IS NOT NULL)"
+                else:
+                    v_where += "(UPPER(" + nome_colonna + ") LIKE '%" + v_where_item_value + "%')"
+                
         return v_where
     
     def slot_where_popup(self):
@@ -3260,14 +3279,14 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                     return 'ko'
                 v_istruzione_str = ''
             # inizio select, insert, update, delete.... monoriga
-            elif not v_istruzione and v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','GRANT','ALTER','DROP','COMMENT','TRUNCATE') and v_riga[-1] == ';':
+            elif not v_istruzione and v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','GRANT','REVOKE','ALTER','DROP','COMMENT','TRUNCATE') and v_riga[-1] == ';':
                 v_istruzione_str = v_riga[0:len(v_riga)-1]
                 v_ok = self.esegui_istruzione(v_istruzione_str, p_explain)
                 if v_ok == 'ko':
                     return 'ko'
                 v_istruzione_str = ''
             # inizio select, insert, update, delete.... multiriga
-            elif v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','GRANT','ALTER','DROP','COMMENT','TRUNCATE'):
+            elif v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','GRANT','REVOKE','ALTER','DROP','COMMENT','TRUNCATE'):
                 v_istruzione = True
                 v_istruzione_str = v_riga
             # riga di codice pl-sql (da notare come lo script verrà composto con v_riga_raw)       
