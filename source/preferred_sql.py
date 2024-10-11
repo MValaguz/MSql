@@ -56,6 +56,9 @@ class preferred_sql_class(QMainWindow, Ui_preferred_sql_window):
         # richiamo la procedura di caricamento
         self.slot_start()
 
+         # imposto il focus sul campo di ricerca
+        self.e_where_cond.setFocus()
+
     def closeEvent(self, event):
         """
            alla chiusura controlla se ci sono delle modifiche in sospeso
@@ -79,8 +82,8 @@ class preferred_sql_class(QMainWindow, Ui_preferred_sql_window):
         self.matrice.clear()
 
         # controllo se indicata la where
-        if self.e_where_cond.toPlainText() != '':
-            v_where = ' where ' + self.e_where_cond.toPlainText()
+        if self.e_where_cond.text() != '':
+            v_where = " where NOME || SQL || DATA like '%" + self.e_where_cond.text().upper() + "%'"
         else:
             v_where = ''
 
@@ -212,6 +215,6 @@ class preferred_sql_class(QMainWindow, Ui_preferred_sql_window):
 # ----------------------------------------
 if __name__ == "__main__":    
     app = QApplication([])    
-    application = preferred_sql_class('C:\MSql\MSql.db',True) 
+    application = preferred_sql_class('C:\\Users\\MValaguz\\AppData\\Local\\MSql\\MSql.db',True) 
     application.show()
     sys.exit(app.exec())      

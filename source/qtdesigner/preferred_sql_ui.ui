@@ -30,28 +30,12 @@
       <item>
        <widget class="QLabel" name="l_label6">
         <property name="text">
-         <string>Where condition (ex. SQL like '%VALUE%'):</string>
-        </property>
-        <property name="buddy">
-         <cstring>e_where_cond</cstring>
+         <string>Text to find</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QTextEdit" name="e_where_cond">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>50</height>
-         </size>
-        </property>
-       </widget>
+       <widget class="QLineEdit" name="e_where_cond"/>
       </item>
       <item>
        <widget class="QPushButton" name="b_start">

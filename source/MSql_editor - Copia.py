@@ -178,9 +178,6 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
 
         # incapsulo la classe grafica da qtdesigner
         super(MSql_win1_class, self).__init__()        
-        # creo oggetto settings per salvare posizione della window e delle dock
-        self.settings = QSettings("Marco Valaguzza", "MSql")
-        # carico interfaccia
         self.setupUi(self)
         # forzo la dimensione della finestra. Mi sono accorto che questa funzione, nella gestione MDI
         # è importante in quanto permette poi al connettore dello smistamento menu di funzionare sulla
@@ -188,7 +185,6 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         self.showNormal()      
         # dimensioni della window
         self.carico_posizione_window()  
-        
         # attivo il drag&drop (viene gestito per quando da esplora risorse si trascina un file sull'app)
         self.setAcceptDrops(True)        
 
@@ -891,31 +887,41 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
            Leggo dal file la posizione della window (se richiesto dalle preferenze)
         """
         global o_global_preferences
-                
-        # se utente ha richiesto di ricordare la posizione della window...
+        global v_global_work_dir
+
+        # se utente ha richiesto di salvare la posizione della window...
         if o_global_preferences.remember_window_pos:
-            # recupero dal registro di sistema (regedit) la posizione della window
-            geometry = self.settings.value("geometry")
-            if geometry:
-                self.restoreGeometry(geometry)                        
-            # recupero dal registro di sistema (regedit) la posizione delle dock                
-            windowstate = self.settings.value("windowstate")
-            if windowstate:
-                self.restoreState(windowstate)                        
+            if os.path.isfile(v_global_work_dir + 'Msql_window_pos.ini'):
+                v_file = open(v_global_work_dir + 'Msql_window_pos.ini','r')
+                # al momento leggo solo la prima riga che contiene la dimensione della mainwindow
+                v_my_window_pos = v_file.readline().rstrip('\n').split()                                
+                if v_my_window_pos[0] == 'MainWindow':
+                    # finestra massimizzata
+                    if v_my_window_pos[1] == 'MAXIMIZED':
+                        self.showMaximized()
+                    # finestra a dimensione specifica
+                    else:
+                        self.setGeometry(int(v_my_window_pos[1]), int(v_my_window_pos[2]), int(v_my_window_pos[3]), int(v_my_window_pos[4]))    
+                v_file.close()
                         
     def salvo_posizione_window(self):
         """
            Salvo in un file la posizione della window (se richiesto dalle preferenze)
            Questo salvataggio avviene automaticamente alla chiusura di MSql
         """
-        global o_global_preferences        
-                
+        global o_global_preferences
+        global v_global_work_dir
+
         # se utente ha richiesto di salvare la posizione della window...
         if o_global_preferences.remember_window_pos:
-            # salvo nel registro di sistema (regedit) la posizione della window
-            self.settings.setValue("geometry", self.saveGeometry())            
-            # salvo nel registro di sistema (regedit) la posizione delle dock
-            self.settings.setValue("windowstate", self.saveState())                        
+            v_file = open(v_global_work_dir + 'Msql_window_pos.ini','w')
+            if self.isMaximized():
+                v_file.write("MainWindow MAXIMIZED")
+            else:
+                o_pos = self.geometry()            
+                o_rect = o_pos.getRect()                        
+                v_file.write("MainWindow " + str(o_rect[0]) + " " + str(o_rect[1]) + " " +  str(o_rect[2]) + " " + str(o_rect[3]))
+            v_file.close()
     
     def controllo_transazioni_aperte(self):
         """

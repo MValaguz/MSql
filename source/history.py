@@ -34,6 +34,9 @@ class history_class(QMainWindow, Ui_history_window):
         # richiamo la procedura di visualizzazione 
         self.slot_start()
 
+        # imposto il focus sul campo di ricerca
+        self.e_where_cond.setFocus()
+
     def slot_start(self):
         """
            carico a video la tabella
@@ -46,14 +49,14 @@ class history_class(QMainWindow, Ui_history_window):
             return 'ko'
      
         # controllo se indicata la where
-        if self.e_where_cond.toPlainText() != '':
-            v_where = ' where ' + self.e_where_cond.toPlainText()
+        if self.e_where_cond.text() != '':
+            v_where = " where strftime('%d/%m/%Y %H:%S',ORARIO) || UPPER(ISTRUZIONE) || ROUND(EXEC_TIME,2) like '%" + self.e_where_cond.text().upper() + "%'"
         else:
             v_where = ''
 
         # creo un modello di dati su query
         v_modello = QSqlQueryModel()
-        v_modello.setQuery("select strftime('%d/%m/%Y %H:%S',ORARIO) TIME, UPPER(ISTRUZIONE) INSTRUCTION, ROUND(EXEC_TIME,2) 'SEC.TIME' from SQL_HISTORY " + v_where.upper() + " order by ORARIO desc")
+        v_modello.setQuery("select strftime('%d/%m/%Y %H:%S',ORARIO) TIME, UPPER(ISTRUZIONE) INSTRUCTION, ROUND(EXEC_TIME,2) 'SEC.TIME' from SQL_HISTORY " + v_where + " order by ORARIO desc"        )
 
         # imposto l'oggetto di visualizzazione con il modello 
         self.o_lst1.setModel(v_modello)
