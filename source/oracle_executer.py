@@ -201,10 +201,20 @@ class SendCommandToOracle(QDialog):
         self.worker_thread.signalStatus.connect(self.update_progress)
         # connessione dei segnali
         QMetaObject.connectSlotsByName(self)
+
+    def start(self):
+        """
+           Avvia la progress con esecuzione del comando....e rimane in attesa fino a che non termina!
+        """
         # lancio del primo thread al cui interno verrà lanciato il secondo thread che esegue il comando vero e proprio
         self.worker_thread.start()
         # ciclo di visualizzazione
-        self.show()    
+        self.show()   
+
+        # mi metto in attesa della fine del comando inviato a Oracle...questo perché non voglio accettare altri eventi nel frattempo se non la fine del comando
+        v_loop = QEventLoop()
+        self.signalStatus.connect(v_loop.quit)  # Aspetto l'evento che mi restituisce l'executer
+        v_loop.exec_()  # Entra nel ciclo di attesa                        
         
     def cancel_worker(self):
         """ 
@@ -274,8 +284,10 @@ def slot_on_click():
         elif status == 'END_JOB_OK':
             v_cursor = v_oracle_executer.get_cursor()    
             v_matrice = v_cursor.fetchall()
+            """
             for row in v_matrice:
                 print(row)    
+            """
             # chiudo la progressbar
             v_oracle_executer.close()
         
@@ -293,10 +305,12 @@ def slot_on_click():
     #                                                      MW_MAGAZZINI.PREPARA_PRELIEVO_ORDINI('SMI','B1');
     #                                                      MW_MAGAZZINI.DISPONIBILE_PRELIEVO_ORDINI('SMI','B1');
     #                                                     end;""", v_bind)        
-    v_oracle_executer = SendCommandToOracle(v_cursor, """select * from va_op_da_versare""", v_bind)                                                                
-    #v_oracle_executer = SendCommandToOracle(v_cursor, """select * from cp_dipen""", v_bind)                                                                    
-
+    #v_oracle_executer = SendCommandToOracle(v_cursor, """select * from va_op_da_versare""", v_bind)                                                                
+    v_oracle_executer = SendCommandToOracle(v_cursor, """select * from dual""", v_bind)                                                                    
     v_oracle_executer.signalStatus.connect(endCommandToOracle)    
+    v_oracle_executer.start()
+    
+    print('fine')
 
 if __name__ == "__main__":    
     # inizializzo libreria oracle    
@@ -309,6 +323,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     v_win = QMainWindow()        
     button = QPushButton('Test Oracle', v_win)
+    button.setShortcut("F5")
     button.clicked.connect(slot_on_click)
     button.resize(100, 30)
     button.move(50, 50)

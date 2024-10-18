@@ -3409,11 +3409,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.v_plsql_corrente = p_plsql
             self.v_set_rowcount = p_rowcount
             self.v_oracle_executer = oracle_executer.SendCommandToOracle(self.v_cursor, p_plsql, self.v_variabili_bind_dizionario)                                                                        
-        
-            # mi metto in attesa della fine del comando inviato a Oracle...questo perché non voglio accettare altri eventi nel frattempo se non la fine del comando
-            v_loop = QEventLoop()
-            self.v_oracle_executer.signalStatus.connect(v_loop.quit)  # Aspetto l'evento che mi restituisce l'executer
-            v_loop.exec_()  # Entra nel ciclo di attesa            
+            self.v_oracle_executer.start()
         
             # riattivo la freccia del mouse
             Freccia_Mouse(False)       
@@ -3593,11 +3589,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.bind_variable(p_function='DIC',p_testo_sql=v_select)                                                        
             v_start_time = datetime.datetime.now()
             self.v_oracle_executer = oracle_executer.SendCommandToOracle(self.v_cursor, v_select, self.v_variabili_bind_dizionario)                                                                        
-            
-            # mi metto in attesa della fine del comando inviato a Oracle...questo perché non voglio accettare altri eventi nel frattempo se non la fine del comando
-            v_loop = QEventLoop()
-            self.v_oracle_executer.signalStatus.connect(v_loop.quit)  # Aspetto l'evento che mi restituisce l'executer
-            v_loop.exec_()  # Entra nel ciclo di attesa                        
+            self.v_oracle_executer.start()
 
             # riattivo la freccia del mouse
             Freccia_Mouse(False)        
