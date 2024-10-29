@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/two_columns.png</file>
     <file>icons/sql.png</file>
     <file>icons/sum.png</file>
     <file>icons/download.png</file>

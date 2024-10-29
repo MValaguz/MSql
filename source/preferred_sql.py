@@ -2,7 +2,7 @@
 
 """
  Creato da.....: Marco Valaguzza
- Piattaforma...: Python3.11
+ Piattaforma...: Python3.11 con libreria pyqt6
  Data..........: 23/02/2024
  Descrizione...: Gestione degli SQL preferiti
 """
@@ -12,14 +12,16 @@ import datetime
 #Amplifico la pathname dell'applicazione in modo veda il contenuto della directory qtdesigner dove sono contenuti i layout
 sys.path.append('qtdesigner')
 #Librerie grafiche
-from PyQt5.QtWidgets import *
-from PyQt5.QtSql import *
-from PyQt5.QtCore import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtSql import *
+from PyQt6.QtCore import *
 from preferred_sql_ui import Ui_preferred_sql_window
 # Libreria sqlite
 import sqlite3
 # Librerie utilità
 from utilita import message_question_yes_no_cancel, message_info
+#Amplifico la pathname per ricercare le icone
+QDir.addSearchPath('icons', 'qtdesigner/icons/')
 
 class preferred_sql_class(QMainWindow, Ui_preferred_sql_window):
     """

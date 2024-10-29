@@ -2,7 +2,7 @@
 
 """
  Creato da.....: Marco Valaguzza
- Piattaforma...: Python3.11 con libreria pyqt5
+ Piattaforma...: Python3.11 con libreria pyqt6
  Data..........: 11/04/2023
  Descrizione...: Classe per la gestione di una progressbar (è ad esempio utilizzato in oracle_my_sql.py)
 """
@@ -12,11 +12,11 @@ import time
 # Amplifico la pathname dell'applicazione in modo veda il contenuto della directory qtdesigner dove sono contenuti i layout
 sys.path.append('qtdesigner')
 # Librerie grafiche
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-# Libreria icone
-import resource_rc
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
+#Amplifico la pathname per ricercare le icone
+QDir.addSearchPath('icons', 'qtdesigner/icons/')
 
 # Classe per la visualizzazione della progressbar
 class avanzamento_infinito_class(QProgressDialog):
@@ -27,12 +27,12 @@ class avanzamento_infinito_class(QProgressDialog):
         # creazione della wait window
         QProgressDialog.__init__(self, None)        
         self.setMinimumDuration(0)        
-        self.setWindowModality(Qt.WindowModal)
+        self.setWindowModality(Qt.WindowModality.WindowModal)
         self.setWindowTitle("Wait...")    
         self.setMinimumWidth(400)            
         # icona del titolo
         self.icon = QIcon()
-        self.icon.addPixmap(QPixmap(":/icons/icons/"+p_icon_name), QIcon.Normal, QIcon.Off)        
+        self.icon.addPixmap(QPixmap("icons:"+p_icon_name), QIcon.Mode.Normal, QIcon.State.Off)        
         self.setWindowIcon(self.icon)        
         # creo un campo label che viene impostato con 100 caratteri in modo venga data una dimensione di base standard
         self.progress_label = QLabel()            

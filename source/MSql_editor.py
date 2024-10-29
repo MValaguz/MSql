@@ -1,27 +1,27 @@
 # -*- coding: utf-8 -*-
 
-"""
- __  __ ____        _ 
-|  \/  / ___|  __ _| |
-| |\/| \___ \ / _` | |
-| |  | |___) | (_| | |
-|_|  |_|____/ \__, |_|
-                 |_|  
+# 
+#  __  __ ____        _ 
+# |  \/  / ___|  __ _| |
+# | |\/| \___ \ / _` | |
+# | |  | |___) | (_| | |
+# |_|  |_|____/ \__, |_|
+#                  |_|  
                  
- Creato da.....: Marco Valaguzza
- Piattaforma...: Python3.11 con libreria pyqt5
- Data..........: 01/01/2023
- Descrizione...: Questo programma ha la "pretesa" di essere editor SQL per ambiente Oracle....                             
-                 In questo programma sono state sperimentate diverse tecniche per la soluzione di particolari problemi...e quindi è di fatto una sorta
-                 di super esercizio....
+#  Creato da.....: Marco Valaguzza
+#  Piattaforma...: Python3.11 con libreria pyqt6
+#  Data..........: 01/01/2023
+#  Descrizione...: Questo programma ha la "pretesa" di essere editor SQL per ambiente Oracle....                             
+#                  In questo programma sono state sperimentate diverse tecniche per la soluzione di particolari problemi...e quindi è di fatto una sorta
+#                  di super esercizio....
                  
- Funzionamento : La classe principale è MSql_win1_class che apre la window di menu e che contiene l'area mdi dove poi si raggrupperranno
-                 le varie finestre dell'editor (gestito dalla classe MSql_win2_class). La window principale si collega con la 
-                 secondaria dell'editor utilizzando un array che contiene i puntatori all'oggetto editor (MSql_win2_class). 
-                 Quindi in MSql_win1_class vi è una continua ricerca all'oggetto editor di riferimento in modo da lavorare sull'editor corrente.
-                 Tutta la parte di definizione grafica è stata creata tramite QtDesigner e i file da lui prodotti, convertiti tramite un'utilità, 
-                 in classi Python da dare poi in pasto alla libreria QT.                 
-"""
+#  Funzionamento : La classe principale è MSql_win1_class che apre la window di menu e che contiene l'area mdi dove poi si raggrupperranno
+#                  le varie finestre dell'editor (gestito dalla classe MSql_win2_class). La window principale si collega con la 
+#                  secondaria dell'editor utilizzando un array che contiene i puntatori all'oggetto editor (MSql_win2_class). 
+#                  Quindi in MSql_win1_class vi è una continua ricerca all'oggetto editor di riferimento in modo da lavorare sull'editor corrente.
+#                  Tutta la parte di definizione grafica è stata creata tramite QtDesigner e i file da lui prodotti, convertiti tramite un'utilità, 
+#                  in classi Python da dare poi in pasto alla libreria QT.                 
+# 
 
 # Librerie di base
 import sys 
@@ -33,11 +33,11 @@ import traceback
 # Librerie di data base Oracle
 import cx_Oracle, oracle_my_lib, oracle_executer
 # Librerie grafiche QT
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 # Librerie QScintilla
-from PyQt5.Qsci import *
+from PyQt6.Qsci import *
 # Classe per la gestione delle preferenze
 from preferences import preferences_class
 # Definizione del solo tema dark
@@ -61,6 +61,9 @@ from utilita_database import *
 from utilita_testo import *
 # Libreria che permette, selezionata un'istruzione sql nell'editor di indentarla automaticamente
 from sql_formatter.core import format_sql
+#Amplifico la pathname per ricercare le icone (la dir _internal serve per quando si compila con pyinstaller)
+QDir.addSearchPath('icons', 'qtdesigner/icons/')
+QDir.addSearchPath('icons', '_internal/icons/')
 
 # Tipi oggetti di database
 Tipi_Oggetti_DB = { 'Tables':'TABLE',                    
@@ -124,7 +127,7 @@ def salvataggio_editor(p_save_as, p_nome, p_testo):
         # propongo un nuovo nome di file dato dalla dir di default + il titolo ricevuto in input
         v_file_save_as = v_default_save_dir + '\\' + p_nome        
      
-        p_nome = QtWidgets.QFileDialog.getSaveFileName(None, "Save a SQL file",v_file_save_as,"MSql files (*.msql);;SQL files (*.sql *.pls *.plb *.trg);;All files (*.*)") [0]                                  
+        p_nome = QFileDialog.getSaveFileName(None, "Save a SQL file",v_file_save_as,"MSql files (*.msql);;SQL files (*.sql *.pls *.plb *.trg);;All files (*.*)") [0]                                  
         if not p_nome:
             message_error('Error saving')
             return 'ko'
@@ -166,7 +169,7 @@ def titolo_window(p_titolo_file):
 # |_|  |_/_/   \_\___|_| \_|    \_/\_/  |___|_| \_|____/ \___/  \_/\_/   
 #                                                                       
 # Classe principale       
-class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):    
+class MSql_win1_class(QMainWindow, Ui_MSql_win1):    
     """
         Classe di gestione MDI principale 
         p_nome_file_da_caricare indica eventuale file da aprire all'avvio (capita quando da desktop si fa doppio click su icona di un file .msql)
@@ -181,13 +184,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         # creo oggetto settings per salvare posizione della window e delle dock
         self.settings = QSettings("Marco Valaguzza", "MSql")
         # carico interfaccia
-        self.setupUi(self)
-        # forzo la dimensione della finestra. Mi sono accorto che questa funzione, nella gestione MDI
-        # è importante in quanto permette poi al connettore dello smistamento menu di funzionare sulla
-        # prima finestra aperta....rimane comunque un mistero questa cosa.....
-        self.showNormal()      
-        # dimensioni della window
-        self.carico_posizione_window()  
+        self.setupUi(self)        
         
         # attivo il drag&drop (viene gestito per quando da esplora risorse si trascina un file sull'app)
         self.setAcceptDrops(True)        
@@ -203,7 +200,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             self.menuServer.addSeparator()
             self.action_elenco_server = []
             for rec in o_global_preferences.elenco_server:
-                v_qaction = QtWidgets.QAction()
+                v_qaction = QAction()
                 v_qaction.setCheckable(True)
                 v_qaction.setText(rec[0])
                 v_qaction.setData('MENU_SERVER')
@@ -219,7 +216,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             self.menuServer.addSeparator()
             self.action_elenco_user = []
             for rec in o_global_preferences.elenco_user:
-                v_qaction = QtWidgets.QAction()
+                v_qaction = QAction()
                 v_qaction.setCheckable(True)
                 v_qaction.setText(rec[0])
                 v_qaction.setData('MENU_USER')
@@ -230,7 +227,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         # Se richiesto il tema scuro forzo il colore scuro sull'area Mdi (non sono riuscito a farlo usando il tema!)             
         ###
         if o_global_preferences.dark_theme:
-            self.mdiArea.setBackground(QColor('#242424'))                                    
+            self.mdiArea.setBackground(QColor('#242424'))                                                            
 
         ###
         # Aggiunta di windget alla statusbar con: flag editabilità, numero di caratteri, indicatore di overwrite, ecc..
@@ -238,38 +235,38 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         ###                                        
         # Informazioni sul tempo di esecuzione dell'ultima istruzione
         self.l_exec_time = QLabel("Last execution time:")
-        self.l_exec_time.setFrameStyle(QFrame.Panel | QFrame.Sunken)        
+        self.l_exec_time.setFrameStyle(QFrame.Shape.NoFrame)        
         self.statusBar.addWidget(self.l_exec_time)                                
         # Informazioni sulla connessione
         self.l_connection = QLabel("Connection:")
-        self.l_connection.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        self.l_connection.setFrameStyle(QFrame.Shape.NoFrame)
         self.l_connection.setStyleSheet('color: black;')
         self.statusBar.addWidget(self.l_connection)                                        
         # Coordinate cursore dell'editor di testo
         self.l_cursor_pos = QLabel()
-        self.l_cursor_pos.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        self.l_cursor_pos.setFrameStyle(QFrame.Shape.NoFrame)
         self.statusBar.addPermanentWidget(self.l_cursor_pos)                
         self.l_cursor_pos.setText("Ln: 1  Col: 1")
         # Numero totale di righe di testo
         self.l_num_righe_e_char = QLabel()
-        self.l_num_righe_e_char.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        self.l_num_righe_e_char.setFrameStyle(QFrame.Shape.NoFrame)
         self.statusBar.addPermanentWidget(self.l_num_righe_e_char)                
         self.l_num_righe_e_char.setText("Lines: 0 , Length: 0")        
         # Stato attivazione inserito di testo o overwrite
         self.l_overwrite_enabled = QLabel("INS")
-        self.l_overwrite_enabled.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        self.l_overwrite_enabled.setFrameStyle(QFrame.Shape.NoFrame)
         self.statusBar.addPermanentWidget(self.l_overwrite_enabled)
         # Stato attivazione codifica utf-8
         self.l_utf8_enabled = QLabel()
-        self.l_utf8_enabled.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        self.l_utf8_enabled.setFrameStyle(QFrame.Shape.NoFrame)
         self.statusBar.addPermanentWidget(self.l_utf8_enabled)        
         # Stato end of line
         self.l_eol = QLabel()
-        self.l_eol.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        self.l_eol.setFrameStyle(QFrame.Shape.NoFrame)
         self.statusBar.addPermanentWidget(self.l_eol)                
         # Indicatore editabilità
         self.l_tabella_editabile = QLabel("Editable table: Disabled")
-        self.l_tabella_editabile.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        self.l_tabella_editabile.setFrameStyle(QFrame.Shape.NoFrame)
         self.l_tabella_editabile.setStyleSheet('color: black;')
         self.statusBar.addPermanentWidget(self.l_tabella_editabile)                
 
@@ -299,10 +296,10 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         ###
         # Definizione della struttura per gestione elenco oggetti DB (object navigator)       
         ###
-        self.oggetti_db_lista = QtGui.QStandardItemModel()        
+        self.oggetti_db_lista = QStandardItemModel()        
         self.oggetti_db_elenco.setModel(self.oggetti_db_lista)
         # attivo la gestione del tasto destro e relativo richiamo menu popup
-        self.oggetti_db_elenco.setContextMenuPolicy(Qt.CustomContextMenu) 
+        self.oggetti_db_elenco.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu) 
         self.oggetti_db_elenco.customContextMenuRequested.connect(self.slot_popup_menu_db_elenco)             
         # per default carico l'elenco di tutte le tabelle (selezionando la voce Tables=1 nell'elenco)
         self.oggetti_db_scelta.setCurrentIndex(1)
@@ -314,7 +311,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         self.v_nome_foglia = ''
         self.v_tipo_foglia = ''
         # attivo la gestione del tasto destro e relativo richiamo menu popup
-        self.db_oggetto_tree.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.db_oggetto_tree.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.db_oggetto_tree.customContextMenuRequested.connect(self.slot_popup_menu_oggetto_tree)
         # creo le variabili che serviranno come appoggio al menu popup (punto in cui il popup è stato attivato)
         self.v_popup_menu_zone = ''        
@@ -347,7 +344,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         if p_nome_file_da_caricare != '':        
             # apro un file            
             v_titolo, v_contenuto_file = self.openfile(p_nome_file_da_caricare)        
-            v_azione = QtWidgets.QAction()
+            v_azione = QAction()
             v_azione.setText('Open_db_obj')            
             self.smistamento_voci_menu(v_azione, v_titolo, v_contenuto_file)        
         ###        
@@ -357,7 +354,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         #             dopo l'apertura si apriva un nuovo file, da quel momento l'autocompletamento partiva.
         ### 
         else:
-            v_azione = QtWidgets.QAction()
+            v_azione = QAction()
             v_azione.setText('New')
             self.smistamento_voci_menu(v_azione)      
 
@@ -395,7 +392,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                 if v_filepath is not None:
                     # apro un file            
                     v_titolo, v_contenuto_file = self.openfile(v_filepath)        
-                    v_azione = QtWidgets.QAction()
+                    v_azione = QAction()
                     v_azione.setText('Open_db_obj')            
                     self.smistamento_voci_menu(v_azione, v_titolo, v_contenuto_file)        
     
@@ -403,13 +400,13 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         """
             Restituisce l'oggetto di classe MSql_win2_class riferito alla window di editor attiva
         """        
-        # Ricavo quale sia la window di editor attiva in questo momento
-        self.window_attiva = self.mdiArea.activeSubWindow()            
-        if self.window_attiva is not None:                                             
+        # Ricavo quale sia la window di editor attiva in questo momento 
+        self.window_attiva = self.mdiArea.activeSubWindow()                            
+        if self.window_attiva is not None:                               
             # scorro la lista-oggetti-editor fino a quando non trovo l'oggetto che ha lo stesso titolo della window attiva
             for i in range(0,len(self.o_lst_window2)):
                 if not self.o_lst_window2[i].v_editor_chiuso:
-                    if self.o_lst_window2[i].objectName() == self.window_attiva.objectName():
+                    if self.o_lst_window2[i].objectName() == self.window_attiva.objectName():                        
                         return self.o_lst_window2[i]
         return None                    
     
@@ -489,7 +486,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             # da notare come il nome di file completo di fatto viaggia all'interno del nome degli oggetti
             sub_window = self.mdiArea.addSubWindow(o_MSql_win2)                  
             sub_window.setObjectName(o_MSql_win2.objectName())
-            sub_window.setWindowIcon(QtGui.QIcon())                              
+            sub_window.setWindowIcon(QIcon("icons:database.png"))                              
             sub_window.show()  
             sub_window.showMaximized()  
         # Codifica utf-8
@@ -513,19 +510,19 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             self.slot_editable()
         # Uscita dal programma (invoco l'evento di chiusura della main window)
         elif p_slot.text() == 'Exit':
-            v_event_close = QtGui.QCloseEvent()
+            v_event_close = QCloseEvent()
             self.closeEvent(v_event_close)        
         # Riorganizzo le window in modalità cascata
         elif p_slot.text() == 'Cascade':
-            self.mdiArea.setViewMode(QtWidgets.QMdiArea.SubWindowView)
+            self.mdiArea.setViewMode(QMdiArea.ViewMode.SubWindowView)
             self.mdiArea.cascadeSubWindows()
         # Riorganizzo le window in modalità piastrelle
         elif p_slot.text() == 'Tile':
-            self.mdiArea.setViewMode(QtWidgets.QMdiArea.SubWindowView)
+            self.mdiArea.setViewMode(QMdiArea.ViewMode.SubWindowView)
             self.mdiArea.tileSubWindows()           
         # Riorganizzo le window in modalità tab
         elif p_slot.text() == 'Tabbed':
-            self.mdiArea.setViewMode(QtWidgets.QMdiArea.TabbedView)            
+            self.mdiArea.setViewMode(QMdiArea.ViewMode.TabbedView)            
         # Apro file di help
         elif p_slot.text() == 'Help':
             os.system("start help\\MSql_help.html")
@@ -700,7 +697,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             # Estraggo dall'output una nuova select e la inserisco nell'editor (questo ha senso se utente ha inserito parametri usando il popup menu sulle colonne)
             elif p_slot.text() == 'Extract sql from output':
                 o_MSql_win2.slot_extract_sql_from_output()
-
+        
     def slot_utf8(self):
         """
            Aggiorna la label nella statusbar relativa alla codifica utf-8
@@ -869,7 +866,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         # scorro la lista-oggetti-editor e richiamo l'evento di chiusura del singolo oggetto 
         for obj_win2 in self.o_lst_window2:
             if not obj_win2.v_editor_chiuso:
-                v_event_close = QtGui.QCloseEvent()
+                v_event_close = QCloseEvent()
                 obj_win2.closeEvent(v_event_close)        
         # controllo se tutte le window sono state chiuse
         v_chiudi_app = True
@@ -1025,10 +1022,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
 
         # sulla statusbar, aggiorno la label della connessione        
         self.l_connection.setText("Connection: " + self.e_server_name + "/" + self.e_user_name)     
-        if o_global_preferences.dark_theme:                       
-            self.l_connection.setStyleSheet('background-color: ' + v_global_color + ';color: "' + v_global_background + '";')              
-        else:
-            self.l_connection.setStyleSheet('background-color: ' + v_global_background + ';color: "' + v_global_color + '";')              
+        self.l_connection.setStyleSheet('background-color: ' + v_global_color + ';color: "' + v_global_background + '";')              
 
         # se la connessione è andata a buon fine, richiedo elenco degli oggetti in modo da aggiornare il dizionario dell'editor con nuove parole chiave
         # in questa sezione viene caricata la lista v_global_my_lexer_keywords con tutti i nomi di tabelle, viste, procedure, ecc.
@@ -1051,14 +1045,6 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             if not obj_win2.v_editor_chiuso and v_global_connesso:        
                 # ...e apro un cursore ad uso di quell'oggetto-editor                
                 obj_win2.v_cursor = v_global_connection.cursor()
-                # Imposto il colore di sfondo su tutti gli oggetti principali (l'editor è stato tolto volutamente per un effetto grafico non piacevole)                               
-                # Questa reimpostazione vale solo per il tema di colori chiaro e non per il tema scuro
-                if not o_global_preferences.dark_theme:
-                    # imposto i colori sugli oggetti che fanno parte dell'editor
-                    obj_win2.set_Color()
-                    # imposto i colori dell'object navigator
-                    self.oggetti_db_elenco.setStyleSheet("QListView {background-color: " + v_global_color + ";}")
-                    self.db_oggetto_tree.setStyleSheet("QTreeView {background-color: " + v_global_color + ";}")                
                                 
                 # aggiorno il lexer aggiungendo tutte le nuove keywords                
                 if len(v_global_my_lexer_keywords) > 0:                          
@@ -1200,18 +1186,18 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         v_righe = self.v_cursor_db_obj.fetchall()                    
         # carico elenco nel modello che è collegato alla lista
         for v_riga in v_righe:
-            v_item = QtGui.QStandardItem()                        
+            v_item = QStandardItem()                        
             # nell'item inserisco nome oggetto e commento
             v_item.setText(v_riga[0]) 
             # oggetto invalido imposto icona errore
             if v_riga[1] != 0: 
-                v_icon = QtGui.QIcon()
-                v_icon.addPixmap(QtGui.QPixmap(":/icons/icons/error.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+                v_icon = QIcon()
+                v_icon.addPixmap(QPixmap("icons:error.png"), QIcon.Mode.Normal, QIcon.State.Off)
                 v_item.setIcon(v_icon)                
             # oggetto disabilitato imposto icona disabled
             if v_riga[2] == 'DISABLED': 
-                v_icon = QtGui.QIcon()
-                v_icon.addPixmap(QtGui.QPixmap(":/icons/icons/disabled.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+                v_icon = QIcon()
+                v_icon.addPixmap(QPixmap("icons:disabled.png"), QIcon.Mode.Normal, QIcon.State.Off)
                 v_item.setIcon(v_icon)                
 
             self.oggetti_db_lista.appendRow(v_item)                                   
@@ -1251,7 +1237,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         v_menu = QMenu(self)        
         if self.v_popup_menu_zone == 'FOGLIA_ALBERO' and v_tipo_obj == 'FUNCTION':            
             # azione insert function in editor
-            v_azione_insert_in_editor = QAction('Insert in editor')
+            v_azione_insert_in_editor = QAction('Insert in editor') 
             v_azione_insert_in_editor.triggered.connect(self.slot_popup_menu_insert_in_editor)
             v_menu.addAction(v_azione_insert_in_editor)
         else:
@@ -1277,10 +1263,10 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             v_menu.addAction(v_azione_drop)
         # visualizzo il menu sopra la riga selezionata (della lista oggetti)
         if self.v_popup_menu_zone == 'LISTA_OGGETTI':
-            v_menu.exec_(self.oggetti_db_elenco.viewport().mapToGlobal(p_position))    
+            v_menu.exec(self.oggetti_db_elenco.viewport().mapToGlobal(p_position))    
         # oppure sopra un elemeno dell'albero dell'object viewer
         elif self.v_popup_menu_zone == 'FOGLIA_ALBERO':
-            v_menu.exec_(self.db_oggetto_tree.viewport().mapToGlobal(p_position))    
+            v_menu.exec(self.db_oggetto_tree.viewport().mapToGlobal(p_position))    
 
     def slot_popup_menu_load_ddl(self):
         """
@@ -1422,7 +1408,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
 
             # apro una nuova finestra di editor simulando il segnale che scatta quando utente sceglie "Open", passando il sorgente ddl
             # Attenzione! I file caricati da Oracle hanno come eol solo LF => formato Unix
-            v_azione = QtWidgets.QAction()
+            v_azione = QAction()
             v_azione.setText('Open_db_obj')
             self.smistamento_voci_menu(v_azione, '!' + self.v_nome_oggetto + '.msql', v_testo_oggetto_db)        
                                         
@@ -1768,11 +1754,11 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                                     # se è la prima volta memorizzo la posizione tramite il suo oggetto indice e seleziono la riga dicendo di pulire eventuale selezione precedente
                                     if v_1a_volta:
                                         v_1a_posizione = v_item1.index()                                        
-                                        self.db_oggetto_tree.selectionModel().select(v_item1.index(), QItemSelectionModel.ClearAndSelect | QItemSelectionModel.Rows)                                    
+                                        self.db_oggetto_tree.selectionModel().select(v_item1.index(), QItemSelectionModel.SelectionFlag.ClearAndSelect | QItemSelectionModel.SelectionFlag.Rows)                                    
                                         v_1a_volta = False
                                     # ...altrimenti aggiungo la riga alla selezione corrente
                                     else:                                        
-                                        self.db_oggetto_tree.selectionModel().select(v_item1.index(), QItemSelectionModel.Select | QItemSelectionModel.Rows)                                                                        
+                                        self.db_oggetto_tree.selectionModel().select(v_item1.index(), QItemSelectionModel.SelectionFlag.Select | QItemSelectionModel.SelectionFlag.Rows)                                                                        
                                     # mi posiziono sulla riga (questo serve esclusivamente per quando la stringa viene trovata nei sottorami in modo che venga esploso l'albero automaticamente...è solo un effetto grafico)
                                     self.db_oggetto_tree.scrollTo(v_item1.index())                                                                                   
                                 # scorro la sottomatrice2 (es. nei package)
@@ -1786,11 +1772,11 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
                                                 # se è la prima volta memorizzo la posizione tramite il suo oggetto indice e seleziono la riga dicendo di pulire eventuale selezione precedente
                                                 if v_1a_volta:
                                                     v_1a_posizione = v_item2.index()                                        
-                                                    self.db_oggetto_tree.selectionModel().select(v_item2.index(), QItemSelectionModel.ClearAndSelect | QItemSelectionModel.Rows)                                    
+                                                    self.db_oggetto_tree.selectionModel().select(v_item2.index(), QItemSelectionModel.SelectionFlag.ClearAndSelect | QItemSelectionModel.SelectionFlag.Rows)                                    
                                                     v_1a_volta = False
                                                 # ...altrimenti aggiungo la riga alla selezione corrente
                                                 else:                                        
-                                                    self.db_oggetto_tree.selectionModel().select(v_item2.index(), QItemSelectionModel.Select | QItemSelectionModel.Rows)                                                                        
+                                                    self.db_oggetto_tree.selectionModel().select(v_item2.index(), QItemSelectionModel.SelectionFlag.Select | QItemSelectionModel.SelectionFlag.Rows)                                                                        
                                                 # mi posiziono sulla riga (questo serve esclusivamente per quando la stringa viene trovata nei sottorami in modo che venga esploso l'albero automaticamente...è solo un effetto grafico)
                                                 self.db_oggetto_tree.scrollTo(v_item2.index())                                                                                   
                     
@@ -1897,9 +1883,11 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
         if len(v_indexes) > 0:                    
             v_current_index = v_indexes[0]            
             v_parent_index = v_current_index.parent()
+            if v_parent_index.data() is None:                                
+                pass
             # l'apertura del menu avviene solo se siamo sotto una determinata serie di rami
             # e viene riciclato il codice già scritto per il la sezione dell'elenco oggetti
-            if v_parent_index.data() in ('Constraints','Triggers','Indexes'):                                
+            elif v_parent_index.data() in ('Constraints','Triggers','Indexes'):                                
                 self.v_popup_menu_zone = 'FOGLIA_ALBERO'
                 self.v_nome_foglia = v_current_index.data()
                 # determino il tipo dell'oggetto
@@ -1928,7 +1916,7 @@ class MSql_win1_class(QtWidgets.QMainWindow, Ui_MSql_win1):
             Apre finestra per richiedere una connessione specifica
         """            
         # inizializzo le strutture grafice e visualizzo la dialog per richiedere una password di conferma prima di procedere
-        self.dialog_connect = QtWidgets.QDialog()
+        self.dialog_connect = QDialog()
         self.win_dialog_connect = Ui_connect_window()
         self.win_dialog_connect.setupUi(self.dialog_connect)       
         
@@ -2097,7 +2085,7 @@ class My_MSql_Lexer(QsciLexerSQL):
         self.p_editor.setIndentationGuides(o_global_preferences.indentation_guide)                
         
         # attivo i margini con + e - 
-        self.p_editor.setFolding(p_editor.BoxedTreeFoldStyle, 2)
+        self.p_editor.setFolding(p_editor.FoldStyle.BoxedTreeFoldStyle, 2) 
         
         # indentazione
         self.p_editor.setIndentationWidth(int(o_global_preferences.tab_size))
@@ -2116,7 +2104,7 @@ class My_MSql_Lexer(QsciLexerSQL):
             self.p_editor.setCaretForegroundColor(QColor("black"))        
         
         # attivo il margine 0 con la numerazione delle righe
-        self.p_editor.setMarginType(0, QsciScintilla.NumberMargin)        
+        self.p_editor.setMarginType(0, QsciScintilla.MarginType.NumberMargin)        
         self.p_editor.setMarginsFont(QFont("Courier New",9))                                   
         
         # attivo il matching sulle parentesi con uno specifico colore
@@ -2139,7 +2127,7 @@ class My_MSql_Lexer(QsciLexerSQL):
         # sono riuscito a fare
         self.v_api_lexer = QsciAPIs(self)            
         # aggiungo tutti i termini di autocompletamento (si trovano all'interno di una tabella che viene generata a comando)
-        self.p_editor.setAutoCompletionSource(QsciScintilla.AcsAll)                
+        self.p_editor.setAutoCompletionSource(QsciScintilla.AutoCompletionSource.AcsAll)                
         self.carica_dizionario_per_autocompletamento()                
         # indico dopo quanti caratteri che sono stati digitati dall'utente, si deve attivare l'autocompletamento
         self.p_editor.setAutoCompletionThreshold(3)  
@@ -2385,7 +2373,7 @@ class My_MSql_Lexer(QsciLexerSQL):
 # |_____|____/___| |_| \___/|_| \_\
 #                                 
 # Classe che contiene tutti i componenti dell'editor
-class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
+class MSql_win2_class(QMainWindow, Ui_MSql_win2):
     """
         Editor SQL
     """       
@@ -2415,7 +2403,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.link_to_MSql_win1_class = o_MSql_win1_class
 
         # splitter che separa l'editor dall'output: imposto l'immagine per indicare lo splitter e il relativo rapporto tra il widget di editor e quello di output
-        #self.splitter.setStyleSheet("QSplitter::handle {text: url(':/icons/icons/splitter.gif')}")
+        #self.splitter.setStyleSheet("QSplitter::handle {text: url('icons:splitter.gif')}")
         self.splitter.setStretchFactor(0,1)
 
         ###
@@ -2445,9 +2433,9 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
 
         # controllo quale formato di eol ha il file e imposto tale opzione in Scintilla 
         if self.setting_eol == 'W':
-            self.e_sql.setEolMode(QsciScintilla.EolWindows)                
+            self.e_sql.setEolMode(QsciScintilla.EolMode.EolWindows)                
         else:
-            self.e_sql.setEolMode(QsciScintilla.EolUnix)                
+            self.e_sql.setEolMode(QsciScintilla.EolMode.EolUnix)                
         # aggiorno la statusbar con l'impostazione di eol
         self.aggiorna_statusbar()
 
@@ -2541,9 +2529,6 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         else:
             self.v_cursor = None
 
-        # imposto i colori
-        self.set_Color()
-
         # definizione del menu di ricerca sulle colonne dei risultati
         self.o_table_hH = self.o_table.horizontalHeader()
         self.o_table_hH.sectionClicked.connect(self.slot_click_colonna_risultati)        
@@ -2563,22 +2548,22 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
 
         # individio la disattivazione della window e disattivo il drop sulla parte di editor in modo possa gestire 
         # i drop di un file che viene trascinato sull'app. Il drop del file viene gestito tramite il controllo dell'evento sulla window principale
-        if event.type() == QEvent.WindowDeactivate:
+        if event.type() == QEvent.Type.WindowDeactivate:
             self.e_sql.setAcceptDrops(False)                     
 
         # individio l'attivazione della window e riattivo la gestione del drop sulla parte di editor in modo possa gestire         
-        if event.type() == QEvent.WindowActivate:
+        if event.type() == QEvent.Type.WindowActivate:
             self.e_sql.setAcceptDrops(True)                     
         
         # individuo tasto destro del mouse sulla tabella dei risultati        
-        if event.type() == QEvent.MouseButtonPress and event.buttons() == Qt.RightButton and source is self.o_table.viewport():            
+        if event.type() == QEvent.Type.MouseButtonPress and event.buttons() == Qt.MouseButton.RightButton and source is self.o_table.viewport():            
             self.tasto_destro_o_table(event)      
             return True      
 
         # individuo la pressione di un tasto sull'editor
-        if event.type() == QEvent.KeyPress and source is self.e_sql:
+        if event.type() == QEvent.Type.KeyPress and source is self.e_sql:
             # tasto Insert premuto da parte dell'utente --> cambio la label sulla statusbar
-            if event.key() == Qt.Key_Insert:
+            if event.key() == Qt.Key.Key_Insert:
                 if self.v_overwrite_enabled:
                     self.v_overwrite_enabled = False                
                 else:
@@ -2586,26 +2571,26 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                 # aggiorno la status bar con relative label
                 self.aggiorna_statusbar()
             # tasto F11 premuto dall'utente --> eseguo la quick query
-            if event.key() == Qt.Key_F11:                 
+            if event.key() == Qt.Key.Key_F11:                 
                 self.slot_f11()   
                 return True
             # tasto F12 premuto dall'utente --> richiamo l'object viewer            
-            if event.key() == Qt.Key_F12:                 
+            if event.key() == Qt.Key.Key_F12:                 
                 self.slot_f12()   
                 return True
             # tasto F3 premuto dall'utente --> richiamo la ricerca
-            if event.key() == Qt.Key_F3:                                 
+            if event.key() == Qt.Key.Key_F3:                                 
                 self.slot_find_next()   
                 return True
             
-        if event.type() == QEvent.DragEnter and source is self.e_sql:                                          
+        if event.type() == QEvent.Type.DragEnter and source is self.e_sql:                                          
             # il drag contiene elenco di item...
             # se il drag non contiene elenco di item, quindi ad esempio del semplice testo, lascio le cose cosi come sono            
             if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
                 # estraggo gli item e li trasformo in stringa
                 v_mime_data = event.mimeData()
-                source_item = QtGui.QStandardItemModel()
-                source_item.dropMimeData(v_mime_data, Qt.CopyAction, 0,0, QModelIndex())                                                
+                source_item = QStandardItemModel()
+                source_item.dropMimeData(v_mime_data, Qt.DropAction.CopyAction, 0,0, QModelIndex())                                                
                 v_stringa = ''
                 for v_indice in range(0,source_item.rowCount()):
                     if v_stringa != '':
@@ -2620,7 +2605,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             return True                                            
         
         # individuo il drop sull'editor               
-        if event.type() == QEvent.Drop and source is self.e_sql:                            
+        if event.type() == QEvent.Type.Drop and source is self.e_sql:                            
             # e richiamo direttamente la funzione che accetta il drop di QScintilla
             # da notare come durante il drag sia stato cambiato il contenuto dei dati nel caso 
             # la sorgente fossero degli item (in questo caso l'object viewer)
@@ -2628,7 +2613,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             return True        
         
         # individuo l'attivazione della subwindow dell'editor...
-        if event.type() == QEvent.FocusIn:                  
+        if event.type() == QEvent.Type.FocusIn:                  
             # aggiorno i dati della statusbar
             self.aggiorna_statusbar()
                             
@@ -2647,8 +2632,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.o_table_cont_menu = QMenu(self)            
             
             # voce per copia valore
-            icon1 = QtGui.QIcon()
-            icon1.addPixmap(QtGui.QPixmap(":/icons/icons/copy.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)        
+            icon1 = QIcon()
+            icon1.addPixmap(QPixmap("icons:copy.png"), QIcon.Mode.Normal, QIcon.State.Off)        
             v_copia = QPushButton()
             v_copia.setText('Copy item')
             v_copia.setIcon(icon1)        
@@ -2658,8 +2643,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.o_table_cont_menu.addAction(v_action)
 
             # voce per aprire window dove viene visualizzato il contenuto della cella in modo amplificato
-            icon2 = QtGui.QIcon()
-            icon2.addPixmap(QtGui.QPixmap(":/icons/icons/zoom_avanti.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)        
+            icon2 = QIcon()
+            icon2.addPixmap(QPixmap("icons:zoom_avanti.png"), QIcon.Mode.Normal, QIcon.State.Off)        
             v_zoom = QPushButton()
             v_zoom.setText('Zoom item')
             v_zoom.setIcon(icon2)        
@@ -2669,7 +2654,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.o_table_cont_menu.addAction(v_action)
 
             # visualizzo il menu alla posizione del cursore
-            self.o_table_cont_menu.exec_(event.globalPos())    
+            self.o_table_cont_menu.exec(event.globalPosition().toPoint())    
         # item non è di tipo testo...si presume sia un blob...cosa non certa...ma al momento non trovato modo per capirlo
         # viene creato il menu popup con la voce per il download
         else:
@@ -2677,8 +2662,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.o_table_cont_menu = QMenu(self)            
             
             # voce per download
-            icon1 = QtGui.QIcon()
-            icon1.addPixmap(QtGui.QPixmap(":/icons/icons/download.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)        
+            icon1 = QIcon()
+            icon1.addPixmap(QPixmap("icons:download.png"), QIcon.Mode.Normal, QIcon.State.Off)        
             v_download = QPushButton()
             v_download.setText('Download blob')
             v_download.setIcon(icon1)        
@@ -2688,7 +2673,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.o_table_cont_menu.addAction(v_action)
 
             # visualizzo il menu alla posizione del cursore
-            self.o_table_cont_menu.exec_(event.globalPos())    
+            self.o_table_cont_menu.exec(event.globalPosition().toPoint())    
     
     def o_table_download_blob(self):
         """
@@ -2795,14 +2780,14 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             Apre la window e visualizza il contenuto del dato di partenza
         """                        
         # inizializzo le strutture grafiche e visualizzo la dialog per la ricerca del testo
-        self.win_dialog_zoom_item = QtWidgets.QDialog()                        
+        self.win_dialog_zoom_item = QDialog()                        
         self.win_dialog_zoom_item.resize(300, 200)
         self.win_dialog_zoom_item.setWindowTitle('Zoom item')
-        v_icon = QtGui.QIcon()
-        v_icon.addPixmap(QtGui.QPixmap(":/icons/icons/MSql.gif"), QtGui.QIcon.Normal, QtGui.QIcon.Off)        
+        v_icon = QIcon()
+        v_icon.addPixmap(QPixmap("icons:MSql.gif"), QIcon.Mode.Normal, QIcon.State.Off)        
         self.win_dialog_zoom_item.setWindowIcon(v_icon)
-        self.win_dialog_zoom_item_gl = QtWidgets.QGridLayout(self.win_dialog_zoom_item)
-        self.win_dialog_zoom_lineEdit = QtWidgets.QPlainTextEdit(self.win_dialog_zoom_item)        
+        self.win_dialog_zoom_item_gl = QGridLayout(self.win_dialog_zoom_item)
+        self.win_dialog_zoom_lineEdit = QPlainTextEdit(self.win_dialog_zoom_item)        
         self.win_dialog_zoom_item_gl.addWidget(self.win_dialog_zoom_lineEdit, 0, 0, 1, 1)
         self.win_dialog_zoom_lineEdit.setPlainText(self.v_o_table_current_item.text())
         self.win_dialog_zoom_item.show()
@@ -2921,8 +2906,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.o_table_popup.addAction(v_action)
                 
         # bottone per ordinamento ascendente
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/icons/icons/order_a_z.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)        
+        icon1 = QIcon()
+        icon1.addPixmap(QPixmap("icons:order_a_z.png"), QIcon.Mode.Normal, QIcon.State.Off)        
         v_sort_a_z = QPushButton()
         v_sort_a_z.setText('Sort asc')
         v_sort_a_z.setIcon(icon1)        
@@ -2932,8 +2917,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.o_table_popup.addAction(v_action)
 
         # bottone per ordinamento discendente
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(":/icons/icons/order_z_a.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2 = QIcon()
+        icon2.addPixmap(QPixmap("icons:order_z_a.png"), QIcon.Mode.Normal, QIcon.State.Off)
         v_sort_z_a = QPushButton()
         v_sort_z_a.setText('Sort desc')
         v_sort_z_a.setIcon(icon2)
@@ -2943,8 +2928,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.o_table_popup.addAction(v_action)
         
         # bottone per raggruppamento su colonna
-        icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap(":/icons/icons/group.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon3 = QIcon()
+        icon3.addPixmap(QPixmap("icons:group.png"), QIcon.Mode.Normal, QIcon.State.Off)
         v_group_by = QPushButton()
         v_group_by.setText('Group by')
         v_group_by.setIcon(icon3)
@@ -2954,8 +2939,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.o_table_popup.addAction(v_action)
                 
         # bottone per il count numero record
-        icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap(":/icons/icons/sequence.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon4 = QIcon()
+        icon4.addPixmap(QPixmap("icons:sequence.png"), QIcon.Mode.Normal, QIcon.State.Off)
         v_count = QPushButton()
         v_count.setText('Count')
         v_count.setIcon(icon4)
@@ -2965,8 +2950,8 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         self.o_table_popup.addAction(v_action)
                         
         # bottone per la somma di colonna
-        icon5 = QtGui.QIcon()
-        icon5.addPixmap(QtGui.QPixmap(":/icons/icons/sum.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon5 = QIcon()
+        icon5.addPixmap(QPixmap("icons:sum.png"), QIcon.Mode.Normal, QIcon.State.Off)
         v_count = QPushButton()
         v_count.setText('Sum')
         v_count.setIcon(icon5)
@@ -2979,7 +2964,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         headerPos = self.o_table.mapToGlobal(self.o_table_hH.pos())
         posY = headerPos.y() + self.o_table_hH.height()
         posX = headerPos.x() + self.o_table_hH.sectionPosition(p_index) - self.o_table_hH.offset()
-        self.o_table_popup.exec_(QPoint(posX, posY))        
+        self.o_table_popup.exec(QPoint(posX, posY))        
 
     def get_where_filtri_colonne(self):
         """
@@ -3181,7 +3166,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         # imposto la var di select corrente che serve in altre funzioni
         self.v_select_corrente = ''
 
-        # prendo tutto il testo o solo quello evidenziato dall'utente
+        # prendo tutto il testo o solo quello evidenziato dall'utente        
         if self.e_sql.selectedText():
             v_testo = self.e_sql.selectedText()            
             # imposto la var che in caso di script che contiene più istruzioni separate da / tenga conto delle righe
@@ -3332,7 +3317,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                 for result in v_cursor_db_plan:                       
                     self.o_plan.appendPlainText(result[0])
                 # mi posiziono all'inizio del testo
-                self.o_plan.moveCursor(QtGui.QTextCursor.Start)                    
+                self.o_plan.moveCursor(QTextCursor.MoveOperation.Start)                    
                 # porto in primo piano la visualizzazione del tab di plan
                 self.o_tab_widget.setCurrentIndex(3)          
 
@@ -3409,11 +3394,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.v_plsql_corrente = p_plsql
             self.v_set_rowcount = p_rowcount
             self.v_oracle_executer = oracle_executer.SendCommandToOracle(self.v_cursor, p_plsql, self.v_variabili_bind_dizionario)                                                                        
-        
-            # mi metto in attesa della fine del comando inviato a Oracle...questo perché non voglio accettare altri eventi nel frattempo se non la fine del comando
-            v_loop = QEventLoop()
-            self.v_oracle_executer.signalStatus.connect(v_loop.quit)  # Aspetto l'evento che mi restituisce l'executer
-            v_loop.exec_()  # Entra nel ciclo di attesa            
+            self.v_oracle_executer.start()
         
             # riattivo la freccia del mouse
             Freccia_Mouse(False)       
@@ -3593,11 +3574,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.bind_variable(p_function='DIC',p_testo_sql=v_select)                                                        
             v_start_time = datetime.datetime.now()
             self.v_oracle_executer = oracle_executer.SendCommandToOracle(self.v_cursor, v_select, self.v_variabili_bind_dizionario)                                                                        
-            
-            # mi metto in attesa della fine del comando inviato a Oracle...questo perché non voglio accettare altri eventi nel frattempo se non la fine del comando
-            v_loop = QEventLoop()
-            self.v_oracle_executer.signalStatus.connect(v_loop.quit)  # Aspetto l'evento che mi restituisce l'executer
-            v_loop.exec_()  # Entra nel ciclo di attesa                        
+            self.v_oracle_executer.start()
 
             # riattivo la freccia del mouse
             Freccia_Mouse(False)        
@@ -3646,7 +3623,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                         if self.valori_intestazioni[v_pos] != '':                        
                             # creo un item che contiene icona imbuto e nome colonna corrente e rigenero la rispettiva intestazione
                             v_new_header_item = QTableWidgetItem()
-                            v_new_header_item.setIcon(QIcon(QPixmap(":/icons/icons/filter.png")))
+                            v_new_header_item.setIcon(QIcon(QPixmap("icons:filter.png")))
                             v_new_header_item.setText(nome_colonna)
                             self.o_table.setHorizontalHeaderItem(v_pos,v_new_header_item)
                                 
@@ -3715,14 +3692,14 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                     elif isinstance(field, int):                           
                         # per dare coerenza a tutte le operazioni svolte sui dati il formato di base viene definito Italiano                                
                         v_item = QTableWidgetItem('{:d}'.format(field))                        
-                        v_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)   
+                        v_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)   
                         self.o_table.setItem(self.v_pos_y, x, v_item)                    
                     # campo numerico reale (se non funziona provare con i cx_Oracle type)
                     elif isinstance(field, float):   
                         # per dare coerenza a tutte le operazioni svolte sui dati il formato di base viene definito Italiano        
                         locale.setlocale(locale.LC_ALL, 'it_IT')                                             
                         v_item = QTableWidgetItem(locale.str(field))                        
-                        v_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)   
+                        v_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)   
                         self.o_table.setItem(self.v_pos_y, x, v_item)                    
                     # campo nullo
                     elif field == None:                                 
@@ -3739,7 +3716,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                         qimg = QImage.fromData(field.read())                        
                         # se nel blob non è presente un'immagine (lo capisco in base alla profondità-colore), allora carico icona di non-immagine
                         if qimg.depth() == 0:                            
-                            pixmap = QPixmap(":/icons/icons/no_image.png")                                                        
+                            pixmap = QPixmap("icons:no_image.png")                                                        
                         # se è presente un'immagine, carico immagine del blob...
                         else:
                             pixmap = QPixmap.fromImage(qimg)                           
@@ -3752,7 +3729,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                         self.o_table.setCellWidget(self.v_pos_y, x, label )                                        
                     # se il contenuto è un clob...leggo sempre tramite metodo read e lo carico in un widget di testo largo
                     elif self.tipi_intestazioni[x][1] == cx_Oracle.CLOB:                        
-                        qtext = QtWidgets.QTextEdit(field.read())    
+                        qtext = QTextEdit(field.read())    
                         # da notare come prendendo qtext e trasformandolo in plaintext le prestazioni migliorino di molto                    
                         self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( qtext.toPlainText() ) )                                                                                                                
                     x += 1
@@ -4019,7 +3996,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
            Se p_font viene ricevuto in input, non apre la dialog ma lo setta
         """
         if p_font is None:
-            font, ok = QFontDialog.getFont(QtGui.QFont("Courier New"))
+            font, ok = QFontDialog.getFont(QFont("Courier New"))
         else:
             font = p_font
             ok = True
@@ -4033,7 +4010,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
            Se p_font viene ricevuto in input, non apre la dialog ma lo setta
         """
         if p_font is None:
-            font, ok = QFontDialog.getFont(QtGui.QFont("Arial"))
+            font, ok = QFontDialog.getFont(QFont("Arial"))
         else:
             font = p_font
             ok = True
@@ -4047,20 +4024,13 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
     def slot_find(self):
         """
            Apre la dock per la ricerca del testo 
-        """            
-        # se è stato selezionato del testo lo utilizzo come base per la ricerca
-        v_testo_selezionato = self.e_sql.selectedText()
-        if len(v_testo_selezionato) > 0:            
-            self.e_find.setText(v_testo_selezionato.split()[0])        
-        else:
-            self.e_find.setText('')        
-
+        """                    
         # apro la sezione di ricerca e posiziono il fuoco del cursore
         self.dockFindWidget.show()
         self.e_find.setFocus()  
                         
         # definizione della struttura per elenco dei risultati (valido solo per find all)       
-        self.find_all_model = QtGui.QStandardItemModel()        
+        self.find_all_model = QStandardItemModel()        
         self.o_find_all_result.setModel(self.find_all_model)
 
     def slot_find_all(self):
@@ -4089,7 +4059,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                 v_risultato = v_risultato + self.e_sql.selectedText().lstrip()
                 v_risultato = v_risultato.replace('\n','')
                 # aggiungo il risultato all'elenco
-                self.find_all_model.appendRow(QtGui.QStandardItem(v_risultato))        
+                self.find_all_model.appendRow(QStandardItem(v_risultato))        
                 # lancio la ricerca alla riga successiva
                 v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, v_start_line + 1, -1, False, False, False)                        
                 # conto le ricorrenze
@@ -4209,7 +4179,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.dialog_goto_line.show()
         except:
             # inizializzo le strutture grafiche e visualizzo la dialog per chiedere i dati
-            self.dialog_goto_line = QtWidgets.QDialog()
+            self.dialog_goto_line = QDialog()
             self.win_goto_line = Ui_GotoLineWindow()        
             self.win_goto_line.setupUi(self.dialog_goto_line)                
             # da notare come il collegamento delle funzioni venga fatto in questo punto e non nella ui            
@@ -4262,7 +4232,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
            Se è stato indicato un parametro di ricerca, estraggo solo quanto corrispondente
         """
         # imposto il modello per la visualizzazione dati                   
-        self.map_model = QtGui.QStandardItemModel()        
+        self.map_model = QStandardItemModel()        
         # pulisco l'oggetto che a video riporta i risultati
         self.map_model.clear()
         # carico nel modello la lista delle intestazioni
@@ -4296,15 +4266,13 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
                 self.map_model.setItem(v_y-1, 0, v_item)                                                                
                 # campo che contiene il numero di riga                                    
                 v_item = QStandardItem('{:d}'.format(ele.numero_riga_testo))                        
-                v_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)   
+                v_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)   
                 self.map_model.setItem(v_y-1, 1, v_item)                                            
         # carico il modello nel widget        
         self.o_map.setModel(self.map_model)                                   
         # indico che la larghezza delle colonne si deve adattare al contenuto
         self.o_map.resizeColumnsToContents()        
-        # forzo altezza delle righe (automatica in base al contenuto)
-        self.o_map.verticalHeader().setDefaultSectionSize(QHeaderView.ResizeToContents)
-    
+        
     def slot_o_map_selected(self):
         """
            Mi posiziono sull'editor in base alla posizione indicata sulla mappa
@@ -4403,20 +4371,20 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         global o_global_preferences
         
         # definizione dei pennelli per scrivere il testo in diversi colori (i nomi fanno riferimento al tema chiaro)
-        v_pennello_rosso = QtGui.QTextCharFormat()
-        v_pennello_blu = QtGui.QTextCharFormat()
-        v_pennello_nero = QtGui.QTextCharFormat()
-        v_pennello_verde = QtGui.QTextCharFormat()
+        v_pennello_rosso = QTextCharFormat()
+        v_pennello_blu = QTextCharFormat()
+        v_pennello_nero = QTextCharFormat()
+        v_pennello_verde = QTextCharFormat()
         if o_global_preferences.dark_theme:            
-            v_pennello_rosso.setForeground(Qt.red)            
-            v_pennello_blu.setForeground(Qt.cyan)            
-            v_pennello_nero.setForeground(Qt.white)            
-            v_pennello_verde.setForeground(Qt.green)
+            v_pennello_rosso.setForeground(Qt.GlobalColor.red)            
+            v_pennello_blu.setForeground(Qt.GlobalColor.cyan)            
+            v_pennello_nero.setForeground(Qt.GlobalColor.white)            
+            v_pennello_verde.setForeground(Qt.GlobalColor.green)
         else:            
-            v_pennello_rosso.setForeground(Qt.red)            
-            v_pennello_blu.setForeground(Qt.blue)            
-            v_pennello_nero.setForeground(Qt.black)            
-            v_pennello_verde.setForeground(Qt.darkGreen)
+            v_pennello_rosso.setForeground(Qt.GlobalColor.red)            
+            v_pennello_blu.setForeground(Qt.GlobalColor.blue)            
+            v_pennello_nero.setForeground(Qt.GlobalColor.black)            
+            v_pennello_verde.setForeground(Qt.GlobalColor.darkGreen)
 
         # stampo in blu l'ora di sistema
         v_time = datetime.datetime.now()        
@@ -4433,7 +4401,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
             self.o_output.setCurrentCharFormat(v_pennello_nero)        
             self.o_output.appendPlainText(p_messaggio)                         
         # forzo il posizionamento in fondo all'item di risultato
-        self.o_output.moveCursor(QTextCursor.End)                
+        self.o_output.moveCursor(QTextCursor.MoveOperation.End)                
         # porto in primo piano la visualizzazione del tab di output
         self.o_tab_widget.setCurrentIndex(1)                         
         
@@ -4446,27 +4414,13 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
         # se attivato...
         if o_global_preferences.editable:
             # attivo le modifiche sulla tabella
-            self.o_table.setEditTriggers(QtWidgets.QAbstractItemView.AllEditTriggers)
+            self.o_table.setEditTriggers(QAbstractItemView.EditTrigger.AllEditTriggers)
             # pulisco la tabella costringendo l'utente a ricaricare la query in quanto deve comparire il rowid
             self.slot_clear('RES')      
         # ...
         else:
             # disattivo le modifiche sulla tabella
-            self.o_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)            
-
-    def set_Color(self):
-        """
-           Imposto i colori di sfondo degli oggetti dell'editor
-        """
-        global v_global_color
-
-        # Questa reimpostazione vale solo per il tema di colori chiaro e non per il tema scuro
-        if not o_global_preferences.dark_theme:        
-            self.o_table.setStyleSheet("QTableWidget {background-color: " + v_global_color + ";}")
-            self.o_output.setStyleSheet("QPlainTextEdit {background-color: " + v_global_color + ";}")
-            self.o_map.setStyleSheet("QTableView {background-color: " + v_global_color + ";}")
-            self.o_bind.setStyleSheet("QTableView {background-color: " + v_global_color + ";}")
-            self.o_plan.setStyleSheet("QPlainTextEdit {background-color: " + v_global_color + ";}")
+            self.o_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)            
     
     def set_show_end_of_line(self):
         """
@@ -4560,22 +4514,22 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
 
             # preparo la struttura della tabella che visualizza l'oggetto :binds
             intestazioni = ['Name','Type','Value' ]                                
-            self.bind_risultati = QtGui.QStandardItemModel()        
+            self.bind_risultati = QStandardItemModel()        
             self.bind_risultati.setHorizontalHeaderLabels(intestazioni)                
             self.bind_risultati.setColumnCount(len(intestazioni))                
             self.bind_risultati.setRowCount(0)                        
 
             for y in range(0,len(self.v_variabili_bind_nome)):            
                 # colonna Name
-                v_item = QtGui.QStandardItem()                
+                v_item = QStandardItem()                
                 v_item.setText(str(self.v_variabili_bind_nome[y]))            
                 self.bind_risultati.setItem(y, 0, v_item )  
                 # colonna Tipo di dato
-                v_item = QtGui.QStandardItem()                
+                v_item = QStandardItem()                
                 v_item.setText(str(self.v_variabili_bind_tipo[y]))            
                 self.bind_risultati.setItem(y, 1, v_item )  
                 # colonna Valore
-                v_item = QtGui.QStandardItem()                
+                v_item = QStandardItem()                
                 v_item.setText(str(self.v_variabili_bind_valore[y]))            
                 self.bind_risultati.setItem(y, 2, v_item )  
 
@@ -4633,7 +4587,7 @@ class MSql_win2_class(QtWidgets.QMainWindow, Ui_MSql_win2):
 # |___|_| \_|_|   \___/ 
 # 
 # Classe che contiene finestra info di programma                      
-class program_info_class(QtWidgets.QDialog, Ui_program_info):
+class program_info_class(QDialog, Ui_program_info):
     """
         Visualizza le info del programma
     """                
@@ -4685,9 +4639,12 @@ if __name__ == "__main__":
     # sovrascrive l'hook delle eccezioni; in pratica se avverrà un errore imprevisto, dovrebbe uscire un messaggio a video...
     sys.excepthook = excepthook
 
-    # inizializzazione ambiente grafico
-    app = QtWidgets.QApplication([])    
+    # eventuale preferenza di zoom di tutto il programma (introdotto a partire PyQt6)    
+    os.environ['QT_SCALE_FACTOR'] = str(o_global_preferences.general_zoom / 100)
 
+    # creazione dell'applicazione
+    app = QApplication(sys.argv)        
+    
     # se è stato scelto di avere il tema dei colori scuro, lo carico
     # Attenzione! La parte principale del tema colori rispetta il meccanismo di QT library
     #             Mentre per la parte di QScintilla ho dovuto fare le impostazioni manuali (v. definizione del lexer)
@@ -4695,7 +4652,17 @@ if __name__ == "__main__":
         app.setStyleSheet(dark_theme_definition())                    
 
     # avvio del programma (aprendo eventuale file indicato su linea di comando)   
-    application = MSql_win1_class(v_nome_file_da_caricare)     
+    application = MSql_win1_class(v_nome_file_da_caricare)         
+
+    # forzo la dimensione della finestra. Mi sono accorto che questa funzione, nella gestione MDI
+    # è importante in quanto permette poi al connettore dello smistamento menu di funzionare sulla
+    # prima finestra aperta....rimane comunque un mistero questa cosa.....
+    #application.showNormal()      
+    
+    # dimensioni della window
+    application.carico_posizione_window()  
+    
+    # mostro la window
     application.show()
             
     # attivazione degli eventi

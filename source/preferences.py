@@ -2,7 +2,7 @@
 
 """
  Creato da.....: Marco Valaguzza
- Piattaforma...: Python3.11 con libreria pyqt5
+ Piattaforma...: Python3.11 con libreria pyqt6
  Data..........: 06/09/2023
  Descrizione...: Gestione delle preferenze di MSql
  
@@ -19,12 +19,15 @@ import json
 #Amplifico la pathname dell'applicazione in modo veda il contenuto della directory qtdesigner dove sono contenuti i layout
 sys.path.append('qtdesigner')
 #Librerie grafiche
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 #Definizioni interfaccia
 from preferences_ui import Ui_preferences_window
 #Librerie aggiuntive interne
 from utilita import message_info, message_question_yes_no
+#Amplifico la pathname per ricercare le icone
+QDir.addSearchPath('icons', 'qtdesigner/icons/')
 
 class preferences_class():
     """
@@ -106,11 +109,17 @@ class preferences_class():
                 self.autosave_snapshoot_interval = v_json['autosave_snapshoot_interval']
             else:
                 self.autosave_snapshoot_interval = 60
+            # general zoom
+            if 'general_zoom' in v_json:            
+                self.general_zoom = v_json['general_zoom']            
+            else:
+                self.general_zoom = 100
         # imposto valori di default senza presenza dello specifico file
         else:
             self.remember_window_pos = True
             self.remember_text_pos = True
             self.dark_theme = False
+            self.general_zoom = 100
             self.open_dir = 'W:\\SQL'
             self.save_dir = 'W:\\SQL'
             self.utf_8 = False
@@ -158,6 +167,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         self.e_remember_window_pos.setChecked(self.preferences.remember_window_pos)        
         self.e_remember_text_pos.setChecked(self.preferences.remember_text_pos)        
         self.e_dark_theme.setChecked(self.preferences.dark_theme)        
+        self.e_general_zoom.setValue(self.preferences.general_zoom)
         self.e_default_open_dir.setText(self.preferences.open_dir)
         self.e_default_save_dir.setText(self.preferences.save_dir)        
         self.e_default_utf_8.setChecked(self.preferences.utf_8)        
@@ -185,7 +195,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
             # come quarta colonna metto il pulsante per la scelta del colore
             v_color_button = QPushButton()            
             v_icon = QIcon()
-            v_icon.addPixmap(QPixmap(":/icons/icons/color.png"), QIcon.Normal, QIcon.Off)
+            v_icon.addPixmap(QPixmap("icons:color.png"), QIcon.Mode.Normal, QIcon.State.Off)
             v_color_button.setIcon(v_icon)
             v_color_button.clicked.connect(self.slot_set_color_server)
 
@@ -216,7 +226,8 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         # apro la dialog color
         color = QColorDialog.getColor(QColor(v_color_corrente))                
         # imposto il colore
-        self.o_server.setItem( index.row(), 2, QTableWidgetItem(color.name()) )            
+        if color.isValid():
+            self.o_server.setItem( index.row(), 2, QTableWidgetItem(color.name()) )            
     
     def slot_b_restore(self):
         """
@@ -399,7 +410,8 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
                  'auto_clear_output': v_auto_clear_output,
                  'date_format': self.e_default_date_format.currentText(),
                  'server': v_server,
-                 'users': v_users
+                 'users': v_users,
+                 'general_zoom':self.e_general_zoom.value() 
                 }
 
 		# scrittura nel file dell'oggetto json

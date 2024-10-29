@@ -558,7 +558,7 @@ QCheckBox::indicator
 
 QCheckBox::indicator:checked
 {
-    image:url(://icons//icons//checkbox_dark_theme.png);
+    image:url(icons:checkbox_dark_theme.png);
     border: 1px solid white;
 }
 

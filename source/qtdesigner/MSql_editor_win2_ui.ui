@@ -45,14 +45,7 @@
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
-      <widget class="QsciScintilla" name="e_sql">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>100</height>
-        </size>
-       </property>
-      </widget>
+      <widget class="QsciScintilla" name="e_sql"/>
       <widget class="QTabWidget" name="o_tab_widget">
        <property name="currentIndex">
         <number>0</number>

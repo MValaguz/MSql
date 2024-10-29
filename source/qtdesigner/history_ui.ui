@@ -80,8 +80,8 @@
          <string>Search</string>
         </property>
         <property name="icon">
-         <iconset>
-          <normaloff>:/icons/icons/go.gif</normaloff>:/icons/icons/go.gif</iconset>
+         <iconset resource="resource.qrc">
+          <normaloff>:/icons/icons/go.png</normaloff>:/icons/icons/go.png</iconset>
         </property>
        </widget>
       </item>

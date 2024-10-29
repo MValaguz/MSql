@@ -8,3 +8,4 @@
    che poi verrà parcheggiato in C:\MSql_setup per essere reso disponibile a tutti gli utenti
    
 Al termine sia la dir C:\MSql_exe\ che C:\MSql_setup possono essere eliminate!
+

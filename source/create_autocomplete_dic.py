@@ -2,7 +2,7 @@
 
 """
  Creato da.....: Marco Valaguzza
- Piattaforma...: Python3.11 con libreria pyqt5
+ Piattaforma...: Python3.11 con libreria pyqt6
  Data..........: 22/11/2023
  Descrizione...: Gestione e creazione del dizionario per l'autocomplete all'interno dell'editor
  
@@ -14,13 +14,16 @@ import sys
 #Amplifico la pathname dell'applicazione in modo veda il contenuto della directory qtdesigner dove sono contenuti i layout
 sys.path.append('qtdesigner')
 #Librerie grafiche
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 #Definizioni interfaccia
 from create_autocomplete_dic_ui import Ui_create_autocomplete_dic_window
 #Librerie aggiuntive interne
 from utilita import message_info, message_error
 from avanzamento import avanzamento_infinito_class
+#Amplifico la pathname per ricercare le icone
+QDir.addSearchPath('icons', 'qtdesigner/icons/')
 
 class create_autocomplete_dic_class(QMainWindow, Ui_create_autocomplete_dic_window):
     """

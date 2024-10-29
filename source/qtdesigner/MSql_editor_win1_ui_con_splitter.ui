@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1250</width>
-    <height>881</height>
+    <height>806</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,7 +24,7 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QGridLayout" name="gridLayout_3">
     <property name="leftMargin">
      <number>0</number>
     </property>
@@ -37,20 +37,39 @@
     <property name="bottomMargin">
      <number>0</number>
     </property>
-    <item>
-     <widget class="QMdiArea" name="mdiArea">
-      <property name="activationOrder">
-       <enum>QMdiArea::ActivationHistoryOrder</enum>
+    <item row="0" column="0">
+     <widget class="QSplitter" name="splitter_mdi">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
       </property>
-      <property name="viewMode">
-       <enum>QMdiArea::TabbedView</enum>
-      </property>
-      <property name="tabsClosable">
-       <bool>true</bool>
-      </property>
-      <property name="tabsMovable">
-       <bool>true</bool>
-      </property>
+      <widget class="QMdiArea" name="mdiArea">
+       <property name="activationOrder">
+        <enum>QMdiArea::ActivationHistoryOrder</enum>
+       </property>
+       <property name="viewMode">
+        <enum>QMdiArea::TabbedView</enum>
+       </property>
+       <property name="tabsClosable">
+        <bool>true</bool>
+       </property>
+       <property name="tabsMovable">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QMdiArea" name="mdiArea_2">
+       <property name="activationOrder">
+        <enum>QMdiArea::ActivationHistoryOrder</enum>
+       </property>
+       <property name="viewMode">
+        <enum>QMdiArea::TabbedView</enum>
+       </property>
+       <property name="tabsClosable">
+        <bool>true</bool>
+       </property>
+       <property name="tabsMovable">
+        <bool>true</bool>
+       </property>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -194,6 +213,8 @@
     <addaction name="separator"/>
     <addaction name="actionFold_All"/>
     <addaction name="actionShow_end_of_line"/>
+    <addaction name="separator"/>
+    <addaction name="actionSplit_view"/>
     <addaction name="separator"/>
     <addaction name="actionFont_editor_selector"/>
    </widget>
@@ -637,6 +658,7 @@
    <addaction name="actionMaps_procedure_function"/>
    <addaction name="actionZoom_In"/>
    <addaction name="actionZoom_Out"/>
+   <addaction name="actionSplit_view"/>
    <addaction name="separator"/>
    <addaction name="actionAutoColumnResize"/>
    <addaction name="actionExport_to_Excel"/>
@@ -1251,6 +1273,21 @@
     <string>Extract sql from output</string>
    </property>
   </action>
+  <action name="actionSplit_view">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/two_columns.png</normaloff>:/icons/icons/two_columns.png</iconset>
+   </property>
+   <property name="text">
+    <string>Split view</string>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Split view (You must have at least two files open!)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+\</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>oggetti_db_scelta</tabstop>
@@ -1322,7 +1359,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>1244</x>
-     <y>855</y>
+     <y>780</y>
     </hint>
     <hint type="destinationlabel">
      <x>995</x>
@@ -1370,7 +1407,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>1243</x>
-     <y>543</y>
+     <y>505</y>
     </hint>
     <hint type="destinationlabel">
      <x>800</x>

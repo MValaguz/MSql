@@ -2,7 +2,7 @@
 
 """
   Creato da.....: Marco Valaguzza
-  Piattaforma...: Python3.11 con libreria pyqt5
+  Piattaforma...: Python3.11 
   Data..........: 01/10/2017
   Descrizione...: Libreria funzioni per estrazioni strutture ed altro dai DB Oracle e SQLite
 """

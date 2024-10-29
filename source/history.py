@@ -11,12 +11,14 @@ import sys
 #Amplifico la pathname dell'applicazione in modo veda il contenuto della directory qtdesigner dove sono contenuti i layout
 sys.path.append('qtdesigner')
 #Librerie grafiche
-from PyQt5.QtWidgets import *
-from PyQt5.QtSql import *
-from PyQt5.QtCore import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtSql import *
+from PyQt6.QtCore import *
 from history_ui import Ui_history_window
 from utilita import message_error, message_question_yes_no, message_info
 from utilita_database import purge_sql_history
+#Amplifico la pathname per ricercare le icone
+QDir.addSearchPath('icons', 'qtdesigner/icons/')
 
 class history_class(QMainWindow, Ui_history_window):
     """
@@ -68,7 +70,7 @@ class history_class(QMainWindow, Ui_history_window):
         self.o_lst1.setColumnWidth(2, 70)                
         # intestazioni automatiche in base alla query
         v_horizontal_header = self.o_lst1.horizontalHeader()
-        v_horizontal_header.setDefaultAlignment(Qt.AlignLeft)
+        v_horizontal_header.setDefaultAlignment(Qt.AlignmentFlag.AlignLeft)
         # altezza della riga (sotto un certo numero non va) in base all'altezza del font
         v_vertical_header = self.o_lst1.verticalHeader()
         v_vertical_header.setDefaultSectionSize(8)   
