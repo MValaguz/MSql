@@ -1,44 +1,36 @@
-import sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QSplitter, QMdiArea, QMdiSubWindow, QVBoxLayout, QWidget
-from PyQt6.Qsci import QsciScintilla
+from PyQt6.QtWidgets import QApplication, QMainWindow, QMdiArea, QSplitter, QTextEdit, QVBoxLayout, QWidget, QMdiSubWindow
 
-class MdiSplitter(QMainWindow):
-    def __init__(self):
-        super().__init__()
+app = QApplication([])
 
-        self.mdi_area = QMdiArea()
-        self.setCentralWidget(self.mdi_area)
+main_window = QMainWindow()
 
-        self.init_ui()
+# Creazione della QMdiArea
+mdi_area = QMdiArea()
+mdi_area.setViewMode(QMdiArea.ViewMode.TabbedView)
 
-    def init_ui(self):
-        splitter = QSplitter()
+# Widget per contenere lo splitter
+splitter_container = QWidget()
+splitter_layout = QVBoxLayout(splitter_container)
 
-        subwindow1 = self.create_mdi_sub_window("Editor 1")
-        subwindow2 = self.create_mdi_sub_window("Editor 2")
+# Creazione dello splitter
+splitter = QSplitter()
 
-        splitter.addWidget(subwindow1)
-        splitter.addWidget(subwindow2)
+# Aggiunta di due text edit allo splitter
+splitter.addWidget(QTextEdit("Left Pane"))
+splitter.addWidget(QTextEdit("Right Pane"))
 
-        widget = QWidget()
-        layout = QVBoxLayout()
-        layout.addWidget(splitter)
-        widget.setLayout(layout)
+# Aggiunta dello splitter al layout del container
+splitter_layout.addWidget(splitter)
 
-        sub_window = QMdiSubWindow()
-        sub_window.setWidget(widget)
-        self.mdi_area.addSubWindow(sub_window)
-        sub_window.show()
+# Creazione di una subwindow per lo splitter
+sub_window = QMdiSubWindow()
+sub_window.setWidget(splitter_container)
 
-    def create_mdi_sub_window(self, title):
-        sub_window = QMdiSubWindow()
-        editor = QsciScintilla()
-        sub_window.setWidget(editor)
-        sub_window.setWindowTitle(title)
-        return sub_window
+# Aggiunta della subwindow alla QMdiArea
+mdi_area.addSubWindow(sub_window)
+sub_window.show()
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    main_win = MdiSplitter()
-    main_win.show()
-    sys.exit(app.exec())
+main_window.setCentralWidget(mdi_area)
+main_window.show()
+
+app.exec()

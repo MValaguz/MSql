@@ -2,7 +2,7 @@
 
 """
  Creato da.....: Marco Valaguzza
- Piattaforma...: Python3.11 con libreria pyqt5
+ Piattaforma...: Python3.13 con libreria pyqt6
  Data..........: 10/08/2024
  Descrizione...: Classe per l'esecuzione di un comando SQL/PL-SQL dove viene presentata una progressbar di avanzamento e viene 
                  permessa l'interruzione del comando....il tutto avviene tramite utilizzo dei thread.
@@ -22,14 +22,15 @@ import datetime
 # Amplifico la pathname dell'applicazione in modo veda il contenuto della directory qtdesigner dove sono contenuti i layout
 sys.path.append('qtdesigner')
 # Librerie grafiche
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-import resource_rc
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 # Libreria Oracle
 import cx_Oracle
 # Librerie interne
 import oracle_my_lib
+#Amplifico la pathname per ricercare le icone
+QDir.addSearchPath('icons', 'qtdesigner/icons/')
 
 class SecondThread(QThread):
     """
@@ -173,14 +174,14 @@ class SendCommandToOracle(QDialog):
     signalStatus = pyqtSignal(str)
 
     def __init__(self, p_cursor, p_command, p_bind_variables):
-        super().__init__()
+        super().__init__()        
         # definizione layout della finestra di dialogo
         self.setModal(True)
         self.v_status = ''
         self.setWindowTitle("...please wait...")    
         self.resize(320, 81)
         icon = QIcon()
-        icon.addPixmap(QPixmap(":/icons/icons/MSql.ico"), QIcon.Normal, QIcon.Off)
+        icon.addPixmap(QPixmap("icons:MSql.ico"), QIcon.Mode.Normal, QIcon.State.Off)
         self.setWindowIcon(icon)
         self.gridLayout = QGridLayout(self)        
         # progressbar (il testo è invisibile all'inizio per questioni estetiche ma poi diventerà visibile)
@@ -189,10 +190,12 @@ class SendCommandToOracle(QDialog):
         self.progressbar.setMinimum(0)
         self.progressbar.setMaximum(100)    
         self.gridLayout.addWidget(self.progressbar, 0, 0, 1, 1)
+        # valori disponibili Fusio, WindowsVista, Windows 
+        self.progressbar.setStyle(QStyleFactory.create('Windows'))        
         # zona del bottone di interruzione dell'operazione
         self.buttonBox = QDialogButtonBox(self)
-        self.buttonBox.setOrientation(Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel)        
+        self.buttonBox.setOrientation(Qt.Orientation.Horizontal)
+        self.buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.Cancel)        
         self.gridLayout.addWidget(self.buttonBox, 1, 0, 1, 1)        
         # definizione del segnale di interruzione
         self.buttonBox.rejected.connect(self.cancel_worker) # type: ignore
@@ -214,7 +217,7 @@ class SendCommandToOracle(QDialog):
         # mi metto in attesa della fine del comando inviato a Oracle...questo perché non voglio accettare altri eventi nel frattempo se non la fine del comando
         v_loop = QEventLoop()
         self.signalStatus.connect(v_loop.quit)  # Aspetto l'evento che mi restituisce l'executer
-        v_loop.exec_()  # Entra nel ciclo di attesa                        
+        v_loop.exec()  # Entra nel ciclo di attesa                        
         
     def cancel_worker(self):
         """ 
@@ -246,7 +249,7 @@ class SendCommandToOracle(QDialog):
                 v_value += 20
             self.progressbar.setValue(v_value)
             self.progressbar.setFormat(status)             
-            self.progressbar.setAlignment(Qt.AlignCenter)           
+            self.progressbar.setAlignment(Qt.AlignmentFlag.AlignCenter)           
 
     def get_cursor(self):
         """
@@ -305,8 +308,8 @@ def slot_on_click():
     #                                                      MW_MAGAZZINI.PREPARA_PRELIEVO_ORDINI('SMI','B1');
     #                                                      MW_MAGAZZINI.DISPONIBILE_PRELIEVO_ORDINI('SMI','B1');
     #                                                     end;""", v_bind)        
-    #v_oracle_executer = SendCommandToOracle(v_cursor, """select * from va_op_da_versare""", v_bind)                                                                
-    v_oracle_executer = SendCommandToOracle(v_cursor, """select * from dual""", v_bind)                                                                    
+    v_oracle_executer = SendCommandToOracle(v_cursor, """select * from va_op_da_versare""", v_bind)                                                                
+    #v_oracle_executer = SendCommandToOracle(v_cursor, """select * from dual""", v_bind)                                                                    
     v_oracle_executer.signalStatus.connect(endCommandToOracle)    
     v_oracle_executer.start()
     
@@ -328,4 +331,4 @@ if __name__ == "__main__":
     button.resize(100, 30)
     button.move(50, 50)
     v_win.show()    
-    sys.exit(app.exec_())        
+    sys.exit(app.exec())        
