@@ -90,7 +90,6 @@ class SecondThread(QThread):
            Interrompe il comando Oracle
         """                
         self.quit()
-        self.wait()
 
 class FirstThread(QThread):
     """
@@ -159,17 +158,12 @@ class FirstThread(QThread):
         """
         self.server_thread.cancel_job()
         self.quit()        
-        self.wait()
 
     def end_of_job(self, status):                
         """
            Lavoro terminato emetto segnale di fine che verrà catturato dalla funzione progress
         """
         self.signalStatus.emit(status)
-        self.server_thread.quit()
-        self.server_thread.wait()
-        self.quit()        
-        self.wait()
 
 class SendCommandToOracle(QDialog):
     """
@@ -314,13 +308,12 @@ def slot_on_click():
     #                                                      MW_MAGAZZINI.PREPARA_PRELIEVO_ORDINI('SMI','B1');
     #                                                      MW_MAGAZZINI.DISPONIBILE_PRELIEVO_ORDINI('SMI','B1');
     #                                                     end;""", v_bind)        
-    for i in range(1,1000):
-        #v_oracle_executer = SendCommandToOracle(v_cursor, """select * from va_op_da_versare""", v_bind)                                                                
-        v_oracle_executer = SendCommandToOracle(v_cursor, """select * from dual""", v_bind)                                                                    
-        v_oracle_executer.signalStatus.connect(endCommandToOracle)    
-        v_oracle_executer.start()
-        
-        print('fine ' + str(i))
+    v_oracle_executer = SendCommandToOracle(v_cursor, """select * from va_op_da_versare""", v_bind)                                                                
+    #v_oracle_executer = SendCommandToOracle(v_cursor, """select * from dual""", v_bind)                                                                    
+    v_oracle_executer.signalStatus.connect(endCommandToOracle)    
+    v_oracle_executer.start()
+    
+    print('fine')
 
 if __name__ == "__main__":    
     # inizializzo libreria oracle    

@@ -63,7 +63,9 @@ from utilita_testo import *
 from sql_formatter.core import format_sql
 #Amplifico la pathname per ricercare le icone (la dir _internal serve per quando si compila con pyinstaller)
 QDir.addSearchPath('icons', 'qtdesigner/icons/')
+QDir.addSearchPath('logos', 'qtdesigner/logos/')
 QDir.addSearchPath('icons', '_internal/icons/')
+QDir.addSearchPath('logos', '_internal/logos/')
 
 # Tipi oggetti di database
 Tipi_Oggetti_DB = { 'Tables':'TABLE',                    
@@ -2130,7 +2132,11 @@ class My_MSql_Lexer(QsciLexerSQL):
         self.p_editor.setAutoCompletionSource(QsciScintilla.AutoCompletionSource.AcsAll)                
         self.carica_dizionario_per_autocompletamento()                
         # indico dopo quanti caratteri che sono stati digitati dall'utente, si deve attivare l'autocompletamento
-        self.p_editor.setAutoCompletionThreshold(3)  
+        # se è stato richiesto di disattivarlo alzo la soglia in modo che di fatto risulta disattivato
+        if o_global_preferences.autocompletation:
+            self.p_editor.setAutoCompletionThreshold(3)  
+        else:
+            self.p_editor.setAutoCompletionThreshold(1000)  
         # attivo autocompletamento sia per la parte del contenuto del documento che per la parte di parole chiave specifiche
         self.p_editor.autoCompleteFromAll()
 
@@ -4643,7 +4649,12 @@ if __name__ == "__main__":
     os.environ['QT_SCALE_FACTOR'] = str(o_global_preferences.general_zoom / 100)
 
     # creazione dell'applicazione
-    app = QApplication(sys.argv)        
+    app = QApplication(sys.argv)     
+    
+    # carica l'immagine dello splash screen e lo mantiene visualizzato per 3 secondi
+    v_pixmap = QPixmap("logos:MSql.png").scaled(300, 300, Qt.AspectRatioMode.KeepAspectRatio) 
+    v_splash = QSplashScreen(v_pixmap) 
+    v_splash.show()         
     
     # se è stato scelto di avere il tema dei colori scuro, lo carico
     # Attenzione! La parte principale del tema colori rispetta il meccanismo di QT library

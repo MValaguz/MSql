@@ -13,7 +13,8 @@ a = Analysis(['..\\source\\MSql_editor.py'],
              datas=[					
 		      ('..\\source\\help\\*.*','help'),										
 		      ('..\\source\\qtdesigner\\*.py','.'),
-			  ('..\\source\\qtdesigner\\icons\\*.*','icons\\')
+			  ('..\\source\\qtdesigner\\icons\\*.*','icons\\'),
+			  ('..\\source\\qtdesigner\\logos\\*.*','logos\\')
 	           ],
              hiddenimports=[],             
              hookspath=[],

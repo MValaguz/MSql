@@ -91,6 +91,11 @@ class preferences_class():
                 self.auto_clear_output = True
             else:
                 self.auto_clear_output = False
+            # autocompletamento del testo nell'editor
+            if 'autocompletation' in v_json and v_json['autocompletation'] == 1:            
+                self.autocompletation = True
+            else:
+                self.autocompletation = False
             # default format data
             if 'date_format' in v_json:                        
                 self.date_format = v_json['date_format']
@@ -131,6 +136,7 @@ class preferences_class():
             self.auto_column_resize = False
             self.indentation_guide = False
             self.auto_clear_output = True
+            self.autocompletation = True
             self.date_format = '%d/%m/%Y %H:%M:%S'
             self.csv_separator = '|'
             self.tab_size = '2'
@@ -179,6 +185,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         self.e_default_auto_column_resize.setChecked(self.preferences.auto_column_resize)
         self.e_default_indentation_guide.setChecked(self.preferences.indentation_guide)
         self.e_default_auto_clear_output.setChecked(self.preferences.auto_clear_output)
+        self.e_default_autocompletation.setChecked(self.preferences.autocompletation)
         self.e_default_date_format.setCurrentText(self.preferences.date_format)
         self.e_default_csv_separator.setText(self.preferences.csv_separator)
         self.e_tab_size.setText(self.preferences.tab_size)
@@ -376,6 +383,12 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
             v_auto_clear_output = 1
         else:
             v_auto_clear_output = 0
+                
+        # il default per autocompletamento va convertito
+        if self.e_default_autocompletation.isChecked():
+            v_autocompletation = 1
+        else:
+            v_autocompletation = 0
 
         # elenco dei server
         v_server = []
@@ -411,7 +424,8 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
                  'date_format': self.e_default_date_format.currentText(),
                  'server': v_server,
                  'users': v_users,
-                 'general_zoom':self.e_general_zoom.value() 
+                 'general_zoom':self.e_general_zoom.value(),
+                 'autocompletation':v_autocompletation
                 }
 
 		# scrittura nel file dell'oggetto json

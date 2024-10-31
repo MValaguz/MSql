@@ -22,7 +22,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="o_tab_widget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="general">
        <attribute name="title">
@@ -137,24 +137,7 @@
        <layout class="QGridLayout" name="gridLayout_7">
         <item row="0" column="0">
          <layout class="QGridLayout" name="gridLayout_6">
-          <item row="4" column="0" colspan="2">
-           <widget class="QLabel" name="label_16">
-            <property name="text">
-             <string>Indentation guide:</string>
-            </property>
-            <property name="buddy">
-             <cstring>e_default_indentation_guide</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="2">
-           <widget class="QCheckBox" name="e_remember_text_pos">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="0">
+          <item row="7" column="0">
            <widget class="QLabel" name="label_18">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Autosave snapshoot:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -174,17 +157,34 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="2">
-           <widget class="QCheckBox" name="e_default_indentation_guide">
-            <property name="toolTip">
-             <string>Indent guides are vertical dotted lines that indicate the indent level of text in the edit window </string>
-            </property>
+          <item row="5" column="2">
+           <widget class="QCheckBox" name="e_remember_text_pos">
             <property name="text">
              <string/>
             </property>
            </widget>
           </item>
-          <item row="6" column="2">
+          <item row="4" column="0" colspan="2">
+           <widget class="QLabel" name="label_16">
+            <property name="text">
+             <string>Indentation guide:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_default_indentation_guide</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0" colspan="2">
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Remember text position:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_remember_text_pos</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="2">
            <widget class="QSpinBox" name="e_autosave_snapshoot_interval">
             <property name="maximum">
              <number>3600</number>
@@ -199,13 +199,13 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="0" colspan="2">
-           <widget class="QLabel" name="label_7">
-            <property name="text">
-             <string>Remember text position:</string>
+          <item row="4" column="2">
+           <widget class="QCheckBox" name="e_default_indentation_guide">
+            <property name="toolTip">
+             <string>Indent guides are vertical dotted lines that indicate the indent level of text in the edit window </string>
             </property>
-            <property name="buddy">
-             <cstring>e_remember_text_pos</cstring>
+            <property name="text">
+             <string/>
             </property>
            </widget>
           </item>
@@ -213,6 +213,26 @@
            <widget class="QLineEdit" name="e_tab_size">
             <property name="inputMask">
              <string>9</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0" colspan="2">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>UTF-8 Encoding:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_default_utf_8</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0" colspan="2">
+           <widget class="QLabel" name="label_15">
+            <property name="text">
+             <string>Tab size:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_tab_size</cstring>
             </property>
            </widget>
           </item>
@@ -233,16 +253,6 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0" colspan="2">
-           <widget class="QLabel" name="label_15">
-            <property name="text">
-             <string>Tab size:</string>
-            </property>
-            <property name="buddy">
-             <cstring>e_tab_size</cstring>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="2">
            <widget class="QCheckBox" name="e_default_end_of_line">
             <property name="text">
@@ -254,23 +264,23 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="0" colspan="2">
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>UTF-8 Encoding:</string>
-            </property>
-            <property name="buddy">
-             <cstring>e_default_utf_8</cstring>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="2">
            <widget class="QCheckBox" name="e_default_utf_8"/>
           </item>
-          <item row="6" column="5">
+          <item row="7" column="5">
            <widget class="QLabel" name="label_19">
             <property name="text">
              <string>secs</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="2">
+           <widget class="QCheckBox" name="e_default_autocompletation"/>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="label_22">
+            <property name="text">
+             <string>Autocompletation:</string>
             </property>
            </widget>
           </item>
@@ -607,13 +617,29 @@
   </widget>
  </widget>
  <tabstops>
-  <tabstop>o_tab_widget</tabstop>
   <tabstop>e_remember_window_pos</tabstop>
   <tabstop>e_default_open_dir</tabstop>
   <tabstop>b_default_open_dir</tabstop>
   <tabstop>e_default_save_dir</tabstop>
   <tabstop>b_default_save_dir</tabstop>
   <tabstop>e_dark_theme</tabstop>
+  <tabstop>e_general_zoom</tabstop>
+  <tabstop>e_default_utf_8</tabstop>
+  <tabstop>e_default_end_of_line</tabstop>
+  <tabstop>e_default_font_editor</tabstop>
+  <tabstop>b_default_font_editor</tabstop>
+  <tabstop>e_tab_size</tabstop>
+  <tabstop>e_default_indentation_guide</tabstop>
+  <tabstop>e_remember_text_pos</tabstop>
+  <tabstop>e_default_autocompletation</tabstop>
+  <tabstop>e_autosave_snapshoot_interval</tabstop>
+  <tabstop>e_default_auto_column_resize</tabstop>
+  <tabstop>e_default_editable</tabstop>
+  <tabstop>e_default_font_result</tabstop>
+  <tabstop>b_default_font_result</tabstop>
+  <tabstop>e_default_csv_separator</tabstop>
+  <tabstop>e_default_auto_clear_output</tabstop>
+  <tabstop>e_default_date_format</tabstop>
   <tabstop>b_server_add</tabstop>
   <tabstop>b_server_remove</tabstop>
   <tabstop>o_server</tabstop>
@@ -621,7 +647,9 @@
   <tabstop>b_user_remove</tabstop>
   <tabstop>o_users</tabstop>
   <tabstop>b_restore</tabstop>
+  <tabstop>b_open_pref_dir</tabstop>
   <tabstop>b_save</tabstop>
+  <tabstop>o_tab_widget</tabstop>
  </tabstops>
  <resources>
   <include location="resource.qrc"/>
