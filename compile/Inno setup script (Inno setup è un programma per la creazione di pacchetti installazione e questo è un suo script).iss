@@ -37,7 +37,7 @@ Root: HKA; Subkey: "Software\Classes\.msql\OpenWithProgids"; ValueType: string; 
 Root: HKA; Subkey: "Software\Classes\MSqlFile.msql"; ValueType: string; ValueName: ""; ValueData: "MSql File"; Flags: uninsdeletekey
 Root: HKA; Subkey: "Software\Classes\MSqlFile.msql\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\MSql.exe,0"
 Root: HKA; Subkey: "Software\Classes\MSqlFile.msql\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\MSql.exe"" ""%1"""
-Root: HKA; Subkey: "Software\Classes\Applications\MSql.exe\SupportedTypes"; ValueType: string; ValueName: ".myp"; ValueData: ""
+Root: HKA; Subkey: "Software\Classes\Applications\MSql.exe\SupportedTypes"; ValueType: string; ValueName: ".msql"; ValueData: ""
 
 [Icons]
 Name: "{autoprograms}\MSql"; Filename: "{app}\MSql.exe"

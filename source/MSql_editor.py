@@ -61,11 +61,6 @@ from utilita_database import *
 from utilita_testo import *
 # Libreria che permette, selezionata un'istruzione sql nell'editor di indentarla automaticamente
 from sql_formatter.core import format_sql
-#Amplifico la pathname per ricercare le icone (la dir _internal serve per quando si compila con pyinstaller)
-QDir.addSearchPath('icons', 'qtdesigner/icons/')
-QDir.addSearchPath('logos', 'qtdesigner/logos/')
-QDir.addSearchPath('icons', '_internal/icons/')
-QDir.addSearchPath('logos', '_internal/logos/')
 
 # Tipi oggetti di database
 Tipi_Oggetti_DB = { 'Tables':'TABLE',                    
@@ -4624,11 +4619,17 @@ def excepthook(exc_type, exc_value, exc_tb):
 # |____/ |_/_/   \_\_| \_\|_|  
 #
 if __name__ == "__main__":    
-    # Amplifico la pathname dell'applicazione in modo veda il contenuto della directory qtdesigner dove sono contenuti i layout
-    # Nota bene! Quando tramite pyinstaller verrà creato l'eseguibile, tutti i file della cartella qtdesigner verranno messi 
-    #            nella cartella principale e questa istruzione di cambio path di fatto non avrà alcun senso. Serve dunque solo
-    #            in fase di sviluppo. 
-    sys.path.append('qtdesigner')    
+    # se il programma è eseguito da pyinstaller, cambio la dir di riferimento passando a dove si trova l'eseguibile
+    # in questo modo dovrebbe riuscire a trovare tutte le risorse
+    if getattr(sys, 'frozen', False): 
+       v_dir_eseguibile = os.path.dirname(sys.executable)
+       os.chdir(v_dir_eseguibile)
+    
+    # amplifico la pathname per ricercare le icone (la dir _internal serve per quando si compila con pyinstaller)
+    QDir.addSearchPath('icons', 'qtdesigner/icons/')
+    QDir.addSearchPath('logos', 'qtdesigner/logos/')
+    QDir.addSearchPath('icons', '_internal/icons/')
+    QDir.addSearchPath('logos', '_internal/logos/')
         
     # controllo se programma è stato richiamato da linea di comando passando il nome di un file    
     v_nome_file_da_caricare = ''
@@ -4664,17 +4665,15 @@ if __name__ == "__main__":
 
     # avvio del programma (aprendo eventuale file indicato su linea di comando)   
     application = MSql_win1_class(v_nome_file_da_caricare)         
-
-    # forzo la dimensione della finestra. Mi sono accorto che questa funzione, nella gestione MDI
-    # è importante in quanto permette poi al connettore dello smistamento menu di funzionare sulla
-    # prima finestra aperta....rimane comunque un mistero questa cosa.....
-    #application.showNormal()      
     
     # dimensioni della window
     application.carico_posizione_window()  
     
     # mostro la window
     application.show()
+
+    # nascondo la splash screen
+    v_splash.close()
             
     # attivazione degli eventi
     sys.exit(app.exec())    
