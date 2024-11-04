@@ -12,7 +12,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_preferences_window(object):
     def setupUi(self, preferences_window):
         preferences_window.setObjectName("preferences_window")
-        preferences_window.resize(448, 524)
+        preferences_window.resize(511, 499)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap("icons:MSql.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         preferences_window.setWindowIcon(icon)
@@ -324,7 +324,7 @@ class Ui_preferences_window(object):
         self.label_14.setBuddy(self.o_users)
 
         self.retranslateUi(preferences_window)
-        self.o_tab_widget.setCurrentIndex(1)
+        self.o_tab_widget.setCurrentIndex(0)
         self.b_default_open_dir.clicked.connect(preferences_window.slot_b_default_open_dir) # type: ignore
         self.b_default_save_dir.clicked.connect(preferences_window.slot_b_default_save_dir) # type: ignore
         self.b_save.clicked.connect(preferences_window.slot_b_save) # type: ignore

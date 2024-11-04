@@ -141,18 +141,18 @@ class preferences_class():
             self.csv_separator = '|'
             self.tab_size = '2'
             # elenco server è composto da Titolo, TNS e Colore
-            self.elenco_server = [('Server Prod (ICOM_815)','ICOM_815','#aaffff'),
-                                  ('Server Dev (BACKUP_815)','BACKUP_815','#ffffff')]
+            self.elenco_server = [('Server Prod (ICOM_815)','ICOM_815','#aaffff','0'),
+                                  ('Server Dev (BACKUP_815)','BACKUP_815','#ffffff','1')]
             # elenco users è composto da Titolo, User, Password
-            self.elenco_user = [('USER_SMILE','SMILE','SMILE'),
-                                ('USER_SMI','SMI','SMI'),
-                                ('USER_SMIPACK','SMIPACK','SMIPACK'),
-                                ('USER_SMITEC','SMITEC','SMITEC'),
-                                ('USER_SMIMEC','SMIMEC','SMIMEC'),
-                                ('USER_SMIWRAP (SMIEnergia)','SMIWRAP','SMIWRAP'),
-                                ('USER_ENOBERG','ENOBERG','ENOBERG'),
-                                ('USER_FORM (SMILab)','SMIBLOW','SMIBLOW'),
-                                ('USER_SARCO','SARCO','SARCO')]
+            self.elenco_user = [('USER_SMILE','SMILE','SMILE','1'),
+                                ('USER_SMI','SMI','SMI','0'),
+                                ('USER_SMIPACK','SMIPACK','SMIPACK','0'),
+                                ('USER_SMITEC','SMITEC','SMITEC','0'),
+                                ('USER_SMIMEC','SMIMEC','SMIMEC','0'),
+                                ('USER_SMIWRAP (SMIEnergia)','SMIWRAP','SMIWRAP','0'),
+                                ('USER_ENOBERG','ENOBERG','ENOBERG','0'),
+                                ('USER_FORM (SMILab)','SMIBLOW','SMIBLOW','0'),
+                                ('USER_SARCO','SARCO','SARCO','0')]
        
 class win_preferences_class(QMainWindow, Ui_preferences_window):
     """
@@ -191,8 +191,8 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         self.e_tab_size.setText(self.preferences.tab_size)
 
         # preparo elenco server        
-        self.o_server.setColumnCount(4)
-        self.o_server.setHorizontalHeaderLabels(['Server title','TNS Name','Color',''])           
+        self.o_server.setColumnCount(5)
+        self.o_server.setHorizontalHeaderLabels(['Server title','TNS Name','Color','','Def.connection'])           
         v_rig = 1                
         for record in self.preferences.elenco_server:                                    
             self.o_server.setRowCount(v_rig) 
@@ -205,20 +205,59 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
             v_icon.addPixmap(QPixmap("icons:color.png"), QIcon.Mode.Normal, QIcon.State.Off)
             v_color_button.setIcon(v_icon)
             v_color_button.clicked.connect(self.slot_set_color_server)
+            self.o_server.setCellWidget(v_rig-1,3,v_color_button)                 
+            # la quinta colonna è una check-box per la selezione del server di default
+            # da notare come la checkbox viene inserita in un widget di layout in modo che si possa
+            # attivare la centratura 
+            v_checkbox = QCheckBox()          
+            v_widget = QWidget()      
+            v_layout = QHBoxLayout(v_widget)
+            v_layout.addWidget(v_checkbox)
+            v_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            v_layout.setContentsMargins(0,0,0,0)
+            v_widget.setLayout(v_layout)
+            try:
+                if record[3] == '1':
+                    v_checkbox.setChecked(True)                                            
+                else:
+                    v_checkbox.setChecked(False)                                                        
+            except:
+                v_checkbox.setChecked(False)                                                        
+            self.o_server.setCellWidget(v_rig-1,4,v_widget)                                                      
 
-            self.o_server.setCellWidget(v_rig-1,3,v_color_button)                               
+            # passo alla prossima riga
             v_rig += 1
         self.o_server.resizeColumnsToContents()
 
         # preparo elenco user        
-        self.o_users.setColumnCount(3)
-        self.o_users.setHorizontalHeaderLabels(['User title','User name','Password'])   
+        self.o_users.setColumnCount(4)
+        self.o_users.setHorizontalHeaderLabels(['User title','User name','Password','Def.connection'])   
         v_rig = 1                
         for record in self.preferences.elenco_user:                                    
             self.o_users.setRowCount(v_rig) 
             self.o_users.setItem(v_rig-1,0,QTableWidgetItem(record[0]))       
             self.o_users.setItem(v_rig-1,1,QTableWidgetItem(record[1]))                               
             self.o_users.setItem(v_rig-1,2,QTableWidgetItem(record[2]))                               
+            # la quarta colonna è una check-box per la selezione dell'utente di default
+            # da notare come la checkbox viene inserita in un widget di layout in modo che si possa
+            # attivare la centratura 
+            v_checkbox = QCheckBox()          
+            v_widget = QWidget()      
+            v_layout = QHBoxLayout(v_widget)
+            v_layout.addWidget(v_checkbox)
+            v_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            v_layout.setContentsMargins(0,0,0,0)
+            v_widget.setLayout(v_layout)
+            try:
+                if record[3] == '1':
+                    v_checkbox.setChecked(True)                                            
+                else:
+                    v_checkbox.setChecked(False)                                                        
+            except:
+                v_checkbox.setChecked(False)                                                        
+            self.o_users.setCellWidget(v_rig-1,3,v_widget)                                                      
+
+            # passo alla prossima riga
             v_rig += 1
         self.o_users.resizeColumnsToContents()
 
@@ -393,12 +432,32 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         # elenco dei server
         v_server = []
         for i in range(0,self.o_server.rowCount()):
-            v_server.append( ( self.o_server.item(i,0).text(), self.o_server.item(i,1).text(), self.o_server.item(i,2).text() ) )            
+            # controllo la checkbox del default (da notare come la checkbox è annegata in un oggetto di layout 
+            # e quindi prima prendo l'oggetto che c'è annegato nella cella della tabella, poi in quell'oggetto
+            # prendo tutti gli oggetti di tipo checkbox e poi prendo il primo checkbox (che è anche l'unico)
+            # e da li prendo il suo stato!
+            v_widget = self.o_server.cellWidget(i,4)
+            v_checkbox = v_widget.findChildren(QCheckBox)
+            if v_checkbox[0].isChecked():                
+                v_default = '1'
+            else:
+                v_default = '0'
+            v_server.append( ( self.o_server.item(i,0).text(), self.o_server.item(i,1).text(), self.o_server.item(i,2).text(), v_default ) )            
 
         # elenco dei users
         v_users = []
         for i in range(0,self.o_users.rowCount()):
-            v_users.append( ( self.o_users.item(i,0).text(), self.o_users.item(i,1).text() , self.o_users.item(i,2).text()) )            
+            # controllo la checkbox del default (da notare come la checkbox è annegata in un oggetto di layout 
+            # e quindi prima prendo l'oggetto che c'è annegato nella cella della tabella, poi in quell'oggetto
+            # prendo tutti gli oggetti di tipo checkbox e poi prendo il primo checkbox (che è anche l'unico)
+            # e da li prendo il suo stato!
+            v_widget = self.o_users.cellWidget(i,3)
+            v_checkbox = v_widget.findChildren(QCheckBox)
+            if v_checkbox[0].isChecked():                
+                v_default = '1'
+            else:
+                v_default = '0'
+            v_users.append( ( self.o_users.item(i,0).text(), self.o_users.item(i,1).text() , self.o_users.item(i,2).text(), v_default) )            
 
         # se il tabsize è vuoto --> imposto 2
         if self.e_tab_size.text() == '':

@@ -9,7 +9,7 @@
 #                  |_|  
                  
 #  Creato da.....: Marco Valaguzza
-#  Piattaforma...: Python3.11 con libreria pyqt6
+#  Piattaforma...: Python3.13 con libreria pyqt6
 #  Data..........: 01/01/2023
 #  Descrizione...: Questo programma ha la "pretesa" di essere editor SQL per ambiente Oracle....                             
 #                  In questo programma sono state sperimentate diverse tecniche per la soluzione di particolari problemi...e quindi è di fatto una sorta
@@ -282,13 +282,28 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         self.menuBar.triggered[QAction].connect(self.smistamento_voci_menu)        
 
         ###        
-        # eseguo la connessione automatica di default (questa cosa va rivista perché ora l'elenco è dinamico!)
+        # eseguo la connessione automatica di default (solo se richiesta tramite il default sulle preferenze di server e user)
         ###
-        self.e_server_name = 'BACKUP_815'
-        self.e_user_name = 'SMILE'
-        self.e_password = 'SMILE'        
+        self.e_server_name = ''
+        self.e_user_name = ''
+        self.e_password = ''
         self.e_user_mode = 'Normal'        
-        self.slot_connetti()           
+        for rec in o_global_preferences.elenco_server:                
+                try:
+                    if rec[3] == '1':                                            
+                        self.e_server_name = rec[1]
+                except:
+                    pass
+        for rec in o_global_preferences.elenco_user:                
+                try:
+                    if rec[3] == '1':                                            
+                        self.e_user_name = rec[1]
+                        self.e_password = rec[2]        
+                except:
+                    pass
+        # se trovato server e user di default --> eseguo la connessione        
+        if self.e_server_name != '' and self.e_user_name != '':                
+            self.slot_connetti()           
 
         ###
         # Definizione della struttura per gestione elenco oggetti DB (object navigator)       
@@ -820,7 +835,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 v_default_open_dir = o_global_preferences.open_dir
 
             # dialog box per richiesta file
-            v_fileName = QFileDialog.getOpenFileName(self, "Open File", v_default_open_dir ,"MSql files (*.msql);;SQL files (*.sql *.pls *.plb *.trg);;All files (*.*)")                
+            v_fileName = QFileDialog.getOpenFileName(self, "Open File", v_default_open_dir ,"SQL files (*.msql *.sql *.pls *.plb *.trg);;All files (*.*)")                
             # reimposto la dir di default in modo che in questa sessione del programma rimanga quella che l'utente ha scelto per aprire il file                        
             if v_fileName[0] != '':                               
                 o_global_preferences.open_dir = os.path.split( v_fileName[0] )[0]
@@ -2115,8 +2130,8 @@ class My_MSql_Lexer(QsciLexerSQL):
         v_offset = self.p_editor.positionFromLineIndex(1, 5)
         self.p_editor.SendScintilla(self.p_editor.SCI_ADDSELECTION, v_offset, v_offset)
         v_offset = self.p_editor.positionFromLineIndex(2, 5)
-        self.p_editor.SendScintilla(self.p_editor.SCI_ADDSELECTION, v_offset, v_offset)                
-        
+        self.p_editor.SendScintilla(self.p_editor.SCI_ADDSELECTION, v_offset, v_offset)    
+
         # attivo autocompletamento durante la digitazione 
         # (comprende sia le parole del documento corrente che quelle aggiunte da un elenco specifico)
         # attenzione! Da quanto ho capito, il fatto di avere attivo il lexer con linguaggio specifico (sql) questo prevale
@@ -4622,8 +4637,11 @@ if __name__ == "__main__":
     # se il programma è eseguito da pyinstaller, cambio la dir di riferimento passando a dove si trova l'eseguibile
     # in questo modo dovrebbe riuscire a trovare tutte le risorse
     if getattr(sys, 'frozen', False): 
-       v_dir_eseguibile = os.path.dirname(sys.executable)
-       os.chdir(v_dir_eseguibile)
+        v_dir_eseguibile = os.path.dirname(sys.executable)
+        os.chdir(v_dir_eseguibile)
+        v_view_splash = True
+    else:
+        v_view_splash = False
     
     # amplifico la pathname per ricercare le icone (la dir _internal serve per quando si compila con pyinstaller)
     QDir.addSearchPath('icons', 'qtdesigner/icons/')
@@ -4653,9 +4671,10 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)     
     
     # carica l'immagine dello splash screen e lo mantiene visualizzato per 3 secondi
-    v_pixmap = QPixmap("logos:MSql.png").scaled(300, 300, Qt.AspectRatioMode.KeepAspectRatio) 
-    v_splash = QSplashScreen(v_pixmap) 
-    v_splash.show()         
+    if v_view_splash:
+        v_pixmap = QPixmap("logos:MSql.png").scaled(300, 300, Qt.AspectRatioMode.KeepAspectRatio) 
+        v_splash = QSplashScreen(v_pixmap) 
+        v_splash.show()         
     
     # se è stato scelto di avere il tema dei colori scuro, lo carico
     # Attenzione! La parte principale del tema colori rispetta il meccanismo di QT library
@@ -4673,7 +4692,8 @@ if __name__ == "__main__":
     application.show()
 
     # nascondo la splash screen
-    v_splash.close()
+    if v_view_splash:
+        v_splash.close()
             
     # attivazione degli eventi
     sys.exit(app.exec())    

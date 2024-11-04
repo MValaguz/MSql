@@ -637,6 +637,7 @@
    <addaction name="actionMaps_procedure_function"/>
    <addaction name="actionZoom_In"/>
    <addaction name="actionZoom_Out"/>
+   <addaction name="actionTile"/>
    <addaction name="separator"/>
    <addaction name="actionAutoColumnResize"/>
    <addaction name="actionExport_to_Excel"/>
@@ -841,6 +842,9 @@
    </property>
    <property name="text">
     <string>Tile</string>
+   </property>
+   <property name="toolTip">
+    <string>Arrange windows in tiles</string>
    </property>
   </action>
   <action name="actionNew">
