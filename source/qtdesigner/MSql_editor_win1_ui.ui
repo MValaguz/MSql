@@ -177,9 +177,13 @@
     <property name="title">
      <string>T&amp;ools</string>
     </property>
+    <addaction name="actionCompare_last_two_text_editor"/>
+    <addaction name="separator"/>
     <addaction name="actionMaps_procedure_function"/>
+    <addaction name="separator"/>
     <addaction name="actionMy_preferred_SQL"/>
     <addaction name="actionHistory"/>
+    <addaction name="separator"/>
     <addaction name="actionCreate_autocompletation_dictionary"/>
     <addaction name="separator"/>
     <addaction name="actionObjects_Navigator"/>
@@ -1253,6 +1257,15 @@
    </property>
    <property name="text">
     <string>Extract sql from output</string>
+   </property>
+  </action>
+  <action name="actionCompare_last_two_text_editor">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/compare.png</normaloff>:/icons/icons/compare.png</iconset>
+   </property>
+   <property name="text">
+    <string>Compare last two text editor</string>
    </property>
   </action>
  </widget>

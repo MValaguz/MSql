@@ -30,6 +30,7 @@ import datetime
 import locale
 import re
 import traceback
+import difflib
 # Librerie di data base Oracle
 import cx_Oracle, oracle_my_lib, oracle_executer
 # Librerie grafiche QT
@@ -557,6 +558,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # Indico che l'output sql ha le colonne con larghezza auto-adattabile
         elif p_slot.text() == 'Auto Column Resize':
             self.slot_menu_auto_column_resize()
+        # Attivo la comparazione tra i due ultimi file in elenco
+        elif p_slot.text() == 'Compare last two text editor':
+            self.slot_compare_last_two_text_editor()
                 
         # Queste voci di menu che agiscono sull'oggetto editor, sono valide solo se l'oggetto è attivo
         if o_MSql_win2 is not None:
@@ -2072,6 +2076,83 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
 
             o_MSql_win2.e_sql.insert(v_risultato)        
 
+    def slot_compare_last_two_text_editor(self):        
+        """
+           Esegue la comparazione dei testi contenuti nei due ultimi text editor aperti
+           e apre un nuovo text editor con il lexer delle differenze (sola lettura)
+        """
+        global o_global_preferences
+
+        # se non ci sono più di 2 window aperte, il compare non va eseguito
+        if len(self.mdiArea.subWindowList()) < 2:
+            message_error('For compare you must have two editor open or more!')
+            return 'ko'
+
+        # prendo le ultime due finestre aperte 
+        sub_windows = self.mdiArea.subWindowList()                 
+        v_ultima_windows = sub_windows[-1] 
+        v_ultimo_titolo = ''
+        v_penultima_windows = sub_windows[-2] 
+        v_penultimo_titolo = ''
+        
+        # scorro la lista-oggetti-editor fino a quando non trovo l'oggetto che ha lo stesso titolo dell'ultima window
+        # di fatto ricerco l'oggetto e_sql che contiene l'editor
+        for i in range(0,len(self.o_lst_window2)):
+            if not self.o_lst_window2[i].v_editor_chiuso:
+                if self.o_lst_window2[i].objectName() ==v_ultima_windows.objectName():                        
+                    v_ultimo_editor = self.o_lst_window2[i].e_sql
+                    v_ultimo_titolo = self.o_lst_window2[i].windowTitle()
+
+        # scorro la lista-oggetti-editor fino a quando non trovo l'oggetto che ha lo stesso titolo della penultima window
+        # di fatto ricerco l'oggetto e_sql che contiene l'editor
+        for i in range(0,len(self.o_lst_window2)):
+            if not self.o_lst_window2[i].v_editor_chiuso:
+                if self.o_lst_window2[i].objectName() ==v_penultima_windows.objectName():                        
+                    v_penultimo_editor = self.o_lst_window2[i].e_sql
+                    v_penultimo_titolo = self.o_lst_window2[i].windowTitle()
+
+        # creo un nuovo editor qscintilla che andrà a fianco degli editor già presenti nella mdiArea
+        diffEditor = QsciScintilla()
+        #diffEditor.setReadOnly(True)   
+
+        # per questo editor, attivo il lexer diff che contiene la sintassi che si accorda con la libreria diff, usata per creare le differenze
+        lexer = QsciLexerDiff()
+        # se tema scuro imposto lo sfondo a scuro (non impostato in quanto la colorazione del lexer è inguardabile)
+        #if o_global_preferences.dark_theme:            
+        #    lexer.setDefaultPaper(QColor('#242424'))
+        #    lexer.setPaper(QColor('#242424'))                                                         
+        # imposto il font dell'editor in base alle preferenze 
+        if o_global_preferences.font_editor != '':
+            v_split = o_global_preferences.font_editor.split(',')            
+            v_font = QFont(str(v_split[0]),int(v_split[1]))
+            if len(v_split) > 2 and v_split[2] == ' BOLD':
+                v_font.setBold(True)            
+            lexer.setFont(v_font)    
+        diffEditor.setLexer(lexer)
+        diffEditor.setMarginLineNumbers(1, True)
+        diffEditor.setMarginWidth(1, "0000")
+        
+        # l'editor lo associato alla mdiArea di riferimento (v. le istruzioni usate per creare nuovo editor....)
+        diff_sub_window = self.mdiArea.addSubWindow(diffEditor)                  
+        diff_sub_window.setWindowIcon(QIcon("icons:database.png"))                              
+        diff_sub_window.show()  
+        diff_sub_window.showMaximized() 
+        diff_sub_window.setWindowTitle('Compare ' + v_ultimo_titolo + ' and ' + v_penultimo_titolo)
+         
+        # viene preso il testo (convertito a seconda ci siano eol windows o linux) e portato in una struttura lista
+        # sia del primo che del secondo editor
+        v_testo1 = v_ultimo_editor.text().replace('\r','').split('\n')
+        v_testo2 = v_penultimo_editor.text().replace('\r','').split('\n')        
+
+        # crea una lista con le differenze 
+        diff = list(difflib.unified_diff(v_testo1, v_testo2, lineterm=''))
+        
+        # dalla lista delle differenze ricava il testo 
+        diff_text = diff[0] + '\n' + diff[1] + '\n' + diff[2] + '\n' + '\n'.join(diff[3:])                
+        
+        # porta il testo dentro l'oggetto qscintilla dove è presente il lexer diff
+        diffEditor.setText(diff_text)        
+        
 #  _     _______  _______ ____  
 # | |   | ____\ \/ / ____|  _ \ 
 # | |   |  _|  \  /|  _| | |_) |

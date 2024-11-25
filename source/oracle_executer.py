@@ -117,6 +117,10 @@ class FirstThread(QThread):
         start_time = datetime.datetime.now()             
         v_1a_volta = True
         v_fine_lavoro = False
+        # forzo un refresh iniziale della progressbar, in modo che se richiamato executer più volte consecutive e comandi brevi,
+        # faccia almeno vedere un minimo di grafica...da notare anche l'attesa di 10 millisecondi successiva che serve solo a scopi grafici
+        self.signalStatus.emit('')
+        self.msleep(10)  
         # avvio un ciclo infinito
         while not v_fine_lavoro:
             # calcolo il tempo trascorso
@@ -255,7 +259,7 @@ class SendCommandToOracle(QDialog):
                 v_value += 20
             self.progressbar.setValue(v_value)
             self.progressbar.setFormat(status)             
-            self.progressbar.setAlignment(Qt.AlignmentFlag.AlignCenter)           
+            self.progressbar.setAlignment(Qt.AlignmentFlag.AlignCenter)                       
 
     def get_cursor(self):
         """

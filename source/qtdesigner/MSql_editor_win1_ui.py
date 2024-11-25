@@ -508,6 +508,11 @@ class Ui_MSql_win1(object):
         icon64.addPixmap(QtGui.QPixmap("icons:sql.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         self.actionExtract_sql_from_output.setIcon(icon64)
         self.actionExtract_sql_from_output.setObjectName("actionExtract_sql_from_output")
+        self.actionCompare_last_two_text_editor = QtGui.QAction(parent=MSql_win1)
+        icon65 = QtGui.QIcon()
+        icon65.addPixmap(QtGui.QPixmap("icons:compare.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        self.actionCompare_last_two_text_editor.setIcon(icon65)
+        self.actionCompare_last_two_text_editor.setObjectName("actionCompare_last_two_text_editor")
         self.menuFiles.addAction(self.actionNew)
         self.menuFiles.addAction(self.actionOpen)
         self.menuFiles.addAction(self.menuRecent_file.menuAction())
@@ -572,9 +577,13 @@ class Ui_MSql_win1(object):
         self.menuWindow.addSeparator()
         self.menuHelp.addAction(self.actionHelp)
         self.menuHelp.addAction(self.actionProgram_info)
+        self.menuTools.addAction(self.actionCompare_last_two_text_editor)
+        self.menuTools.addSeparator()
         self.menuTools.addAction(self.actionMaps_procedure_function)
+        self.menuTools.addSeparator()
         self.menuTools.addAction(self.actionMy_preferred_SQL)
         self.menuTools.addAction(self.actionHistory)
+        self.menuTools.addSeparator()
         self.menuTools.addAction(self.actionCreate_autocompletation_dictionary)
         self.menuTools.addSeparator()
         self.menuTools.addAction(self.actionObjects_Navigator)
@@ -772,6 +781,7 @@ class Ui_MSql_win1(object):
         self.actionTabbed.setText(_translate("MSql_win1", "Tabbed"))
         self.actionAuto_clear_output.setText(_translate("MSql_win1", "Auto clear output"))
         self.actionExtract_sql_from_output.setText(_translate("MSql_win1", "Extract sql from output"))
+        self.actionCompare_last_two_text_editor.setText(_translate("MSql_win1", "Compare last two text editor"))
 
 
 if __name__ == "__main__":
