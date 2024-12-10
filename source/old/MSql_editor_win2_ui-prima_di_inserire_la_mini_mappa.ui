@@ -32,26 +32,20 @@
      <number>3</number>
     </property>
     <property name="topMargin">
-     <number>3</number>
+     <number>2</number>
     </property>
     <property name="rightMargin">
      <number>3</number>
     </property>
     <property name="bottomMargin">
-     <number>3</number>
+     <number>0</number>
     </property>
     <item row="0" column="0">
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
-      <widget class="QSplitter" name="splitter_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <widget class="QsciScintilla" name="e_sql"/>
-       <widget class="QsciScintilla" name="e_sql_mini_map"/>
-      </widget>
+      <widget class="QsciScintilla" name="e_sql"/>
       <widget class="QTabWidget" name="o_tab_widget">
        <property name="currentIndex">
         <number>0</number>

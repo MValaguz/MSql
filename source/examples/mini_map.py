@@ -1,43 +1,80 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
-from PyQt6.Qsci import QsciScintilla, QsciLexerPython
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
+from PyQt6.Qsci import *
 
-class MiniMapEditor(QMainWindow):
+import sys
+from PyQt6.QtWidgets import QApplication, QHBoxLayout, QMainWindow, QWidget
+from PyQt6.Qsci import QsciScintilla
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QFont
+
+class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.setWindowTitle("QScintilla Mini Map Example")
+        self.resize(800, 600)
 
-        self.setWindowTitle("Mini Map Editor")
-        self.setGeometry(100, 100, 800, 600)
-
-        self.main_editor = QsciScintilla()
-        self.mini_map = QsciScintilla()
-
-        lexer = QsciLexerPython()
-        self.main_editor.setLexer(lexer)
-        self.mini_map.setLexer(lexer)
-
-        # Configura le proprietà della mini mappa
-        self.mini_map.setReadOnly(True)
-        self.mini_map.SendScintilla(self.mini_map.SCI_STYLESETFONT, 0, 'Courier')
-        self.mini_map.SendScintilla(self.mini_map.SCI_STYLESETSIZE, 0, 5)  # Imposta una dimensione del testo più piccola
-
-        # Layout
-        layout = QVBoxLayout()
-        layout.addWidget(self.main_editor)
-        layout.addWidget(self.mini_map)
+        self.editor = QsciScintilla()
+        self.editor.setText("Inserisci qui il tuo testo\n" * 5)
+        
+        self.minimap = QsciScintilla()
+        self.minimap.setReadOnly(True)
+        #self.minimap.setMargins(0, 0, 0, 0)
+        self.minimap.setFixedWidth(100)
+        self.minimap.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.minimap.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        
+        # Impostazione del carattere più piccolo per la minimappa
+        font = QFont("Courier", 3)  # Usa un font ancora più piccolo
+        self.minimap.setFont(font)
+        
+        self.sync_scroll_bars()
+        self.sync_text_changes()
 
         container = QWidget()
+        layout = QHBoxLayout()
+        layout.addWidget(self.editor)
+        layout.addWidget(self.minimap)
         container.setLayout(layout)
+
         self.setCentralWidget(container)
+        
+    def sync_scroll_bars(self):
+        # Collegare la scrollbar verticale dell'editor principale alla minimappa
+        self.editor.verticalScrollBar().valueChanged.connect(self.on_editor_scroll)
+        # Collegare la scrollbar verticale della minimappa all'editor principale
+        self.minimap.verticalScrollBar().valueChanged.connect(self.on_minimap_scroll)
+        
+        self.minimap.verticalScrollBar().setValue(self.editor.verticalScrollBar().value())
+        
+    def on_editor_scroll(self, value):
+        # Impedire il loop di aggiornamento
+        if self.minimap.verticalScrollBar().value() != value:
+            minimap_max = self.minimap.verticalScrollBar().maximum()
+            editor_max = self.editor.verticalScrollBar().maximum()
+            scale_factor = minimap_max / editor_max if editor_max > 0 else 1
+            self.minimap.verticalScrollBar().setValue(int(value * scale_factor))
 
-        # Sincronizza il contenuto tra main_editor e mini_map
-        self.main_editor.textChanged.connect(self.sync_with_mini_map)
-        self.sync_with_mini_map()
+    def on_minimap_scroll(self, value):
+        # Impedire il loop di aggiornamento
+        if self.editor.verticalScrollBar().value() != value:
+            editor_max = self.editor.verticalScrollBar().maximum()
+            minimap_max = self.minimap.verticalScrollBar().maximum()
+            scale_factor = editor_max / minimap_max if minimap_max > 0 else 1
+            self.editor.verticalScrollBar().setValue(int(value * scale_factor))
 
-    def sync_with_mini_map(self):
-        self.mini_map.setText(self.main_editor.text())
+    def sync_text_changes(self):
+        self.editor.textChanged.connect(self.on_text_change)
+        
+    def on_text_change(self):
+        self.minimap.setText(self.editor.text())
+        #self.minimap.setCursorPosition(self.editor.getCursorPosition())
+        v_line, v_pos = self.editor.getCursorPosition()
+        self.minimap.setCursorPosition(v_line, 0)       
 
 app = QApplication(sys.argv)
-window = MiniMapEditor()
+window = MainWindow()
 window.show()
 sys.exit(app.exec())

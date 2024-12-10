@@ -101,6 +101,16 @@ v_global_exec_time = 0
 v_global_color = '#ffffff'
 v_global_background = 'black'
 
+# Classe che disabilita tutti gli eventi del mouse su un determinato oggetto
+class Lock_Mouse_Event_Filter(QObject):
+    def eventFilter(self, obj, event):        
+        if event.type() in (QEvent.Type.MouseButtonPress,
+                            QEvent.Type.MouseButtonRelease,
+                            QEvent.Type.MouseButtonDblClick,                            
+                            QEvent.Type.MouseMove):            
+            return True  # Ignora l'evento di mouse
+        return super().eventFilter(obj, event)
+
 def salvataggio_editor(p_save_as, p_nome, p_testo):
     """
         Salvataggio di p_testo dentro il file p_nome        
@@ -2147,8 +2157,11 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # crea una lista con le differenze 
         diff = list(difflib.unified_diff(v_testo1, v_testo2, lineterm=''))
         
-        # dalla lista delle differenze ricava il testo 
-        diff_text = diff[0] + '\n' + diff[1] + '\n' + diff[2] + '\n' + '\n'.join(diff[3:])                
+        # dalla lista delle differenze ricava il testo
+        if len(diff) > 2:
+            diff_text = diff[0] + '\n' + diff[1] + '\n' + diff[2] + '\n' + '\n'.join(diff[3:])                
+        else:
+            diff_text = 'There is no differences!'
         
         # porta il testo dentro l'oggetto qscintilla dove è presente il lexer diff
         diffEditor.setText(diff_text)        
@@ -2167,89 +2180,110 @@ class My_MSql_Lexer(QsciLexerSQL):
         Si basa sulla lista v_global_my_lexer_keywords che viene caricata quando ci si connette al DB
         In base al valore di index è possibile settare parole chiave di una determinata categoria
         1=parole primarie, 2=parole secondarie, 3=commenti, 4=classi, ecc.. usato 8 (boh!) 
+
+        Il parametro p_mini_map, se passato a True indica che il lexer è quello della mini mappa
     """
-    def __init__(self, p_editor):        
+    def __init__(self, p_editor, p_mini_map):        
         super(My_MSql_Lexer, self).__init__()  
 
         # salvo il puntatore all'editor all'interno del lexer
         self.p_editor = p_editor      
 
-        # attivo le righe verticali che segnano le indentazioni
-        self.p_editor.setIndentationGuides(o_global_preferences.indentation_guide)                
+        # editor normale...
+        if not p_mini_map:
+            # attivo le righe verticali che segnano le indentazioni
+            self.p_editor.setIndentationGuides(o_global_preferences.indentation_guide)                
         
-        # attivo i margini con + e - 
-        self.p_editor.setFolding(p_editor.FoldStyle.BoxedTreeFoldStyle, 2) 
+            # attivo i margini con + e - 
+            self.p_editor.setFolding(p_editor.FoldStyle.BoxedTreeFoldStyle, 2) 
         
-        # indentazione
-        self.p_editor.setIndentationWidth(int(o_global_preferences.tab_size))
-        self.p_editor.setAutoIndent(True)
+            # indentazione
+            self.p_editor.setIndentationWidth(int(o_global_preferences.tab_size))
+            self.p_editor.setAutoIndent(True)
         
-        # tabulatore (in base alle preferenze...di base 2 caratteri)
-        self.p_editor.setTabWidth(int(o_global_preferences.tab_size))   
+            # tabulatore (in base alle preferenze...di base 2 caratteri)
+            self.p_editor.setTabWidth(int(o_global_preferences.tab_size))   
         
-        # evidenzia l'intera riga dove posizionato il cursore (grigio scuro e cursore bianco se il tema è dark)
-        self.p_editor.setCaretLineVisible(True)
-        if o_global_preferences.dark_theme:
-            self.p_editor.setCaretLineBackgroundColor(QColor("#4a5157"))
-            self.p_editor.setCaretForegroundColor(QColor("white"))
-        else:
-            self.p_editor.setCaretLineBackgroundColor(QColor("#FFFF99"))        
-            self.p_editor.setCaretForegroundColor(QColor("black"))        
+            # evidenzia l'intera riga dove posizionato il cursore (grigio scuro e cursore bianco se il tema è dark)
+            self.p_editor.setCaretLineVisible(True)
+            if o_global_preferences.dark_theme:
+                self.p_editor.setCaretLineBackgroundColor(QColor("#4a5157"))
+                self.p_editor.setCaretForegroundColor(QColor("white"))
+            else:
+                self.p_editor.setCaretLineBackgroundColor(QColor("#FFFF99"))        
+                self.p_editor.setCaretForegroundColor(QColor("black"))        
         
-        # attivo il margine 0 con la numerazione delle righe
-        self.p_editor.setMarginType(0, QsciScintilla.MarginType.NumberMargin)        
-        self.p_editor.setMarginsFont(QFont("Courier New",9))                                   
+            self.p_editor.setMarginType(0, QsciScintilla.MarginType.NumberMargin)        
+            self.p_editor.setMarginsFont(QFont("Courier New",9))                                   
         
-        # attivo il matching sulle parentesi con uno specifico colore
-        self.p_editor.setBraceMatching(QsciScintilla.BraceMatch.SloppyBraceMatch)
-        self.p_editor.setMatchedBraceBackgroundColor(QColor("#80ff9900"))
+            # attivo il matching sulle parentesi con uno specifico colore
+            self.p_editor.setBraceMatching(QsciScintilla.BraceMatch.SloppyBraceMatch)
+            self.p_editor.setMatchedBraceBackgroundColor(QColor("#80ff9900"))
         
-        # attivo il multiediting (cioè la possibilità, una volta fatta una selezione verticale, di fare un edit multiplo)        
-        self.p_editor.SendScintilla(self.p_editor.SCI_SETADDITIONALSELECTIONTYPING, 1)        
-        v_offset = self.p_editor.positionFromLineIndex(0, 7) 
-        self.p_editor.SendScintilla(self.p_editor.SCI_SETSELECTION, v_offset, v_offset)        
-        v_offset = self.p_editor.positionFromLineIndex(1, 5)
-        self.p_editor.SendScintilla(self.p_editor.SCI_ADDSELECTION, v_offset, v_offset)
-        v_offset = self.p_editor.positionFromLineIndex(2, 5)
-        self.p_editor.SendScintilla(self.p_editor.SCI_ADDSELECTION, v_offset, v_offset)    
+            # attivo il multiediting (cioè la possibilità, una volta fatta una selezione verticale, di fare un edit multiplo)        
+            self.p_editor.SendScintilla(self.p_editor.SCI_SETADDITIONALSELECTIONTYPING, 1)        
+            v_offset = self.p_editor.positionFromLineIndex(0, 7) 
+            self.p_editor.SendScintilla(self.p_editor.SCI_SETSELECTION, v_offset, v_offset)        
+            v_offset = self.p_editor.positionFromLineIndex(1, 5)
+            self.p_editor.SendScintilla(self.p_editor.SCI_ADDSELECTION, v_offset, v_offset)
+            v_offset = self.p_editor.positionFromLineIndex(2, 5)
+            self.p_editor.SendScintilla(self.p_editor.SCI_ADDSELECTION, v_offset, v_offset)    
 
-        # attivo autocompletamento durante la digitazione 
-        # (comprende sia le parole del documento corrente che quelle aggiunte da un elenco specifico)
-        # attenzione! Da quanto ho capito, il fatto di avere attivo il lexer con linguaggio specifico (sql) questo prevale
-        # sul funzionamento di alcuni aspetti dell'autocompletamento....quindi ad un certo punto mi sono arreso con quello che
-        # sono riuscito a fare
-        self.v_api_lexer = QsciAPIs(self)            
-        # aggiungo tutti i termini di autocompletamento (si trovano all'interno di una tabella che viene generata a comando)
-        self.p_editor.setAutoCompletionSource(QsciScintilla.AutoCompletionSource.AcsAll)                
-        self.carica_dizionario_per_autocompletamento()                
-        # indico dopo quanti caratteri che sono stati digitati dall'utente, si deve attivare l'autocompletamento
-        # se è stato richiesto di disattivarlo alzo la soglia in modo che di fatto risulta disattivato
-        if o_global_preferences.autocompletation:
-            self.p_editor.setAutoCompletionThreshold(3)  
-        else:
-            self.p_editor.setAutoCompletionThreshold(1000)  
-        # attivo autocompletamento sia per la parte del contenuto del documento che per la parte di parole chiave specifiche
-        self.p_editor.autoCompleteFromAll()
+            # attivo autocompletamento durante la digitazione 
+            # (comprende sia le parole del documento corrente che quelle aggiunte da un elenco specifico)
+            # attenzione! Da quanto ho capito, il fatto di avere attivo il lexer con linguaggio specifico (sql) questo prevale
+            # sul funzionamento di alcuni aspetti dell'autocompletamento....quindi ad un certo punto mi sono arreso con quello che
+            # sono riuscito a fare
+            self.v_api_lexer = QsciAPIs(self)            
+            # aggiungo tutti i termini di autocompletamento (si trovano all'interno di una tabella che viene generata a comando)
+            self.p_editor.setAutoCompletionSource(QsciScintilla.AutoCompletionSource.AcsAll)                
+            self.carica_dizionario_per_autocompletamento()                
+            # indico dopo quanti caratteri che sono stati digitati dall'utente, si deve attivare l'autocompletamento
+            # se è stato richiesto di disattivarlo alzo la soglia in modo che di fatto risulta disattivato
+            if o_global_preferences.autocompletation:
+                self.p_editor.setAutoCompletionThreshold(3)  
+            else:
+                self.p_editor.setAutoCompletionThreshold(1000)  
+            # attivo autocompletamento sia per la parte del contenuto del documento che per la parte di parole chiave specifiche
+            self.p_editor.autoCompleteFromAll()
 
+            # attivo il folding (+ e - sul margine sinistro)
+            self.setFoldCompact(False)
+            self.setFoldComments(True)
+            self.setFoldAtElse(True)     
+
+            # imposto gli elementi che servono all'interno dell'editor per attivare la funzione
+            # tale per cui quando utente fa doppio click su una parola, vengono evidenziate tutte 
+            # le parole uguali presenti nel testo!         
+            self.p_editor.selectionChanged.connect(self.cambio_di_selezione_testo)        
+            self.selection_lock = False
+            self.SELECTION_INDICATOR = 4     
+        # se siamo in apertura della mini mappa...
+        else:
+            # nascondo il margine del folding e numeri di riga
+            self.p_editor.setMarginWidth(1, 0)
+            # imposto a sola lettura
+            self.p_editor.setReadOnly(True)
+            # disattivo la possibilità di selezionare del testo
+            self.p_editor.SendScintilla(QsciScintilla.SCI_SETSEL, -1, -1)
+            # disattivo la scrollbar orizzontale inferiore
+            self.p_editor.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+            # imposto no wrapmode che significa non fare andare a capo le righe di testo in modo automatico
+            self.p_editor.setWrapMode(QsciScintilla.WrapMode.WrapNone)
+            # tabulatore (in base alle preferenze...di base 2 caratteri)
+            self.p_editor.setTabWidth(int(o_global_preferences.tab_size))   
+            
         # imposto il font dell'editor in base alle preferenze 
         if o_global_preferences.font_editor != '':
             v_split = o_global_preferences.font_editor.split(',')            
-            v_font = QFont(str(v_split[0]),int(v_split[1]))
+            if not p_mini_map:
+                v_font = QFont(str(v_split[0]),int(v_split[1]))
+            else:
+                v_font = QFont(str(v_split[0]),3)
             if len(v_split) > 2 and v_split[2] == ' BOLD':
                 v_font.setBold(True)
             self.setFont(v_font)    
-
-        self.setFoldCompact(False)
-        self.setFoldComments(True)
-        self.setFoldAtElse(True)     
-
-        # imposto gli elementi che servono all'interno dell'editor per attivare la funzione
-        # tale per cui quando utente fa doppio click su una parola, vengono evidenziate tutte 
-        # le parole uguali presenti nel testo!         
-        self.p_editor.selectionChanged.connect(self.cambio_di_selezione_testo)        
-        self.selection_lock = False
-        self.SELECTION_INDICATOR = 4 
-
+        
         # se è stato scelto il tema colori scuro --> reimposto i colori della sezione qscintilla
         # non sono riuscito a trovare altre strade per fare questa cosa
         if o_global_preferences.dark_theme:
@@ -2499,9 +2533,14 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # mi salvo il puntatore alla classe principale (in questo modo posso accedere ai suoi oggetti e metodi)
         self.link_to_MSql_win1_class = o_MSql_win1_class
 
+        # splitter che separa l'editor dalla mini mappa (rapporto 15-1)                
+        self.splitter_2.setStretchFactor(0,15)        
+        self.splitter_2.setStretchFactor(1,1)        
         # splitter che separa l'editor dall'output: imposto l'immagine per indicare lo splitter e il relativo rapporto tra il widget di editor e quello di output
-        #self.splitter.setStyleSheet("QSplitter::handle {text: url('icons:splitter.gif')}")
-        self.splitter.setStretchFactor(0,1)
+        self.splitter.setStretchFactor(0,8)        
+        self.splitter.setStretchFactor(1,2)    
+        # imposto visivamente la maniglia degli splitter con una linea grigia
+        self.splitter.setStyleSheet(""" QSplitter::handle { background-color: #667078; width: 1px; /* Larghezza della maniglia */ } """)
 
         ###
         # IMPOSTAZIONI DELL'EDITOR SCINTILLA (Notare come le impostazioni delle proprietà siano stato postate nella definizione del lexer)
@@ -2511,9 +2550,13 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             self.e_sql.setUtf8(True)                                                        
         # attivo il lexer per evidenziare il codice del linguaggio SQL. Notare come faccia riferimento ad un oggetto che a sua volta personalizza il 
         # dizionario del lexer SQL, aggiungendo (se sono state caricate) le parole chiave di: tabelle, viste, package, ecc.
-        self.v_lexer = My_MSql_Lexer(self.e_sql)                
+        self.v_lexer = My_MSql_Lexer(self.e_sql, False)                
         # attivo il lexer sull'editor
         self.e_sql.setLexer(self.v_lexer)
+        
+        # attivo il lexer sulla mini mappa 
+        self.v_lexer_mini_map = My_MSql_Lexer(self.e_sql_mini_map, True)                
+        self.e_sql_mini_map.setLexer(self.v_lexer_mini_map)
                 
         # imposto il ritorno a capo in formato Windows (CR-LF) o Unix (LF)
         # Attenzione! Nel caso di nuovo file il formato è Windows, mentre se viene aperto un file, va analizzata la prima riga
@@ -2582,13 +2625,15 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         v_cur_y, v_cur_x = 0,0
         if p_contenuto_file is not None:        
             # imposto editor con quello ricevuto in ingresso
-            self.e_sql.setText(p_contenuto_file)
+            self.e_sql.setText(p_contenuto_file)            
+            self.e_sql_mini_map.setText(p_contenuto_file)            
             # chiedo allo storico di darmi eventuale posizione di dove si trovava il cursore ultima volta
             if o_global_preferences.remember_text_pos:
                 v_cur_y, v_cur_x = read_files_history(v_global_work_dir+'MSql.db', p_titolo)            
                 
         # mi posiziono sulla prima riga (la posizione X viene al momento forzata a zero!)
         self.e_sql.setCursorPosition(v_cur_y,0)
+        self.e_sql_mini_map.setCursorPosition(v_cur_y,0)
 
         # var che indica che il testo è stato modificato
         #self.e_sql.insert('SELECT * FROM MS_UTN')
@@ -2615,7 +2660,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         #             avviene disattivando il drop sull'editor quando si disattiva la finestra per poi riattivarlo quando si attiva....
         self.e_sql.setAcceptDrops(True)                     
         # attivo il filtro di eventi sull'oggetto editor; ogni evento passerà dalla funzione eventFilter
-        self.e_sql.installEventFilter(self)   
+        self.e_sql.installEventFilter(self)           
 
         # var che si attiva quando l'oggetto viene chiuso
         self.v_editor_chiuso = False
@@ -2635,6 +2680,47 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             self.autosave_snapshoot_timer = QTimer(self)
             self.autosave_snapshoot_timer.timeout.connect(self.slot_save_snapshoot)
             self.autosave_snapshoot_timer.start(o_global_preferences.autosave_snapshoot_interval*1000) 
+
+        # attivo slot che copia il testo dell'editor nella mini mappa
+        self.e_sql.textChanged.connect(self.slot_mini_map_copy_text) 
+        # attivo slot che tiene sincronizzato l'editor con la mini mappa tramite le scrollbar
+        self.e_sql.verticalScrollBar().valueChanged.connect(self.slot_mini_map_sync_scrollbars) 
+        self.e_sql_mini_map.verticalScrollBar().valueChanged.connect(self.slot_mini_map_sync_scrollbars) 
+        # applico alla mini mappa il filtro di eventi che di fatto blocca tutti gli eventi del mouse sull'oggetto 
+        # nello specifico il blocco degli eventi è stato applicato alla viewport sottostante in quanto l'oggetto qscintilla 
+        # ignorava la classe
+        self.lock_mouse_event_filter = Lock_Mouse_Event_Filter() 
+        self.e_sql_mini_map.viewport().installEventFilter(self.lock_mouse_event_filter)
+        
+    def slot_mini_map_copy_text(self): 
+        """
+           Copia il testo dell'editor nella mini mappa
+        """ 
+        # blocco i segnali sulle scrollbar!
+        self.e_sql.verticalScrollBar().blockSignals(True)                        
+        self.e_sql_mini_map.verticalScrollBar().blockSignals(True)                   
+        
+        # sincronizzo il testo tra l'editor e la mini mappa e posiziono il cursore correttamente sulla mini mappa
+        self.e_sql_mini_map.setText(self.e_sql.text()) 
+        v_line, v_pos = self.e_sql.getCursorPosition()
+        self.e_sql_mini_map.setCursorPosition(v_line, 0)                        
+        
+        # sincronizzo la posizione delle scrollbar tra editro e mini mappa
+        self.e_sql_mini_map.verticalScrollBar().setValue( self.e_sql.verticalScrollBar().value() )
+        
+        # riattivo i segnali sulle scrollbar
+        self.e_sql.verticalScrollBar().blockSignals(False)                        
+        self.e_sql_mini_map.verticalScrollBar().blockSignals(False)                           
+        
+    def slot_mini_map_sync_scrollbars(self, value): 
+        """
+           Quando si agisce sulla scrollbar dell'editor o della mini mappa, sposta il testo
+           Notare come l'evento sulla scrollbar venga disattivato per non incappare nel fatto che poi si autorichiamano!
+        """        
+        if self.sender() == self.e_sql.verticalScrollBar():             
+            self.e_sql_mini_map.verticalScrollBar().setValue(value)                         
+        elif self.sender() == self.e_sql_mini_map.verticalScrollBar():                         
+            self.e_sql.verticalScrollBar().setValue(value)                                
         
     def eventFilter(self, source, event):
         """
