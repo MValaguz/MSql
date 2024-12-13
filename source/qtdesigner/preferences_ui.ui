@@ -31,6 +31,16 @@
        <layout class="QGridLayout" name="gridLayout_5">
         <item row="0" column="0">
          <layout class="QGridLayout" name="gridLayout_4">
+          <item row="1" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Default Open Directory:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_default_open_dir</cstring>
+            </property>
+           </widget>
+          </item>
           <item row="2" column="2">
            <widget class="QPushButton" name="b_default_save_dir">
             <property name="icon">
@@ -38,26 +48,6 @@
               <normaloff>:/icons/icons/folder.png</normaloff>:/icons/icons/folder.png</iconset>
             </property>
            </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_8">
-            <property name="text">
-             <string>Dark theme:</string>
-            </property>
-            <property name="buddy">
-             <cstring>e_dark_theme</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QCheckBox" name="e_dark_theme">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QCheckBox" name="e_remember_window_pos"/>
           </item>
           <item row="1" column="1">
            <widget class="QLineEdit" name="e_default_open_dir"/>
@@ -72,34 +62,23 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label">
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_8">
             <property name="text">
-             <string>Default Open Directory:</string>
+             <string>Dark theme:</string>
             </property>
             <property name="buddy">
-             <cstring>e_default_open_dir</cstring>
+             <cstring>e_dark_theme</cstring>
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="e_default_save_dir"/>
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="e_remember_window_pos"/>
           </item>
-          <item row="1" column="2">
-           <widget class="QPushButton" name="b_default_open_dir">
-            <property name="icon">
-             <iconset resource="resource.qrc">
-              <normaloff>:/icons/icons/folder.png</normaloff>:/icons/icons/folder.png</iconset>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_2">
+          <item row="3" column="1">
+           <widget class="QCheckBox" name="e_dark_theme">
             <property name="text">
-             <string>Default Save Directory:</string>
-            </property>
-            <property name="buddy">
-             <cstring>e_default_save_dir</cstring>
+             <string/>
             </property>
            </widget>
           </item>
@@ -125,6 +104,37 @@
              <string>General zoom:</string>
             </property>
            </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="e_default_save_dir"/>
+          </item>
+          <item row="1" column="2">
+           <widget class="QPushButton" name="b_default_open_dir">
+            <property name="icon">
+             <iconset resource="resource.qrc">
+              <normaloff>:/icons/icons/folder.png</normaloff>:/icons/icons/folder.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Default Save Directory:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_default_save_dir</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_23">
+            <property name="text">
+             <string>Open new editor at open:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QCheckBox" name="e_open_new_editor"/>
           </item>
          </layout>
         </item>

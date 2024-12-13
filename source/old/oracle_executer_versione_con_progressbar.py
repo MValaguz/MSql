@@ -17,6 +17,7 @@
 """
 # Librerie di sistema
 import sys
+import time
 import datetime
 # Amplifico la pathname dell'applicazione in modo veda il contenuto della directory qtdesigner dove sono contenuti i layout
 sys.path.append('qtdesigner')
@@ -69,9 +70,6 @@ class SecondThread(QThread):
         except cx_Oracle.Error as e:
             self.v_oracle_error, = e.args
             # lavoro terminato con errore --> emetto segnale di fine che verrà dal chiamante
-            self.signalStatus.emit("END_JOB_KO")
-        except:
-            # lavoro terminato con errore sconosciuto --> emetto segnale di fine che verrà dal chiamante
             self.signalStatus.emit("END_JOB_KO")
         self.v_completato = True        
 
@@ -191,28 +189,24 @@ class SendCommandToOracle(QDialog):
         self.setModal(True)
         self.v_status = ''
         self.setWindowTitle("...please wait...")    
-        self.resize(150, 50)        
+        self.resize(320, 81)
         icon = QIcon()
         icon.addPixmap(QPixmap("icons:MSql.ico"), QIcon.Mode.Normal, QIcon.State.Off)
         self.setWindowIcon(icon)
         self.gridLayout = QGridLayout(self)        
-        # definizione della gif animata (che verrà ulteriormente zoomata durante la visualizzazione)
-        self.gears = QLabel(self)        
-        self.gridLayout.addWidget(self.gears, 0, 0, 1, 1)        
-        self.movie = QMovie("icons:gear-wheel.gif")                
-        # segnale che si scatena ad ogni visualizzazione di frame e che serve solo per zoomare l'animazione
-        self.movie.frameChanged.connect(self.update_movie_frame)
-        self.gears.setMovie(self.movie)                
-        self.movie.start()        
-        # definizione della label timer 
-        self.label_time = QLabel(self)
-        self.label_time.setText('Exec time: 00:00')
-        self.gridLayout.addWidget(self.label_time, 0, 1, 1, 1)
+        # progressbar (il testo è invisibile all'inizio per questioni estetiche ma poi diventerà visibile)
+        self.progressbar = QProgressBar(self)        
+        self.progressbar.setTextVisible(False)        
+        self.progressbar.setMinimum(0)
+        self.progressbar.setMaximum(100)    
+        self.gridLayout.addWidget(self.progressbar, 0, 0, 1, 1)
+        # valori disponibili Fusio, WindowsVista, Windows 
+        self.progressbar.setStyle(QStyleFactory.create('WindowsVista'))        
         # zona del bottone di interruzione dell'operazione
         self.buttonBox = QDialogButtonBox(self)
         self.buttonBox.setOrientation(Qt.Orientation.Horizontal)
         self.buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.Cancel)        
-        self.gridLayout.addWidget(self.buttonBox, 1, 1, 1, 1)        
+        self.gridLayout.addWidget(self.buttonBox, 1, 0, 1, 1)        
         # definizione del segnale di interruzione
         self.buttonBox.rejected.connect(self.cancel_worker) # type: ignore
         # definizione del primo thread 
@@ -221,17 +215,9 @@ class SendCommandToOracle(QDialog):
         # connessione dei segnali
         QMetaObject.connectSlotsByName(self)
 
-    def update_movie_frame(self):
-        """
-           Esegue lo zoom sulla gif animata degli ingranaggi
-        """
-        frame = self.movie.currentPixmap() 
-        scaled_frame = frame.scaled(70, 70, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation) 
-        self.gears.setPixmap(QPixmap.fromImage(scaled_frame.toImage()))
-
     def start(self):
         """
-           Avvia operazione....e rimane in attesa fino a che non termina!
+           Avvia la progress con esecuzione del comando....e rimane in attesa fino a che non termina!
         """
         # lancio del primo thread al cui interno verrà lanciato il secondo thread che esegue il comando vero e proprio
         self.worker_thread.start()
@@ -263,8 +249,17 @@ class SendCommandToOracle(QDialog):
             # lavoro terminato emetto segnale di fine che verrà catturato dalla funzione progress
             self.signalStatus.emit(status) 
         else:
-            # lavoro non terminato, aggiorno la il tempo di esecuzione
-            self.label_time.setText(status)
+            # lavoro non terminato --> faccio avanzare la progressbar
+            if not self.progressbar.isTextVisible():
+                self.progressbar.setTextVisible(True)        
+            v_value = self.progressbar.value()
+            if v_value >= 99:
+                v_value = 1
+            else:
+                v_value += 1
+            self.progressbar.setValue(v_value)
+            self.progressbar.setFormat(status)             
+            self.progressbar.setAlignment(Qt.AlignmentFlag.AlignCenter)                       
 
     def get_cursor(self):
         """
@@ -342,7 +337,7 @@ if __name__ == "__main__":
     # creo window principale con bottone per richiamare il test
     app = QApplication(sys.argv)
     v_win = QMainWindow()        
-    button = QPushButton('Test Oracle', v_win)        
+    button = QPushButton('Test Oracle', v_win)
     button.setShortcut("F5")
     button.clicked.connect(slot_on_click)
     button.resize(100, 30)

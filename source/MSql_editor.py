@@ -377,9 +377,11 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         #             dopo l'apertura si apriva un nuovo file, da quel momento l'autocompletamento partiva.
         ### 
         else:
-            v_azione = QAction()
-            v_azione.setText('New')
-            self.smistamento_voci_menu(v_azione)      
+            # il nuovo editor viene aperto solo in base a specifica preferenza
+            if o_global_preferences.open_new_editor:
+                v_azione = QAction()
+                v_azione.setText('New')
+                self.smistamento_voci_menu(v_azione)      
 
         ###
         # Se è presente il file dei termini di dizionario, controllo se più vecchio di 2 settimane e avverto che andrebbe rigenerato
@@ -2729,6 +2731,11 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         """      
         global v_global_connection
 
+        # intercetto il cambio di focus e cambio il titolo della window principale di MSql così che sulla barra di Windows risulti 
+        # il titolo dell'editor corrente
+        if event.type() == QEvent.Type.FocusIn and source is self.e_sql:
+            self.link_to_MSql_win1_class.setWindowTitle(titolo_window(self.objectName()))
+
         # individio la disattivazione della window e disattivo il drop sulla parte di editor in modo possa gestire 
         # i drop di un file che viene trascinato sull'app. Il drop del file viene gestito tramite il controllo dell'evento sulla window principale
         if event.type() == QEvent.Type.WindowDeactivate:
@@ -3611,8 +3618,8 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 # calcolo tempo esecuzione e aggiorno a video            
                 v_global_exec_time = (datetime.datetime.now() - v_start_time).total_seconds()
                 self.aggiorna_statusbar()
-                # aggiungo l'istruzione all'history            
-                write_sql_history(v_global_work_dir+'MSql.db',self.v_select_corrente,v_global_exec_time)                   
+                # aggiungo l'istruzione all'history                            
+                write_sql_history(v_global_work_dir+'MSql.db',self.v_plsql_corrente,v_global_exec_time)                   
                 # conto record
                 v_tot_record = self.v_cursor.rowcount
                 self.v_esecuzione_ok = True            

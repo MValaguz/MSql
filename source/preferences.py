@@ -119,6 +119,14 @@ class preferences_class():
                 self.general_zoom = v_json['general_zoom']            
             else:
                 self.general_zoom = 100
+            # open new editor at open 
+            if 'open_new_editor' in v_json:            
+                if v_json['open_new_editor'] == 1:       
+                    self.open_new_editor = True
+                else:
+                    self.open_new_editor = False
+            else:
+                self.open_new_editor = True
         # imposto valori di default senza presenza dello specifico file
         else:
             self.remember_window_pos = True
@@ -140,6 +148,7 @@ class preferences_class():
             self.date_format = '%d/%m/%Y %H:%M:%S'
             self.csv_separator = '|'
             self.tab_size = '2'
+            self.open_new_editor = True
             # elenco server è composto da Titolo, TNS e Colore
             self.elenco_server = [('Server Prod (ICOM_815)','ICOM_815','#aaffff','0'),
                                   ('Server Dev (BACKUP_815)','BACKUP_815','#ffffff','1')]
@@ -179,6 +188,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         self.e_default_utf_8.setChecked(self.preferences.utf_8)        
         self.e_default_end_of_line.setChecked(self.preferences.end_of_line)                
         self.e_autosave_snapshoot_interval.setValue(self.preferences.autosave_snapshoot_interval)
+        self.e_open_new_editor.setChecked(self.preferences.open_new_editor)
         self.e_default_font_editor.setText(self.preferences.font_editor)
         self.e_default_font_result.setText(self.preferences.font_result)
         self.e_default_editable.setChecked(self.preferences.editable)   
@@ -428,6 +438,12 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
             v_autocompletation = 1
         else:
             v_autocompletation = 0
+                        
+        # il default per apertura automatica di un nuovo editor all'apertura del programma, va convertito
+        if self.e_open_new_editor.isChecked():
+            v_open_new_editor = 1
+        else:
+            v_open_new_editor = 0
 
         # elenco dei server
         v_server = []
@@ -484,7 +500,8 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
                  'server': v_server,
                  'users': v_users,
                  'general_zoom':self.e_general_zoom.value(),
-                 'autocompletation':v_autocompletation
+                 'autocompletation':v_autocompletation,
+                 'open_new_editor':v_open_new_editor
                 }
 
 		# scrittura nel file dell'oggetto json
