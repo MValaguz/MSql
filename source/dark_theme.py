@@ -131,10 +131,22 @@ QListView
  background-color: #4a5157;
 }
 
+QListView::item:selected
+{
+     background: #007ACC;      
+     color: white;
+}
+
 /*-----QTreeView---------------------------------------------------------------*/
 QTreeView
 {
  background-color: #4a5157;
+}
+
+QTreeView::item:selected
+{
+     background: #007ACC;      
+     color: white;
 }
 
 /*-----QToolButton------------------------------------------------------------*/

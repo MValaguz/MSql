@@ -85,6 +85,7 @@ class history_class(QMainWindow, Ui_history_window):
         if message_question_yes_no('Are you sure you want to delete your history?') == 'Yes':
             purge_sql_history(self.nome_db)
             message_info('History deleted!')
+            self.slot_start()
             
 # ----------------------------------------
 # TEST APPLICAZIONE

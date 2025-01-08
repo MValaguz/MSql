@@ -149,9 +149,9 @@ class preferences_class():
             self.csv_separator = '|'
             self.tab_size = '2'
             self.open_new_editor = True
-            # elenco server è composto da Titolo, TNS e Colore
-            self.elenco_server = [('Server Prod (ICOM_815)','ICOM_815','#aaffff','0'),
-                                  ('Server Dev (BACKUP_815)','BACKUP_815','#ffffff','1')]
+            # elenco server è composto da Titolo, TNS e Colore, Flag per la connessione di default, Flag per evidenzia colore e richiesta conferme in creazione pkg
+            self.elenco_server = [('Server Prod (ICOM_815)','ICOM_815','#aaffff','0','0','0'),
+                                  ('Server Dev (BACKUP_815)','BACKUP_815','#ffffff','1','0','0')]
             # elenco users è composto da Titolo, User, Password
             self.elenco_user = [('USER_SMILE','SMILE','SMILE','1'),
                                 ('USER_SMI','SMI','SMI','0'),
@@ -200,9 +200,11 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         self.e_default_csv_separator.setText(self.preferences.csv_separator)
         self.e_tab_size.setText(self.preferences.tab_size)
 
+        ###
         # preparo elenco server        
-        self.o_server.setColumnCount(5)
-        self.o_server.setHorizontalHeaderLabels(['Server title','TNS Name','Color','','AutoConnection'])           
+        ###
+        self.o_server.setColumnCount(7)
+        self.o_server.setHorizontalHeaderLabels(['Server title','TNS Name','Color','','AutoConnection','Emphasis','CREATE'+chr(10)+'confirm'])           
         v_rig = 1                
         for record in self.preferences.elenco_server:                                    
             self.o_server.setRowCount(v_rig) 
@@ -220,6 +222,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
             # da notare come la checkbox viene inserita in un widget di layout in modo che si possa
             # attivare la centratura 
             v_checkbox = QCheckBox()          
+            v_checkbox.setToolTip('When this flag is set, MSql automatically connects to this server at startup. Warning! Select only one preference!')
             v_widget = QWidget()      
             v_layout = QHBoxLayout(v_widget)
             v_layout.addWidget(v_checkbox)
@@ -234,12 +237,52 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
             except:
                 v_checkbox.setChecked(False)                                                        
             self.o_server.setCellWidget(v_rig-1,4,v_widget)                                                      
+            # la sesta colonna è una check-box per indicare che quando si è connessi a questo server deve essere attiva evidenziazione
+            # da notare come la checkbox viene inserita in un widget di layout in modo che si possa
+            # attivare la centratura 
+            v_checkbox_e = QCheckBox()          
+            v_checkbox_e.setToolTip('When this flag is set, the chosen color is also used for the data and results output sections.')
+            v_widget_e = QWidget()      
+            v_layout_e = QHBoxLayout(v_widget_e)
+            v_layout_e.addWidget(v_checkbox_e)
+            v_layout_e.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            v_layout_e.setContentsMargins(0,0,0,0)
+            v_widget_e.setLayout(v_layout_e)
+            try:
+                if record[4] == '1':
+                    v_checkbox_e.setChecked(True)                                            
+                else:
+                    v_checkbox_e.setChecked(False)                                                        
+            except:
+                v_checkbox_e.setChecked(False)                                                        
+            self.o_server.setCellWidget(v_rig-1,5,v_widget_e)                                                      
+            # la settima colonna è una check-box per indicare che quando si esegue un'istruzione di CREATE, prima di eseguirla viene richiesta una conferma
+            # da notare come la checkbox viene inserita in un widget di layout in modo che si possa
+            # attivare la centratura 
+            v_checkbox_c = QCheckBox()          
+            v_checkbox_c.setToolTip('When this flag is set, each CREATE statement requires confirmation.')
+            v_widget_c = QWidget()      
+            v_layout_c = QHBoxLayout(v_widget_c)
+            v_layout_c.addWidget(v_checkbox_c)
+            v_layout_c.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            v_layout_c.setContentsMargins(0,0,0,0)
+            v_widget_c.setLayout(v_layout_c)
+            try:
+                if record[5] == '1':
+                    v_checkbox_c.setChecked(True)                                            
+                else:
+                    v_checkbox_c.setChecked(False)                                                        
+            except:
+                v_checkbox_c.setChecked(False)                                                        
+            self.o_server.setCellWidget(v_rig-1,6,v_widget_c)                                                      
 
             # passo alla prossima riga
             v_rig += 1
         self.o_server.resizeColumnsToContents()
 
+        ###
         # preparo elenco user        
+        ###
         self.o_users.setColumnCount(4)
         self.o_users.setHorizontalHeaderLabels(['User title','User name','Password','AutoConnection'])   
         v_rig = 1                
@@ -247,11 +290,14 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
             self.o_users.setRowCount(v_rig) 
             self.o_users.setItem(v_rig-1,0,QTableWidgetItem(record[0]))       
             self.o_users.setItem(v_rig-1,1,QTableWidgetItem(record[1]))                               
-            self.o_users.setItem(v_rig-1,2,QTableWidgetItem(record[2]))                               
+            v_password = QLineEdit(record[2])
+            v_password.setEchoMode(QLineEdit.EchoMode.Password) 
+            self.o_users.setCellWidget(v_rig-1,2,v_password)                               
             # la quarta colonna è una check-box per la selezione dell'utente di default
             # da notare come la checkbox viene inserita in un widget di layout in modo che si possa
             # attivare la centratura 
-            v_checkbox = QCheckBox()          
+            v_checkbox = QCheckBox() 
+            v_checkbox.setToolTip('When this flag is set, MSql automatically connects with this user at startup. Warning! Select only one preference!')         
             v_widget = QWidget()      
             v_layout = QHBoxLayout(v_widget)
             v_layout.addWidget(v_checkbox)
@@ -445,7 +491,9 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         else:
             v_open_new_editor = 0
 
+        ###
         # elenco dei server
+        ###
         v_server = []
         for i in range(0,self.o_server.rowCount()):
             # controllo la checkbox del default (da notare come la checkbox è annegata in un oggetto di layout 
@@ -458,11 +506,35 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
                 v_default = '1'
             else:
                 v_default = '0'
-            v_server.append( ( self.o_server.item(i,0).text(), self.o_server.item(i,1).text(), self.o_server.item(i,2).text(), v_default ) )            
+            # controllo la checkbox dell'evidenziare (da notare come la checkbox è annegata in un oggetto di layout 
+            # e quindi prima prendo l'oggetto che c'è annegato nella cella della tabella, poi in quell'oggetto
+            # prendo tutti gli oggetti di tipo checkbox e poi prendo il primo checkbox (che è anche l'unico)
+            # e da li prendo il suo stato!
+            v_widget = self.o_server.cellWidget(i,5)
+            v_checkbox = v_widget.findChildren(QCheckBox)
+            if v_checkbox[0].isChecked():                
+                v_emphasis = '1'
+            else:
+                v_emphasis = '0'
+            # controllo la checkbox della conferma su comandi di CREATE (da notare come la checkbox è annegata in un oggetto di layout 
+            # e quindi prima prendo l'oggetto che c'è annegato nella cella della tabella, poi in quell'oggetto
+            # prendo tutti gli oggetti di tipo checkbox e poi prendo il primo checkbox (che è anche l'unico)
+            # e da li prendo il suo stato!
+            v_widget = self.o_server.cellWidget(i,6)
+            v_checkbox = v_widget.findChildren(QCheckBox)
+            if v_checkbox[0].isChecked():                
+                v_create_confirm = '1'
+            else:
+                v_create_confirm = '0'
+            v_server.append( ( self.o_server.item(i,0).text(), self.o_server.item(i,1).text(), self.o_server.item(i,2).text(), v_default, v_emphasis, v_create_confirm ) )            
 
+        ###
         # elenco dei users
+        ###
         v_users = []
         for i in range(0,self.o_users.rowCount()):
+            # controllo il campo della password che è annegato in un widget
+            v_password = self.o_users.cellWidget(i,2)            
             # controllo la checkbox del default (da notare come la checkbox è annegata in un oggetto di layout 
             # e quindi prima prendo l'oggetto che c'è annegato nella cella della tabella, poi in quell'oggetto
             # prendo tutti gli oggetti di tipo checkbox e poi prendo il primo checkbox (che è anche l'unico)
@@ -473,7 +545,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
                 v_default = '1'
             else:
                 v_default = '0'
-            v_users.append( ( self.o_users.item(i,0).text(), self.o_users.item(i,1).text() , self.o_users.item(i,2).text(), v_default) )            
+            v_users.append( ( self.o_users.item(i,0).text(), self.o_users.item(i,1).text() , v_password.text(), v_default) )            
 
         # se il tabsize è vuoto --> imposto 2
         if self.e_tab_size.text() == '':

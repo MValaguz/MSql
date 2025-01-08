@@ -32,25 +32,27 @@ def extract_word_from_cursor_pos(p_string, p_pos):
        estrae la parola che sta "sotto" la posizione del cursore
        Es. p_string = CIAO A TUTTI QUANTI VOI 
            p_pos = 10
-           restituisce TUTTI
-    """
+           restituisce TUTTI       
+    """    
     # se posizione cursore è oltre la stringa...esco    
-    if p_pos >= len(p_string):
+    if p_pos > len(p_string):
         return ''
+    elif p_pos == len(p_string):
+        p_pos -= 1
 
     # inizio a comporre la parola partendo dalla posizione del cursore (se non trovo nulla esco)
     v_word=p_string[p_pos]    
-    if v_word is None or v_word in ('',' ','=',':','.','(',')',';',','):
+    if v_word is None or v_word in ('',' ','=',':','.','(',')',';',',',chr(9)):        
         return ''
 
     # mi sposto a sinistra rispetto al cursore e compongo la parola    
     v_index = p_pos
     while True and v_index > 0:
-        v_index -= 1
-        if v_index < len(p_string):
-            if p_string[v_index] not in (' ','=',':','.','(',')',';',','):
+        v_index -= 1        
+        if v_index < len(p_string):            
+            if p_string[v_index] not in (' ','=',':','.','(',')',';',',',chr(9)):
                 v_word = p_string[v_index] + v_word
-            else:
+            else:                
                 break
         else:
             break
@@ -60,7 +62,7 @@ def extract_word_from_cursor_pos(p_string, p_pos):
     while True:
         v_index += 1
         if v_index < len(p_string):
-            if p_string[v_index] not in (' ','=',':','\n','\r','.','(',')',';',','):
+            if p_string[v_index] not in (' ','=',':','\n','\r','.','(',')',';',',',chr(9)):
                 v_word += p_string[v_index]
             else:
                 break
@@ -220,12 +222,13 @@ def estrai_procedure_function(p_testo):
 # TEST DELLA FUNZIONE CHE PARTENDO DA CODICE PL-SQL, RESTITUISCE UN OGGETTO CHE CONTIENE TUTTE LE DEFINIZIONI TROVATE
 ######################################################################################################################
 if __name__ == "__main__":       
-    v_file = open('c:\Msql\APEX_AJAX_UPLOAD.msql','r', newline='').read()   
-    v_lista_def = estrai_procedure_function(v_file.split(chr(10)))
-    # emetto a video il contenuto di tutto quello che ho trovato nel testo
-    v_write = open('c:\\Msql\\output.txt','w', newline='')
-    for ele in v_lista_def:
-            v_write.write(ele.nome_definizione+' '+str(ele.numero_riga_testo)+'\r\n')
-            for par in ele.lista_parametri:
-                v_write.write('   ' + par + '\r\n')    
-    #scrivi_lista_in_output(['ciao\n','marco\r\n'])
+    # v_file = open('c:\Msql\APEX_AJAX_UPLOAD.msql','r', newline='').read()   
+    # v_lista_def = estrai_procedure_function(v_file.split(chr(10)))
+    # # emetto a video il contenuto di tutto quello che ho trovato nel testo
+    # v_write = open('c:\\Msql\\output.txt','w', newline='')
+    # for ele in v_lista_def:
+    #         v_write.write(ele.nome_definizione+' '+str(ele.numero_riga_testo)+'\r\n')
+    #         for par in ele.lista_parametri:
+    #             v_write.write('   ' + par + '\r\n')    
+    # #scrivi_lista_in_output(['ciao\n','marco\r\n'])
+    print(extract_word_from_cursor_pos('v_peso_nu			MA_ARTRE.PESO_NU%TYPE;', 18))

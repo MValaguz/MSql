@@ -38,14 +38,16 @@ class SecondThread(QThread):
     """
     signalStatus = pyqtSignal(str)
 
-    def __init__(self, p_cursor, p_command, p_bind_variables):
+    def __init__(self, p_connection, p_cursor, p_command, p_bind_variables):
         super(SecondThread, self).__init__()          
         """
            I parametri d'ingresso vengono salvati nell'oggetto, per eseguire istruzione e per restituirli
         """
         self.v_completato = False
+        self.v_connection = p_connection
         self.v_cursor = p_cursor
         self.v_command = p_command
+        self.v_oracle_error = None
         self.v_bind_variables = p_bind_variables
 
     def run(self):                        
@@ -62,16 +64,13 @@ class SecondThread(QThread):
             #  / ___/ _ \|  \/  |  \/  |  / \  | \ | |  _ \ 
             # | |  | | | | |\/| | |\/| | / _ \ |  \| | | | |
             # | |__| |_| | |  | | |  | |/ ___ \| |\  | |_| |
-            #  \____\___/|_|  |_|_|  |_/_/   \_\_| \_|____/                                                         
-            self.v_cursor.execute(self.v_command,self.v_bind_variables)                
-            # lavoro terminato ok --> emetto segnale di fine che verrà dal chiamante
+            #  \____\___/|_|  |_|_|  |_/_/   \_\_| \_|____/                                                                     
+            self.v_cursor.execute(self.v_command,self.v_bind_variables)                            
+            # lavoro terminato ok --> emetto segnale di fine che verrà dal chiamante            
             self.signalStatus.emit("END_JOB_OK")
         except cx_Oracle.Error as e:
             self.v_oracle_error, = e.args
             # lavoro terminato con errore --> emetto segnale di fine che verrà dal chiamante
-            self.signalStatus.emit("END_JOB_KO")
-        except:
-            # lavoro terminato con errore sconosciuto --> emetto segnale di fine che verrà dal chiamante
             self.signalStatus.emit("END_JOB_KO")
         self.v_completato = True        
 
@@ -90,7 +89,9 @@ class SecondThread(QThread):
     def cancel_job(self):
         """
            Interrompe il comando Oracle
-        """                
+        """     
+        print('richiesta cancellazione comando')                   
+        self.v_connection.cancel()
         self.quit()
         self.wait()
 
@@ -101,11 +102,12 @@ class FirstThread(QThread):
     """
     signalStatus = pyqtSignal(str)
 
-    def __init__(self, p_cursor, p_command, p_bind_variables):
+    def __init__(self, p_connection, p_cursor, p_command, p_bind_variables):
         """
            I parametri d'ingresso vengono salvati nell'oggetto, per eseguire istruzione e per restituirli
         """
         super(FirstThread, self).__init__()          
+        self.v_connection = p_connection
         self.v_cursor = p_cursor
         self.v_command = p_command
         self.v_bind_variables = p_bind_variables
@@ -131,7 +133,7 @@ class FirstThread(QThread):
             # se prima volta, avvio il lavoro sul server...
             if v_1a_volta:
                 v_1a_volta = False
-                self.server_thread = SecondThread(self.v_cursor, self.v_command, self.v_bind_variables)        
+                self.server_thread = SecondThread(self.v_connection, self.v_cursor, self.v_command, self.v_bind_variables)        
                 self.server_thread.signalStatus.connect(self.end_of_job)
                 self.server_thread.start()                
                 prec_elapsed_seconds = elapsed_time.total_seconds()
@@ -163,6 +165,7 @@ class FirstThread(QThread):
         """
            Forza la chiusura esecuzione comando
         """
+        print('richiesta cancellazione')
         self.server_thread.cancel_job()
         self.quit()        
         self.wait()
@@ -182,11 +185,12 @@ class SendCommandToOracle(QDialog):
        Questa classe visualizza una dialog con una progressbar di avanzamento lavoro e lancia il comando Oracle 
        ricevuto in input. Questo meccanismo avviene tramite utilizzo dei thread (due nello specifico) che 
        comunicano tra loro tramite segnali.
+       p_parent_geometry contiene le informazioni della dimensione della window chiamante
     """
     signalStatus = pyqtSignal(str)
 
-    def __init__(self, p_cursor, p_command, p_bind_variables):
-        super().__init__()        
+    def __init__(self, p_connection, p_cursor, p_command, p_bind_variables, p_parent_geometry):
+        super().__init__()                        
         # definizione layout della finestra di dialogo
         self.setModal(True)
         self.v_status = ''
@@ -196,6 +200,11 @@ class SendCommandToOracle(QDialog):
         icon.addPixmap(QPixmap("icons:MSql.ico"), QIcon.Mode.Normal, QIcon.State.Off)
         self.setWindowIcon(icon)
         self.gridLayout = QGridLayout(self)        
+        # centratura della window rispetto alla window chiamante
+        parent_center = p_parent_geometry.center() 
+        self_geometry = self.frameGeometry() 
+        self_geometry.moveCenter(parent_center) 
+        self.move(self_geometry.topLeft())
         # definizione della gif animata (che verrà ulteriormente zoomata durante la visualizzazione)
         self.gears = QLabel(self)        
         self.gridLayout.addWidget(self.gears, 0, 0, 1, 1)        
@@ -216,7 +225,7 @@ class SendCommandToOracle(QDialog):
         # definizione del segnale di interruzione
         self.buttonBox.rejected.connect(self.cancel_worker) # type: ignore
         # definizione del primo thread 
-        self.worker_thread = FirstThread(p_cursor,p_command,p_bind_variables)
+        self.worker_thread = FirstThread(p_connection, p_cursor,p_command,p_bind_variables)
         self.worker_thread.signalStatus.connect(self.update_progress)
         # connessione dei segnali
         QMetaObject.connectSlotsByName(self)
@@ -295,6 +304,7 @@ def slot_on_click():
         questa funzione tramite segnale.
         Se tutto ok, visualizzo il risultato, altrimenti il messaggio di errore!
         """
+        print('main ' + status)
         if status == 'CANCEL_JOB':                        
             print('Annullato!')            
             v_connection.cancel()                                                            
@@ -319,18 +329,22 @@ def slot_on_click():
     # esecuzione della funzione con creazione della classe ed esecuzione della medesima
     # in questo modo le classi di thread vedono i parametri ricevuti in input e la dialog blocca 
     # tutto il programma fino al termine del thread principale    
-    v_oracle_executer = SendCommandToOracle(v_cursor, """begin
-                                                         MW_MAGAZZINI.PREPARA_PRELIEVO_ORDINI('SMI','B1');
-                                                         MW_MAGAZZINI.DISPONIBILE_PRELIEVO_ORDINI('SMI','B1');
-                                                        end;""", v_bind)        
-    v_oracle_executer.signalStatus.connect(endCommandToOracle)    
-    v_oracle_executer.start()
-    # for i in range(1,1000):
-    #     v_oracle_executer = SendCommandToOracle(v_cursor, """select * from va_op_da_versare""", v_bind)                                                                
-    #     #v_oracle_executer = SendCommandToOracle(v_cursor, """select * from dual""", v_bind)                                                                    
-    #     v_oracle_executer.signalStatus.connect(endCommandToOracle)    
-    #     v_oracle_executer.start()
-    #     print('fine ' + str(i))
+    # v_oracle_executer = SendCommandToOracle(v_connection,
+    #                                         v_cursor, 
+    #                                         """begin
+    #                                              MW_MAGAZZINI.PREPARA_PRELIEVO_ORDINI('SMI','B1');
+    #                                              MW_MAGAZZINI.DISPONIBILE_PRELIEVO_ORDINI('SMI','B1');
+    #                                            end;""", 
+    #                                         v_bind,
+    # v_win.frameGeometry())        
+    # v_oracle_executer.signalStatus.connect(endCommandToOracle)    
+    # v_oracle_executer.start()
+    for i in range(1,1000):
+        v_oracle_executer = SendCommandToOracle(v_connection, v_cursor, """select * from va_op_da_versare""", v_bind, v_win.frameGeometry())                                                                
+        #v_oracle_executer = SendCommandToOracle(v_connection, v_cursor, """select * from dual""", v_bind, v_win.frameGeometry())                                                                    
+        v_oracle_executer.signalStatus.connect(endCommandToOracle)    
+        v_oracle_executer.start()
+        print('fine ' + str(i))
 
 if __name__ == "__main__":    
     # inizializzo libreria oracle    

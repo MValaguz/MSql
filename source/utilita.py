@@ -107,4 +107,14 @@ def Freccia_Mouse(p_active):
         QApplication.setOverrideCursor(QCursor(Qt.CursorShape.WaitCursor))        
     else:
         # ripristino icona freccia del mouse
-        QApplication.restoreOverrideCursor()          
+        QApplication.restoreOverrideCursor()    
+
+def centra_window_figlia(p_window_madre, p_window_figlia): 
+    """
+        Data la p_window_madre, centra p_window_figlia al centro di p_window_madre
+    """
+    parent_geometry = p_window_madre.frameGeometry() 
+    parent_center = parent_geometry.center() 
+    self_geometry = p_window_figlia.frameGeometry() 
+    self_geometry.moveCenter(parent_center) 
+    p_window_figlia.move(self_geometry.topLeft())

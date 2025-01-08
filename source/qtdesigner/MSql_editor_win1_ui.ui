@@ -118,6 +118,8 @@
     <addaction name="actionSelectAll"/>
     <addaction name="separator"/>
     <addaction name="actionFormat_SQL_instruction"/>
+    <addaction name="actionExtract_primary_key"/>
+    <addaction name="actionNextF4"/>
    </widget>
    <widget class="QMenu" name="menuRun">
     <property name="title">
@@ -1072,9 +1074,6 @@
    <property name="text">
     <string>Connect to specific database</string>
    </property>
-   <property name="shortcut">
-    <string>F4</string>
-   </property>
   </action>
   <action name="actionUppercase_current_selection">
    <property name="icon">
@@ -1266,6 +1265,24 @@
    </property>
    <property name="text">
     <string>Compare last two text editor</string>
+   </property>
+  </action>
+  <action name="actionExtract_primary_key">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/primary_key.png</normaloff>:/icons/icons/primary_key.png</iconset>
+   </property>
+   <property name="text">
+    <string>Extract primary key</string>
+   </property>
+  </action>
+  <action name="actionNextF4">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/next.png</normaloff>:/icons/icons/next.png</iconset>
+   </property>
+   <property name="text">
+    <string>Find next =</string>
    </property>
   </action>
  </widget>

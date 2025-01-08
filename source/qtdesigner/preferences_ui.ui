@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>511</width>
+    <width>590</width>
     <height>499</height>
    </rect>
   </property>
@@ -22,7 +22,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="o_tab_widget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="general">
        <attribute name="title">
@@ -52,17 +52,14 @@
           <item row="1" column="1">
            <widget class="QLineEdit" name="e_default_open_dir"/>
           </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_10">
+          <item row="5" column="1">
+           <widget class="QCheckBox" name="e_dark_theme">
             <property name="text">
-             <string>Remember window position:</string>
-            </property>
-            <property name="buddy">
-             <cstring>e_remember_window_pos</cstring>
+             <string/>
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
+          <item row="5" column="0">
            <widget class="QLabel" name="label_8">
             <property name="text">
              <string>Dark theme:</string>
@@ -72,41 +69,18 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QCheckBox" name="e_remember_window_pos"/>
-          </item>
-          <item row="3" column="1">
-           <widget class="QCheckBox" name="e_dark_theme">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1">
-           <widget class="QSpinBox" name="e_general_zoom">
-            <property name="minimum">
-             <number>50</number>
-            </property>
-            <property name="maximum">
-             <number>200</number>
-            </property>
-            <property name="singleStep">
-             <number>10</number>
-            </property>
-            <property name="value">
-             <number>100</number>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_21">
-            <property name="text">
-             <string>General zoom:</string>
-            </property>
-           </widget>
+          <item row="7" column="1">
+           <widget class="QCheckBox" name="e_open_new_editor"/>
           </item>
           <item row="2" column="1">
            <widget class="QLineEdit" name="e_default_save_dir"/>
+          </item>
+          <item row="7" column="0">
+           <widget class="QLabel" name="label_23">
+            <property name="text">
+             <string>Open new editor at open:</string>
+            </property>
+           </widget>
           </item>
           <item row="1" column="2">
            <widget class="QPushButton" name="b_default_open_dir">
@@ -126,15 +100,54 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="label_23">
+          <item row="1" column="3">
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_10">
             <property name="text">
-             <string>Open new editor at open:</string>
+             <string>Remember window position:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_remember_window_pos</cstring>
             </property>
            </widget>
           </item>
-          <item row="5" column="1">
-           <widget class="QCheckBox" name="e_open_new_editor"/>
+          <item row="4" column="1">
+           <widget class="QCheckBox" name="e_remember_window_pos"/>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_21">
+            <property name="text">
+             <string>General zoom:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QSpinBox" name="e_general_zoom">
+            <property name="minimum">
+             <number>50</number>
+            </property>
+            <property name="maximum">
+             <number>200</number>
+            </property>
+            <property name="singleStep">
+             <number>10</number>
+            </property>
+            <property name="value">
+             <number>100</number>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -147,7 +160,14 @@
        <layout class="QGridLayout" name="gridLayout_7">
         <item row="0" column="0">
          <layout class="QGridLayout" name="gridLayout_6">
-          <item row="7" column="0">
+          <item row="4" column="2">
+           <widget class="QSpinBox" name="e_autosave_snapshoot_interval">
+            <property name="maximum">
+             <number>3600</number>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
            <widget class="QLabel" name="label_18">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Autosave snapshoot:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -157,24 +177,7 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0" colspan="2">
-           <widget class="QLabel" name="label_9">
-            <property name="text">
-             <string>Show end of line:</string>
-            </property>
-            <property name="buddy">
-             <cstring>e_default_end_of_line</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="2">
-           <widget class="QCheckBox" name="e_remember_text_pos">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0" colspan="2">
+          <item row="7" column="0">
            <widget class="QLabel" name="label_16">
             <property name="text">
              <string>Indentation guide:</string>
@@ -184,7 +187,7 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="0" colspan="2">
+          <item row="8" column="0">
            <widget class="QLabel" name="label_7">
             <property name="text">
              <string>Remember text position:</string>
@@ -194,22 +197,21 @@
             </property>
            </widget>
           </item>
+          <item row="4" column="3">
+           <widget class="QLabel" name="label_19">
+            <property name="text">
+             <string>secs</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="2">
+           <widget class="QCheckBox" name="e_remember_text_pos">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
           <item row="7" column="2">
-           <widget class="QSpinBox" name="e_autosave_snapshoot_interval">
-            <property name="maximum">
-             <number>3600</number>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="5">
-           <widget class="QPushButton" name="b_default_font_editor">
-            <property name="icon">
-             <iconset resource="resource.qrc">
-              <normaloff>:/icons/icons/font_type.png</normaloff>:/icons/icons/font_type.png</iconset>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="2">
            <widget class="QCheckBox" name="e_default_indentation_guide">
             <property name="toolTip">
              <string>Indent guides are vertical dotted lines that indicate the indent level of text in the edit window </string>
@@ -226,16 +228,6 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="0" colspan="2">
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>UTF-8 Encoding:</string>
-            </property>
-            <property name="buddy">
-             <cstring>e_default_utf_8</cstring>
-            </property>
-           </widget>
-          </item>
           <item row="3" column="0" colspan="2">
            <widget class="QLabel" name="label_15">
             <property name="text">
@@ -243,6 +235,13 @@
             </property>
             <property name="buddy">
              <cstring>e_tab_size</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QLineEdit" name="e_default_font_editor">
+            <property name="readOnly">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -256,14 +255,38 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="2">
-           <widget class="QLineEdit" name="e_default_font_editor">
-            <property name="readOnly">
-             <bool>true</bool>
+          <item row="2" column="4">
+           <spacer name="horizontalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="2" column="3">
+           <widget class="QPushButton" name="b_default_font_editor">
+            <property name="icon">
+             <iconset resource="resource.qrc">
+              <normaloff>:/icons/icons/font_type.png</normaloff>:/icons/icons/font_type.png</iconset>
             </property>
            </widget>
           </item>
-          <item row="1" column="2">
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>UTF-8 Encoding:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_default_utf_8</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="2">
            <widget class="QCheckBox" name="e_default_end_of_line">
             <property name="text">
              <string/>
@@ -274,25 +297,28 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
-           <widget class="QCheckBox" name="e_default_utf_8"/>
-          </item>
-          <item row="7" column="5">
-           <widget class="QLabel" name="label_19">
+          <item row="6" column="0">
+           <widget class="QLabel" name="label_9">
             <property name="text">
-             <string>secs</string>
+             <string>Show end of line:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_default_end_of_line</cstring>
             </property>
            </widget>
           </item>
-          <item row="6" column="2">
-           <widget class="QCheckBox" name="e_default_autocompletation"/>
+          <item row="5" column="2">
+           <widget class="QCheckBox" name="e_default_utf_8"/>
           </item>
-          <item row="6" column="0">
+          <item row="9" column="0">
            <widget class="QLabel" name="label_22">
             <property name="text">
              <string>Autocompletation:</string>
             </property>
            </widget>
+          </item>
+          <item row="9" column="2">
+           <widget class="QCheckBox" name="e_default_autocompletation"/>
           </item>
          </layout>
         </item>
@@ -305,10 +331,48 @@
        <layout class="QGridLayout" name="gridLayout_8">
         <item row="0" column="0">
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="2" column="2">
-           <widget class="QLineEdit" name="e_default_font_result">
-            <property name="readOnly">
-             <bool>true</bool>
+          <item row="5" column="2">
+           <widget class="QCheckBox" name="e_default_auto_column_resize">
+            <property name="icon">
+             <iconset>
+              <normaloff>:/icons/icons/fix_column.gif</normaloff>:/icons/icons/fix_column.gif</iconset>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>Make table editable:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_default_editable</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="2">
+           <widget class="QCheckBox" name="e_default_editable">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_11">
+            <property name="text">
+             <string>Auto Column Resize:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_default_auto_column_resize</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0" colspan="2">
+           <widget class="QLabel" name="label_12">
+            <property name="text">
+             <string>CSV column separator:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_default_csv_separator</cstring>
             </property>
            </widget>
           </item>
@@ -322,27 +386,37 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="2">
-           <widget class="QCheckBox" name="e_default_editable">
+          <item row="7" column="2">
+           <widget class="QCheckBox" name="e_default_auto_clear_output">
             <property name="text">
              <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QLineEdit" name="e_default_font_result">
+            <property name="readOnly">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
           <item row="3" column="2">
            <widget class="QLineEdit" name="e_default_csv_separator"/>
           </item>
-          <item row="3" column="0" colspan="2">
-           <widget class="QLabel" name="label_12">
-            <property name="text">
-             <string>CSV column separator:</string>
-            </property>
-            <property name="buddy">
-             <cstring>e_default_csv_separator</cstring>
-            </property>
-           </widget>
-          </item>
           <item row="2" column="4">
+           <spacer name="horizontalSpacer_5">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="2" column="3">
            <widget class="QPushButton" name="b_default_font_result">
             <property name="icon">
              <iconset resource="resource.qrc">
@@ -350,7 +424,7 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="0" colspan="2">
+          <item row="7" column="0" colspan="2">
            <widget class="QLabel" name="label_17">
             <property name="text">
              <string>Auto-Clear output:</string>
@@ -360,42 +434,14 @@
             </property>
            </widget>
           </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_20">
+            <property name="text">
+             <string>Date format:</string>
+            </property>
+           </widget>
+          </item>
           <item row="4" column="2">
-           <widget class="QCheckBox" name="e_default_auto_clear_output">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0" colspan="2">
-           <widget class="QLabel" name="label_11">
-            <property name="text">
-             <string>Auto Column Resize:</string>
-            </property>
-            <property name="buddy">
-             <cstring>e_default_auto_column_resize</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QCheckBox" name="e_default_auto_column_resize">
-            <property name="icon">
-             <iconset>
-              <normaloff>:/icons/icons/fix_column.gif</normaloff>:/icons/icons/fix_column.gif</iconset>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0" colspan="2">
-           <widget class="QLabel" name="label_6">
-            <property name="text">
-             <string>Make table editable:</string>
-            </property>
-            <property name="buddy">
-             <cstring>e_default_editable</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="2">
            <widget class="QComboBox" name="e_default_date_format">
             <item>
              <property name="text">
@@ -417,13 +463,6 @@
               <string>%Y/%m/%d</string>
              </property>
             </item>
-           </widget>
-          </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="label_20">
-            <property name="text">
-             <string>Date format:</string>
-            </property>
            </widget>
           </item>
          </layout>
@@ -627,29 +666,16 @@
   </widget>
  </widget>
  <tabstops>
-  <tabstop>e_remember_window_pos</tabstop>
   <tabstop>e_default_open_dir</tabstop>
   <tabstop>b_default_open_dir</tabstop>
   <tabstop>e_default_save_dir</tabstop>
   <tabstop>b_default_save_dir</tabstop>
   <tabstop>e_dark_theme</tabstop>
-  <tabstop>e_general_zoom</tabstop>
-  <tabstop>e_default_utf_8</tabstop>
-  <tabstop>e_default_end_of_line</tabstop>
   <tabstop>e_default_font_editor</tabstop>
-  <tabstop>b_default_font_editor</tabstop>
   <tabstop>e_tab_size</tabstop>
-  <tabstop>e_default_indentation_guide</tabstop>
-  <tabstop>e_remember_text_pos</tabstop>
-  <tabstop>e_default_autocompletation</tabstop>
-  <tabstop>e_autosave_snapshoot_interval</tabstop>
-  <tabstop>e_default_auto_column_resize</tabstop>
-  <tabstop>e_default_editable</tabstop>
   <tabstop>e_default_font_result</tabstop>
-  <tabstop>b_default_font_result</tabstop>
   <tabstop>e_default_csv_separator</tabstop>
   <tabstop>e_default_auto_clear_output</tabstop>
-  <tabstop>e_default_date_format</tabstop>
   <tabstop>b_server_add</tabstop>
   <tabstop>b_server_remove</tabstop>
   <tabstop>o_server</tabstop>

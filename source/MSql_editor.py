@@ -100,6 +100,10 @@ v_global_exec_time = 0
 # Contiene il colore personalizzato del server
 v_global_color = '#ffffff'
 v_global_background = 'black'
+# Indica se la connessione va evidenziata
+v_global_emphasis = False
+# Indica che sui comandi sql di CREATE, va richiesta una conferma
+v_global_create_confirm = False
 
 # Classe che disabilita tutti gli eventi del mouse su un determinato oggetto
 class Lock_Mouse_Event_Filter(QObject):
@@ -553,8 +557,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             os.system("start help\\MSql_help.html")
         # Visualizzo program info
         elif p_slot.text() == 'Program info':            
-            self.program_info = program_info_class()
-            self.program_info.show()
+            self.slot_info()
         # visualizza l'objects navigator
         elif p_slot.text() == 'Objects Navigator':
             self.dockWidget.show()
@@ -627,6 +630,12 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # Selezione del testo rettangolare
             elif p_slot.text() == 'Rect selection':                
                 message_info('There are 2 ways to switch to rectangular selection mode' + chr(10) + chr(10) + '1. (Keyboard and mouse) Hold down ALT while left clicking, then dragging' + chr(10) + chr(10) + '2. (Keyboard only) Hold down ALT+Shift while using the arrow keys')                                
+            # Estrazione della chiave primaria
+            elif p_slot.text() == 'Extract primary key':                
+                message_info('To extract the primary key, position yourself on a table name and press CTRL+K. Otherwise, to join two tables, write the two tables separated by commas, select the text and press CTRL+K.')                                
+            # Ricerca prossimo ='
+            elif p_slot.text() == "Find next =":                
+                message_info("To search next = press F4")                                
             # Commenta il testo selezionato
             elif p_slot.text() == 'Comment selection':                
                 o_MSql_win2.slot_commenta()
@@ -981,7 +990,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         global v_global_my_lexer_keywords
         global v_global_color
         global v_global_background
-        global o_global_preferences           
+        global v_global_emphasis
+        global v_global_create_confirm
+        global o_global_preferences                   
         
         ###
         # Refresh del menu
@@ -993,13 +1004,24 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             action.setChecked(False)
 
         # ricerco posizione nei preferiti e attivo la corrispondente voce di menu (elenco server)
-        # notare come attraverso una triangolazione trovo quale voce attivare (usando quanto contenuto nelle preferenze)
+        # notare come attraverso una triangolazione trovo quale voce attivare (usando quanto contenuto nelle preferenze)        
         for rec in o_global_preferences.elenco_server:
             if rec[1] == self.e_server_name:
                 for action in self.action_elenco_server:            
                     if action.text() == rec[0]:
                         action.setChecked(True)            
+                        # colore usato per evidenziare il nome del server...
                         v_global_color = rec[2]                                                      
+                        # alla posizione 4 è presente la preferenza di evidenziare il server con colore specifico
+                        if len(rec) >= 5 and rec[4] == '1':
+                            v_global_emphasis = True
+                        else:
+                            v_global_emphasis = False
+                        # alla posizione 5 è presente la preferenza se chiedere conferma quando viene lanciato un comando CREATE
+                        if len(rec) >= 6 and rec[5] == '1':
+                            v_global_create_confirm = True
+                        else:
+                            v_global_create_confirm = False
 
         # ricerco posizione nei preferiti e attivo la corrispondente voce di menu (elenco user)
         # notare come attraverso una triangolazione trovo quale voce attivare (usando quanto contenuto nelle preferenze)
@@ -1073,6 +1095,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             if not obj_win2.v_editor_chiuso and v_global_connesso:        
                 # ...e apro un cursore ad uso di quell'oggetto-editor                
                 obj_win2.v_cursor = v_global_connection.cursor()
+                
+                # evidenzio i colori se richiesto
+                obj_win2.set_emphasis()
                                 
                 # aggiorno il lexer aggiungendo tutte le nuove keywords                
                 if len(v_global_my_lexer_keywords) > 0:                          
@@ -1988,8 +2013,21 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         global v_global_work_dir         
         from preferences import win_preferences_class
         self.my_app = win_preferences_class(v_global_work_dir + 'MSql.ini')        
+        centra_window_figlia(self, self.my_app)
         self.my_app.show()   
 
+    def slot_info(self):
+        """
+           Apre la window delle info
+        """   
+        global v_global_work_dir         
+        from program_info_ui import Ui_program_info
+        self.win_program_info = QDialog()
+        self.ui_program_info = Ui_program_info()
+        self.ui_program_info.setupUi(self.win_program_info)
+        centra_window_figlia(self, self.win_program_info)
+        self.win_program_info.show()                        
+        
     def crea_dizionario_per_autocompletamento(self):
         """
            Apre la window per la creazione del dizionario
@@ -2003,6 +2041,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                                                     self.v_cursor_db_obj, 
                                                     self.e_user_name, 
                                                     v_global_work_dir + 'MSql_autocompletion.ini')        
+        centra_window_figlia(self, self.my_app)
         self.my_app.show()   
     
     def slot_menu_auto_column_resize(self):
@@ -2031,6 +2070,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             self.win_history = history_class(v_global_work_dir+'MSql.db')        
             # aggiungo l'evento click per l'import dell'istruzione nell'editor
             self.win_history.b_insert_in_editor.clicked.connect(self.slot_history_insert_in_editor)
+            centra_window_figlia(self, self.win_history)
             self.win_history.show()     
 
     def slot_history_insert_in_editor(self):
@@ -2049,7 +2089,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             v_risultato = self.win_history.o_lst1.model().data(index)
             # il testo che prendo dall'history ha formato eol Linux, e se necessario
             # va convertito in Windows (a seconda dell'impostazione dell'editor di destinazione)
-            if o_MSql_win2.setting_eol == 'W':
+            if o_MSql_win2.setting_eol == 'W' and '\r\n' not in v_risultato:
                 v_risultato = v_risultato.replace('\n', '\r\n')                                    
 
             o_MSql_win2.e_sql.insert(v_risultato)        
@@ -2069,6 +2109,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             self.win_preferred_sql = preferred_sql_class(v_global_work_dir+'MSql.db',False)        
             # aggiungo l'evento doppio click per l'import dell'istruzione nell'editor
             self.win_preferred_sql.b_insert_in_editor.clicked.connect(self.slot_preferred_sql_insert_in_editor)
+            centra_window_figlia(self, self.win_preferred_sql)
             self.win_preferred_sql.show()     
 
     def slot_preferred_sql_insert_in_editor(self):
@@ -2259,7 +2300,7 @@ class My_MSql_Lexer(QsciLexerSQL):
             # le parole uguali presenti nel testo!         
             self.p_editor.selectionChanged.connect(self.cambio_di_selezione_testo)        
             self.selection_lock = False
-            self.SELECTION_INDICATOR = 4     
+            self.SELECTION_INDICATOR = 4    
         # se siamo in apertura della mini mappa...
         else:
             # nascondo il margine del folding e numeri di riga
@@ -2318,8 +2359,8 @@ class My_MSql_Lexer(QsciLexerSQL):
             self.setColor(QColor('#ac98ca'), QsciLexerSQL.KeywordSet7) 
             self.setColor(QColor('#ac98ca'), QsciLexerSQL.KeywordSet8) 
             self.setColor(QColor('green'), QsciLexerSQL.QuotedIdentifier)
-            self.setColor(QColor('green'), QsciLexerSQL.QuotedOperator)
-
+            self.setColor(QColor('green'), QsciLexerSQL.QuotedOperator)     
+    
     def keywords(self, index):
         """
            Funzione interna di QScintilla che viene automaticamente richiamata e carica le keyword di primo livello
@@ -2639,8 +2680,11 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
 
         # var che indica che il testo è stato modificato
         #self.e_sql.insert('SELECT * FROM MS_UTN')
-        self.v_testo_modificato = False                
+        self.v_testo_modificato = False         
 
+        # evidenzio i colori se richiesto
+        self.set_emphasis()
+       
         ###
         # Definizione di eventi aggiuntivi
         ###
@@ -2652,7 +2696,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         self.o_table.viewport().installEventFilter(self)   
         # slot per controllare quando cambia il testo digitato dall'utente
         self.e_sql.textChanged.connect(self.slot_e_sql_modificato)    
-        self.e_sql.cursorPositionChanged.connect(self.aggiorna_statusbar)            
+        self.e_sql.cursorPositionChanged.connect(self.aggiorna_statusbar)                    
             
         # attivo il drop sulla parte di editor 
         # Attenzione! L'attivazione del drop delega la gestione a QScintilla che non è per niente bella!
@@ -2683,7 +2727,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             self.autosave_snapshoot_timer.timeout.connect(self.slot_save_snapshoot)
             self.autosave_snapshoot_timer.start(o_global_preferences.autosave_snapshoot_interval*1000) 
 
-        # attivo slot che copia il testo dell'editor nella mini mappa
+        # attivo slot sul cambiamento di testo (es. digitazione di testo)
         self.e_sql.textChanged.connect(self.slot_mini_map_copy_text) 
         # attivo slot che tiene sincronizzato l'editor con la mini mappa tramite le scrollbar
         self.e_sql.verticalScrollBar().valueChanged.connect(self.slot_mini_map_sync_scrollbars) 
@@ -2692,12 +2736,13 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # nello specifico il blocco degli eventi è stato applicato alla viewport sottostante in quanto l'oggetto qscintilla 
         # ignorava la classe
         self.lock_mouse_event_filter = Lock_Mouse_Event_Filter() 
-        self.e_sql_mini_map.viewport().installEventFilter(self.lock_mouse_event_filter)
-        
+        self.e_sql_mini_map.viewport().installEventFilter(self.lock_mouse_event_filter)        
+    
     def slot_mini_map_copy_text(self): 
         """
            Copia il testo dell'editor nella mini mappa
         """ 
+        
         # blocco i segnali sulle scrollbar!
         self.e_sql.verticalScrollBar().blockSignals(True)                        
         self.e_sql_mini_map.verticalScrollBar().blockSignals(True)                   
@@ -2752,6 +2797,19 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
 
         # individuo la pressione di un tasto sull'editor
         if event.type() == QEvent.Type.KeyPress and source is self.e_sql:
+            # premuta parentesi aperta....inserisco parentesi chiusa
+            if event.key() == Qt.Key.Key_ParenLeft:
+                self.completa_sequenza('(')                
+            # premuto doppio apice...inserisco altro doppio apice
+            elif event.key() == Qt.Key.Key_QuoteDbl:
+                self.completa_sequenza('"')                
+            # premuto apice...inserisco altro apice
+            elif event.key() == Qt.Key.Key_Apostrophe:
+                self.completa_sequenza("'")                
+            # premuta combinazione CTRL+K (se premuto su un nome di tabella crea la select con i campi chiave)
+            if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_K:                
+                self.slot_ctrl_k()
+                return True
             # tasto Insert premuto da parte dell'utente --> cambio la label sulla statusbar
             if event.key() == Qt.Key.Key_Insert:
                 if self.v_overwrite_enabled:
@@ -2760,6 +2818,11 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                     self.v_overwrite_enabled = True                
                 # aggiorno la status bar con relative label
                 self.aggiorna_statusbar()
+            # tasto F4 premuto dall'utente --> mi posiziono sulla prossima ricorrenza =
+            # questa funzione risulta utile quando devo valorizzare dei campi di una select e voglio passare velocemente da uno all'altro
+            if event.key() == Qt.Key.Key_F4:                 
+                self.slot_f4()   
+                return True
             # tasto F11 premuto dall'utente --> eseguo la quick query
             if event.key() == Qt.Key.Key_F11:                 
                 self.slot_f11()   
@@ -2810,6 +2873,31 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # fine senza alcuna elaborazione e quindi si procede con esecuzione dei segnali nativi del framework       
         return False
            
+    def completa_sequenza(self, p_char):
+        """
+           Se utente sta scrivendo un carattere speciale (es. parentesi aperta) 
+           automaticamente viene scritta la corrispondente parentesi chiusa.
+           Lo stesso per apice, doppio-apice
+        """
+        # ricavo numero riga e posizione del cursore
+        v_num_line, v_num_pos = self.e_sql.getCursorPosition()                                        
+        # se colonna è presente, estraggo il carattere corrente
+        if v_num_pos > 1:
+            v_char = self.e_sql.text(v_num_line)[v_num_pos-1]                             
+        else:
+            v_char = ''
+                
+        # aggiungo il nuovo carattare e nel caso di apice e doppio apice lo aggiungo solo se non c'è già presente
+        if p_char == '(':
+            self.e_sql.insert(')')
+        elif p_char == '"' and v_char != '"':
+            self.e_sql.insert('"')
+        elif p_char == "'" and v_char != "'":
+            self.e_sql.insert("'")
+        
+        # posiziono il cursore
+        self.e_sql.setCursorPosition(self.e_sql.getCursorPosition()[0], self.e_sql.getCursorPosition()[1])
+    
     def tasto_destro_o_table(self, event):
         """
            Gestione del menu contestuale con tasto destro su tabella dei risultati
@@ -3004,6 +3092,24 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         v_file.write(self.e_sql.text())
         v_file.close()                                
     
+    def slot_f4(self):
+        """
+           Se premuto F4 eseguo la ricerca della prossima ricorrenza =
+           Questo comando si rivela utile quando voglio passare da un campo all'altra di una select e sono in fase di editing
+           es. SELECT * FROM OC_ORTES WHERE AZIEN_CO='' AND ESERC_CO='' AND DEPOS_CO='' AND TORDI_CO='' AND ORDIN_NU=''
+           premendo F4 passo da un campo all'altro...
+        """        
+        # ricerco la stringa
+        v_found = self.e_sql.findFirst("=", False, False, False, False, True, -1, -1, True, False, False)        
+        # posiziono il cursore 
+        if v_found:
+            v_line, v_pos = self.e_sql.getCursorPosition() 
+            v_text_line = self.e_sql.text(v_line)                        
+            v_new_pos = v_text_line[v_pos:].find("'")            
+            if v_new_pos != -1:
+                self.e_sql.setCursorPosition(v_line, v_pos + v_new_pos + 1)
+                self.e_sql.setFocus()
+    
     def slot_f11(self):
         """
            Premendo F11 viene estratto dalla posizione del cursore dell'editor, il nome dell'oggetto
@@ -3062,6 +3168,177 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 MSql_win1_class.carica_object_viewer(self.link_to_MSql_win1_class,v_tipo_oggetto,v_nome_oggetto)                                        
             else:
                 print('Not found ' + v_oggetto)
+    
+    def slot_ctrl_k(self):
+        """
+           Se premuta la combinazione CTRL-K si individua se cursore è sul nome di una tabella
+           A quel punto viene cercata la chiave primaria, e viene creata una select con il nome della tabella e con i campi
+           della chiave primaria
+        """        
+        v_oggetto  = ''
+        v_oggetto2 = ''
+        # se non è stata fatta alcuna selezione multipla di testo....vuol dire che è stato richiesto di ricercare la primary key di un'unica tabella
+        if self.e_sql.selectedText() == '':            
+            # ricavo numero riga e posizione del cursore
+            v_num_line, v_num_pos = self.e_sql.getCursorPosition()                
+            # estraggo l'intera riga dove è posizionato il cursore
+            self.e_sql.setSelection(v_num_line, 0, v_num_line+1, -1)
+            v_line = self.e_sql.selectedText()
+            if '\r\n' in v_line:
+                v_line = v_line.replace('\r\n','')
+            else:
+                v_line = v_line.replace('\n','')            
+            v_line = v_line.strip().upper()                 
+            # riposiziono il cursore allo stato originario
+            self.e_sql.setSelection(v_num_line, v_num_pos, v_num_line, v_num_pos)
+            # utilizzando la posizione del cursore sulla riga, estraggo la parola più prossima al cursore stesso                
+            v_oggetto = extract_word_from_cursor_pos(v_line.upper(), v_num_pos)                            
+        # altrimenti è stato selezionato del testo e devo capire se l'utente ha scritto due tabella su cui vuole fare la join
+        else:
+            # ricavo numero riga e posizione del cursore
+            v_num_line, v_num_pos = self.e_sql.getCursorPosition()                
+            # estraggo il testo selezionato e lo depuro da eventuali ritorni a capo e spazi            
+            v_testo = self.e_sql.selectedText()            
+            if '\r\n' in v_testo:
+                v_testo = v_testo.replace('\r\n','')
+            else:
+                v_testo = v_testo.replace('\n','')            
+            v_testo = v_testo.strip().upper()                        
+            # dal testo selezionato ricavo il nome delle due tabelle 
+            v_oggetti = v_testo.split(',')            
+            if len(v_oggetti) > 0:
+                v_oggetto = v_oggetti[0]
+            if len(v_oggetti) > 1:
+                v_oggetto2 = v_oggetti[1]
+
+        print('CTRL_K-Key of --> ' + v_oggetto2 + ',' + v_oggetto)
+        # sostituisce la freccia del mouse con icona "clessidra"
+        Freccia_Mouse(True)
+        # richiamo la procedura di oracle che mi restituisce la ddl dell'oggetto (apro un cursore locale a questa funzione)
+        v_temp_cursor = v_global_connection.cursor()
+
+        # si è richiesto di fare la chiave di una sola tabella...
+        if v_oggetto != '' and v_oggetto2 == '':            
+            try:
+                v_temp_cursor.execute("""SELECT ALL_TAB_COLUMNS.COLUMN_NAME, ALL_TAB_COLUMNS.DATA_TYPE
+                                            FROM   ALL_CONSTRAINTS,
+                                                ALL_CONS_COLUMNS,
+                                                ALL_TAB_COLUMNS																					
+                                            WHERE  ALL_CONSTRAINTS.OWNER           = '""" + self.link_to_MSql_win1_class.e_user_name + """'
+                                            AND  ALL_CONSTRAINTS.TABLE_NAME      = '""" + v_oggetto + """'
+                                            AND  ALL_CONSTRAINTS.CONSTRAINT_TYPE = 'P'
+                                            AND  ALL_CONSTRAINTS.OWNER           = ALL_CONS_COLUMNS.OWNER
+                                            AND  ALL_CONSTRAINTS.CONSTRAINT_NAME = ALL_CONS_COLUMNS.CONSTRAINT_NAME
+                                            AND  ALL_CONSTRAINTS.TABLE_NAME      = ALL_CONS_COLUMNS.TABLE_NAME
+                                            AND  ALL_CONS_COLUMNS.OWNER          = ALL_TAB_COLUMNS.OWNER
+                                            AND  ALL_CONS_COLUMNS.TABLE_NAME     = ALL_TAB_COLUMNS.TABLE_NAME
+                                            AND  ALL_CONS_COLUMNS.COLUMN_NAME    = ALL_TAB_COLUMNS.COLUMN_NAME
+                                        ORDER BY ALL_CONS_COLUMNS.POSITION""")
+            except:
+                return 'ko'
+            # prendo il risultato e inizio a costruire una nuova select con tutti i campi che compongono la chiave primaria
+            v_record = v_temp_cursor.fetchall()
+            # se trovati dei record....inizio a comporre la select, mettendo nella where campo per campo
+            if len(v_record) > 0:
+                v_risultato = 'SELECT *' + chr(10) + 'FROM   ' + v_oggetto + chr(10) + 'WHERE  '
+                v_1a_volta = True
+                for campi in v_record:                
+                    if v_1a_volta:
+                        v_1a_volta = False
+                    else:
+                        v_risultato += chr(10) + '  AND  '
+                    v_risultato += campi[0] + '='
+                    if campi[1] == 'DATE':
+                        v_risultato += "TO_DATE('','DD/MM/YYYY')"                
+                    else:
+                        v_risultato += "''"            
+                v_risultato += chr(10)                    
+                # cancello la riga dove presente il cursore
+                self.e_sql.setSelection(v_num_line, 0, v_num_line, self.e_sql.lineLength(v_num_line)) 
+                self.e_sql.removeSelectedText()
+                # ed inserisco il risultato 
+                self.e_sql.insert(v_risultato)
+                # chiudo eventuale popup di autocompletation inviando a qscintilla il tasto Esc
+                v_event = QKeyEvent(QKeyEvent.Type.KeyPress, Qt.Key.Key_Escape, Qt.KeyboardModifier.NoModifier) 
+                QApplication.postEvent(self.e_sql, v_event)
+                # mi posiziono sul primo campo tramite la ricerca offerta dalla funzione F4
+                self.slot_f4()
+            else:
+                message_info('No PK found!')        
+        # altrimenti si è richiesto di fare la chiave di due tabelle
+        else:                
+            try:
+                # nota che per alcune situazioni si ottengono dei campi "doppi" sia come chiave primaria che come chiave univoca...un questi casi viene tolta successivamente la chiave univoca
+                v_temp_cursor.execute("""SELECT FK.TABLE_NAME AS TABLE2,
+                                                FKC.COLUMN_NAME AS TABLE2_COLUMN,
+                                                PK.TABLE_NAME AS TABLE1,
+                                                PKC.COLUMN_NAME AS TABLE1_COLUMN,
+                                                (SELECT DATA_TYPE FROM ALL_TAB_COLUMNS WHERE ALL_TAB_COLUMNS.TABLE_NAME=FK.TABLE_NAME  AND ALL_TAB_COLUMNS.COLUMN_NAME=FKC.COLUMN_NAME) AS DATA_TYPE,
+                                                PK.CONSTRAINT_TYPE 
+                                            FROM   USER_CONSTRAINTS  FK,
+                                                USER_CONS_COLUMNS FKC,
+                                                USER_CONSTRAINTS  PK,
+                                                USER_CONS_COLUMNS PKC
+                                            WHERE  FK.OWNER           = '""" + self.link_to_MSql_win1_class.e_user_name + """'
+                                            AND  FK.CONSTRAINT_TYPE = 'R'
+                                            AND  FK.TABLE_NAME      = '""" + v_oggetto2 + """'
+                                            AND  PK.TABLE_NAME      = '""" + v_oggetto + """'
+                                            AND  FK.OWNER = FKC.OWNER AND FK.CONSTRAINT_NAME   = FKC.CONSTRAINT_NAME
+                                            AND  FK.OWNER = PK.OWNER  AND FK.R_CONSTRAINT_NAME = PK.CONSTRAINT_NAME
+                                            AND  PK.OWNER = PKC.OWNER AND PK.CONSTRAINT_NAME   = PKC.CONSTRAINT_NAME AND PKC.POSITION = FKC.POSITION
+                                            ORDER BY FKC.POSITION""")
+            except:
+                return 'ko'
+            # prendo il risultato e inizio a costruire una nuova select con tutti i campi che compongono la join
+            v_record = v_temp_cursor.fetchall()            
+            # se trovati dei record....inizio a comporre la select, mettendo nella where campo per campo
+            if len(v_record) > 0:
+                # se presente sia chiave primaria che univoca
+                # faccio una pulizia dei dati in modo che in v_record rimanga solo la chiave primaria        
+                v_p = 0
+                v_u = 0
+                for campi in v_record:
+                    if campi[5] == 'U':
+                        v_u = 1
+                    elif campi[5] == 'P':
+                        v_p = 1
+                if v_p == 1 and v_u == 1:
+                    v_record_new = []
+                    for campi in v_record:
+                        if campi[5] == 'P':
+                            v_record_new.append(campi)
+                    v_record = v_record_new                        
+                
+                # inizio la costruzione del risultato
+                v_risultato = 'SELECT * ' + chr(10) + 'FROM   ' + v_oggetto + ',' + chr(10) + '       ' + v_oggetto2 + chr(10) + 'WHERE  '
+                # primary key
+                v_1a_volta = True
+                for campi in v_record:                
+                    if v_1a_volta:
+                        v_1a_volta = False
+                    else:
+                        v_risultato += '  AND  '
+                    v_risultato += campi[2] + '.' + campi[3] + '='
+                    if campi[1] == 'DATE':
+                        v_risultato += "TO_DATE('','DD/MM/YYYY')"                
+                    else:
+                        v_risultato += "''"            
+                    v_risultato += chr(10)                                     
+                # aggiunta della join
+                for campi in v_record:                
+                    v_risultato += '  AND  '
+                    v_risultato += campi[2] + '.' + campi[3] + ' = ' + campi[0] + '.' + campi[1] + chr(10)                                                            
+                # cancello la selezione                    
+                self.e_sql.removeSelectedText()
+                # ed inserisco il risultato 
+                self.e_sql.insert(v_risultato)                    
+                # mi posiziono sul primo campo tramite la ricerca offerta dalla funzione F4
+                self.slot_f4()
+            else:
+                message_info('No FK found!')
+            
+        # sostituisce la freccia del mouse con icona "clessidra"
+        Freccia_Mouse(False)                
     
     def slot_click_colonna_risultati(self, p_index):       
         """
@@ -3346,13 +3623,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # se indicato dalla preferenza, prima di partire ad eseguire, pulisco l'output
         if o_global_preferences.auto_clear_output:
             self.slot_clear('OUT')
-
-        # se metto a true v_debug usciranno tutti i messaggi di diagnostica della ricerca delle istruzioni
-        v_debug = False
-        def debug_interno(p_message):
-            if v_debug:
-                print(p_message)        
-
+        
         # imposto la var di select corrente che serve in altre funzioni
         self.v_select_corrente = ''
 
@@ -3386,10 +3657,10 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         for v_riga_raw in v_righe_testo:
             # dalla riga elimino gli spazi a sinistra e a destra
             v_riga = v_riga_raw.lstrip()
-            v_riga = v_riga.rstrip()            
+            v_riga = v_riga.rstrip()               
             # continuazione plsql (da notare come lo script verrà composto con v_riga_raw)
             if v_plsql:            
-                debug_interno('Continuo con script plsql ' + v_riga)
+                print('Continuo con script plsql ' + v_riga)
                 if v_riga != '':
                     # se trovo "aperture" aumento indice
                     if v_riga.split()[0].upper() in ('DECLARE','BEGIN','CREATE','REPLACE','FUNCTION','PROCEDURE') != -1:
@@ -3425,21 +3696,21 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # commento multi multiriga (se è un'istruzione non faccio pulizia dei commenti)
             elif v_riga[0:2] == '/*' and v_istruzione_str == '':
                 self.v_offset_numero_di_riga += 1
-                v_commento_multi = True            
-            # continuazione di una select, insert, update, delete....
-            elif v_istruzione and v_riga.find(';') == -1:
-                 v_istruzione_str += chr(10) + v_riga
+                v_commento_multi = True                        
             # continuazione di una select dove la riga inizia con una costante
             elif v_istruzione and v_riga[0] == "'":
                 v_istruzione_str += v_riga
             # fine di una select, insert, update, delete.... con punto e virgola
-            elif v_istruzione and v_riga.find(';') != -1:
+            elif v_istruzione and (v_riga.find(';') != -1 or v_riga == '/'):
                 v_istruzione = False
                 v_istruzione_str += chr(10) + v_riga[0:len(v_riga)-1]
                 v_ok = self.esegui_istruzione(v_istruzione_str, p_explain)
                 if v_ok == 'ko':
                     return 'ko'
                 v_istruzione_str = ''
+            # continuazione di una select, insert, update, delete....
+            elif v_istruzione and v_riga.find(';') == -1:
+                 v_istruzione_str += chr(10) + v_riga
             # inizio select, insert, update, delete.... monoriga
             elif not v_istruzione and v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','GRANT','REVOKE','ALTER','DROP','COMMENT','TRUNCATE') and v_riga[-1] == ';':
                 v_istruzione_str = v_riga[0:len(v_riga)-1]
@@ -3447,13 +3718,13 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 if v_ok == 'ko':
                     return 'ko'
                 v_istruzione_str = ''
-            # inizio select, insert, update, delete.... multiriga
+            # inizio select, insert, update, delete.... multiriga            
             elif v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','GRANT','REVOKE','ALTER','DROP','COMMENT','TRUNCATE'):
                 v_istruzione = True
                 v_istruzione_str = v_riga
-            # riga di codice pl-sql (da notare come lo script verrà composto con v_riga_raw)       
+            # riga di codice pl-sql (da notare come lo script verrà composto con v_riga_raw)             
             elif v_riga.split()[0].upper() in ('DECLARE','BEGIN','CREATE','REPLACE','FUNCTION','PROCEDURE'):
-                debug_interno('Inizio plsql ')
+                print('Inizio plsql ')
                 v_plsql = True
                 v_plsql_idx += 1
                 v_plsql_str = v_riga_raw
@@ -3525,11 +3796,19 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                          - Codice PL-SQL puro che va eseguito e basta (al limite contiene istruzioni dbms_output)                         
                         Queste tre macro categorie vengono quindi interpretate ed eseguite da questa funzione;
                         il risultato al di fuori di queste tre casistiche è imprevedibile!
-                        Inoltre va tenuto conto che la libreria cx_oracle ha delle sue classi specifiche per la gestione dei vari aspetti
+                        Inoltre va tenuto conto che la libreria cx_Oracle ha delle sue classi specifiche per la gestione dei vari aspetti
         """
         global v_global_connesso
+        global v_global_create_confirm
         global v_global_exec_time
-
+        
+        # Eccezione! il ritorno a capo finale viene tolto se ultima istruzione non è una end
+        if p_plsql.splitlines()[-1].upper().find('END') == -1:
+            if p_plsql[-1] == '\r' or p_plsql[-1] == '\n':            
+                p_plsql = p_plsql[0:-1]                                    
+            if p_plsql[-1] == ';':            
+                p_plsql = p_plsql[0:-1]                                    
+    
         def get_dbms_output_flow():
             """
                Funzione interna che restituisce il flusso generato dal package dbms_output, durante l'esecuzione dello script pl-sql
@@ -3565,6 +3844,19 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
 
         # solo se sono connesso al DB....
         if v_global_connesso:            
+            # imposto la var che conterrà il comando corrente
+            self.v_plsql_corrente = p_plsql
+            # var che indica se siamo in uno script di "CREATE"            
+            v_create = False
+            v_testo = self.v_plsql_corrente[0:500].upper()               
+            # controllo se siamo in presenza di un comando che altera il DB...
+            if 'CREATE ' in v_testo or 'REPLACE ' in v_testo or 'ALTER ' in v_testo or 'DROP ' in v_testo:
+                v_create = True
+                # l'utente ha richiesto di chiedere conferma prima di procedere con questo tipo di comandi....
+                # quindi faccio comparire messaggio di conferma e se risponde di no --> interrompo
+                if v_global_create_confirm and message_question_yes_no('Are you sure to confirm this command?' + chr(10) + v_testo[0:100].rstrip()) == 'No':
+                    return 'ko'
+
             # sostituisce la freccia del mouse con icona "clessidra"
             Freccia_Mouse(True)
 
@@ -3580,10 +3872,9 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             v_tot_record = 0
             # esegue comando sql in modo asincrono!!! Al termine viene invocato un segnale e richiamata la funzione endSelectCommandToOracle
             self.bind_variable(p_function='DIC',p_testo_sql=p_plsql)                                                        
-            v_start_time = datetime.datetime.now()
-            self.v_plsql_corrente = p_plsql
-            self.v_set_rowcount = p_rowcount
-            self.v_oracle_executer = oracle_executer.SendCommandToOracle(self.v_cursor, p_plsql, self.v_variabili_bind_dizionario)                                                                        
+            v_start_time = datetime.datetime.now()            
+            self.v_set_rowcount = p_rowcount                 
+            self.v_oracle_executer = oracle_executer.SendCommandToOracle(v_global_connection, self.v_cursor, p_plsql, self.v_variabili_bind_dizionario, self.link_to_MSql_win1_class.frameGeometry())                                                                        
             self.v_oracle_executer.start()
         
             # riattivo la freccia del mouse
@@ -3593,11 +3884,10 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             self.v_oracle_executer.close()                
             
             if self.v_oracle_executer.get_status() == 'CANCEL_JOB':               
-                # comando abortito --> cancello la connessione...unico modo per interrompere esecuzione 
-                v_global_connection.cancel()                                 
+                # comando abortito --> scrivo apposito errore
                 self.scrive_output("Error: command aborted", "E")                                                            
 
-            if self.v_oracle_executer.get_status() == 'END_JOB_KO':                
+            if self.v_oracle_executer.get_status() == 'END_JOB_KO':                                
                 # comando terminato con errore --> emetto errore nella sezione di output
                 v_oracle_error = self.v_oracle_executer.get_error()                         
                 # leggo la parte di dbms_output
@@ -3624,14 +3914,9 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 v_tot_record = self.v_cursor.rowcount
                 self.v_esecuzione_ok = True            
                 ###
-                # da qui in poi vado alla ricerca di eventuali errori 
-                # var che indica se siamo in uno script di "CREATE"
-                v_create = False
                 # controllo se eravamo di fronte ad uno script di "CREATE"...inizio con il prendere i primi 500 caratteri (è una cifra aleatoria!)
-                # da notare come la stringa che si ricerca abbia uno spazio finale in modo non venga confusa con altro (ad esempio la funzione replace())
-                v_testo = self.v_plsql_corrente[0:500].upper()               
-                if 'CREATE ' in v_testo or 'REPLACE ' in v_testo or 'ALTER ' in v_testo or 'DROP ' in v_testo:
-                    v_create = True
+                # da notare come la stringa che si ricerca abbia uno spazio finale in modo non venga confusa con altro (ad esempio la funzione replace())                
+                if v_create:                    
                     # nettifica del testo, togliendo spazi e ritorni a capo
                     v_testo = v_testo.upper().lstrip().replace('\n',' ')                
                     # cerco che tipo di oggetto è stato richiesto di creare                
@@ -3662,9 +3947,12 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                             v_nome_script = v_parola
                             break
                     # nettifico il nome dell'oggetto che potrebbe essere nel formato "SMILE"."NOME_OGGETTO"                
-                    v_nome_script = v_nome_script.replace('"','')
+                    v_nome_script = v_nome_script.replace('"','')                    
                     if '.' in v_nome_script:
                         v_nome_script = v_nome_script.split('.')[1]
+                    # oppure nel formato che termina con una parentesi (es. CREATE FUNCTION PROVA(P_PARAMETER VARCHAR2) )
+                    elif '(' in v_nome_script:
+                        v_nome_script = v_nome_script.split('(')[0]
 
                 # quindi...se lo script era di "CREATE"...controllo se in compilazione ci sono stati errori...
                 if v_create:
@@ -3763,7 +4051,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # esegue comando sql in modo asincrono!!! Al termine viene invocato un segnale e richiamata la funzione endSelectCommandToOracle
             self.bind_variable(p_function='DIC',p_testo_sql=v_select)                                                        
             v_start_time = datetime.datetime.now()
-            self.v_oracle_executer = oracle_executer.SendCommandToOracle(self.v_cursor, v_select, self.v_variabili_bind_dizionario)                                                                        
+            self.v_oracle_executer = oracle_executer.SendCommandToOracle(v_global_connection, self.v_cursor, v_select, self.v_variabili_bind_dizionario, self.link_to_MSql_win1_class.frameGeometry())                                                                        
             self.v_oracle_executer.start()
 
             # riattivo la freccia del mouse
@@ -3771,8 +4059,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
 
             # controllo cosa mi ha restituito l'oggetto executer
             if self.v_oracle_executer.get_status() == 'CANCEL_JOB':               
-                # comando abortito --> cancello la connessione...unico modo per interrompere esecuzione 
-                v_global_connection.cancel()                                 
+                # comando abortito --> scrivo apposito errore
                 self.scrive_output("Error: command aborted", "E")                                                            
 
             if self.v_oracle_executer.get_status() == 'END_JOB_KO':                
@@ -4612,6 +4899,24 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # disattivo le modifiche sulla tabella
             self.o_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)            
     
+    def set_emphasis(self):
+        """
+           Evidenzio i colori del tab risultati e output
+        """
+        global v_global_color
+        global v_global_emphasis
+
+        if v_global_emphasis:            
+            self.o_table.setStyleSheet("QTableWidget {background-color: " + v_global_color + ";}")
+            self.o_output.setStyleSheet("QPlainTextEdit {background-color: " + v_global_color + ";}")            
+            self.o_bind.setStyleSheet("QTableView {background-color: " + v_global_color + ";}")
+            self.o_plan.setStyleSheet("QPlainTextEdit {background-color: " + v_global_color + ";}")
+        else:
+            self.o_table.setStyleSheet("")
+            self.o_output.setStyleSheet("")            
+            self.o_bind.setStyleSheet("")
+            self.o_plan.setStyleSheet("")
+    
     def set_show_end_of_line(self):
         """
            Rende visibile o meno il carattere di end of line
@@ -4768,22 +5073,6 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         v_tenths_of_second = int(v_microseconds * 100)
         v_tempo_formattato = f"{int(v_hours):02}:{int(v_minutes):02}:{int(v_seconds):02}.{v_tenths_of_second:02}"
         self.link_to_MSql_win1_class.l_exec_time.setText("Last execution time: " + v_tempo_formattato)
-
-#
-#  ___ _   _ _____ ___  
-# |_ _| \ | |  ___/ _ \ 
-#  | ||  \| | |_ | | | |
-#  | || |\  |  _|| |_| |
-# |___|_| \_|_|   \___/ 
-# 
-# Classe che contiene finestra info di programma                      
-class program_info_class(QDialog, Ui_program_info):
-    """
-        Visualizza le info del programma
-    """                
-    def __init__(self):
-        super(program_info_class, self).__init__()        
-        self.setupUi(self)
 
 #
 #  _______  ______ _____ ____ _____ 
