@@ -1,16 +1,12 @@
-# -*- coding: utf-8 -*-
-
-"""
- Creato da.....: Marco Valaguzza
- Piattaforma...: Python3.11 con libreria pyqt6
- Data..........: 06/09/2023
- Descrizione...: Gestione delle preferenze di MSql
+#  Creato da.....: Marco Valaguzza
+#  Piattaforma...: Python3.11 con libreria pyqt6
+#  Data..........: 06/09/2023
+#  Descrizione...: Gestione delle preferenze di MSql
  
- Note..........: Il layout è stato creato utilizzando qtdesigner e il file preferences.py è ricavato partendo da preferences_ui.ui 
+#  Note..........: Il layout è stato creato utilizzando qtdesigner e il file preferences.py è ricavato partendo da preferences_ui.ui 
 
- Note..........: Questo programma ha due funzioni. La prima di gestire a video le preferenze e la seconda di restituire una classe
-                 che contiene le preferenze (preferences_class)
-"""
+#  Note..........: Questo programma ha due funzioni. La prima di gestire a video le preferenze e la seconda di restituire una classe
+#                  che contiene le preferenze (preferences_class)
 
 #Librerie sistema
 import sys
@@ -137,7 +133,7 @@ class preferences_class():
             self.save_dir = 'W:\\SQL'
             self.utf_8 = False
             self.end_of_line = False
-            self.font_editor = 'Courier New, 12, BOLD'
+            self.font_editor = 'Cascadia Code SemiBold, 12, BOLD'
             self.font_result = 'Segoe UI, 8'
             self.autosave_snapshoot_interval = 60
             self.editable = False

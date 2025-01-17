@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
-
-"""
- Creato da.....: Marco Valaguzza
- Piattaforma...: Python3.11 con libreria pyqt6
- Data..........: 09/08/2018 
-"""
+#  Creato da.....: Marco Valaguzza
+#  Piattaforma...: Python3.11 con libreria pyqt6
+#  Data..........: 09/08/2018 
 
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *

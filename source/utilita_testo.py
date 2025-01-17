@@ -1,27 +1,23 @@
-# -*- coding: utf-8 -*-
-
-"""
- Creato da.....: Marco Valaguzza
- Piattaforma...: Python3.11
- Data..........: 03/10/2023
- Descrizione...: Funzioni per l'estrazione di codice pl-sql 
-"""
+#  Creato da.....: Marco Valaguzza
+#  Piattaforma...: Python3.11
+#  Data..........: 03/10/2023
+#  Descrizione...: Funzioni per l'estrazione di codice pl-sql 
 
 def scrivi_testo_in_output(p_testo):
     """
-       Utilizzata per il debug. Scrive nel file C:\MSql\output.txt il parametro p_testo
+       Utilizzata per il debug. Scrive nel file C:/MSql/output.txt il parametro p_testo
     """      
-    print('Scrittura nel file C:\MSql\output.txt')
-    v_file = open('C:\MSql\output.txt','w', newline='')
+    print('Scrittura nel file C:/MSql/output.txt')
+    v_file = open('C:/MSql/output.txt','w', newline='')
     v_file.write(p_testo)
     v_file.close()
 
 def scrivi_lista_in_output(p_lista):
     """
-       Utilizzata per il debug. Scrive nel file C:\MSql\output.txt il contenuto di p_lista
+       Utilizzata per il debug. Scrive nel file C:/MSql/output.txt il contenuto di p_lista
     """      
-    print('Scrittura nel file C:\MSql\output.txt')
-    v_file = open('C:\MSql\output.txt','w', encoding='utf-8', newline='')
+    print('Scrittura nel file C:/MSql/output.txt')
+    v_file = open('C:/MSql/output.txt','w', encoding='utf-8', newline='')
     for riga in p_lista:
         v_file.write(riga)                
     v_file.close()

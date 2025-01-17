@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # 
 #  __  __ ____        _ 
 # |  \/  / ___|  __ _| |
@@ -104,16 +102,6 @@ v_global_background = 'black'
 v_global_emphasis = False
 # Indica che sui comandi sql di CREATE, va richiesta una conferma
 v_global_create_confirm = False
-
-# Classe che disabilita tutti gli eventi del mouse su un determinato oggetto
-class Lock_Mouse_Event_Filter(QObject):
-    def eventFilter(self, obj, event):        
-        if event.type() in (QEvent.Type.MouseButtonPress,
-                            QEvent.Type.MouseButtonRelease,
-                            QEvent.Type.MouseButtonDblClick,                            
-                            QEvent.Type.MouseMove):            
-            return True  # Ignora l'evento di mouse
-        return super().eventFilter(obj, event)
 
 def salvataggio_editor(p_save_as, p_nome, p_testo):
     """
@@ -450,6 +438,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             Parametri: p_slot = Oggetto di tipo event che indica l'evento 
                        p_oggetto_titolo_db = Serve solo quando si vuole aprire un oggetto di testo db (titolo della window)
                        p_oggetto_testo_db = Serve solo quando si vuole aprire un oggetto di testo db (contenuto dell'editor)
+            Nota! In QtDesigner alcune voci di menu hanno il shortcut context attivo come WindowShortcut e altre come WidgetShortcut
+                  La modalità WidgetShortcut va definita solo per fare in modo che a menu sia presente la scritta della shortcut ma poi lasci 
+                  a qscintilla la gestione del medesimo (perché è un altro widget)
         """
         global o_global_preferences                
         global v_global_main_geometry
@@ -627,6 +618,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             elif p_slot.text() == 'Map procedures/functions':
                 v_global_main_geometry = self.frameGeometry()
                 o_MSql_win2.slot_map()
+            # Mini mappa attiva/disattiva
+            elif p_slot.text() == 'Mini map':                
+                o_MSql_win2.slot_mini_map_visible()
             # Selezione del testo rettangolare
             elif p_slot.text() == 'Rect selection':                
                 message_info('There are 2 ways to switch to rectangular selection mode' + chr(10) + chr(10) + '1. (Keyboard and mouse) Hold down ALT while left clicking, then dragging' + chr(10) + chr(10) + '2. (Keyboard only) Hold down ALT+Shift while using the arrow keys')                                
@@ -648,6 +642,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # Lowercase del testo selezionato
             elif p_slot.text() == 'Lowercase':                
                 o_MSql_win2.e_sql.SendScintilla(QsciScintilla.SCI_LOWERCASE)
+            # Indenta la riga alla posizione del cursore
+            elif p_slot.text() == 'Indent to cursor':
+                o_MSql_win2.slot_indent_to_cursor()
             # Compressione di tutti i livelli
             elif p_slot.text() == 'Fold/Unfold All':
                 o_MSql_win2.e_sql.foldAll()
@@ -671,18 +668,42 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 o_MSql_win2.e_sql.copy()
             # Incolla il testo
             elif p_slot.text() == 'Paste':
-                o_MSql_win2.e_sql.paste()
+                o_MSql_win2.e_sql.paste()                
             # Seleziona tutto
             elif p_slot.text() == 'Select All':
                 o_MSql_win2.e_sql.selectAll()
+            # Elimina riga
+            elif p_slot.text() == 'Line cut':
+                o_MSql_win2.e_sql.SendScintilla(QsciScintilla.SCI_LINEDELETE)
+            # Traspone riga
+            elif p_slot.text() == 'Line transpose':
+                o_MSql_win2.e_sql.SendScintilla(QsciScintilla.SCI_LINETRANSPOSE)
+            # Duplica riga/selezione
+            elif p_slot.text() == 'Line/Selection duplicate':
+                o_MSql_win2.e_sql.SendScintilla(QsciScintilla.SCI_LINEDUPLICATE)
+            # Cancella parola a sinistra
+            elif p_slot.text() == 'Delete start of word':
+                o_MSql_win2.e_sql.SendScintilla(QsciScintilla.SCI_DELWORDLEFT)
+            # Cancella parola a destra
+            elif p_slot.text() == 'Delete end of word':
+                o_MSql_win2.e_sql.SendScintilla(QsciScintilla.SCI_DELWORDRIGHT)
+            # Cancella riga a sinistra
+            elif p_slot.text() == 'Delete start of line':
+                o_MSql_win2.e_sql.SendScintilla(QsciScintilla.SCI_DELLINELEFT)
+            # Cancella riga a destra
+            elif p_slot.text() == 'Delete end of line':
+                o_MSql_win2.e_sql.SendScintilla(QsciScintilla.SCI_DELLINERIGHT)                
             # Vai alla riga numero
-            elif p_slot.text() == 'Go To Line':
+            elif p_slot.text() == 'Go to line':
                 o_MSql_win2.slot_goto_line()
             # Esecuzione dell'sql
             elif p_slot.text() == 'Execute':                 
                 v_ok = o_MSql_win2.slot_esegui(False)                
                 if v_ok == 'ko':
                     message_error('Script stopped for error!')
+            # Esecuzione della singola istruzione sql
+            elif p_slot.text() == 'Execute current':                 
+                message_info('Position yourself on the instruction you want to execute and press CTRL+Enter')                                
             # Esecuzione dell'sql in modalità piano di esecuzione
             elif p_slot.text() == 'Explain plan':                
                 v_ok = o_MSql_win2.slot_esegui(True)
@@ -2677,6 +2698,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # mi posiziono sulla prima riga (la posizione X viene al momento forzata a zero!)
         self.e_sql.setCursorPosition(v_cur_y,0)
         self.e_sql_mini_map.setCursorPosition(v_cur_y,0)
+        self.v_mini_map_visible = True
 
         # var che indica che il testo è stato modificato
         #self.e_sql.insert('SELECT * FROM MS_UTN')
@@ -2732,43 +2754,73 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # attivo slot che tiene sincronizzato l'editor con la mini mappa tramite le scrollbar
         self.e_sql.verticalScrollBar().valueChanged.connect(self.slot_mini_map_sync_scrollbars) 
         self.e_sql_mini_map.verticalScrollBar().valueChanged.connect(self.slot_mini_map_sync_scrollbars) 
-        # applico alla mini mappa il filtro di eventi che di fatto blocca tutti gli eventi del mouse sull'oggetto 
-        # nello specifico il blocco degli eventi è stato applicato alla viewport sottostante in quanto l'oggetto qscintilla 
-        # ignorava la classe
-        self.lock_mouse_event_filter = Lock_Mouse_Event_Filter() 
-        self.e_sql_mini_map.viewport().installEventFilter(self.lock_mouse_event_filter)        
+        # attivo slot che quando viene cliccata la mini mappa riposiziona il testo 
+        self.e_sql_mini_map.selectionChanged.connect(self.slot_mini_map_click)
+
+    def slot_mini_map_click(self):
+        """
+           Quando viene cliccato il testo sulla mini mappa riposiziona il cursore sull'editor
+           Attenzione! Se il testo cliccato in mini mappa è già visualizzato nell'editor, non si sposta nulla
+        """
+        if self.v_mini_map_visible:
+            # prendo coordinate cursore della mini mappa
+            v_line, v_pos = self.e_sql_mini_map.getCursorPosition()        
+            # riposiziono cursore nell'editor
+            self.e_sql.setCursorPosition(v_line,v_pos)
+            # blocco il segnali sulla mini mappa
+            self.e_sql_mini_map.blockSignals(True)                        
+            # pulisco eventuale selezione sulla mini mappa
+            self.e_sql_mini_map.setSelection(v_line,0,v_line,1)
+            # posiziono il focus sull'editor
+            self.e_sql.setFocus()
+            # riattivo i segnali sulla mini mappa
+            self.e_sql_mini_map.blockSignals(False)                        
     
     def slot_mini_map_copy_text(self): 
         """
            Copia il testo dell'editor nella mini mappa
-        """ 
-        
-        # blocco i segnali sulle scrollbar!
-        self.e_sql.verticalScrollBar().blockSignals(True)                        
-        self.e_sql_mini_map.verticalScrollBar().blockSignals(True)                   
-        
-        # sincronizzo il testo tra l'editor e la mini mappa e posiziono il cursore correttamente sulla mini mappa
-        self.e_sql_mini_map.setText(self.e_sql.text()) 
-        v_line, v_pos = self.e_sql.getCursorPosition()
-        self.e_sql_mini_map.setCursorPosition(v_line, 0)                        
-        
-        # sincronizzo la posizione delle scrollbar tra editro e mini mappa
-        self.e_sql_mini_map.verticalScrollBar().setValue( self.e_sql.verticalScrollBar().value() )
-        
-        # riattivo i segnali sulle scrollbar
-        self.e_sql.verticalScrollBar().blockSignals(False)                        
-        self.e_sql_mini_map.verticalScrollBar().blockSignals(False)                           
+        """         
+        if self.v_mini_map_visible:
+            # blocco i segnali sugli 
+            self.e_sql.blockSignals(True)                        
+            self.e_sql_mini_map.blockSignals(True)                   
+            
+            # sincronizzo il testo tra l'editor e la mini mappa e posiziono il cursore correttamente sulla mini mappa
+            self.e_sql_mini_map.setText(self.e_sql.text()) 
+            v_line, v_pos = self.e_sql.getCursorPosition()
+            self.e_sql_mini_map.setCursorPosition(v_line, 0)                        
+            
+            # sincronizzo la posizione delle scrollbar tra editro e mini mappa
+            self.e_sql_mini_map.verticalScrollBar().setValue( self.e_sql.verticalScrollBar().value() )
+            
+            # riattivo i segnali sulle scrollbar
+            self.e_sql.blockSignals(False)                        
+            self.e_sql_mini_map.blockSignals(False)                   
         
     def slot_mini_map_sync_scrollbars(self, value): 
         """
            Quando si agisce sulla scrollbar dell'editor o della mini mappa, sposta il testo
            Notare come l'evento sulla scrollbar venga disattivato per non incappare nel fatto che poi si autorichiamano!
         """        
-        if self.sender() == self.e_sql.verticalScrollBar():             
-            self.e_sql_mini_map.verticalScrollBar().setValue(value)                         
-        elif self.sender() == self.e_sql_mini_map.verticalScrollBar():                         
-            self.e_sql.verticalScrollBar().setValue(value)                                
+        if self.v_mini_map_visible:
+            if self.sender() == self.e_sql.verticalScrollBar():             
+                self.e_sql_mini_map.verticalScrollBar().setValue(value)                         
+            elif self.sender() == self.e_sql_mini_map.verticalScrollBar():                         
+                self.e_sql.verticalScrollBar().setValue(value)                                
         
+    def slot_mini_map_visible(self):
+        """
+           Attiva o disattiva la mini mappa
+        """
+        if self.v_mini_map_visible:
+            self.v_mini_map_visible = False
+            self.e_sql_mini_map.setText('')
+            self.e_sql_mini_map.setVisible(False)
+        else:
+            self.v_mini_map_visible = True
+            self.e_sql_mini_map.setText(self.e_sql.text())
+            self.e_sql_mini_map.setVisible(True)
+
     def eventFilter(self, source, event):
         """
            Gestione di eventi personalizzati sull'editor (overwrite, drag&drop, F12) e sulla tabella dei risultati
@@ -2809,6 +2861,10 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # premuta combinazione CTRL+K (se premuto su un nome di tabella crea la select con i campi chiave)
             if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_K:                
                 self.slot_ctrl_k()
+                return True
+            # premuta combinazione CTRL+Enter (esecuzione dell'istruzine corrente)
+            if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_Return:                
+                self.slot_ctrl_invio()
                 return True
             # tasto Insert premuto da parte dell'utente --> cambio la label sulla statusbar
             if event.key() == Qt.Key.Key_Insert:
@@ -2880,21 +2936,22 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
            Lo stesso per apice, doppio-apice
         """
         # ricavo numero riga e posizione del cursore
-        v_num_line, v_num_pos = self.e_sql.getCursorPosition()                                        
+        v_num_line, v_num_pos = self.e_sql.getCursorPosition()                                            
         # se colonna è presente, estraggo il carattere corrente
         if v_num_pos > 1:
             v_char = self.e_sql.text(v_num_line)[v_num_pos-1]                             
         else:
-            v_char = ''
-                
-        # aggiungo il nuovo carattare e nel caso di apice e doppio apice lo aggiungo solo se non c'è già presente
+            v_char = ''        
+        # se sto scrivendo un carattere speciale sopra un testo selezionato, il testo selezionato viene prima eliminato        
+        if self.e_sql.selectedText() != '':               
+            self.e_sql.cut()                
+        # aggiungo il nuovo carattere e nel caso di apice e doppio apice lo aggiungo solo se non c'è già presente
         if p_char == '(':
             self.e_sql.insert(')')
         elif p_char == '"' and v_char != '"':
             self.e_sql.insert('"')
         elif p_char == "'" and v_char != "'":
-            self.e_sql.insert("'")
-        
+            self.e_sql.insert("'")        
         # posiziono il cursore
         self.e_sql.setCursorPosition(self.e_sql.getCursorPosition()[0], self.e_sql.getCursorPosition()[1])
     
@@ -3101,7 +3158,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         """        
         # ricerco la stringa
         v_found = self.e_sql.findFirst("=", False, False, False, False, True, -1, -1, True, False, False)        
-        # posiziono il cursore 
+        # se trovato --> posiziono il cursore 
         if v_found:
             v_line, v_pos = self.e_sql.getCursorPosition() 
             v_text_line = self.e_sql.text(v_line)                        
@@ -3109,6 +3166,9 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             if v_new_pos != -1:
                 self.e_sql.setCursorPosition(v_line, v_pos + v_new_pos + 1)
                 self.e_sql.setFocus()
+        # se non trovato --> vado all'inizio del testo
+        else:                
+            self.e_sql.setCursorPosition(0,0)            
     
     def slot_f11(self):
         """
@@ -3174,7 +3234,13 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
            Se premuta la combinazione CTRL-K si individua se cursore è sul nome di una tabella
            A quel punto viene cercata la chiave primaria, e viene creata una select con il nome della tabella e con i campi
            della chiave primaria
-        """        
+        """    
+        # imposto end of line
+        if self.setting_eol == 'W':                        
+            v_eol = '\r\n'
+        else:
+            v_eol = '\n'
+
         v_oggetto  = ''
         v_oggetto2 = ''
         # se non è stata fatta alcuna selezione multipla di testo....vuol dire che è stato richiesto di ricercare la primary key di un'unica tabella
@@ -3240,19 +3306,19 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             v_record = v_temp_cursor.fetchall()
             # se trovati dei record....inizio a comporre la select, mettendo nella where campo per campo
             if len(v_record) > 0:
-                v_risultato = 'SELECT *' + chr(10) + 'FROM   ' + v_oggetto + chr(10) + 'WHERE  '
+                v_risultato = 'SELECT *' + v_eol + 'FROM   ' + v_oggetto + v_eol + 'WHERE  '
                 v_1a_volta = True
                 for campi in v_record:                
                     if v_1a_volta:
                         v_1a_volta = False
                     else:
-                        v_risultato += chr(10) + '  AND  '
+                        v_risultato += v_eol + '  AND  '
                     v_risultato += campi[0] + '='
                     if campi[1] == 'DATE':
                         v_risultato += "TO_DATE('','DD/MM/YYYY')"                
                     else:
                         v_risultato += "''"            
-                v_risultato += chr(10)                    
+                v_risultato += v_eol                    
                 # cancello la riga dove presente il cursore
                 self.e_sql.setSelection(v_num_line, 0, v_num_line, self.e_sql.lineLength(v_num_line)) 
                 self.e_sql.removeSelectedText()
@@ -3310,7 +3376,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                     v_record = v_record_new                        
                 
                 # inizio la costruzione del risultato
-                v_risultato = 'SELECT * ' + chr(10) + 'FROM   ' + v_oggetto + ',' + chr(10) + '       ' + v_oggetto2 + chr(10) + 'WHERE  '
+                v_risultato = 'SELECT * ' + v_eol + 'FROM   ' + v_oggetto + ',' + v_eol + '       ' + v_oggetto2 + v_eol + 'WHERE  '
                 # primary key
                 v_1a_volta = True
                 for campi in v_record:                
@@ -3323,11 +3389,11 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                         v_risultato += "TO_DATE('','DD/MM/YYYY')"                
                     else:
                         v_risultato += "''"            
-                    v_risultato += chr(10)                                     
+                    v_risultato += v_eol                                     
                 # aggiunta della join
                 for campi in v_record:                
                     v_risultato += '  AND  '
-                    v_risultato += campi[2] + '.' + campi[3] + ' = ' + campi[0] + '.' + campi[1] + chr(10)                                                            
+                    v_risultato += campi[2] + '.' + campi[3] + ' = ' + campi[0] + '.' + campi[1] + v_eol                                                            
                 # cancello la selezione                    
                 self.e_sql.removeSelectedText()
                 # ed inserisco il risultato 
@@ -3609,16 +3675,31 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         self.v_testo_modificato = True
         # aggiorno i dati della statusbar
         self.aggiorna_statusbar()
-                                                                       
+    
     def slot_esegui(self, p_explain=False):
         """
-           Prende tutto il testo selezionato ed inizia ad eseguirlo step by step
+           Interprete delle istruzioni SQL e PL-SQL           
+           
            Nota Bene! Nell'editor sql l'utente può aver scritto PL-SQL, SQL o entrambe le cose, intervvallati
-                      da segni di separazione come / e ;
-           Se si attiva v_debug, variabile interna, verrà eseguito l'output di tutte le righe processate
+                      da segni di separazione come / e ;           
+           
            Se si attiva p_explain la select verrà eseguita come se fosse uno script che crea il "piano di esecuzione"
         """
         global o_global_preferences  
+
+        def fine_istruzione(p_stringa):
+            """
+               Funzione interna per controllare se la riga ha un termine di istruzione '/' oppure ;
+            """
+            # se istruzione è / --> allora termine istruzione
+            if p_stringa == '/':
+                return True
+            # se istruzione finisce con ; e il punto e virgola però non è tra apici 
+            v_reg = "^(?!.*(['\"].*;\1)).*;$"
+            if re.match(v_reg, p_stringa):
+                return True        
+
+            return False
 
         # se indicato dalla preferenza, prima di partire ad eseguire, pulisco l'output
         if o_global_preferences.auto_clear_output:
@@ -3627,12 +3708,13 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # imposto la var di select corrente che serve in altre funzioni
         self.v_select_corrente = ''
 
-        # prendo tutto il testo o solo quello evidenziato dall'utente        
+        # prendo solo il testo evidenziato dall'utente 
         if self.e_sql.selectedText():
             v_testo = self.e_sql.selectedText()            
             # imposto la var che in caso di script che contiene più istruzioni separate da / tenga conto delle righe
             # delle sezioni precedenti (in questo caso parto dalla riga relativa! ad esempio ho spezzoni di script e non parto dall'inizio....)
             self.v_offset_numero_di_riga, v_start_pos = self.e_sql.getCursorPosition()
+        # ... altrimenti prendo tutto il testo 
         else:                        
             v_testo = self.e_sql.text()
             # imposto la var che in caso di script che contiene più istruzioni separate da / tenga conto delle righe
@@ -3700,8 +3782,8 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # continuazione di una select dove la riga inizia con una costante
             elif v_istruzione and v_riga[0] == "'":
                 v_istruzione_str += v_riga
-            # fine di una select, insert, update, delete.... con punto e virgola
-            elif v_istruzione and (v_riga.find(';') != -1 or v_riga == '/'):
+            # fine di una select, insert, update, delete.... con punto e virgola o /
+            elif v_istruzione and fine_istruzione(v_riga):
                 v_istruzione = False
                 v_istruzione_str += chr(10) + v_riga[0:len(v_riga)-1]
                 v_ok = self.esegui_istruzione(v_istruzione_str, p_explain)
@@ -3709,7 +3791,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                     return 'ko'
                 v_istruzione_str = ''
             # continuazione di una select, insert, update, delete....
-            elif v_istruzione and v_riga.find(';') == -1:
+            elif v_istruzione and not fine_istruzione(v_riga):
                  v_istruzione_str += chr(10) + v_riga
             # inizio select, insert, update, delete.... monoriga
             elif not v_istruzione and v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','GRANT','REVOKE','ALTER','DROP','COMMENT','TRUNCATE') and v_riga[-1] == ';':
@@ -3748,13 +3830,62 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             v_ok = self.esegui_istruzione(v_istruzione_str, p_explain)  
 
         return v_ok
+                                                                       
+    def slot_ctrl_invio(self):
+        """
+           L'utente ha premuto CTRL+Invio: viene ricercata l'istruzione dove il cursore di testo è attualmente posizionato
+           e viene inviata all'esecutore
+        """
+        # funzione interna creata con CoPilot che dato testo sql e posizione del cursore, restituisce istruzione corrente con posizione di 
+        # riga iniziale e finale
+        def extract_statement_with_positions(sql, cursor_position):
+            #r'(?:SELECT.*?;|INSERT.*?;|UPDATE.*?;|DELETE.*?;|CREATE TABLE.*?\);|BEGIN.*?END;)'
+            pattern = re.compile(
+                r'(?:SELECT.*?;|INSERT.*?;|UPDATE.*?;|DELETE.*?;)'
+                , re.DOTALL
+            )
+            
+            matches = list(pattern.finditer(sql))
+            for match in matches:
+                start, end = match.span()
+                if start <= cursor_position <= end:
+                    start_line = sql[:start].count('\n') + 1
+                    end_line = sql[:end].count('\n')
+                    return match.group(), start_line, end_line
+
+            return None, None, None
+        
+        # prendo posizione attuale del cursore (relativa!)
+        v_pos_relativa_cursore = self.e_sql.SendScintilla(self.e_sql.SCI_GETCURRENTPOS)
+        # richiamo funzione interna per estrazione dell'istruzione sql e delle relative posizioni di riga
+        v_istruzione, v_start_line, v_end_line = extract_statement_with_positions(self.e_sql.text().upper(), v_pos_relativa_cursore)
+        # se non trovato nulla --> errore
+        if v_start_line is None or v_end_line is None:
+            message_error('No statement found as SELECT, INSERT, UPDATE, DELETE!')
+            return 'ko'            
+        # correggo posizioni riga
+        if v_end_line < v_start_line:
+            v_end_line = v_start_line
+        else:
+            v_start_line -= 1
+            v_end_line += 1        
+        # se trovata istruzione ...
+        if v_istruzione != '':
+            # eventuale punto e virgola finale viene tolto
+            if v_istruzione[-1] == ';':            
+                v_istruzione = v_istruzione[0:-1]                                    
+            # eseguo l'istruzione            
+            self.esegui_istruzione(v_istruzione, False)        
+            # seleziono il testo per evidenziare l'istruzione che è stata eseguita                                                
+            if v_start_line < v_end_line:
+                self.e_sql.setSelection(v_start_line, 0, v_end_line, -1)                           
 
     def esegui_istruzione(self, p_istruzione, p_explain):
         """
            Esegue istruzione p_istruzione
            Se p_explain è attivo, vuol dire che è stata richiesta la explain plan (tasto F9 da menu)...
         """
-        v_ok = ''                    
+        v_ok = ''              
         # esecuzione normale...
         if not p_explain:    
             # se trovo select eseguo select
@@ -3802,7 +3933,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         global v_global_create_confirm
         global v_global_exec_time
         
-        # Eccezione! il ritorno a capo finale viene tolto se ultima istruzione non è una end
+        # Eccezione! il ritorno a capo finale viene tolto se ultima istruzione non è una end e stessa cosa per il punto e virgola
         if p_plsql.splitlines()[-1].upper().find('END') == -1:
             if p_plsql[-1] == '\r' or p_plsql[-1] == '\n':            
                 p_plsql = p_plsql[0:-1]                                    
@@ -4576,7 +4707,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # se sono arrivato alla fine, chiedo se si desidera ripartire dall'inizio...da notare come viene poi richiamata questa stessa funzione!
             if not v_found:
                 if message_question_yes_no('Passed the end of file!'+chr(10)+'Move to the beginnig?') == 'Yes':                    
-                    self.e_sql.setCursorPosition(1,0)
+                    self.e_sql.setCursorPosition(0,0)
                     self.slot_find_next()
 
     def slot_find_e_replace(self):
@@ -4841,6 +4972,27 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # inserisco il nuovo testo al posto di quello eliminato
         self.e_sql.insert(v_new_text)        
     
+    def slot_indent_to_cursor(self):
+        """
+           Indenta la riga dove è presente il cursore, alla posizione del cursore (in pratica inserisce spazi bianchi)
+        """
+        # prendo coordinate cursore della mini mappa
+        v_num_line, v_pos = self.e_sql.getCursorPosition()                     
+        if v_pos > 1:            
+            # estraggo l'intera riga dove è posizionato il cursore ed elmino gli spazi e i tab a sinistra
+            # attenzione! se ci sono dei tab, il cursore avrà un numero di colonna inferiore e quindi l'indentazione risulterà sporca
+            #             in questi casi, l'utente deve riposizionarsi e dare di nuovo il comando
+            self.e_sql.setSelection(v_num_line, 0, v_num_line+1, -1)                        
+            v_line = self.e_sql.selectedText().lstrip()            
+            # aggiungo tanti spazi quanto è la posizione in colonna del cursore                        
+            v_line = (' ' * v_pos) + v_line            
+            # elimino la riga
+            self.e_sql.removeSelectedText()
+            # inserisco la riga
+            self.e_sql.insert(v_line)
+            # posiziono il cursore
+            self.e_sql.setCursorPosition(v_num_line,v_pos)
+
     def scrive_output(self, p_messaggio, p_tipo_messaggio):
         """
            Scrive p_messaggio nella sezione "output" precedendolo dall'ora di sistema

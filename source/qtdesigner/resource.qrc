@@ -1,5 +1,10 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/duoble_line.png</file>
+    <file>icons/turn.png</file>
+    <file>icons/cut_line.png</file>
+    <file>icons/mini_map.png</file>
+    <file>icons/go_current.png</file>
     <file>icons/next.png</file>
     <file>icons/compare.png</file>
     <file>icons/two_columns.png</file>

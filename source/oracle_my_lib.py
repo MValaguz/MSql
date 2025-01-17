@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
+#  Creato da.....: Marco Valaguzza
+#  Piattaforma...: Python3.11
+#  Data..........: 09/02/2023
+#  Descrizione...: Scopo di questa classe è wrappare la libreria di connessione a Oracle, così da rendere disponibile ai programmi MGrep un oggetto comune
 
-"""
- Creato da.....: Marco Valaguzza
- Piattaforma...: Python3.11
- Data..........: 09/02/2023
- Descrizione...: Scopo di questa classe è wrappare la libreria di connessione a Oracle, così da rendere disponibile ai programmi MGrep un oggetto comune
-"""
 #Importo la libreria cx_Oracle versione dalla 8.3 in su
 import cx_Oracle
 import os

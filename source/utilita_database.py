@@ -1,11 +1,7 @@
-# -*- coding: utf-8 -*-
-
-"""
-  Creato da.....: Marco Valaguzza
-  Piattaforma...: Python3.11 
-  Data..........: 01/10/2017
-  Descrizione...: Libreria funzioni per estrazioni strutture ed altro dai DB Oracle e SQLite
-"""
+#   Creato da.....: Marco Valaguzza
+#   Piattaforma...: Python3.11 
+#   Data..........: 01/10/2017
+#   Descrizione...: Libreria funzioni per estrazioni strutture ed altro dai DB Oracle e SQLite
 
 # Libreria sqlite
 import sqlite3

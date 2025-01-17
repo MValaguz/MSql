@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
+#  Creato da.....: Marco Valaguzza
+#  Piattaforma...: Python3.11
+#  Data..........: 02/11/2023
+#  Descrizione...: Visualizza l'history dei comandi eseguiti in MSql
 
-"""
- Creato da.....: Marco Valaguzza
- Piattaforma...: Python3.11
- Data..........: 02/11/2023
- Descrizione...: Visualizza l'history dei comandi eseguiti in MSql
-"""
 #Librerie sistema
 import sys
 #Amplifico la pathname dell'applicazione in modo veda il contenuto della directory qtdesigner dove sono contenuti i layout

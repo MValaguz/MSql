@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
+#  Creato da.....: Marco Valaguzza
+#  Piattaforma...: Python3.11 con libreria pyqt6
+#  Data..........: 23/02/2024
+#  Descrizione...: Gestione degli SQL preferiti
 
-"""
- Creato da.....: Marco Valaguzza
- Piattaforma...: Python3.11 con libreria pyqt6
- Data..........: 23/02/2024
- Descrizione...: Gestione degli SQL preferiti
-"""
 #Librerie sistema
 import sys
 import datetime

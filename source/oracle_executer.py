@@ -1,20 +1,17 @@
-# -*- coding: utf-8 -*-
+#  Creato da.....: Marco Valaguzza
+#  Piattaforma...: Python3.13 con libreria pyqt6
+#  Data..........: 10/08/2024
+#  Descrizione...: Classe per l'esecuzione di un comando SQL/PL-SQL dove viene presentata una progressbar di avanzamento e viene 
+#                  permessa l'interruzione del comando....il tutto avviene tramite utilizzo dei thread.
+#                  La classe riceve in input sia l'istruzione che un oggetto cursore oracle già inizializzato.
+#  Note..........: Come funziona? La classe di riferimento è SendCommandToOracle la quale crea la window con la progressbar.
+#                  Dentro in questa classe viene creato un primo thread che ha il compito ogni 100millisecondi di aggiornare la progressbar di avanzamento.
+#                  Dentro in questo thread viene creato un secondo thread che si occupa di lanciare il comando Oracle.
+#                  Il tutto viene gestito tramite segnali tra una classe e l'altra.
+#                  Quando il lavoro è terminato un segnale di END_JOB_OK viene emesso verso l'alto tra una classe e l'altra e tramite il metodo get_cursor si accede
+#                  al cursore restituito da Oracle. Se il comando oracle ha dato errore, viene emesso comunque un segnale di END_JOB_KO (KO!) e tramite il 
+#                  metodo get_error si accede alla struttura di errore.
 
-"""
- Creato da.....: Marco Valaguzza
- Piattaforma...: Python3.13 con libreria pyqt6
- Data..........: 10/08/2024
- Descrizione...: Classe per l'esecuzione di un comando SQL/PL-SQL dove viene presentata una progressbar di avanzamento e viene 
-                 permessa l'interruzione del comando....il tutto avviene tramite utilizzo dei thread.
-                 La classe riceve in input sia l'istruzione che un oggetto cursore oracle già inizializzato.
- Note..........: Come funziona? La classe di riferimento è SendCommandToOracle la quale crea la window con la progressbar.
-                 Dentro in questa classe viene creato un primo thread che ha il compito ogni 100millisecondi di aggiornare la progressbar di avanzamento.
-                 Dentro in questo thread viene creato un secondo thread che si occupa di lanciare il comando Oracle.
-                 Il tutto viene gestito tramite segnali tra una classe e l'altra.
-                 Quando il lavoro è terminato un segnale di END_JOB_OK viene emesso verso l'alto tra una classe e l'altra e tramite il metodo get_cursor si accede
-                 al cursore restituito da Oracle. Se il comando oracle ha dato errore, viene emesso comunque un segnale di END_JOB_KO (KO!) e tramite il 
-                 metodo get_error si accede alla struttura di errore.
-"""
 # Librerie di sistema
 import sys
 import datetime

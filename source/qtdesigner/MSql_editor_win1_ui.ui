@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1250</width>
-    <height>881</height>
+    <height>581</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -102,6 +102,8 @@
     <addaction name="actionFind"/>
     <addaction name="actionFind_and_Replace"/>
     <addaction name="actionGo_To_Line"/>
+    <addaction name="actionGo_to_start"/>
+    <addaction name="actionGo_to_end"/>
     <addaction name="separator"/>
     <addaction name="actionRect_selection"/>
     <addaction name="actionUppercase_current_selection"/>
@@ -109,6 +111,7 @@
     <addaction name="separator"/>
     <addaction name="actionComment_selection"/>
     <addaction name="actionUncomment_selection"/>
+    <addaction name="actionIndent_to_cursor"/>
     <addaction name="separator"/>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
@@ -116,6 +119,14 @@
     <addaction name="actionCopy"/>
     <addaction name="actionPaste"/>
     <addaction name="actionSelectAll"/>
+    <addaction name="separator"/>
+    <addaction name="actionLine_cut"/>
+    <addaction name="actionLine_transpose"/>
+    <addaction name="actionLine_Selection_duplicate"/>
+    <addaction name="actionDelete_start_of_word"/>
+    <addaction name="actionDelete_end_of_word"/>
+    <addaction name="actionDelete_start_of_line"/>
+    <addaction name="actionDelete_end_of_line"/>
     <addaction name="separator"/>
     <addaction name="actionFormat_SQL_instruction"/>
     <addaction name="actionExtract_primary_key"/>
@@ -126,6 +137,8 @@
      <string>&amp;Script</string>
     </property>
     <addaction name="actionRun_selected_area"/>
+    <addaction name="actionExecute_current"/>
+    <addaction name="separator"/>
     <addaction name="actionCommit"/>
     <addaction name="actionRollback"/>
     <addaction name="separator"/>
@@ -200,6 +213,7 @@
     <addaction name="separator"/>
     <addaction name="actionFold_All"/>
     <addaction name="actionShow_end_of_line"/>
+    <addaction name="actionMini_map"/>
     <addaction name="separator"/>
     <addaction name="actionFont_editor_selector"/>
    </widget>
@@ -1042,7 +1056,7 @@
      <normaloff>:/icons/icons/right.png</normaloff>:/icons/icons/right.png</iconset>
    </property>
    <property name="text">
-    <string>Go To Line</string>
+    <string>Go to line</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+G</string>
@@ -1106,6 +1120,12 @@
    </property>
    <property name="text">
     <string>Find object</string>
+   </property>
+   <property name="shortcut">
+    <string>F12</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WidgetShortcut</enum>
    </property>
   </action>
   <action name="actionPreferences">
@@ -1197,6 +1217,12 @@
    <property name="text">
     <string>Quick query</string>
    </property>
+   <property name="shortcut">
+    <string>F11</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WidgetShortcut</enum>
+   </property>
   </action>
   <action name="actionMy_preferred_SQL">
    <property name="icon">
@@ -1275,6 +1301,12 @@
    <property name="text">
     <string>Extract primary key</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+K</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WidgetShortcut</enum>
+   </property>
   </action>
   <action name="actionNextF4">
    <property name="icon">
@@ -1283,6 +1315,183 @@
    </property>
    <property name="text">
     <string>Find next =</string>
+   </property>
+   <property name="shortcut">
+    <string>F4</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WidgetShortcut</enum>
+   </property>
+  </action>
+  <action name="actionExecute_current">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/go_current.png</normaloff>:/icons/icons/go_current.png</iconset>
+   </property>
+   <property name="text">
+    <string>Execute current</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Return</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WidgetShortcut</enum>
+   </property>
+  </action>
+  <action name="actionMini_map">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/mini_map.png</normaloff>:/icons/icons/mini_map.png</iconset>
+   </property>
+   <property name="text">
+    <string>Mini map</string>
+   </property>
+  </action>
+  <action name="actionLine_cut">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/cut_line.png</normaloff>:/icons/icons/cut_line.png</iconset>
+   </property>
+   <property name="text">
+    <string>Line cut</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WidgetShortcut</enum>
+   </property>
+  </action>
+  <action name="actionLine_transpose">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/turn.png</normaloff>:/icons/icons/turn.png</iconset>
+   </property>
+   <property name="text">
+    <string>Line transpose</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+T</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WidgetShortcut</enum>
+   </property>
+  </action>
+  <action name="actionLine_Selection_duplicate">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/duoble_line.png</normaloff>:/icons/icons/duoble_line.png</iconset>
+   </property>
+   <property name="text">
+    <string>Line/Selection duplicate</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WidgetShortcut</enum>
+   </property>
+  </action>
+  <action name="actionDelete_start_of_word">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/left.png</normaloff>:/icons/icons/left.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete start of word</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Backspace</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WidgetShortcut</enum>
+   </property>
+  </action>
+  <action name="actionDelete_end_of_word">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/right.png</normaloff>:/icons/icons/right.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete end of word</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Del</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WidgetShortcut</enum>
+   </property>
+  </action>
+  <action name="actionDelete_start_of_line">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/left.png</normaloff>:/icons/icons/left.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete start of line</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+Backspace</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WidgetShortcut</enum>
+   </property>
+  </action>
+  <action name="actionDelete_end_of_line">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/right.png</normaloff>:/icons/icons/right.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete end of line</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+Del</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WidgetShortcut</enum>
+   </property>
+  </action>
+  <action name="actionGo_to_start">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/up.png</normaloff>:/icons/icons/up.png</iconset>
+   </property>
+   <property name="text">
+    <string>Go to start</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Home</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WidgetShortcut</enum>
+   </property>
+  </action>
+  <action name="actionGo_to_end">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/down.png</normaloff>:/icons/icons/down.png</iconset>
+   </property>
+   <property name="text">
+    <string>Go to end</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+End</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WidgetShortcut</enum>
+   </property>
+  </action>
+  <action name="actionIndent_to_cursor">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/indent.png</normaloff>:/icons/icons/indent.png</iconset>
+   </property>
+   <property name="text">
+    <string>Indent to cursor</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
    </property>
   </action>
  </widget>

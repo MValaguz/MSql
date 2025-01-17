@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
+#  Creato da.....: Marco Valaguzza
+#  Piattaforma...: Python3.11 con libreria pyqt6
+#  Data..........: 11/04/2023
+#  Descrizione...: Classe per la gestione di una progressbar (è ad esempio utilizzato in oracle_my_sql.py)
 
-"""
- Creato da.....: Marco Valaguzza
- Piattaforma...: Python3.11 con libreria pyqt6
- Data..........: 11/04/2023
- Descrizione...: Classe per la gestione di una progressbar (è ad esempio utilizzato in oracle_my_sql.py)
-"""
 # Librerie di sistema
 import sys
 import time

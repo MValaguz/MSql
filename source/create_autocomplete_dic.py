@@ -1,13 +1,9 @@
-# -*- coding: utf-8 -*-
-
-"""
- Creato da.....: Marco Valaguzza
- Piattaforma...: Python3.11 con libreria pyqt6
- Data..........: 22/11/2023
- Descrizione...: Gestione e creazione del dizionario per l'autocomplete all'interno dell'editor
+#  Creato da.....: Marco Valaguzza
+#  Piattaforma...: Python3.11 con libreria pyqt6
+#  Data..........: 22/11/2023
+#  Descrizione...: Gestione e creazione del dizionario per l'autocomplete all'interno dell'editor
  
- Note..........: Il layout è stato creato utilizzando qtdesigner e il file create_autocomplete_dic_ui.py è ricavato partendo da create_autocomplete_dic_ui.ui 
-"""
+#  Note..........: Il layout è stato creato utilizzando qtdesigner e il file create_autocomplete_dic_ui.py è ricavato partendo da create_autocomplete_dic_ui.ui 
 
 #Librerie sistema
 import sys
