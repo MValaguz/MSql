@@ -204,73 +204,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         v_rig = 1                
         for record in self.preferences.elenco_server:                                    
             self.o_server.setRowCount(v_rig) 
-            self.o_server.setItem(v_rig-1,0,QTableWidgetItem(record[0]))       
-            self.o_server.setItem(v_rig-1,1,QTableWidgetItem(record[1]))                               
-            self.o_server.setItem(v_rig-1,2,QTableWidgetItem(record[2]))                                           
-            # come quarta colonna metto il pulsante per la scelta del colore
-            v_color_button = QPushButton()            
-            v_icon = QIcon()
-            v_icon.addPixmap(QPixmap("icons:color.png"), QIcon.Mode.Normal, QIcon.State.Off)
-            v_color_button.setIcon(v_icon)
-            v_color_button.clicked.connect(self.slot_set_color_server)
-            self.o_server.setCellWidget(v_rig-1,3,v_color_button)                 
-            # la quinta colonna è una check-box per la selezione del server di default
-            # da notare come la checkbox viene inserita in un widget di layout in modo che si possa
-            # attivare la centratura 
-            v_checkbox = QCheckBox()          
-            v_checkbox.setToolTip('When this flag is set, MSql automatically connects to this server at startup. Warning! Select only one preference!')
-            v_widget = QWidget()      
-            v_layout = QHBoxLayout(v_widget)
-            v_layout.addWidget(v_checkbox)
-            v_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            v_layout.setContentsMargins(0,0,0,0)
-            v_widget.setLayout(v_layout)
-            try:
-                if record[3] == '1':
-                    v_checkbox.setChecked(True)                                            
-                else:
-                    v_checkbox.setChecked(False)                                                        
-            except:
-                v_checkbox.setChecked(False)                                                        
-            self.o_server.setCellWidget(v_rig-1,4,v_widget)                                                      
-            # la sesta colonna è una check-box per indicare che quando si è connessi a questo server deve essere attiva evidenziazione
-            # da notare come la checkbox viene inserita in un widget di layout in modo che si possa
-            # attivare la centratura 
-            v_checkbox_e = QCheckBox()          
-            v_checkbox_e.setToolTip('When this flag is set, the chosen color is also used for the data and results output sections.')
-            v_widget_e = QWidget()      
-            v_layout_e = QHBoxLayout(v_widget_e)
-            v_layout_e.addWidget(v_checkbox_e)
-            v_layout_e.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            v_layout_e.setContentsMargins(0,0,0,0)
-            v_widget_e.setLayout(v_layout_e)
-            try:
-                if record[4] == '1':
-                    v_checkbox_e.setChecked(True)                                            
-                else:
-                    v_checkbox_e.setChecked(False)                                                        
-            except:
-                v_checkbox_e.setChecked(False)                                                        
-            self.o_server.setCellWidget(v_rig-1,5,v_widget_e)                                                      
-            # la settima colonna è una check-box per indicare che quando si esegue un'istruzione di CREATE, prima di eseguirla viene richiesta una conferma
-            # da notare come la checkbox viene inserita in un widget di layout in modo che si possa
-            # attivare la centratura 
-            v_checkbox_c = QCheckBox()          
-            v_checkbox_c.setToolTip('When this flag is set, each CREATE statement requires confirmation.')
-            v_widget_c = QWidget()      
-            v_layout_c = QHBoxLayout(v_widget_c)
-            v_layout_c.addWidget(v_checkbox_c)
-            v_layout_c.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            v_layout_c.setContentsMargins(0,0,0,0)
-            v_widget_c.setLayout(v_layout_c)
-            try:
-                if record[5] == '1':
-                    v_checkbox_c.setChecked(True)                                            
-                else:
-                    v_checkbox_c.setChecked(False)                                                        
-            except:
-                v_checkbox_c.setChecked(False)                                                        
-            self.o_server.setCellWidget(v_rig-1,6,v_widget_c)                                                      
+            self.carico_riga_server(v_rig,record)
 
             # passo alla prossima riga
             v_rig += 1
@@ -284,35 +218,113 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         v_rig = 1                
         for record in self.preferences.elenco_user:                                    
             self.o_users.setRowCount(v_rig) 
-            self.o_users.setItem(v_rig-1,0,QTableWidgetItem(record[0]))       
-            self.o_users.setItem(v_rig-1,1,QTableWidgetItem(record[1]))                               
-            v_password = QLineEdit(record[2])
-            v_password.setEchoMode(QLineEdit.EchoMode.Password) 
-            self.o_users.setCellWidget(v_rig-1,2,v_password)                               
-            # la quarta colonna è una check-box per la selezione dell'utente di default
-            # da notare come la checkbox viene inserita in un widget di layout in modo che si possa
-            # attivare la centratura 
-            v_checkbox = QCheckBox() 
-            v_checkbox.setToolTip('When this flag is set, MSql automatically connects with this user at startup. Warning! Select only one preference!')         
-            v_widget = QWidget()      
-            v_layout = QHBoxLayout(v_widget)
-            v_layout.addWidget(v_checkbox)
-            v_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            v_layout.setContentsMargins(0,0,0,0)
-            v_widget.setLayout(v_layout)
-            try:
-                if record[3] == '1':
-                    v_checkbox.setChecked(True)                                            
-                else:
-                    v_checkbox.setChecked(False)                                                        
-            except:
-                v_checkbox.setChecked(False)                                                        
-            self.o_users.setCellWidget(v_rig-1,3,v_widget)                                                      
+            self.carico_riga_user(v_rig, record)
 
             # passo alla prossima riga
             v_rig += 1
         self.o_users.resizeColumnsToContents()
 
+    def carico_riga_server(self, v_rig, record):
+        """
+           Carica una nuova riga nella tabella server
+        """
+        self.o_server.setItem(v_rig-1,0,QTableWidgetItem(record[0]))       
+        self.o_server.setItem(v_rig-1,1,QTableWidgetItem(record[1]))                               
+        self.o_server.setItem(v_rig-1,2,QTableWidgetItem(record[2]))                                           
+        # come quarta colonna metto il pulsante per la scelta del colore
+        v_color_button = QPushButton()            
+        v_icon = QIcon()
+        v_icon.addPixmap(QPixmap("icons:color.png"), QIcon.Mode.Normal, QIcon.State.Off)
+        v_color_button.setIcon(v_icon)
+        v_color_button.clicked.connect(self.slot_set_color_server)
+        self.o_server.setCellWidget(v_rig-1,3,v_color_button)                 
+        # la quinta colonna è una check-box per la selezione del server di default
+        # da notare come la checkbox viene inserita in un widget di layout in modo che si possa
+        # attivare la centratura 
+        v_checkbox = QCheckBox()          
+        v_checkbox.setToolTip('When this flag is set, MSql automatically connects to this server at startup. Warning! Select only one preference!')
+        v_widget = QWidget()      
+        v_layout = QHBoxLayout(v_widget)
+        v_layout.addWidget(v_checkbox)
+        v_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        v_layout.setContentsMargins(0,0,0,0)
+        v_widget.setLayout(v_layout)
+        try:
+            if record[3] == '1':
+                v_checkbox.setChecked(True)                                            
+            else:
+                v_checkbox.setChecked(False)                                                        
+        except:
+            v_checkbox.setChecked(False)                                                        
+        self.o_server.setCellWidget(v_rig-1,4,v_widget)                                                      
+        # la sesta colonna è una check-box per indicare che quando si è connessi a questo server deve essere attiva evidenziazione
+        # da notare come la checkbox viene inserita in un widget di layout in modo che si possa
+        # attivare la centratura 
+        v_checkbox_e = QCheckBox()          
+        v_checkbox_e.setToolTip('When this flag is set, the chosen color is also used for the data and results output sections.')
+        v_widget_e = QWidget()      
+        v_layout_e = QHBoxLayout(v_widget_e)
+        v_layout_e.addWidget(v_checkbox_e)
+        v_layout_e.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        v_layout_e.setContentsMargins(0,0,0,0)
+        v_widget_e.setLayout(v_layout_e)
+        try:
+            if record[4] == '1':
+                v_checkbox_e.setChecked(True)                                            
+            else:
+                v_checkbox_e.setChecked(False)                                                        
+        except:
+            v_checkbox_e.setChecked(False)                                                        
+        self.o_server.setCellWidget(v_rig-1,5,v_widget_e)                                                      
+        # la settima colonna è una check-box per indicare che quando si esegue un'istruzione di CREATE, prima di eseguirla viene richiesta una conferma
+        # da notare come la checkbox viene inserita in un widget di layout in modo che si possa
+        # attivare la centratura 
+        v_checkbox_c = QCheckBox()          
+        v_checkbox_c.setToolTip('When this flag is set, each CREATE statement requires confirmation.')
+        v_widget_c = QWidget()      
+        v_layout_c = QHBoxLayout(v_widget_c)
+        v_layout_c.addWidget(v_checkbox_c)
+        v_layout_c.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        v_layout_c.setContentsMargins(0,0,0,0)
+        v_widget_c.setLayout(v_layout_c)
+        try:
+            if record[5] == '1':
+                v_checkbox_c.setChecked(True)                                            
+            else:
+                v_checkbox_c.setChecked(False)                                                        
+        except:
+            v_checkbox_c.setChecked(False)                                                        
+        self.o_server.setCellWidget(v_rig-1,6,v_widget_c)                                                      
+    
+    def carico_riga_user(self, v_rig, record):
+        """
+           Carica una nuova riga nella tabella user
+        """
+        self.o_users.setItem(v_rig-1,0,QTableWidgetItem(record[0]))       
+        self.o_users.setItem(v_rig-1,1,QTableWidgetItem(record[1]))                               
+        v_password = QLineEdit(record[2])
+        v_password.setEchoMode(QLineEdit.EchoMode.Password) 
+        self.o_users.setCellWidget(v_rig-1,2,v_password)                               
+        # la quarta colonna è una check-box per la selezione dell'utente di default
+        # da notare come la checkbox viene inserita in un widget di layout in modo che si possa
+        # attivare la centratura 
+        v_checkbox = QCheckBox() 
+        v_checkbox.setToolTip('When this flag is set, MSql automatically connects with this user at startup. Warning! Select only one preference!')         
+        v_widget = QWidget()      
+        v_layout = QHBoxLayout(v_widget)
+        v_layout.addWidget(v_checkbox)
+        v_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        v_layout.setContentsMargins(0,0,0,0)
+        v_widget.setLayout(v_layout)
+        try:
+            if record[3] == '1':
+                v_checkbox.setChecked(True)                                            
+            else:
+                v_checkbox.setChecked(False)                                                        
+        except:
+            v_checkbox.setChecked(False)                                                        
+        self.o_users.setCellWidget(v_rig-1,3,v_widget)                                                      
+    
     def slot_set_color_server(self):
         """
            Gestione della scelta dei colori sull'elenco dei server
@@ -397,7 +409,9 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         """
            Crea una riga vuota dove poter inserire informazioni connessioni al server
         """
-        self.o_server.setRowCount(self.o_server.rowCount()+1)
+        v_rig = self.o_server.rowCount()+1
+        self.o_server.setRowCount(v_rig)
+        self.carico_riga_server(v_rig, ['','','',0,0,0])
 
     def slot_b_server_remove(self):
         """
@@ -409,7 +423,9 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         """
            Crea una riga vuota dove poter inserire informazioni utente di connessione al server
         """
-        self.o_users.setRowCount(self.o_users.rowCount()+1)
+        v_rig = self.o_users.rowCount()+1
+        self.o_users.setRowCount(v_rig)
+        self.carico_riga_user(v_rig, ['','','',0])
 
     def slot_b_user_remove(self):
         """

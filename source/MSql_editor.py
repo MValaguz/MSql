@@ -1114,6 +1114,13 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # scorro la lista-oggetti-editor...        
         for obj_win2 in self.o_lst_window2:
             if not obj_win2.v_editor_chiuso and v_global_connesso:        
+                # l'oggetto che contiene i risultati delle query viene pulito, in modo che se c'era qualcosa in canna da connessione precedente, non rimanga a video                                
+                obj_win2.o_table.verticalScrollBar().blockSignals(True)      
+                obj_win2.o_table.clearContents()
+                obj_win2.o_table.setRowCount(0)                    
+                obj_win2.o_table.setColumnCount(0)                    
+                obj_win2.o_table.verticalScrollBar().blockSignals(False)      
+                
                 # ...e apro un cursore ad uso di quell'oggetto-editor                
                 obj_win2.v_cursor = v_global_connection.cursor()
                 
@@ -1289,7 +1296,13 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         v_selindex = self.oggetti_db_elenco.selectedIndexes()[0]        
         self.v_nome_oggetto = v_selindex.data()
         # prendo il tipo di oggetto scelto dall'utente        
-        self.v_tipo_oggetto = Tipi_Oggetti_DB[self.oggetti_db_scelta.currentText()]                        
+        if self.oggetti_db_scelta.currentText() != '':
+            self.v_tipo_oggetto = Tipi_Oggetti_DB[self.oggetti_db_scelta.currentText()]                        
+        # se siamo nella modalità di visulizzazione di tutti gli oggetti, ne ricavo il nome e il tipo dalla riga selezionata
+        # dove il nomer e il tipo sono separati da spazio+meno+spazio
+        else:
+            self.v_tipo_oggetto = self.v_nome_oggetto.split(' - ')[1]
+            self.v_nome_oggetto = self.v_nome_oggetto.split(' - ')[0]
         # richiamo la creazione del popup menu
         self.popup_menu_object(p_position,'RAMO')
 
@@ -1299,12 +1312,12 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
            Nel caso si sia premuto il tasto destro sull'object viewer e il sottostante sia un package,
            viene visualizzata solo la voce "Insert function in editor"
         """        
-        if p_tipo_ela == 'RAMO':
-            v_nome_obj = self.v_nome_oggetto
+        if p_tipo_ela == 'RAMO':            
             v_tipo_obj = self.v_tipo_oggetto
-        elif p_tipo_ela == 'FOGLIA':
-            v_nome_obj = self.v_nome_foglia
+        elif p_tipo_ela == 'FOGLIA':            
             v_tipo_obj = self.v_tipo_foglia
+        elif p_tipo_ela == 'CAMPO_TABELLA':            
+            v_tipo_obj = self.v_nome_foglia
         else:
             message_error('Error to create popupmenu!')
 
@@ -1314,6 +1327,19 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             v_azione_insert_in_editor = QAction('Insert in editor') 
             v_azione_insert_in_editor.triggered.connect(self.slot_popup_menu_insert_in_editor)
             v_menu.addAction(v_azione_insert_in_editor)
+        elif self.v_popup_menu_zone == 'CAMPO_TABELLA':            
+            # azione modify field
+            v_azione_modify_field = QAction('Modify')
+            v_azione_modify_field.triggered.connect(self.slot_popup_menu_modify_field)
+            v_menu.addAction(v_azione_modify_field)
+            # azione drop field 
+            v_azione_drop_field = QAction('Drop')
+            v_azione_drop_field.triggered.connect(self.slot_popup_menu_drop_field)
+            v_menu.addAction(v_azione_drop_field)            
+            # azione drop field 
+            v_azione_comment = QAction('Extract comment')
+            v_azione_comment.triggered.connect(self.slot_popup_menu_comment_field)
+            v_menu.addAction(v_azione_comment)            
         else:
             # azione load ddl
             v_azione_load_ddl = QAction('Load DDL')
@@ -1338,10 +1364,28 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # visualizzo il menu sopra la riga selezionata (della lista oggetti)
         if self.v_popup_menu_zone == 'LISTA_OGGETTI':
             v_menu.exec(self.oggetti_db_elenco.viewport().mapToGlobal(p_position))    
-        # oppure sopra un elemeno dell'albero dell'object viewer
-        elif self.v_popup_menu_zone == 'FOGLIA_ALBERO':
+        # oppure sopra un elmento dell'albero dell'object viewer
+        elif self.v_popup_menu_zone in ('FOGLIA_ALBERO','CAMPO_TABELLA'):
             v_menu.exec(self.db_oggetto_tree.viewport().mapToGlobal(p_position))    
 
+    def slot_popup_menu_modify_field(self):
+        """
+           Crea il comando di modifica del campo di tabella lo inserisce nell'editor
+        """                
+        self.oggetti_db_elenco_esegui_voce_menu('MODIFY_FIELD')
+
+    def slot_popup_menu_drop_field(self):
+        """
+           Crea il comando di eliminazione del campo di tabella lo inserisce nell'editor
+        """                
+        self.oggetti_db_elenco_esegui_voce_menu('DROP_FIELD')
+
+    def slot_popup_menu_comment_field(self):
+        """
+           Crea il comando di estrazione del commento del campo di tabella
+        """                
+        self.oggetti_db_elenco_esegui_voce_menu('COMMENT_FIELD')
+    
     def slot_popup_menu_load_ddl(self):
         """
            Carica il sorgente dell'oggetto selezionato (menu popup sull'elenco) dentro l'editor
@@ -1516,10 +1560,13 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         if self.v_popup_menu_zone == 'FOGLIA_ALBERO':
             v_nome_obj = self.v_nome_foglia
             v_tipo_obj = self.v_tipo_foglia
+        elif self.v_popup_menu_zone == 'CAMPO_TABELLA':
+            v_nome_obj = self.v_nome_oggetto
+            v_tipo_obj = self.v_nome_foglia
         else:
             v_nome_obj = self.v_nome_oggetto
             v_tipo_obj = self.v_tipo_oggetto
-
+            
         # prendo editor corrente
         o_MSql_win2 = self.oggetto_win2_attivo()
         if o_MSql_win2 == None:            
@@ -1578,6 +1625,22 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 message_error('Invalid object!')
                 return 'ko'
 
+        # operazioni sui campi di tabella 
+        # Attenzione! Alcune variabili sono state usate impropriamente 
+        #             v_tipo_obj = contiene il nome del campo
+        #             v_tipo_foglia = contiene tipo+check+chr(10)+commento 
+        if v_nome_obj != '' and self.v_tipo_oggetto != '' and p_function in ('MODIFY_FIELD','DROP_FIELD','COMMENT_FIELD'):
+            v_campi = self.v_tipo_foglia.split(chr(10))            
+            if p_function == 'MODIFY_FIELD':
+                v_comando += "ALTER TABLE "+v_nome_obj+" MODIFY ("+v_tipo_obj+" "+v_campi[0]+");"                
+            elif p_function == 'DROP_FIELD':
+                v_comando += "ALTER TABLE "+v_nome_obj+" DROP ("+v_tipo_obj+");"                
+            elif p_function == 'COMMENT_FIELD':
+                v_comando += "COMMENT ON COLUMN "+v_nome_obj+"."+v_tipo_obj+" IS '"+v_campi[1]+"';"                
+            else:
+                message_error('Invalid field!')
+                return 'ko'
+            
         # inserisco il comando nell'editor corrente
         o_MSql_win2.e_sql.append(v_comando)            
         
@@ -1587,20 +1650,20 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         """
         # pulisco il campo di ricerca dell'object viewer
         self.e_object_viewer_find.setText('')
-        # prendo il tipo di oggetto scelto dall'utente
-        try:            
-            v_tipo_oggetto = Tipi_Oggetti_DB[self.oggetti_db_scelta.currentText()]                
-        except:
-            v_tipo_oggetto = ''
         # prendo il nome dell'oggetto scelto dall'utente
         v_selindex = self.oggetti_db_lista.itemFromIndex(p_index)
-        v_nome_oggetto = v_selindex.text()  
-        # se ho attivato la descrizione degli oggi, la devo nettificare
-        if self.e_view_description.isChecked():
-            v_nome_oggetto = v_nome_oggetto.split(' - ')[0]
+        self.v_nome_oggetto = v_selindex.text()  
+        # prendo il tipo di oggetto scelto dall'utente        
+        if self.oggetti_db_scelta.currentText() != '':
+            self.v_tipo_oggetto = Tipi_Oggetti_DB[self.oggetti_db_scelta.currentText()]                        
+        # se siamo nella modalità di visulizzazione di tutti gli oggetti, ne ricavo il nome e il tipo dalla riga selezionata
+        # dove il nomer e il tipo sono separati da spazio+meno+spazio
+        else:
+            self.v_tipo_oggetto = self.v_nome_oggetto.split(' - ')[1]
+            self.v_nome_oggetto = self.v_nome_oggetto.split(' - ')[0]        
         # se tutto ok, richiamo la visualizzazione
-        if v_nome_oggetto != '':
-            self.carica_object_viewer(v_tipo_oggetto, v_nome_oggetto)
+        if self.v_nome_oggetto != '':
+            self.carica_object_viewer(self.v_tipo_oggetto, self.v_nome_oggetto)
 
     def carica_object_viewer(self, p_tipo_oggetto, p_nome_oggetto):
         """
@@ -1636,8 +1699,8 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             v_root_campi = QStandardItem('Fields')            
 
             self.v_cursor_db_obj.execute("""SELECT A.COLUMN_NAME AS NOME,
-                                                   Decode(A.DATA_TYPE,'NUMBER',Lower(A.DATA_TYPE) || '(' || A.DATA_PRECISION || ',' || A.DATA_SCALE || ')',Lower(A.DATA_TYPE) || '(' || A.CHAR_LENGTH || ')')  AS TIPO,
-                                                   Decode(A.NULLABLE,'N',' not null','') AS COLONNA_NULLA,
+                                                   Upper(Decode(A.DATA_TYPE,'NUMBER',Lower(A.DATA_TYPE) || '(' || A.DATA_PRECISION || ',' || A.DATA_SCALE || ')',Lower(A.DATA_TYPE) || '(' || A.CHAR_LENGTH || ')'))  AS TIPO,
+                                                   Upper(Decode(A.NULLABLE,'N',' not null','')) AS COLONNA_NULLA,
                                                    DATA_DEFAULT AS VALORE_DEFAULT,
                                                    B.COMMENTS AS COMMENTO
                                             FROM   ALL_TAB_COLUMNS A, ALL_COL_COMMENTS B 
@@ -1653,8 +1716,8 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 v_campo_col0 = QStandardItem(result[0])
                 v_campo_col1 = QStandardItem(result[1])
                 v_campo_col2 = QStandardItem(result[2])
-                if result[3] != None:
-                    v_campo_col2.setText( v_campo_col2.text() + ' default ' + str(result[3]) )                                    
+                if result[3] != None:                                                                                
+                    v_campo_col2.setText( v_campo_col2.text() + ' default ' + str(result[3]).rstrip() )                                    
                 v_campo_col3 = QStandardItem(result[4])
                 v_root_campi.appendRow([v_campo_col0,v_campo_col1,v_campo_col2,v_campo_col3])                
             self.db_oggetto_tree_model.appendRow(v_root_campi)
@@ -1956,11 +2019,11 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         
         if len(v_indexes) > 0:                    
             v_current_index = v_indexes[0]            
-            v_parent_index = v_current_index.parent()
+            v_parent_index = v_current_index.parent()            
             if v_parent_index.data() is None:                                
                 pass
             # l'apertura del menu avviene solo se siamo sotto una determinata serie di rami
-            # e viene riciclato il codice già scritto per il la sezione dell'elenco oggetti
+            # e viene riciclato il codice già scritto per il la sezione dell'elenco oggetti            
             elif v_parent_index.data() in ('Constraints','Triggers','Indexes'):                                
                 self.v_popup_menu_zone = 'FOGLIA_ALBERO'
                 self.v_nome_foglia = v_current_index.data()
@@ -1984,6 +2047,14 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 # richiamo la creazione e gestione del popup menu
                 # notare come all'interno di questa gestione verranno usate le var di nome e tipo oggetto                
                 self.popup_menu_object(p_position,'FOGLIA')                                
+            # in questo caso siamo nell'object viewer di una tabella e si è selezionato un campo
+            elif v_parent_index.data() in ('Fields'):
+                self.v_popup_menu_zone = 'CAMPO_TABELLA'
+                self.v_nome_foglia = v_current_index.data()
+                self.v_tipo_foglia = v_indexes[1].data() + v_indexes[2].data() + chr(10) + v_indexes[3].data()                                                                                                                  
+                # richiamo la creazione e gestione del popup menu
+                # notare come all'interno di questa gestione verranno usate le var di nome e tipo oggetto                
+                self.popup_menu_object(p_position,'CAMPO_TABELLA')                                
     
     def richiesta_connessione_specifica(self):    
         """
@@ -2779,11 +2850,14 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
     def slot_mini_map_copy_text(self): 
         """
            Copia il testo dell'editor nella mini mappa
+           Notare come vengono bloccati gli eventi perché altrimenti si creano riposizionamenti indesiderati!
         """         
         if self.v_mini_map_visible:
             # blocco i segnali sugli 
             self.e_sql.blockSignals(True)                        
-            self.e_sql_mini_map.blockSignals(True)                   
+            self.e_sql_mini_map.blockSignals(True)      
+            self.e_sql.verticalScrollBar().blockSignals(True)                        
+            self.e_sql_mini_map.verticalScrollBar().blockSignals(True)      
             
             # sincronizzo il testo tra l'editor e la mini mappa e posiziono il cursore correttamente sulla mini mappa
             self.e_sql_mini_map.setText(self.e_sql.text()) 
@@ -2795,18 +2869,19 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             
             # riattivo i segnali sulle scrollbar
             self.e_sql.blockSignals(False)                        
-            self.e_sql_mini_map.blockSignals(False)                   
+            self.e_sql_mini_map.blockSignals(False)          
+            self.e_sql.verticalScrollBar().blockSignals(False)                        
+            self.e_sql_mini_map.verticalScrollBar().blockSignals(False)      
         
     def slot_mini_map_sync_scrollbars(self, value): 
         """
-           Quando si agisce sulla scrollbar dell'editor o della mini mappa, sposta il testo
-           Notare come l'evento sulla scrollbar venga disattivato per non incappare nel fatto che poi si autorichiamano!
-        """        
-        if self.v_mini_map_visible:
-            if self.sender() == self.e_sql.verticalScrollBar():             
-                self.e_sql_mini_map.verticalScrollBar().setValue(value)                         
-            elif self.sender() == self.e_sql_mini_map.verticalScrollBar():                         
-                self.e_sql.verticalScrollBar().setValue(value)                                
+           Quando si agisce sulla scrollbar dell'editor o della mini mappa, sposta il testo           
+        """            
+        if self.v_mini_map_visible:            
+            if self.sender() == self.e_sql.verticalScrollBar():                             
+                self.e_sql_mini_map.verticalScrollBar().setValue(value)                                                         
+            elif self.sender() == self.e_sql_mini_map.verticalScrollBar():                                         
+                self.e_sql.verticalScrollBar().setValue(value)                                                        
         
     def slot_mini_map_visible(self):
         """
@@ -2859,7 +2934,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             elif event.key() == Qt.Key.Key_Apostrophe:
                 self.completa_sequenza("'")                
             # premuta combinazione CTRL+K (se premuto su un nome di tabella crea la select con i campi chiave)
-            if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_K:                
+            if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_K:                                
                 self.slot_ctrl_k()
                 return True
             # premuta combinazione CTRL+Enter (esecuzione dell'istruzine corrente)
@@ -3242,9 +3317,9 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             v_eol = '\n'
 
         v_oggetto  = ''
-        v_oggetto2 = ''
+        v_oggetto2 = ''        
         # se non è stata fatta alcuna selezione multipla di testo....vuol dire che è stato richiesto di ricercare la primary key di un'unica tabella
-        if self.e_sql.selectedText() == '':            
+        if self.e_sql.selectedText() == '':              
             # ricavo numero riga e posizione del cursore
             v_num_line, v_num_pos = self.e_sql.getCursorPosition()                
             # estraggo l'intera riga dove è posizionato il cursore
@@ -3253,12 +3328,11 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             if '\r\n' in v_line:
                 v_line = v_line.replace('\r\n','')
             else:
-                v_line = v_line.replace('\n','')            
-            v_line = v_line.strip().upper()                 
+                v_line = v_line.replace('\n','')                        
             # riposiziono il cursore allo stato originario
             self.e_sql.setSelection(v_num_line, v_num_pos, v_num_line, v_num_pos)
-            # utilizzando la posizione del cursore sulla riga, estraggo la parola più prossima al cursore stesso                
-            v_oggetto = extract_word_from_cursor_pos(v_line.upper(), v_num_pos)                            
+            # utilizzando la posizione del cursore sulla riga, estraggo la parola più prossima al cursore stesso                            
+            v_oggetto = extract_word_from_cursor_pos(v_line.upper(), v_num_pos)                                                    
         # altrimenti è stato selezionato del testo e devo capire se l'utente ha scritto due tabella su cui vuole fare la join
         else:
             # ricavo numero riga e posizione del cursore
@@ -3319,9 +3393,9 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                     else:
                         v_risultato += "''"            
                 v_risultato += v_eol                    
-                # cancello la riga dove presente il cursore
-                self.e_sql.setSelection(v_num_line, 0, v_num_line, self.e_sql.lineLength(v_num_line)) 
-                self.e_sql.removeSelectedText()
+                # cancello la parola dove presente il cursore (sia a destra che a sinistra)
+                self.e_sql.SendScintilla(QsciScintilla.SCI_DELWORDLEFT)
+                self.e_sql.SendScintilla(QsciScintilla.SCI_DELWORDRIGHT)                
                 # ed inserisco il risultato 
                 self.e_sql.insert(v_risultato)
                 # chiudo eventuale popup di autocompletation inviando a qscintilla il tasto Esc
@@ -3837,8 +3911,8 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
            e viene inviata all'esecutore
         """
         # funzione interna creata con CoPilot che dato testo sql e posizione del cursore, restituisce istruzione corrente con posizione di 
-        # riga iniziale e finale
-        def extract_statement_with_positions(sql, cursor_position):
+        # riga iniziale e finale (caso in cui l'istruzione sia terminata da ;)
+        def extract_statement_with_positions_comma(sql, cursor_position):
             #r'(?:SELECT.*?;|INSERT.*?;|UPDATE.*?;|DELETE.*?;|CREATE TABLE.*?\);|BEGIN.*?END;)'
             pattern = re.compile(
                 r'(?:SELECT.*?;|INSERT.*?;|UPDATE.*?;|DELETE.*?;)'
@@ -3853,23 +3927,37 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                     end_line = sql[:end].count('\n')
                     return match.group(), start_line, end_line
 
-            return None, None, None
+            return '', 0, 0
+
+        # funzione interna creata con CoPilot che dato testo sql e posizione del cursore, restituisce istruzione corrente con posizione di 
+        # riga iniziale e finale (caso in istruzione non è terminata da ;)
+        def extract_statement_with_positions_space(sql_text, position):
+            # Lista di parole chiave SQL che indicano l'inizio di una nuova istruzione
+            sql_keywords = ["SELECT", "UPDATE", "DELETE", "INSERT"]
+            # Espressione regolare per catturare le istruzioni SQL complete
+            sql_pattern = re.compile(r"(?i)\b(" + "|".join(sql_keywords) + r")\b.*?(?=\b(" + "|".join(sql_keywords) + r")\b|$)", re.DOTALL)            
+            # Estrazione dell'istruzione
+            match = sql_pattern.finditer(sql_text)            
+            for m in match:
+                start, end = m.span()
+                if start <= position < end:
+                    return m.group().strip()
+            return None
         
+        # prendo posizione cursore in riga e colonna
+        v_pos_line, v_pos_column = self.e_sql.getCursorPosition()
         # prendo posizione attuale del cursore (relativa!)
         v_pos_relativa_cursore = self.e_sql.SendScintilla(self.e_sql.SCI_GETCURRENTPOS)
-        # richiamo funzione interna per estrazione dell'istruzione sql e delle relative posizioni di riga
-        v_istruzione, v_start_line, v_end_line = extract_statement_with_positions(self.e_sql.text().upper(), v_pos_relativa_cursore)
-        # se non trovato nulla --> errore
-        if v_start_line is None or v_end_line is None:
-            message_error('No statement found as SELECT, INSERT, UPDATE, DELETE!')
-            return 'ko'            
+        # richiamo funzione interna per estrazione dell'istruzione sql (istruzione che termina con ;) e delle relative posizioni di riga
+        v_istruzione, v_start_line, v_end_line = extract_statement_with_positions_comma(self.e_sql.text().upper(), v_pos_relativa_cursore)                
         # correggo posizioni riga
         if v_end_line < v_start_line:
             v_end_line = v_start_line
         else:
             v_start_line -= 1
             v_end_line += 1        
-        # se trovata istruzione ...
+        
+        # se trovata istruzione che terminava con ;...
         if v_istruzione != '':
             # eventuale punto e virgola finale viene tolto
             if v_istruzione[-1] == ';':            
@@ -3879,6 +3967,18 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # seleziono il testo per evidenziare l'istruzione che è stata eseguita                                                
             if v_start_line < v_end_line:
                 self.e_sql.setSelection(v_start_line, 0, v_end_line, -1)                           
+        # .. altrimenti
+        else:
+            # se non trovato nulla --> provo a fare la ricerca di un'istruzione che non termina con il ;
+            # in questo caso la funzione non restituisce la posizione di inizio e fine            
+            v_istruzione = extract_statement_with_positions_space(self.e_sql.text().upper(), v_pos_relativa_cursore)                        
+            if v_istruzione != '' and v_istruzione is not None:
+                # eseguo l'istruzione                     
+                self.esegui_istruzione(v_istruzione, False)        
+            else:
+                # altrimenti errore
+                message_error('No statement found as SELECT, INSERT, UPDATE, DELETE!')
+                return 'ko'                                    
 
     def esegui_istruzione(self, p_istruzione, p_explain):
         """
@@ -4235,7 +4335,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                             v_new_header_item.setText(nome_colonna)
                             self.o_table.setHorizontalHeaderItem(v_pos,v_new_header_item)
                                 
-                # se tutto ok, posso procedere con il caricare la prima pagina            
+                # se tutto ok, posso procedere con il caricare la prima pagina                            
                 self.carica_pagina()   
 
                 # refresh della sezione variabili bind
@@ -4386,7 +4486,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # sostituisce la freccia del mouse con icona "clessidra"
             Freccia_Mouse(True)
 
-            # carico prossima pagina
+            # carico prossima pagina            
             self.carica_pagina()
                         
             # Ripristino icona freccia del mouse
@@ -4404,7 +4504,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         v_progress = avanzamento_infinito_class("sql_editor.gif")
 
         # carico tutte le pagine fino ad arrivare in fondo (siccome vengono caricati 100 record per pagina....)
-        v_counter = 0 
+        v_counter = 0         
         while self.carica_pagina() != 'ko':
             v_counter += 1            
             # visualizzo barra di avanzamento e se richiesto interrompo
