@@ -156,6 +156,7 @@ def estrai_procedure_function(p_testo):
             v_riga_raw = result.upper()
             v_riga = v_riga_raw.replace('\n','') # tolgo ritorno a capo dalla riga
             v_riga = v_riga.replace('\r','') # tolgo ritorno a capo dalla riga
+            v_riga = v_riga.replace('\t',' ') # sostituisco i tab con gli spazi
             v_riga = v_riga.replace('"','') # tolgo i doppi apici dalla riga (potrebbero essere presenti nella dichiarazione della procedura)
             if v_riga.find('--') != -1: # se presente un commento, lo tolgo
                 v_riga = v_riga[0:v_riga.find('--')]

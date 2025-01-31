@@ -94,6 +94,7 @@
      <string>&amp;Connection</string>
     </property>
     <addaction name="actionConnect"/>
+    <addaction name="actionDisconnect"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -643,6 +644,7 @@
    <addaction name="actionMy_preferred_SQL"/>
    <addaction name="separator"/>
    <addaction name="actionConnect"/>
+   <addaction name="actionDisconnect"/>
    <addaction name="actionRun_selected_area"/>
    <addaction name="separator"/>
    <addaction name="actionCommit"/>
@@ -1492,6 +1494,15 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+I</string>
+   </property>
+  </action>
+  <action name="actionDisconnect">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/disconnect.png</normaloff>:/icons/icons/disconnect.png</iconset>
+   </property>
+   <property name="text">
+    <string>Disconnect</string>
    </property>
   </action>
  </widget>

@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/disconnect.png</file>
     <file>icons/duoble_line.png</file>
     <file>icons/turn.png</file>
     <file>icons/cut_line.png</file>

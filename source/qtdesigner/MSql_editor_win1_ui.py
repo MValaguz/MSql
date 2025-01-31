@@ -585,6 +585,11 @@ class Ui_MSql_win1(object):
         self.actionIndent_to_cursor = QtGui.QAction(parent=MSql_win1)
         self.actionIndent_to_cursor.setIcon(icon57)
         self.actionIndent_to_cursor.setObjectName("actionIndent_to_cursor")
+        self.actionDisconnect = QtGui.QAction(parent=MSql_win1)
+        icon74 = QtGui.QIcon()
+        icon74.addPixmap(QtGui.QPixmap("icons:disconnect.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        self.actionDisconnect.setIcon(icon74)
+        self.actionDisconnect.setObjectName("actionDisconnect")
         self.menuFiles.addAction(self.actionNew)
         self.menuFiles.addAction(self.actionOpen)
         self.menuFiles.addAction(self.menuRecent_file.menuAction())
@@ -601,6 +606,7 @@ class Ui_MSql_win1(object):
         self.menuFiles.addSeparator()
         self.menuFiles.addAction(self.actionExit)
         self.menuServer.addAction(self.actionConnect)
+        self.menuServer.addAction(self.actionDisconnect)
         self.menuEdit.addAction(self.actionFind)
         self.menuEdit.addAction(self.actionFind_and_Replace)
         self.menuEdit.addAction(self.actionGo_To_Line)
@@ -699,6 +705,7 @@ class Ui_MSql_win1(object):
         self.toolBar.addAction(self.actionMy_preferred_SQL)
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.actionConnect)
+        self.toolBar.addAction(self.actionDisconnect)
         self.toolBar.addAction(self.actionRun_selected_area)
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.actionCommit)
@@ -898,6 +905,7 @@ class Ui_MSql_win1(object):
         self.actionGo_to_end.setShortcut(_translate("MSql_win1", "Ctrl+End"))
         self.actionIndent_to_cursor.setText(_translate("MSql_win1", "Indent to cursor"))
         self.actionIndent_to_cursor.setShortcut(_translate("MSql_win1", "Ctrl+I"))
+        self.actionDisconnect.setText(_translate("MSql_win1", "Disconnect"))
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@
                  
 #  Creato da.....: Marco Valaguzza
 #  Piattaforma...: Python3.13 con libreria pyqt6
-#  Data..........: 01/01/2023
+#  Data inizio...: 01/01/2023
 #  Descrizione...: Questo programma ha la "pretesa" di essere editor SQL per ambiente Oracle....                             
 #                  In questo programma sono state sperimentate diverse tecniche per la soluzione di particolari problemi...e quindi è di fatto una sorta
 #                  di super esercizio....
@@ -464,9 +464,12 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                     self.e_password = rec[2]
                     self.e_user_mode = 'Normal'                    
             self.slot_connetti()            
-        # Cambio user specificato da utente
+        # Connessione a un data base specifico richiedendo tutti i parametri singolarmente
         elif p_slot.text() == 'Connect to specific database':
                 self.richiesta_connessione_specifica()        
+        # Disconnessione al database corrente
+        elif p_slot.text() == 'Disconnect':
+                self.slot_disconnect()        
         # Apertura di un nuovo editor o di un file recente
         elif p_slot.text() in ('New','Open','Open_db_obj') or str(p_slot.data()) == 'FILE_RECENTI':
             # se richiesto un file recente
@@ -1132,6 +1135,55 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                     obj_win2.v_lexer.keywords(6)
                     obj_win2.v_lexer.carica_dizionario_per_autocompletamento()
         
+    def slot_disconnect(self):
+        """
+           Esegue disconnessione a Oracle
+        """
+        global v_global_connesso   
+        global v_global_connection        
+        global v_global_color
+        global v_global_background        
+        global v_global_create_confirm        
+        
+        ###
+        # Refresh del menu
+        ###
+        # disattivo la check sulla parte server e user (preferiti)
+        for action in self.action_elenco_server:            
+            action.setChecked(False)
+        for action in self.action_elenco_user:
+            action.setChecked(False)
+
+        ###
+        # Disconnessione
+        ###
+
+        # se c'è una connessione aperta, controllo se ci sono transazioni aperte
+        # verrà evetualmente richiesto se effettuare la commit
+        self.controllo_transazioni_aperte()
+            
+        # scorro la lista-oggetti-editor...
+        for obj_win2 in self.o_lst_window2:
+            if not obj_win2.v_editor_chiuso and v_global_connesso:        
+                # ...e chiudo eventuale cursore attualmente presente
+                if obj_win2.v_cursor is not None:
+                    obj_win2.v_cursor.close()
+                                    
+        # chiudo connessione
+        try:
+            # se c'è già una connessione --> la chiudo
+            if v_global_connesso:
+                v_global_connection.close()            
+        except:
+            message_error('Error to oracle disconnection!')                
+        
+        # imposto var che indica la connessione a oracle
+        v_global_connesso = False
+
+        # sulla statusbar, aggiorno la label della connessione        
+        self.l_connection.setText("No connect to Oracle Database!")     
+        self.l_connection.setStyleSheet('background-color: red ;color: "' + v_global_background + '";')                      
+    
     def slot_object_navigator_start_timer(self):
         """
            Attiva il timer che attende 0,8 secondi prima di richiamare effettivamente la ricerca
@@ -1489,6 +1541,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 v_testo_oggetto_db = ''
                 for v_record in self.v_cursor_db_obj:
                     v_testo_oggetto_db += str(v_record[0])
+                # in presenza di trigger si controlla se alla fine c'è l'istruzione di alter. Viene tolta perché manca di separatore istruzione
+                if "ALTER TRIGGER" in v_testo_oggetto_db.splitlines()[-1]:
+                    v_testo_oggetto_db = "\n".join(v_testo_oggetto_db.splitlines()[0:-1])
             except:
                 Freccia_Mouse(False)
                 message_error('Error to retrive metadata information!')
@@ -1699,8 +1754,18 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             v_root_campi = QStandardItem('Fields')            
 
             self.v_cursor_db_obj.execute("""SELECT A.COLUMN_NAME AS NOME,
-                                                   Upper(Decode(A.DATA_TYPE,'NUMBER',Lower(A.DATA_TYPE) || '(' || A.DATA_PRECISION || ',' || A.DATA_SCALE || ')',Lower(A.DATA_TYPE) || '(' || A.CHAR_LENGTH || ')'))  AS TIPO,
-                                                   Upper(Decode(A.NULLABLE,'N',' not null','')) AS COLONNA_NULLA,
+                                                   CASE WHEN A.DATA_TYPE = 'NUMBER' THEN
+                                                        CASE WHEN A.DATA_PRECISION IS NULL THEN
+	                                                         'INTEGER'
+	                                                    ELSE
+                                                             A.DATA_TYPE|| '(' || A.DATA_PRECISION || ',' || A.DATA_SCALE || ')'
+	                                                    END 
+                                                   WHEN A.DATA_TYPE IN ('VARCHAR2','CHAR') THEN
+                                                        A.DATA_TYPE || '(' || A.CHAR_LENGTH || ')'
+                                                   ELSE
+                                                         A.DATA_TYPE
+                                                   END AS TIPO,
+                                                   UPPER(Decode(A.NULLABLE,'N',' NOT NULL','')) AS COLONNA_NULLA,
                                                    DATA_DEFAULT AS VALORE_DEFAULT,
                                                    B.COMMENTS AS COMMENTO
                                             FROM   ALL_TAB_COLUMNS A, ALL_COL_COMMENTS B 
@@ -1717,7 +1782,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 v_campo_col1 = QStandardItem(result[1])
                 v_campo_col2 = QStandardItem(result[2])
                 if result[3] != None:                                                                                
-                    v_campo_col2.setText( v_campo_col2.text() + ' default ' + str(result[3]).rstrip() )                                    
+                    v_campo_col2.setText( v_campo_col2.text() + ' DEFAULT ' + str(result[3]).rstrip() )                                    
                 v_campo_col3 = QStandardItem(result[4])
                 v_root_campi.appendRow([v_campo_col0,v_campo_col1,v_campo_col2,v_campo_col3])                
             self.db_oggetto_tree_model.appendRow(v_root_campi)
@@ -2937,8 +3002,8 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_K:                                
                 self.slot_ctrl_k()
                 return True
-            # premuta combinazione CTRL+Enter (esecuzione dell'istruzine corrente)
-            if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_Return:                
+            # premuta combinazione CTRL+Invio e CTRL+Enter (esecuzione dell'istruzine corrente)
+            if event.modifiers() & Qt.KeyboardModifier.ControlModifier and (event.key() == Qt.Key.Key_Enter or event.key() == Qt.Key.Key_Return):                
                 self.slot_ctrl_invio()
                 return True
             # tasto Insert premuto da parte dell'utente --> cambio la label sulla statusbar
@@ -3014,18 +3079,24 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         v_num_line, v_num_pos = self.e_sql.getCursorPosition()                                            
         # se colonna è presente, estraggo il carattere corrente
         if v_num_pos > 1:
-            v_char = self.e_sql.text(v_num_line)[v_num_pos-1]                             
+            v_char_left = self.e_sql.text(v_num_line)[v_num_pos-1]                             
+            try:
+                v_char_right = self.e_sql.text(v_num_line)[v_num_pos]                             
+            except:
+                v_char_right = ''
         else:
-            v_char = ''        
+            v_char_left = ''   
+            v_char_right = ''   
+
         # se sto scrivendo un carattere speciale sopra un testo selezionato, il testo selezionato viene prima eliminato        
         if self.e_sql.selectedText() != '':               
             self.e_sql.cut()                
         # aggiungo il nuovo carattere e nel caso di apice e doppio apice lo aggiungo solo se non c'è già presente
         if p_char == '(':
             self.e_sql.insert(')')
-        elif p_char == '"' and v_char != '"':
+        elif p_char == '"' and ((v_char_left == ' ' and v_char_right == ' ') or (v_char_right == '')):
             self.e_sql.insert('"')
-        elif p_char == "'" and v_char != "'":
+        elif p_char == "'" and ((v_char_left == ' ' and v_char_right == ' ') or (v_char_right == '')):
             self.e_sql.insert("'")        
         # posiziono il cursore
         self.e_sql.setCursorPosition(self.e_sql.getCursorPosition()[0], self.e_sql.getCursorPosition()[1])
@@ -3929,23 +4000,47 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
 
             return '', 0, 0
 
-        # funzione interna creata con CoPilot che dato testo sql e posizione del cursore, restituisce istruzione corrente con posizione di 
-        # riga iniziale e finale (caso in istruzione non è terminata da ;)
-        def extract_statement_with_positions_space(sql_text, position):
-            # Lista di parole chiave SQL che indicano l'inizio di una nuova istruzione
-            sql_keywords = ["SELECT", "UPDATE", "DELETE", "INSERT"]
-            # Espressione regolare per catturare le istruzioni SQL complete
-            sql_pattern = re.compile(r"(?i)\b(" + "|".join(sql_keywords) + r")\b.*?(?=\b(" + "|".join(sql_keywords) + r")\b|$)", re.DOTALL)            
-            # Estrazione dell'istruzione
-            match = sql_pattern.finditer(sql_text)            
-            for m in match:
-                start, end = m.span()
-                if start <= position < end:
-                    return m.group().strip()
-            return None
+        # funzione interna creata con CoPilot che dato testo sql e posizione del cursore, restituisce posizione di inizio e fine dell'istruzione, riga inizio e di fine
+        # funzione che viene usata nel caso non si stata trovata istruzione che termina con ;
+        def extract_statement_with_positions_space(sql_string, cursor_position):
+            # Pattern per ricercare le istruzioni SQL
+            v_pattern = re.compile(r'(SELECT|INSERT|UPDATE|DELETE).*?(?=SELECT|INSERT|UPDATE|DELETE|$)', re.DOTALL | re.IGNORECASE)
+            
+            v_matches = list(v_pattern.finditer(sql_string))
+            # Scorro la lista dei risultati
+            for v_match in v_matches:        
+                # Se trovo il risultato all'interno della posizione del cursore...
+                if v_match.start() <= cursor_position <= v_match.end():
+                    # Imposto posizione di inizio e fine            
+                    v_start_pos = v_match.start()
+                    v_end_pos = v_match.end()            
+                    # Ricerco su quale riga è la posizione di inizio
+                    v_riga_inizio = 0
+                    v_posizione = -1
+                    for c in sql_string:              
+                        v_posizione += 1
+                        if c == chr(10):
+                            v_riga_inizio += 1
+                        if v_posizione == v_start_pos:
+                            break
+                    # Ricerco su quale riga è la posizine di fine
+                    v_riga_fine = 0
+                    v_posizione = -1
+                    for c in sql_string:              
+                        v_posizione += 1
+                        if c == chr(10):
+                            v_riga_fine += 1
+                        if v_posizione == v_end_pos:
+                            break            
+                    # Esco con i risultati
+                    return v_start_pos, v_end_pos, v_riga_inizio, v_riga_fine
+            
+            return None, None, None, None
         
         # prendo posizione cursore in riga e colonna
         v_pos_line, v_pos_column = self.e_sql.getCursorPosition()
+        # imposto var generali
+        self.v_offset_numero_di_riga = 0
         # prendo posizione attuale del cursore (relativa!)
         v_pos_relativa_cursore = self.e_sql.SendScintilla(self.e_sql.SCI_GETCURRENTPOS)
         # richiamo funzione interna per estrazione dell'istruzione sql (istruzione che termina con ;) e delle relative posizioni di riga
@@ -3964,17 +4059,25 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 v_istruzione = v_istruzione[0:-1]                                    
             # eseguo l'istruzione            
             self.esegui_istruzione(v_istruzione, False)        
-            # seleziono il testo per evidenziare l'istruzione che è stata eseguita                                                
-            if v_start_line < v_end_line:
+            # seleziono il testo per evidenziare l'istruzione che è stata eseguita                                                            
+            if v_start_line < v_end_line:                
                 self.e_sql.setSelection(v_start_line, 0, v_end_line, -1)                           
         # .. altrimenti
         else:
-            # se non trovato nulla --> provo a fare la ricerca di un'istruzione che non termina con il ;
-            # in questo caso la funzione non restituisce la posizione di inizio e fine            
-            v_istruzione = extract_statement_with_positions_space(self.e_sql.text().upper(), v_pos_relativa_cursore)                        
-            if v_istruzione != '' and v_istruzione is not None:
-                # eseguo l'istruzione                     
-                self.esegui_istruzione(v_istruzione, False)        
+            # se non trovato nulla --> provo a fare la ricerca di un'istruzione usando come delimitatori le parole chiave INSERT,UPDATE,DELETE,SELECT
+            # da notare come la stringa venga passata aggiungendo un ritorno a capo in fondo...questo perché se cursore è su ultima istruzione non dava le posizioni corrette
+            v_pos_start, v_pos_end, v_start_line, v_end_line = extract_statement_with_positions_space(self.e_sql.text().upper()+chr(10), v_pos_relativa_cursore)                        
+            if v_pos_start != None and v_pos_end != None:
+                v_istruzione = self.e_sql.text()[v_pos_start:v_pos_end]
+                if v_istruzione != '' and v_istruzione is not None:
+                    # eseguo l'istruzione                           
+                    self.esegui_istruzione(v_istruzione, False)        
+                    # evidenzio il testo dell'istruzione                                                                                                    
+                    self.e_sql.setSelection(v_start_line, 0, v_end_line, -1)                           
+                else:
+                    # altrimenti errore
+                    message_error('No statement found as SELECT, INSERT, UPDATE, DELETE!')
+                    return 'ko'                                    
             else:
                 # altrimenti errore
                 message_error('No statement found as SELECT, INSERT, UPDATE, DELETE!')
