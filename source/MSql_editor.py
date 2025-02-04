@@ -1712,10 +1712,15 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         if self.oggetti_db_scelta.currentText() != '':
             self.v_tipo_oggetto = Tipi_Oggetti_DB[self.oggetti_db_scelta.currentText()]                        
         # se siamo nella modalità di visulizzazione di tutti gli oggetti, ne ricavo il nome e il tipo dalla riga selezionata
-        # dove il nomer e il tipo sono separati da spazio+meno+spazio
+        # dove il nome e il tipo sono separati da spazio+meno+spazio
         else:
             self.v_tipo_oggetto = self.v_nome_oggetto.split(' - ')[1]
             self.v_nome_oggetto = self.v_nome_oggetto.split(' - ')[0]        
+        
+        # se attivo il flag del descrittore tabelle, pulisco il nome oggetto della sua descrizione
+        if self.e_view_description.isChecked():
+            self.v_nome_oggetto = self.v_nome_oggetto.split(' - ')[0]        
+                
         # se tutto ok, richiamo la visualizzazione
         if self.v_nome_oggetto != '':
             self.carica_object_viewer(self.v_tipo_oggetto, self.v_nome_oggetto)
