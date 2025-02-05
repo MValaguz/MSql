@@ -633,6 +633,12 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # Ricerca prossimo ='
             elif p_slot.text() == "Find next =":                
                 message_info("To search next = press F4")                                
+            elif p_slot.text() == 'Add Bookmark':                
+                message_info('Click on the left margins of the editor and the bookmark will be highlighted with a green circle.')                                
+            elif p_slot.text() == 'Remove Bookmark':                
+                message_info('Click on the left margins of the editor, select a bookmark, and hold down the CTRL key.')                                
+            elif p_slot.text() == 'SearchNext Bookmark':                
+                message_info('With CTRL+B you can jump from one bookmark to another! When you reach the end, the search starts again from the beginning of the text.')                                
             # Commenta il testo selezionato
             elif p_slot.text() == 'Comment selection':                
                 o_MSql_win2.slot_commenta()
@@ -2457,6 +2463,10 @@ class My_MSql_Lexer(QsciLexerSQL):
             self.setFoldComments(True)
             self.setFoldAtElse(True)     
 
+            # attivo i segnalibri dentro il margine tra i numeri di riga e il folding (scalo la dimensione dell'icona a 16px)                    
+            # riferirsi eventualmente alla documentazione https://qscintilla.com/#margins/margin_basics/symbol_margin
+            self.p_editor.markerDefine(QImage("icons:green_dot.png").scaled(QSize(16, 16)), 0)  
+            
             # imposto gli elementi che servono all'interno dell'editor per attivare la funzione
             # tale per cui quando utente fa doppio click su una parola, vengono evidenziate tutte 
             # le parole uguali presenti nel testo!         
@@ -2892,6 +2902,9 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
 
         # attivo slot sul cambiamento di testo (es. digitazione di testo)
         self.e_sql.textChanged.connect(self.slot_mini_map_copy_text) 
+        # attivo slot che dal margine, segna i segnalibri
+        self.e_sql.setMarginSensitivity(1, True)
+        self.e_sql.marginClicked.connect(self.slot_add_bookmark)
         # attivo slot che tiene sincronizzato l'editor con la mini mappa tramite le scrollbar
         self.e_sql.verticalScrollBar().valueChanged.connect(self.slot_mini_map_sync_scrollbars) 
         self.e_sql_mini_map.verticalScrollBar().valueChanged.connect(self.slot_mini_map_sync_scrollbars) 
@@ -3003,6 +3016,10 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # premuto apice...inserisco altro apice
             elif event.key() == Qt.Key.Key_Apostrophe:
                 self.completa_sequenza("'")                
+            # premuta combinazione CTRL+B passa da un segnalibro all'altro
+            if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_B:                                
+                self.slot_ctrl_b()
+                return True
             # premuta combinazione CTRL+K (se premuto su un nome di tabella crea la select con i campi chiave)
             if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_K:                                
                 self.slot_ctrl_k()
@@ -3099,9 +3116,9 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # aggiungo il nuovo carattere e nel caso di apice e doppio apice lo aggiungo solo se non c'è già presente
         if p_char == '(':
             self.e_sql.insert(')')
-        elif p_char == '"' and ((v_char_left == ' ' and v_char_right == ' ') or (v_char_right == '')):
-            self.e_sql.insert('"')
-        elif p_char == "'" and ((v_char_left == ' ' and v_char_right == ' ') or (v_char_right == '')):
+        elif p_char == '"' and (v_char_left != '"' and v_char_right != '"'):
+            self.e_sql.insert('"')        
+        elif p_char == "'" and (v_char_left != "'" and v_char_right != "'"):
             self.e_sql.insert("'")        
         # posiziono il cursore
         self.e_sql.setCursorPosition(self.e_sql.getCursorPosition()[0], self.e_sql.getCursorPosition()[1])
@@ -4844,6 +4861,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # apro la sezione di ricerca e posiziono il fuoco del cursore
         self.dockFindWidget.show()
         self.e_find.setFocus()  
+        self.e_find.setText('')
                         
         # definizione della struttura per elenco dei risultati (valido solo per find all)       
         self.find_all_model = QStandardItemModel()        
@@ -5200,6 +5218,36 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             self.e_sql.insert(v_line)
             # posiziono il cursore
             self.e_sql.setCursorPosition(v_num_line,v_pos)
+
+    def slot_add_bookmark(self, margin_nr, line_nr, state):
+        """
+           Aggiunge o toglie un segnalibro. Sarà possibile scorrere tra i segnalibri premendo CTRL+B
+        """
+        # se premuto il tasto CTRL --> tolgo il segnalibro
+        if state == Qt.KeyboardModifier.ControlModifier:                                
+            # controllo se esiste un segnalibro alla riga indicata in input e se esiste lo elimino
+            if self.e_sql.markersAtLine(line_nr) != -1:                                 
+                self.e_sql.markerDelete(line_nr)            
+        # se premuto solo il tasto sinistro del mouse --> aggiungo il segnalibro
+        else:            
+            self.v_segnalibro = self.e_sql.markerAdd(line_nr, 0)        
+
+    def slot_ctrl_b(self):
+        """
+           Passa da un segnalibro all'altro partendo dall'attuale posizione del cursore
+        """        
+        # prendo attuale posizione del cursore
+        v_pos_line, v_pos_column = self.e_sql.getCursorPosition()
+        # passo al prossimo segnalibro
+        v_new_pos = self.e_sql.markerFindNext(v_pos_line+1, 1 << 0)
+        # se arrivato in fondo all'ultimo segnalibro, la funzione di cui sopra mi restituisce -1...
+        if v_new_pos == -1:        
+            # riparto da capo con la ricerca (riga 0)
+            v_new_pos = self.e_sql.markerFindNext(0, 1 << 0)        
+        # se ottenuto la riga su cui posizionarmi --> riposiziono il cursore
+        if v_new_pos != -1:
+            # posiziono il cursore sulla riga indicata
+            self.e_sql.setCursorPosition(v_new_pos,0)        
 
     def scrive_output(self, p_messaggio, p_tipo_messaggio):
         """

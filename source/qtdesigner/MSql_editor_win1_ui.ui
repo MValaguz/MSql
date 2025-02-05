@@ -100,11 +100,6 @@
     <property name="title">
      <string>&amp;Edit</string>
     </property>
-    <addaction name="actionFind"/>
-    <addaction name="actionFind_and_Replace"/>
-    <addaction name="actionGo_To_Line"/>
-    <addaction name="actionGo_to_start"/>
-    <addaction name="actionGo_to_end"/>
     <addaction name="separator"/>
     <addaction name="actionRect_selection"/>
     <addaction name="actionUppercase_current_selection"/>
@@ -135,7 +130,7 @@
    </widget>
    <widget class="QMenu" name="menuRun">
     <property name="title">
-     <string>&amp;Script</string>
+     <string>Sc&amp;ript</string>
     </property>
     <addaction name="actionRun_selected_area"/>
     <addaction name="actionExecute_current"/>
@@ -218,9 +213,34 @@
     <addaction name="separator"/>
     <addaction name="actionFont_editor_selector"/>
    </widget>
+   <widget class="QMenu" name="menuSearch">
+    <property name="title">
+     <string>&amp;Search</string>
+    </property>
+    <widget class="QMenu" name="menuBookmark">
+     <property name="title">
+      <string>Bookmark</string>
+     </property>
+     <property name="icon">
+      <iconset resource="resource.qrc">
+       <normaloff>:/icons/icons/bookmark.png</normaloff>:/icons/icons/bookmark.png</iconset>
+     </property>
+     <addaction name="actionAdd"/>
+     <addaction name="actionRemove"/>
+     <addaction name="actionSearchNext"/>
+    </widget>
+    <addaction name="actionFind"/>
+    <addaction name="actionFind_and_Replace"/>
+    <addaction name="actionGo_To_Line"/>
+    <addaction name="actionGo_to_start"/>
+    <addaction name="actionGo_to_end"/>
+    <addaction name="separator"/>
+    <addaction name="menuBookmark"/>
+   </widget>
    <addaction name="menuFiles"/>
    <addaction name="menuServer"/>
    <addaction name="menuEdit"/>
+   <addaction name="menuSearch"/>
    <addaction name="menuView"/>
    <addaction name="menuRun"/>
    <addaction name="menuSql"/>
@@ -1503,6 +1523,31 @@
    </property>
    <property name="text">
     <string>Disconnect</string>
+   </property>
+  </action>
+  <action name="actionBookmark_Remove">
+   <property name="text">
+    <string>Bookmark Remove</string>
+   </property>
+  </action>
+  <action name="actionBookmark_SearchNext">
+   <property name="text">
+    <string>Bookmark SearchNext</string>
+   </property>
+  </action>
+  <action name="actionAdd">
+   <property name="text">
+    <string>Add Bookmark</string>
+   </property>
+  </action>
+  <action name="actionRemove">
+   <property name="text">
+    <string>Remove Bookmark</string>
+   </property>
+  </action>
+  <action name="actionSearchNext">
+   <property name="text">
+    <string>SearchNext Bookmark</string>
    </property>
   </action>
  </widget>
