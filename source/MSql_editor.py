@@ -3867,11 +3867,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 return True        
 
             return False
-
-        # se indicato dalla preferenza, prima di partire ad eseguire, pulisco l'output
-        if o_global_preferences.auto_clear_output:
-            self.slot_clear('OUT')
-        
+                
         # imposto la var di select corrente che serve in altre funzioni
         self.v_select_corrente = ''
 
@@ -4065,10 +4061,8 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         ###
         
         # controllo se utente ha selezionato del testo specifico che vuole eseguire
-        v_istruzione = self.e_sql.selectedText()        
-        print('!'+v_istruzione+'!')
-        if v_istruzione is not None and v_istruzione != '':
-            print('ciao')
+        v_istruzione = self.e_sql.selectedText()                
+        if v_istruzione is not None and v_istruzione != '':            
             # eseguo l'istruzione selezionata                          
             self.esegui_istruzione(v_istruzione, False)        
         # ... altrimenti....
@@ -4213,7 +4207,11 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             return 'ko'
 
         # solo se sono connesso al DB....
-        if v_global_connesso:            
+        if v_global_connesso:                                    
+            # se indicato dalla preferenza, prima di partire ad eseguire, pulisco l'output
+            if o_global_preferences.auto_clear_output:
+                self.slot_clear('OUT')
+
             # imposto la var che conterrà il comando corrente
             self.v_plsql_corrente = p_plsql
             # var che indica se siamo in uno script di "CREATE"            
@@ -4390,7 +4388,11 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         self.v_flag_testo_corrente = p_corrente        
                 
         if v_global_connesso:                        
-            # pulisco elenco
+            # se indicato dalla preferenza, prima di partire ad eseguire, pulisco l'output
+            if o_global_preferences.auto_clear_output:
+                self.slot_clear('OUT')
+            
+            # pulisco elenco            
             self.slot_clear('RES')            
             # pulisco la matrice che conterrà elenco delle celle modificate
             self.v_matrice_dati_modificati = []
@@ -4875,7 +4877,12 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # apro la sezione di ricerca e posiziono il fuoco del cursore
         self.dockFindWidget.show()
         self.e_find.setFocus()  
-        self.e_find.setText('')
+        # se è stato selezionato del testo lo utilizzo come base per la ricerca
+        v_testo_selezionato = self.e_sql.selectedText()
+        if len(v_testo_selezionato) > 0:            
+            self.e_find.setText(v_testo_selezionato)        
+        else:
+            self.e_find.setText('')        
                         
         # definizione della struttura per elenco dei risultati (valido solo per find all)       
         self.find_all_model = QStandardItemModel()        
@@ -4957,7 +4964,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # se è stato selezionato del testo lo utilizzo come base per la ricerca
         v_testo_selezionato = self.e_sql.selectedText()
         if len(v_testo_selezionato) > 0:            
-            self.e_replace_search.setText(v_testo_selezionato.split()[0])        
+            self.e_replace_search.setText(v_testo_selezionato)        
         else:
             self.e_replace_search.setText('')        
         

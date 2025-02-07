@@ -133,7 +133,7 @@ class preferences_class():
             self.save_dir = 'W:\\SQL'
             self.utf_8 = False
             self.end_of_line = False
-            self.font_editor = 'Cascadia Code SemiBold, 12, BOLD'
+            self.font_editor = 'Cascadia Code, 12, BOLD'                                
             self.font_result = 'Segoe UI, 8'
             self.autosave_snapshoot_interval = 60
             self.editable = False
