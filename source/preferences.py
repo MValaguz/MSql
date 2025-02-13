@@ -123,6 +123,11 @@ class preferences_class():
                     self.open_new_editor = False
             else:
                 self.open_new_editor = True
+            # refresh dictionary (frequenza con cui lanciare l'aggiornamento del dizionario)
+            if 'refresh_dictionary' in v_json:                        
+                self.refresh_dictionary = v_json['refresh_dictionary']
+            else:
+                self.refresh_dictionary= 15
         # imposto valori di default senza presenza dello specifico file
         else:
             self.remember_window_pos = True
@@ -145,6 +150,7 @@ class preferences_class():
             self.csv_separator = '|'
             self.tab_size = '2'
             self.open_new_editor = True
+            self.refresh_dictionary = 15
             # elenco server è composto da Titolo, TNS e Colore, Flag per la connessione di default, Flag per evidenzia colore e richiesta conferme in creazione pkg
             self.elenco_server = [('Server Prod (ICOM_815)','ICOM_815','#aaffff','0','0','0'),
                                   ('Server Dev (BACKUP_815)','BACKUP_815','#ffffff','1','0','0')]
@@ -184,6 +190,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         self.e_default_utf_8.setChecked(self.preferences.utf_8)        
         self.e_default_end_of_line.setChecked(self.preferences.end_of_line)                
         self.e_autosave_snapshoot_interval.setValue(self.preferences.autosave_snapshoot_interval)
+        self.e_refresh_dictionary.setValue(self.preferences.refresh_dictionary)
         self.e_open_new_editor.setChecked(self.preferences.open_new_editor)
         self.e_default_font_editor.setText(self.preferences.font_editor)
         self.e_default_font_result.setText(self.preferences.font_result)
@@ -585,7 +592,8 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
                  'users': v_users,
                  'general_zoom':self.e_general_zoom.value(),
                  'autocompletation':v_autocompletation,
-                 'open_new_editor':v_open_new_editor
+                 'open_new_editor':v_open_new_editor,
+                 'refresh_dictionary':self.e_refresh_dictionary.value(),
                 }
 
 		# scrittura nel file dell'oggetto json

@@ -378,10 +378,10 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         ###
         # Se è presente il file dei termini di dizionario, controllo se più vecchio di 2 settimane e avverto che andrebbe rigenerato
         ###        
-        if os.path.isfile(v_global_work_dir + 'MSql_autocompletion.ini'):  
+        if o_global_preferences.refresh_dictionary > 0 and os.path.isfile(v_global_work_dir + 'MSql_autocompletion.ini'):  
             v_data_ultima_modifica = datetime.datetime.fromtimestamp(os.stat(v_global_work_dir + 'MSql_autocompletion.ini').st_mtime)
-            if (datetime.datetime.now() - v_data_ultima_modifica) > datetime.timedelta(days=14):
-                message_info("The dictionary is more than two weeks old!" + chr(10) + "Remember to regenerate it!" + chr(10) + "See the menu Tools/Autocomplete dictionary ;-)")                    
+            if (datetime.datetime.now() - v_data_ultima_modifica) > datetime.timedelta(days=o_global_preferences.refresh_dictionary):
+                message_info("The dictionary is more than " + str(o_global_preferences.refresh_dictionary) + " days old!" + chr(10) + "Remember to regenerate it!" + chr(10) + "See the menu Tools/Autocomplete dictionary ;-)")                    
 
         ###
         # imposto il timer che permette all'object navigator di attivare la ricerca automatica dopo 0,8 secondi dalla digitazione del testo
@@ -4188,14 +4188,9 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             while True:
                 self.v_cursor.callproc("dbms_output.get_lines", (v_m_line, v_m_num_lines))    
                 v_num_lines = int(v_m_num_lines.getvalue())
-                v_lines = v_m_line.getvalue()[:v_num_lines]
-                v_pos = 0
-                for line in v_lines:
-                    v_pos += 1
-                    v_dbms_ret += str(line) 
-                    # aggiungo il ritorno a capo                    
-                    if v_pos < v_num_lines:
-                        v_dbms_ret += '\n'
+                v_lines = v_m_line.getvalue()[:v_num_lines]                
+                for line in v_lines:                    
+                    v_dbms_ret += str(line) + '\n'                    
                 if v_num_lines < v_chunk:
                     break
             # restituisco la lista delle righe di dbms_output
@@ -4259,7 +4254,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 # comando terminato con errore --> emetto errore nella sezione di output
                 v_oracle_error = self.v_oracle_executer.get_error()                         
                 # leggo la parte di dbms_output
-                v_dbms_ret = get_dbms_output_flow()
+                v_dbms_ret = get_dbms_output_flow()                
                 # per prima cosa porto l'output a video (tipico è quello di script che contengono dbms_output e che vanno in errore durante l'esecuzione)
                 if v_dbms_ret != '':
                     self.scrive_output(v_dbms_ret, 'I')
@@ -4361,7 +4356,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                             self.scrive_output(self.v_plsql_corrente.split()[0] + ' EXECUTED!', 'I')    
                     else:
                         # porto l'output a video (tipico è quello di script che contengono dbms_output)
-                        if v_dbms_ret != '':
+                        if v_dbms_ret != '':                            
                             self.scrive_output(v_dbms_ret, 'I')
                         else:
                             self.scrive_output('Script executed!', 'I')
@@ -5531,16 +5526,16 @@ if __name__ == "__main__":
     if getattr(sys, 'frozen', False): 
         v_dir_eseguibile = os.path.dirname(sys.executable)
         os.chdir(v_dir_eseguibile)
+        QDir.addSearchPath('icons', '_internal/icons/')
+        QDir.addSearchPath('logos', '_internal/logos/')
         v_view_splash = True
     else:
         v_view_splash = False
     
     # amplifico la pathname per ricercare le icone (la dir _internal serve per quando si compila con pyinstaller)
-    QDir.addSearchPath('icons', 'qtdesigner/icons/')
-    QDir.addSearchPath('logos', 'qtdesigner/logos/')
-    QDir.addSearchPath('icons', '_internal/icons/')
-    QDir.addSearchPath('logos', '_internal/logos/')
-        
+    #QDir.addSearchPath('icons', 'qtdesigner/icons/')
+    #QDir.addSearchPath('logos', 'qtdesigner/logos/')
+            
     # controllo se programma è stato richiamato da linea di comando passando il nome di un file    
     v_nome_file_da_caricare = ''
     try:
