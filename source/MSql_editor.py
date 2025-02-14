@@ -3888,6 +3888,10 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # emetto errore sulla barra di stato 
             message_error('No instruction!')                                 
             return 'ko'
+
+        # se indicato dalla preferenza, prima di partire ad eseguire, pulisco l'output
+        if o_global_preferences.auto_clear_output:
+            self.slot_clear('OUT')
         
         # prendo il testo e inizio ad eseguire le istruzioni
         # divido il testo ricevuto in input riga per riga (ritorno a capo è il divisore)
@@ -4059,6 +4063,10 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         ###
         # inizio della funzione principale
         ###
+
+        # se indicato dalla preferenza, prima di partire ad eseguire, pulisco l'output
+        if o_global_preferences.auto_clear_output:
+            self.slot_clear('OUT')
         
         # controllo se utente ha selezionato del testo specifico che vuole eseguire
         v_istruzione = self.e_sql.selectedText()                
@@ -4203,10 +4211,6 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
 
         # solo se sono connesso al DB....
         if v_global_connesso:                                    
-            # se indicato dalla preferenza, prima di partire ad eseguire, pulisco l'output
-            if o_global_preferences.auto_clear_output:
-                self.slot_clear('OUT')
-
             # imposto la var che conterrà il comando corrente
             self.v_plsql_corrente = p_plsql
             # var che indica se siamo in uno script di "CREATE"            
@@ -4382,11 +4386,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
 
         self.v_flag_testo_corrente = p_corrente        
                 
-        if v_global_connesso:                        
-            # se indicato dalla preferenza, prima di partire ad eseguire, pulisco l'output
-            if o_global_preferences.auto_clear_output:
-                self.slot_clear('OUT')
-            
+        if v_global_connesso:                                    
             # pulisco elenco            
             self.slot_clear('RES')            
             # pulisco la matrice che conterrà elenco delle celle modificate
@@ -5531,10 +5531,6 @@ if __name__ == "__main__":
         v_view_splash = True
     else:
         v_view_splash = False
-    
-    # amplifico la pathname per ricercare le icone (la dir _internal serve per quando si compila con pyinstaller)
-    #QDir.addSearchPath('icons', 'qtdesigner/icons/')
-    #QDir.addSearchPath('logos', 'qtdesigner/logos/')
             
     # controllo se programma è stato richiamato da linea di comando passando il nome di un file    
     v_nome_file_da_caricare = ''
