@@ -271,11 +271,15 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         self.statusBar.addPermanentWidget(self.l_tabella_editabile)                
 
         ###
+        # Var per la gestione dei files recenti
+        ###
+        self.elenco_file_recenti = []            
+        self.elenco_file_recenti_action = []
+
+        ###
         # Var per la gestione degli editor
         ###
 
-        # array interno che tiene traccia elenco file recenti
-        self.elenco_file_recenti = []            
         # var che indica il numero di window2-editor 
         self.v_num_window2 = 0                
         # definisco la lista che contiene il link a tutti gli oggetti window2 degli editor aperti
@@ -817,11 +821,10 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
            Se p_elemento è passato allora non viene caricato elenco da file ma viene aggiunto
            all'elenco p_elemento. Questa modalità viene usata mano a mano che si aprono i file
 
-           Nota! La gestione dei file recenti si basa sul fatto di attaccare alla voce di menu dei recenti
-                 altre voci. Ho usato il meccanismo per cui come testo viene indicato il nome del file e 
-                 viene impostata una sorta di label interna dal nome 'FILE_RECENTI'; questa label verrà
-                 usata durante lo smistamento delle voci di menu per capire che la voce selezionata appartiene
-                 all'elenco dei file recenti
+           Nota! Per permettere alla funzione di smistamento delle voci di menu di capire che siamo in presenza di un file recente,
+                 quando viene creata la action della voce di menu, viene impostato il dato 'FILE_RECENTI'.
+                 Inoltre vengono usati due array a livello di oggetto main dove il primo contiene elenco dei pathname dei files e l'altro
+                 contiene elenco degli oggetti action che sono propri della struttura di menu (questo semplicemente per permettere il ripulisti)
         """
         global v_global_work_dir
 
@@ -838,10 +841,12 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                             v_action.setText(v_nome_file)
                             v_action.setData('FILE_RECENTI')
                             # aggiungo a video la voce di menu
-                            self.menuRecent_file.addAction(v_action)
+                            self.menuFiles.insertAction(self.actionExit,v_action)
+                            # l'oggetto action lo aggiungo all'array che tiene traccia delle voci di menu
+                            self.elenco_file_recenti_action.append(v_action)                            
                             # carico array
                             v_elenco_file_recenti.append(v_nome_file)
-                    
+                    self.menuFiles.insertSeparator(self.actionExit)
                     # prendo la lista con elenco appena caricato e lo inserisco al contrario nella struttura effettiva dei file recenti
                     for v_index in range(len(v_elenco_file_recenti),0,-1):                           
                             self.elenco_file_recenti.append(v_elenco_file_recenti[v_index-1])        
@@ -850,13 +855,15 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # elemento è presente in elenco...
             if p_elemento in self.elenco_file_recenti:                            
                 # lo elimino dalla posizione attuale in quanto deve andare in fondo alla lista
-                self.elenco_file_recenti.remove(p_elemento)
-            
+                self.elenco_file_recenti.remove(p_elemento)            
             # aggiungo nuova voce all'array interno (viene posto in fondo!)
             self.elenco_file_recenti.append(p_elemento)
             
-            # elimino tutte le voci dal menu dei recenti
-            self.menuRecent_file.clear()            
+            # elimino tutte le voci dal menu dei recenti (usando il relativo array con i puntatori agli oggetti action)
+            for v_action in self.elenco_file_recenti_action:                
+                self.menuFiles.removeAction(v_action)            
+            self.elenco_file_recenti_action.clear()
+
             # apro il file che contiene i recenti per salvare i dati (salverò solo gli ultimi 10 files)
             v_file_recenti = open(v_global_work_dir + 'MSql_recent_files.ini','w')            
             # scorro array al contrario (così tengo il più recente in cima alla lista) e ricarico il menu a video            
@@ -865,8 +872,11 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 if v_conta_righe < 10:                    
                     v_action = QAction(self)
                     v_action.setText(self.elenco_file_recenti[v_index-1])
-                    v_action.setData('FILE_RECENTI')
-                    self.menuRecent_file.addAction(v_action)                                    
+                    v_action.setData('FILE_RECENTI')                    
+                    # aggiungo a video la voce di menu
+                    self.menuFiles.insertAction(self.actionExit,v_action)
+                    # l'oggetto action lo aggiungo all'array che tiene traccia delle voci di menu
+                    self.elenco_file_recenti_action.append(v_action)                    
                     v_file_recenti.write(self.elenco_file_recenti[v_index-1]+'\n')                                            
                     v_conta_righe += 1
             # chiudo il file
@@ -880,6 +890,17 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
            Questa funzione restituisce il nome del file e il suo contenuto
         """      
         global o_global_preferences
+
+        def formato_file_utf8(p_filename):
+            """ 
+               Restituisce true se il file è nel formato UTF-8
+            """
+            try:
+                with open(p_filename, 'rb') as f:
+                    f.read().decode('utf-8')
+                return True
+            except UnicodeDecodeError:
+                return False
 
         # se richiesto di aprire file passando dalla dialog box di file requester
         if p_nome_file is None:
@@ -909,15 +930,27 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                     return None,None
             # procedo con apertura
             try:
-                # apertura usando utf-8 (il newline come parametro è molto importante per la gestione corretta degli end of line)                                        
-                if o_global_preferences.utf_8 :                    
+                # controllo se il file ha la codifica utf-8
+                v_file_is_uft_8 = formato_file_utf8(v_fileName[0])
+                # il file ha la codifica utf-8 ma non è stata impostata a menu --> avviso che verrà effettuato lo switch
+                if not o_global_preferences.utf_8 and v_file_is_uft_8:
+                    if message_question_yes_no('This file has UTF-8 format!'+chr(10)+'Continuing MSql will set to this format!!!') == 'No':
+                        return None,None
+                    # imposto il flag utf-8 per tutto MSql!
+                    o_global_preferences.utf_8 = True
+                    # aggiorno la label della statusbar
+                    self.slot_utf8()
+                    # aggiorno l'opzione a menu
+                    self.actionUTF_8_Coding.setChecked(True)
+                # apertura usando utf-8 (il newline come parametro è molto importante per la gestione corretta degli end of line)                                         
+                if o_global_preferences.utf_8:                    
                     v_file = open(v_fileName[0],'r',encoding='utf-8',newline='')
                 # apertura usando ansi (il newline come parametro è molto importante per la gestione corretta degli end of line)                                        
                 else:                    
                     v_file = open(v_fileName[0],'r',newline='')
                 # aggiungo il nome del file ai file recenti                
                 self.aggiorna_elenco_file_recenti(v_fileName[0])
-                # restituisco il nome e il contenuto del file
+                # restituisco il nome e il contenuto del file                
                 return v_fileName[0], v_file.read()
             except Exception as err:
                 message_error('Error to opened the file: ' + str(err))
