@@ -54,11 +54,6 @@ class preferences_class():
             # directory apertura e salvataggio
             self.open_dir = v_json['open_dir']
             self.save_dir = v_json['save_dir']
-            # utf-8
-            if v_json['utf_8'] == 1:            
-                self.utf_8 = True
-            else:
-                self.utf_8 = False
             # end of line 
             if v_json['eol'] == 1:            
                 self.end_of_line = True
@@ -135,8 +130,7 @@ class preferences_class():
             self.dark_theme = False
             self.general_zoom = 100
             self.open_dir = 'W:\\SQL'
-            self.save_dir = 'W:\\SQL'
-            self.utf_8 = False
+            self.save_dir = 'W:\\SQL'            
             self.end_of_line = False
             self.font_editor = 'Cascadia Code, 12, BOLD'                                
             self.font_result = 'Segoe UI, 8'
@@ -186,8 +180,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         self.e_dark_theme.setChecked(self.preferences.dark_theme)        
         self.e_general_zoom.setValue(self.preferences.general_zoom)
         self.e_default_open_dir.setText(self.preferences.open_dir)
-        self.e_default_save_dir.setText(self.preferences.save_dir)        
-        self.e_default_utf_8.setChecked(self.preferences.utf_8)        
+        self.e_default_save_dir.setText(self.preferences.save_dir)                
         self.e_default_end_of_line.setChecked(self.preferences.end_of_line)                
         self.e_autosave_snapshoot_interval.setValue(self.preferences.autosave_snapshoot_interval)
         self.e_refresh_dictionary.setValue(self.preferences.refresh_dictionary)
@@ -461,12 +454,6 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
             v_dark_theme = 1
         else:
             v_dark_theme = 0
-        
-        # il default per utf-8 va convertito 
-        if self.e_default_utf_8.isChecked():
-            v_utf_8 = 1
-        else:
-            v_utf_8 = 0
 
         # il default per risultato editabile va convertito
         if self.e_default_editable.isChecked():
@@ -575,8 +562,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
                  'remember_text_pos': v_remember_text_pos,
                  'dark_theme': v_dark_theme,
                  'open_dir': self.e_default_open_dir.text(),
-		         'save_dir': self.e_default_save_dir.text(),
-                 'utf_8': v_utf_8,
+		         'save_dir': self.e_default_save_dir.text(),                 
                  'eol': v_eol,
                  'autosave_snapshoot_interval':self.e_autosave_snapshoot_interval.value(),
 		         'font_editor' :self.e_default_font_editor.text(),

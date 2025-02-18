@@ -103,7 +103,7 @@ v_global_emphasis = False
 # Indica che sui comandi sql di CREATE, va richiesta una conferma
 v_global_create_confirm = False
 
-def salvataggio_editor(p_save_as, p_nome, p_testo):
+def salvataggio_editor(p_save_as, p_nome, p_testo, p_codifica_utf8):
     """
         Salvataggio di p_testo dentro il file p_nome        
         Se p_save_as è True oppure il titolo dell'editor inizia con "!" --> viene richiesto di salvarlo come nuovo file
@@ -139,7 +139,7 @@ def salvataggio_editor(p_save_as, p_nome, p_testo):
 
     # procedo con il salvataggio
     try:
-        if o_global_preferences.utf_8:
+        if p_codifica_utf8:
             # scrittura usando utf-8 (il newline come parametro è molto importante per la gestione corretta degli end of line)                                                            
             v_file = open(p_nome,'w',encoding='utf-8', newline='')
         else:
@@ -337,9 +337,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
  
         ###
         # Imposto default in base alle preferenze (setto anche le opzioni sulle voci di menu)
-        ###                
-        self.actionUTF_8_Coding.setChecked(o_global_preferences.utf_8)
-        self.slot_utf8()                
+        ###                        
         self.actionMake_table_editable.setChecked(o_global_preferences.editable)
         self.slot_editable()
         self.actionShow_end_of_line.setChecked(o_global_preferences.end_of_line)
@@ -362,10 +360,10 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         ###
         if p_nome_file_da_caricare != '':        
             # apro un file            
-            v_titolo, v_contenuto_file = self.openfile(p_nome_file_da_caricare)        
+            v_titolo, v_contenuto_file, v_codifica_utf8 = self.openfile(p_nome_file_da_caricare)        
             v_azione = QAction()
             v_azione.setText('Open_db_obj')            
-            self.smistamento_voci_menu(v_azione, v_titolo, v_contenuto_file)        
+            self.smistamento_voci_menu(v_azione, v_titolo, v_contenuto_file, v_codifica_utf8)        
         ###        
         # Altrimenti apro una nuova finestra di editor simulando il segnale che scatta quando utente sceglie "New"
         # Attenzione! L'apertura dell'editor è stata posta alla fine di tutto il procedimento di carico del main
@@ -412,10 +410,10 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 v_filepath = url.toLocalFile()
                 if v_filepath is not None:
                     # apro un file            
-                    v_titolo, v_contenuto_file = self.openfile(v_filepath)        
+                    v_titolo, v_contenuto_file, v_codifica_utf8 = self.openfile(v_filepath)        
                     v_azione = QAction()
                     v_azione.setText('Open_db_obj')            
-                    self.smistamento_voci_menu(v_azione, v_titolo, v_contenuto_file)        
+                    self.smistamento_voci_menu(v_azione, v_titolo, v_contenuto_file, v_codifica_utf8)        
     
     def oggetto_win2_attivo(self):
         """
@@ -431,7 +429,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                         return self.o_lst_window2[i]
         return None                    
     
-    def smistamento_voci_menu(self, p_slot, p_oggetto_titolo_db=None, p_oggetto_testo_db=None):
+    def smistamento_voci_menu(self, p_slot, p_oggetto_titolo_db=None, p_oggetto_testo_db=None, p_oggetto_codifica_utf8_db=None):
         """
             Contrariamente al solito, le voci di menù non sono pilotate da qtdesigner ma direttamente
             dal connettore al menu che riporta a questa funzione che poi si occupa di fare lo smistamento.
@@ -442,6 +440,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             Parametri: p_slot = Oggetto di tipo event che indica l'evento 
                        p_oggetto_titolo_db = Serve solo quando si vuole aprire un oggetto di testo db (titolo della window)
                        p_oggetto_testo_db = Serve solo quando si vuole aprire un oggetto di testo db (contenuto dell'editor)
+                       p_oggetto_codifica_utf8_db = Serve solo quando si vuole aprire un oggetto di testo db (se T=UTF-8 dell'editor)
             Nota! In QtDesigner alcune voci di menu hanno il shortcut context attivo come WindowShortcut e altre come WidgetShortcut
                   La modalità WidgetShortcut va definita solo per fare in modo che a menu sia presente la scritta della shortcut ma poi lasci 
                   a qscintilla la gestione del medesimo (perché è un altro widget)
@@ -479,14 +478,14 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # se richiesto un file recente
             if str(p_slot.data()) == 'FILE_RECENTI':
                 # apro il file richiesto
-                v_titolo, v_contenuto_file = self.openfile(p_slot.text())
+                v_titolo, v_contenuto_file, v_codifica_utf8 = self.openfile(p_slot.text())
                 # se non è stato scelto alcun file --> esco da tutto!
                 if v_titolo is None:
                     return None
             # se richiesto Open...
             elif p_slot.text() == 'Open':
                 # apro un file tramite dialog box
-                v_titolo, v_contenuto_file = self.openfile(None)                
+                v_titolo, v_contenuto_file, v_codifica_utf8 = self.openfile(None)                
                 # se non è stato scelto alcun file --> esco da tutto!
                 if v_titolo is None:
                     return None
@@ -495,6 +494,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 # apro un file
                 v_titolo = p_oggetto_titolo_db
                 v_contenuto_file = p_oggetto_testo_db 
+                v_codifica_utf8 = p_oggetto_codifica_utf8_db
                 # se non è stato scelto alcun file --> esco da tutto!
                 if v_titolo is None:
                     return None
@@ -503,9 +503,11 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 self.v_num_window2 += 1
                 v_titolo = 'Untitled' + str(self.v_num_window2)
                 v_contenuto_file = None
-            # creo una nuovo oggetto editor (gli passo il titolo e eventuale contenuto del file e gli oggetti della statusbar)
+                v_codifica_utf8 = True
+            # creo una nuovo oggetto editor (gli passo il titolo, eventuale contenuto del file e relativa codifica e gli oggetti della statusbar)
             o_MSql_win2 = MSql_win2_class(v_titolo, 
                                           v_contenuto_file, 
+                                          v_codifica_utf8,
                                           self)
             # l'oggetto editor lo salvo all'interno di una lista in modo sia reperibile quando necessario
             self.o_lst_window2.append(o_MSql_win2)        
@@ -516,14 +518,6 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             sub_window.setWindowIcon(QIcon("icons:database.png"))                              
             sub_window.show()  
             sub_window.showMaximized()  
-        # Codifica utf-8
-        elif p_slot.text() == 'UTF-8 Coding':
-            if self.actionUTF_8_Coding.isChecked():
-                o_global_preferences.utf_8 = True
-            else:
-                o_global_preferences.utf_8 = False
-            # aggiorno la label sulla statusbar
-            self.slot_utf8()        
         # Gestione preferenze
         elif p_slot.text() == 'Preferences':
             self.slot_preferences()
@@ -579,7 +573,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         if o_MSql_win2 is not None:
             # Salvataggio del file
             if p_slot.text() == 'Save':
-                v_ok, v_nome_file = salvataggio_editor(False, o_MSql_win2.objectName(), o_MSql_win2.e_sql.text())
+                v_ok, v_nome_file = salvataggio_editor(False, o_MSql_win2.objectName(), o_MSql_win2.e_sql.text(), o_MSql_win2.setting_utf8)
                 if v_ok == 'ok':
                     o_MSql_win2.v_testo_modificato = False
                     o_MSql_win2.setObjectName(v_nome_file)
@@ -588,7 +582,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                     self.window_attiva.setObjectName(v_nome_file) # notare come il nome della window va forzato anche sulla window attiva
             # Salvataggio del file come... (semplicemente non gli passo il titolo)
             elif p_slot.text() == 'Save as':
-                v_ok, v_nome_file = salvataggio_editor(True, o_MSql_win2.objectName(), o_MSql_win2.e_sql.text())
+                v_ok, v_nome_file = salvataggio_editor(True, o_MSql_win2.objectName(), o_MSql_win2.e_sql.text(), o_MSql_win2.setting_utf8)
                 if v_ok == 'ok':                    
                     o_MSql_win2.v_testo_modificato = False                    
                     o_MSql_win2.setObjectName(v_nome_file)                    
@@ -768,18 +762,6 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # Estraggo dall'output una nuova select e la inserisco nell'editor (questo ha senso se utente ha inserito parametri usando il popup menu sulle colonne)
             elif p_slot.text() == 'Extract sql from output':
                 o_MSql_win2.slot_extract_sql_from_output()
-        
-    def slot_utf8(self):
-        """
-           Aggiorna la label nella statusbar relativa alla codifica utf-8
-        """
-        global o_global_preferences
-        
-        # se codifica utf-8 abilitata, la evidenzio
-        if o_global_preferences.utf_8:
-            self.l_utf8_enabled.setText('UTF-8')
-        else:
-            self.l_utf8_enabled.setText("ANSI")
 
     def slot_editable(self):
         """
@@ -884,10 +866,13 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                      
     def openfile(self, p_nome_file):
         """
-           Apertura di un file...restituisce il nome del file e il suo contenuto
+           Apertura di un file...
            Se p_nome_file viene passato allora viene letto direttamente il file indicato
 
-           Questa funzione restituisce il nome del file e il suo contenuto
+           Questa funzione restituisce:
+              - nome del file 
+              - contenuto del file
+              - tipo di codifica del file (ANSI-UTF_8)
         """      
         global o_global_preferences
 
@@ -927,23 +912,13 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             for obj_win2 in self.o_lst_window2:
                 if not obj_win2.v_editor_chiuso and  obj_win2.objectName() == v_fileName[0]:
                     message_error('This file is already open!')
-                    return None,None
+                    return None, None, None
             # procedo con apertura
             try:
                 # controllo se il file ha la codifica utf-8
                 v_file_is_uft_8 = formato_file_utf8(v_fileName[0])
-                # il file ha la codifica utf-8 ma non è stata impostata a menu --> avviso che verrà effettuato lo switch
-                if not o_global_preferences.utf_8 and v_file_is_uft_8:
-                    if message_question_yes_no('This file has UTF-8 format!'+chr(10)+'Continuing MSql will set to this format!!!') == 'No':
-                        return None,None
-                    # imposto il flag utf-8 per tutto MSql!
-                    o_global_preferences.utf_8 = True
-                    # aggiorno la label della statusbar
-                    self.slot_utf8()
-                    # aggiorno l'opzione a menu
-                    self.actionUTF_8_Coding.setChecked(True)
                 # apertura usando utf-8 (il newline come parametro è molto importante per la gestione corretta degli end of line)                                         
-                if o_global_preferences.utf_8:                    
+                if v_file_is_uft_8:                    
                     v_file = open(v_fileName[0],'r',encoding='utf-8',newline='')
                 # apertura usando ansi (il newline come parametro è molto importante per la gestione corretta degli end of line)                                        
                 else:                    
@@ -951,12 +926,12 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 # aggiungo il nome del file ai file recenti                
                 self.aggiorna_elenco_file_recenti(v_fileName[0])
                 # restituisco il nome e il contenuto del file                
-                return v_fileName[0], v_file.read()
+                return v_fileName[0], v_file.read(), v_file_is_uft_8
             except Exception as err:
                 message_error('Error to opened the file: ' + str(err))
-                return None, None
+                return None, None, None
         else:
-            return None, None
+            return None, None, None
     
     def closeEvent(self, event):
         """
@@ -2759,6 +2734,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
     def __init__(self, 
                  p_titolo, # Titolo della window-editor
                  p_contenuto_file,  # Eventuale contenuto da inserire direttamente nella parte di editor
+                 p_codifica_file,  # Eventuale codifica del file (se T=UTF-8)
                  o_MSql_win1_class): # Puntatore alla classe principale (window1)                                  
         global o_global_preferences  
         global v_global_work_dir      
@@ -2794,8 +2770,11 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # IMPOSTAZIONI DELL'EDITOR SCINTILLA (Notare come le impostazioni delle proprietà siano stato postate nella definizione del lexer)
         ###
         # attivo UTF-8 (se richiesto)
-        if o_global_preferences.utf_8:
+        if p_codifica_file:
             self.e_sql.setUtf8(True)                                                        
+            self.setting_utf8 = True
+        else:
+            self.setting_utf8 = False
         # attivo il lexer per evidenziare il codice del linguaggio SQL. Notare come faccia riferimento ad un oggetto che a sua volta personalizza il 
         # dizionario del lexer SQL, aggiungendo (se sono state caricate) le parole chiave di: tabelle, viste, package, ecc.
         self.v_lexer = My_MSql_Lexer(self.e_sql, False)                
@@ -3341,7 +3320,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             os.mkdir(v_global_work_dir + 'backup')
         
         # creo il backup dell'editor corrente (Attenzione! Ogni editor aperto avrà il suo timer di salvataggio!)
-        if o_global_preferences.utf_8:
+        if self.setting_utf8:
             # scrittura usando utf-8 (il newline come parametro è molto importante per la gestione corretta degli end of line)                                                            
             v_file = open(v_global_work_dir + 'backup\\' + titolo_window(self.objectName()) ,'w',encoding='utf-8', newline='')
         else:
@@ -4850,14 +4829,14 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # utente chiede di salvare
         elif v_scelta == 'Yes':            
             if self.objectName() == "":                
-                v_ok, v_nome_file = salvataggio_editor(True, self.objectName(), self.e_sql.text())
+                v_ok, v_nome_file = salvataggio_editor(True, self.objectName(), self.e_sql.text(), self.setting_utf8)
                 if v_ok != 'ok':
                     return 'Cancel'
                 else:
                     self.v_testo_modificato = False
                     return 'Yes'
             else:                      
-                v_ok, v_nome_file = salvataggio_editor(False, self.objectName(), self.e_sql.text())                          
+                v_ok, v_nome_file = salvataggio_editor(False, self.objectName(), self.e_sql.text(), self.setting_utf8)                          
                 if v_ok != 'ok':
                     return 'Cancel'
                 else:
@@ -5511,6 +5490,14 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             self.link_to_MSql_win1_class.l_overwrite_enabled.setText('Overwrite')
         else:                
             self.link_to_MSql_win1_class.l_overwrite_enabled.setText('Insert')
+
+        # label che indica il tipo di codifica                
+        if self.setting_utf8:
+            self.link_to_MSql_win1_class.l_utf8_enabled.setText('UTF-8')
+            self.link_to_MSql_win1_class.l_utf8_enabled.setStyleSheet('background-color: ' + v_global_color + ';color: "' + v_global_background + '";')              
+        else:
+            self.link_to_MSql_win1_class.l_utf8_enabled.setText("ANSI")
+            self.link_to_MSql_win1_class.l_utf8_enabled.setStyleSheet('')              
 
         # label che indica il tipo di eol 
         if self.setting_eol == 'W':        
