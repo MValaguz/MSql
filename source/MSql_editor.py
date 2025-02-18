@@ -896,37 +896,39 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 v_default_open_dir = o_global_preferences.open_dir
 
             # dialog box per richiesta file
-            v_fileName = QFileDialog.getOpenFileName(self, "Open File", v_default_open_dir ,"SQL files (*.msql *.sql *.pls *.plb *.trg);;All files (*.*)")                
+            v_tupla_filename = QFileDialog.getOpenFileName(self, "Open File", v_default_open_dir ,"SQL files (*.msql *.sql *.pls *.plb *.trg);;All files (*.*)")                            
+			# prendo il nome del file e lo normalizzo
+            v_filename = os.path.normpath(v_tupla_filename[0])
             # reimposto la dir di default in modo che in questa sessione del programma rimanga quella che l'utente ha scelto per aprire il file                        
-            if v_fileName[0] != '':                               
-                o_global_preferences.open_dir = os.path.split( v_fileName[0] )[0]
+            if v_filename != '':                               
+                o_global_preferences.open_dir = os.path.split( v_tupla_filename[0] )[0]
 
         # .. altrimenti ricevuto in input un file specifico
         else:
-            v_fileName = []
-            v_fileName.append(p_nome_file)
+            v_tupla_filename = []
+            v_filename = p_nome_file
 
         # è richiesto di aprire un file...
-        if v_fileName[0] != "":
+        if v_filename != "":
             # controllo se il file è già aperto in altra finestra di editor
             for obj_win2 in self.o_lst_window2:
-                if not obj_win2.v_editor_chiuso and  obj_win2.objectName() == v_fileName[0]:
+                if not obj_win2.v_editor_chiuso and  obj_win2.objectName() == v_filename:
                     message_error('This file is already open!')
                     return None, None, None
             # procedo con apertura
             try:
                 # controllo se il file ha la codifica utf-8
-                v_file_is_uft_8 = formato_file_utf8(v_fileName[0])
+                v_file_is_uft_8 = formato_file_utf8(v_filename)
                 # apertura usando utf-8 (il newline come parametro è molto importante per la gestione corretta degli end of line)                                         
                 if v_file_is_uft_8:                    
-                    v_file = open(v_fileName[0],'r',encoding='utf-8',newline='')
+                    v_file = open(v_filename,'r',encoding='utf-8',newline='')
                 # apertura usando ansi (il newline come parametro è molto importante per la gestione corretta degli end of line)                                        
                 else:                    
-                    v_file = open(v_fileName[0],'r',newline='')
+                    v_file = open(v_filename,'r',newline='')
                 # aggiungo il nome del file ai file recenti                
-                self.aggiorna_elenco_file_recenti(v_fileName[0])
+                self.aggiorna_elenco_file_recenti(v_filename)
                 # restituisco il nome e il contenuto del file                
-                return v_fileName[0], v_file.read(), v_file_is_uft_8
+                return v_filename, v_file.read(), v_file_is_uft_8
             except Exception as err:
                 message_error('Error to opened the file: ' + str(err))
                 return None, None, None
@@ -1594,10 +1596,10 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 v_testo_oggetto_db += '\n' + '/\n' + v_testo_grant_db    
 
             # apro una nuova finestra di editor simulando il segnale che scatta quando utente sceglie "Open", passando il sorgente ddl
-            # Attenzione! I file caricati da Oracle hanno come eol solo LF => formato Unix
+            # Attenzione! I file caricati da Oracle hanno come eol solo LF => formato Unix e viene impostato UTF-8
             v_azione = QAction()
             v_azione.setText('Open_db_obj')
-            self.smistamento_voci_menu(v_azione, '!' + self.v_nome_oggetto + '.msql', v_testo_oggetto_db)        
+            self.smistamento_voci_menu(v_azione, '!' + self.v_nome_oggetto + '.msql', v_testo_oggetto_db, True)        
                                         
             # Ripristino icona freccia del mouse
             Freccia_Mouse(False)
@@ -5557,6 +5559,8 @@ if __name__ == "__main__":
     try:
         if sys.argv[1] != '':                
             v_nome_file_da_caricare = sys.argv[1]    
+            # la pathname viene normalizzata
+            v_nome_file_da_caricare = os.path.normpath(v_nome_file_da_caricare)
     except:
         pass    
 

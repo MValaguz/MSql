@@ -513,7 +513,8 @@ def purge_sql_history(p_db_name):
 
 def write_files_history(p_db_name, p_file_name, p_pos_y, p_pos_x):
     """
-       Usata per scrivere dentro un db SQLite tabella FILE_HISTORY, l'istruzione l'sql       
+       Usata per scrivere dentro un db SQLite tabella FILE_HISTORY la posizione del cursore-editor al momento della chiusura della window,
+       in modo che alla prossima riapertura ci si possa posizionare automaticamente
     """ 
     if p_file_name != '':
         v_conn = sqlite3.connect(database=p_db_name)
