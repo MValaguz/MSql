@@ -2466,7 +2466,7 @@ class My_MSql_Lexer(QsciLexerSQL):
             else:
                 self.p_editor.setAutoCompletionThreshold(1000)  
             # attivo autocompletamento sia per la parte del contenuto del documento che per la parte di parole chiave specifiche
-            self.p_editor.autoCompleteFromAll()
+            self.p_editor.autoCompleteFromAll()                        
 
             # attivo il folding (+ e - sul margine sinistro)
             self.setFoldCompact(False)
@@ -2915,7 +2915,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             self.autosave_snapshoot_timer.start(o_global_preferences.autosave_snapshoot_interval*1000) 
 
         # attivo slot sul cambiamento di testo (es. digitazione di testo)
-        self.e_sql.textChanged.connect(self.slot_mini_map_copy_text) 
+        self.e_sql.textChanged.connect(self.slot_mini_map_copy_text)
         # attivo slot che dal margine, segna i segnalibri
         self.e_sql.setMarginSensitivity(1, True)
         self.e_sql.marginClicked.connect(self.slot_add_bookmark)
@@ -2923,7 +2923,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         self.e_sql.verticalScrollBar().valueChanged.connect(self.slot_mini_map_sync_scrollbars) 
         self.e_sql_mini_map.verticalScrollBar().valueChanged.connect(self.slot_mini_map_sync_scrollbars) 
         # attivo slot che quando viene cliccata la mini mappa riposiziona il testo 
-        self.e_sql_mini_map.selectionChanged.connect(self.slot_mini_map_click)
+        self.e_sql_mini_map.selectionChanged.connect(self.slot_mini_map_click)   
 
     def slot_mini_map_click(self):
         """
@@ -2999,6 +2999,17 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
            Da notare come un'istruzione di return False indirizza l'evento verso il suo svolgimento classico
         """      
         global v_global_connection
+
+        # controllo se l'autocompletamento è aperto (poplist con i suggerimenti...)
+        if event.type() == QEvent.Type.KeyPress and source is self.e_sql and self.e_sql.SendScintilla(QsciScintilla.SCI_AUTOCGETCURRENT) != -1:  
+            # se premuto invio, non lo accetto come conferma della voce proposta e chiudo l'autocompletamento
+            if event.key() == Qt.Key.Key_Return:                                                
+                self.e_sql.SendScintilla(QsciScintilla.SCI_AUTOCCANCEL)
+                return True
+            # altrimenti se premuto il tab, accetto quanto proposto da autocompletamento
+            elif event.key() == Qt.Key.Key_Tab:                
+                self.e_sql.SendScintilla(QsciScintilla.SCI_AUTOCCOMPLETE)
+                return True
 
         # intercetto il cambio di focus e cambio il titolo della window principale di MSql così che sulla barra di Windows risulti 
         # il titolo dell'editor corrente
@@ -3104,7 +3115,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                             
         # fine senza alcuna elaborazione e quindi si procede con esecuzione dei segnali nativi del framework       
         return False
-           
+    
     def completa_sequenza(self, p_char):
         """
            Se utente sta scrivendo un carattere speciale (es. parentesi aperta) 
