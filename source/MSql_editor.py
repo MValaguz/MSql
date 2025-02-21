@@ -762,6 +762,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # Estraggo dall'output una nuova select e la inserisco nell'editor (questo ha senso se utente ha inserito parametri usando il popup menu sulle colonne)
             elif p_slot.text() == 'Extract sql from output':
                 o_MSql_win2.slot_extract_sql_from_output()
+            # Attivo/disattivo indentation guide sull'editor
+            elif p_slot.text() == 'Indentation guide':
+                o_MSql_win2.slot_indentation_guide()
 
     def slot_editable(self):
         """
@@ -2412,8 +2415,8 @@ class My_MSql_Lexer(QsciLexerSQL):
 
         # editor normale...
         if not p_mini_map:
-            # attivo le righe verticali che segnano le indentazioni
-            self.p_editor.setIndentationGuides(o_global_preferences.indentation_guide)                
+            # attivo le righe verticali che segnano le indentazioni (questa è anche una voce nel menu view)
+            self.p_editor.setIndentationGuides(o_global_preferences.indentation_guide)                            
         
             # attivo i margini con + e - 
             self.p_editor.setFolding(p_editor.FoldStyle.BoxedTreeFoldStyle, 2) 
@@ -2438,7 +2441,7 @@ class My_MSql_Lexer(QsciLexerSQL):
             self.p_editor.setMarginsFont(QFont("Courier New",9))                                   
         
             # attivo il matching sulle parentesi con uno specifico colore
-            self.p_editor.setBraceMatching(QsciScintilla.BraceMatch.SloppyBraceMatch)
+            self.p_editor.setBraceMatching(QsciScintilla.BraceMatch.SloppyBraceMatch)            
             self.p_editor.setMatchedBraceBackgroundColor(QColor("#80ff9900"))
         
             # attivo il multiediting (cioè la possibilità, una volta fatta una selezione verticale, di fare un edit multiplo)        
@@ -2809,7 +2812,9 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         self.aggiorna_statusbar()
 
         # visualizzo o meno il carattere di end of line in base alla preferenza
-        self.set_show_end_of_line()        
+        self.set_show_end_of_line()      
+        # imposto la var della indentation guide
+        self.v_indentation_guide = o_global_preferences.indentation_guide  
 
         ###
         # DICHIARAZIONE VAR GENERALI
@@ -5260,6 +5265,17 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # posiziono il cursore
             self.e_sql.setCursorPosition(v_num_line,v_pos)
 
+    def slot_indentation_guide(self):
+        """
+           Attiva/disattiva indentation guide sull'editor
+        """        
+        if self.v_indentation_guide:
+            self.v_indentation_guide = False
+        else:
+            self.v_indentation_guide = True
+        
+        self.e_sql.setIndentationGuides(self.v_indentation_guide)                       
+    
     def slot_add_bookmark(self, margin_nr, line_nr, state):
         """
            Aggiunge o toglie un segnalibro. Sarà possibile scorrere tra i segnalibri premendo CTRL+B

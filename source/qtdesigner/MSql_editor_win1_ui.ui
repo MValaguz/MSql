@@ -201,6 +201,7 @@
     <addaction name="separator"/>
     <addaction name="actionFold_All"/>
     <addaction name="actionShow_end_of_line"/>
+    <addaction name="actionIndentation_guide"/>
     <addaction name="actionMini_map"/>
     <addaction name="separator"/>
     <addaction name="actionFont_editor_selector"/>
@@ -1522,6 +1523,15 @@
   <action name="actionSearchNext">
    <property name="text">
     <string>SearchNext Bookmark</string>
+   </property>
+  </action>
+  <action name="actionIndentation_guide">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/indent.png</normaloff>:/icons/icons/indent.png</iconset>
+   </property>
+   <property name="text">
+    <string>Indentation guide</string>
    </property>
   </action>
  </widget>

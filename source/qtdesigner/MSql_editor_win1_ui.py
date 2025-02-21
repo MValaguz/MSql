@@ -598,6 +598,9 @@ class Ui_MSql_win1(object):
         self.actionRemove.setObjectName("actionRemove")
         self.actionSearchNext = QtGui.QAction(parent=MSql_win1)
         self.actionSearchNext.setObjectName("actionSearchNext")
+        self.actionIndentation_guide = QtGui.QAction(parent=MSql_win1)
+        self.actionIndentation_guide.setIcon(icon58)
+        self.actionIndentation_guide.setObjectName("actionIndentation_guide")
         self.menuFiles.addAction(self.actionNew)
         self.menuFiles.addAction(self.actionOpen)
         self.menuFiles.addSeparator()
@@ -686,6 +689,7 @@ class Ui_MSql_win1(object):
         self.menuView.addSeparator()
         self.menuView.addAction(self.actionFold_All)
         self.menuView.addAction(self.actionShow_end_of_line)
+        self.menuView.addAction(self.actionIndentation_guide)
         self.menuView.addAction(self.actionMini_map)
         self.menuView.addSeparator()
         self.menuView.addAction(self.actionFont_editor_selector)
@@ -920,6 +924,7 @@ class Ui_MSql_win1(object):
         self.actionAdd.setText(_translate("MSql_win1", "Add Bookmark"))
         self.actionRemove.setText(_translate("MSql_win1", "Remove Bookmark"))
         self.actionSearchNext.setText(_translate("MSql_win1", "SearchNext Bookmark"))
+        self.actionIndentation_guide.setText(_translate("MSql_win1", "Indentation guide"))
 
 
 if __name__ == "__main__":
