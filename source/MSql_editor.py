@@ -2351,10 +2351,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
 
         # per questo editor, attivo il lexer diff che contiene la sintassi che si accorda con la libreria diff, usata per creare le differenze
         lexer = QsciLexerDiff()
-        # se tema scuro imposto lo sfondo a scuro (non impostato in quanto la colorazione del lexer è inguardabile)
-        #if o_global_preferences.dark_theme:            
-        #    lexer.setDefaultPaper(QColor('#242424'))
-        #    lexer.setPaper(QColor('#242424'))                                                         
+        # se tema scuro imposto lo sfondo cmq a bianco perché se c'è anche il tema scuro di window, non si vede nulla!
+        if o_global_preferences.dark_theme:            
+            lexer.setDefaultPaper(QColor('white'))            
         # imposto il font dell'editor in base alle preferenze 
         if o_global_preferences.font_editor != '':
             v_split = o_global_preferences.font_editor.split(',')            
@@ -2364,7 +2363,8 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             lexer.setFont(v_font)    
         diffEditor.setLexer(lexer)
         diffEditor.setMarginLineNumbers(1, True)
-        diffEditor.setMarginWidth(1, "0000")
+        diffEditor.setMarginWidth(1, "0000")        
+        diffEditor.setFolding(diffEditor.FoldStyle.BoxedTreeFoldStyle, 2)         
         
         # l'editor lo associato alla mdiArea di riferimento (v. le istruzioni usate per creare nuovo editor....)
         diff_sub_window = self.mdiArea.addSubWindow(diffEditor)                  
@@ -4294,8 +4294,8 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                     self.scrive_output(v_dbms_ret, 'I')
                 # output dell'errore
                 self.scrive_output("Error: " + v_oracle_error.message, "E")                                 
-                # per posizionarmi alla riga in errore ho solo la variabile offset che riporta il numero di carattere a cui l'errore si è verificato
-                v_riga, v_colonna =x_y_from_offset_text(self.v_plsql_corrente, v_oracle_error.offset, self.setting_eol)                                
+                # per posizionarmi alla riga in errore ho solo la variabile offset che riporta il numero di carattere a cui l'errore si è verificato                
+                v_riga, v_colonna = x_y_from_offset_text(p_plsql, v_oracle_error.offset)                                                                
                 v_riga += self.v_offset_numero_di_riga
                 self.e_sql.setCursorPosition(v_riga,v_colonna)                
                 # esco con errore

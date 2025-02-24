@@ -78,26 +78,26 @@ def extract_table_name_from_select(p_string):
             return v_split[v_i+1]
     return ''
 
-def x_y_from_offset_text(p_text, p_offset, p_setting_eol):
+def x_y_from_offset_text(p_text, p_offset):
     """
        Analizzando il testo presente in p_text, restituisce il numero riga e colonna
-       della posizione p_offset
-       Il parametro p_setting_eol indica il tipo di ritorno a capo W=Windows, U=Unix
+       della posizione p_offset       
     """
-    # spezzo il testo in righe (in ambiente Windows l'eol end of line è indicato tramite LF-CR)    
     v_riga = 0    
     v_prog = 0
-    if p_setting_eol == 'W':
-        v_eol = '\r\n'
-    else:
-        v_eol = '\n'
-
-    for v_testo in p_text.split(v_eol):        
-        v_prog += len(v_testo) + 2 # si sommano i due caratteri di fine riga        
+    v_col = 1
+    # scorro il testo carattere per carattere e ad ogni ritorno a capo conto la riga
+    # da notare come usata funzione per contare il numero di byte per ogni carattere...nella codifica utf-8 ad esempio il carattere "è" occupa due byte mentre in ansi 1
+    # da notare come per il ritorno a capo usato solo \n in quanto ci sono anche dei file con ritorni a capo misti!
+    for v_testo in p_text:
+        v_prog += len(v_testo.encode("utf-8"))
         if v_prog >= p_offset:            
-            # --> esco con il risultato (il numero di colonna viene ricavato incrociando offset e posizione raggiunta)
-            return v_riga, (len(v_testo)+2) - (v_prog-p_offset) 
-        v_riga += 1
+            return v_riga, v_col
+        if v_testo == '\n':        
+            v_riga += 1
+            v_col = 1
+        else:
+            v_col += 1
     
     # se arrivo qui vuol dire che non ho trovato il punto di ricerca
     return 0,0
