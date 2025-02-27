@@ -3039,13 +3039,28 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         if event.type() == QEvent.Type.KeyPress and source is self.e_sql:
             # premuta parentesi aperta....inserisco parentesi chiusa
             if event.key() == Qt.Key.Key_ParenLeft:
-                self.completa_sequenza('(')                
+                self.auto_insert('(')                
+            # premuta parentesi chiusa....valuto se passare al prossimo carattere
+            if event.key() == Qt.Key.Key_ParenRight:
+                self.auto_insert(')')                
+            # premuta parentesi aperta....inserisco parentesi chiusa
+            if event.key() == Qt.Key.Key_BracketLeft:
+                self.auto_insert('[')                
+            # premuta parentesi chiusa....valuto se passare al prossimo carattere
+            if event.key() == Qt.Key.Key_BracketRight:
+                self.auto_insert(']')                
+            # premuta parentesi aperta....inserisco parentesi chiusa
+            if event.key() == Qt.Key.Key_BraceLeft:
+                self.auto_insert('{')                
+            # premuta parentesi chiusa....valuto se passare al prossimo carattere
+            if event.key() == Qt.Key.Key_BraceRight:
+                self.auto_insert('}')                
             # premuto doppio apice...inserisco altro doppio apice
             elif event.key() == Qt.Key.Key_QuoteDbl:
-                self.completa_sequenza('"')                
+                self.auto_insert('"')                
             # premuto apice...inserisco altro apice
             elif event.key() == Qt.Key.Key_Apostrophe:
-                self.completa_sequenza("'")                
+                self.auto_insert("'")                
             # premuta combinazione CTRL+B passa da un segnalibro all'altro
             if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_B:                                
                 self.slot_ctrl_b()
@@ -3121,11 +3136,10 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # fine senza alcuna elaborazione e quindi si procede con esecuzione dei segnali nativi del framework       
         return False
     
-    def completa_sequenza(self, p_char):
+    def auto_insert(self, p_char):
         """
-           Se utente sta scrivendo un carattere speciale (es. parentesi aperta) 
-           automaticamente viene scritta la corrispondente parentesi chiusa.
-           Lo stesso per apice, doppio-apice
+           Se utente sta scrivendo un carattere speciale (es. parentesi aperta, apice, ecc.) 
+           automaticamente viene scritta la corrispondente parentesi chiusa.           
         """
         # ricavo numero riga e posizione del cursore
         v_num_line, v_num_pos = self.e_sql.getCursorPosition()                                            
@@ -3135,23 +3149,95 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             try:
                 v_char_right = self.e_sql.text(v_num_line)[v_num_pos]                             
             except:
-                v_char_right = ''
+                v_char_right = ' '
         else:
-            v_char_left = ''   
-            v_char_right = ''   
-
+            v_char_left = ' '   
+            v_char_right = ' '   
+        
+        # se il carattere di destra è un ritorno a capo lo normalizzo a spazio
+        if ord(v_char_right) in (13,10):
+            v_char_right = ' '   
+        
         # se sto scrivendo un carattere speciale sopra un testo selezionato, il testo selezionato viene prima eliminato        
         if self.e_sql.selectedText() != '':               
             self.e_sql.cut()                
-        # aggiungo il nuovo carattere e nel caso di apice e doppio apice lo aggiungo solo se non c'è già presente
+        
+        # gestione singolo apice 
+        if p_char == "'":
+            # inserisco apice se a destra e sinistra ho degli spazi oppure sono tra due parentesi
+            if (v_char_left == " " and v_char_right == " ") or (v_char_left in '(,[,{' and v_char_right in '),],}') or (v_char_left == '=' and v_char_right == ' '):       
+                self.e_sql.insert("'")
+                self.e_sql.setCursorPosition(self.e_sql.getCursorPosition()[0], self.e_sql.getCursorPosition()[1])
+            # se sto inserendo lo stesso carattere speciale tra altri due uguali, allora non inserisco nulla e mi posiziono al carattere successivo
+            elif v_char_left == "'" and v_char_right == "'":        
+                self.e_sql.SendScintilla(QsciScintilla.SCI_DELETEBACK)            
+                self.e_sql.setCursorPosition(self.e_sql.getCursorPosition()[0], self.e_sql.getCursorPosition()[1]+1)    
+            # esco
+            return None 
+                        
+        # gestione doppio apice 
+        if p_char == '"':
+            # inserisco doppio apice se a destra e sinistra ho degli spazi oppure sono tra due parentesi
+            if (v_char_left == " " and v_char_right == " ") or (v_char_left in '(,[,{' and v_char_right in '),],}') or (v_char_left == '=' and v_char_right == ' '):              
+                self.e_sql.insert('"')
+                self.e_sql.setCursorPosition(self.e_sql.getCursorPosition()[0], self.e_sql.getCursorPosition()[1])
+            # se sto inserendo lo stesso carattere speciale tra altri due uguali, allora non inserisco nulla e mi posiziono al carattere successivo
+            elif v_char_left == '"' and v_char_right == '"':        
+                self.e_sql.SendScintilla(QsciScintilla.SCI_DELETEBACK)            
+                self.e_sql.setCursorPosition(self.e_sql.getCursorPosition()[0], self.e_sql.getCursorPosition()[1]+1)    
+            # esco
+            return None
+                                
+        # gestione parentesi tonda aperta
         if p_char == '(':
-            self.e_sql.insert(')')
-        elif p_char == '"' and (v_char_left != '"' and v_char_right != '"'):
-            self.e_sql.insert('"')        
-        elif p_char == "'" and (v_char_left != "'" and v_char_right != "'"):
-            self.e_sql.insert("'")        
-        # posiziono il cursore
-        self.e_sql.setCursorPosition(self.e_sql.getCursorPosition()[0], self.e_sql.getCursorPosition()[1])
+            # inserisco apice se a destra ho uno spazio
+            if v_char_right == " ":       
+                self.e_sql.insert(')')
+                self.e_sql.setCursorPosition(self.e_sql.getCursorPosition()[0], self.e_sql.getCursorPosition()[1])
+            # esco
+            return None        
+        # gestione parentesi tonda chiusa
+        if p_char == ')':                                    
+            # se sto inserendo lo stesso carattere speciale tra altri due uguali, allora non inserisco nulla e mi posiziono al carattere successivo
+            if v_char_left == '(' and v_char_right == ')':        
+                self.e_sql.setCursorPosition(self.e_sql.getCursorPosition()[0], self.e_sql.getCursorPosition()[1]+1)    
+                self.e_sql.SendScintilla(QsciScintilla.SCI_DELETEBACK)                            
+            # esco
+            return None        
+                                                
+        # gestione parentesi quadra aperta
+        if p_char == '[':
+            # inserisco apice se a destra ho uno spazio
+            if v_char_right == " ":       
+                self.e_sql.insert(']')
+                self.e_sql.setCursorPosition(self.e_sql.getCursorPosition()[0], self.e_sql.getCursorPosition()[1])
+            # esco
+            return None        
+        # gestione parentesi quadra chiusa
+        if p_char == ']':                                    
+            # se sto inserendo lo stesso carattere speciale tra altri due uguali, allora non inserisco nulla e mi posiziono al carattere successivo
+            if v_char_left == '[' and v_char_right == ']':        
+                self.e_sql.setCursorPosition(self.e_sql.getCursorPosition()[0], self.e_sql.getCursorPosition()[1]+1)    
+                self.e_sql.SendScintilla(QsciScintilla.SCI_DELETEBACK)                            
+            # esco
+            return None        
+                                                        
+        # gestione parentesi graffa aperta
+        if p_char == '{':
+            # inserisco apice se a destra ho uno spazio
+            if v_char_right == " ":       
+                self.e_sql.insert('}')
+                self.e_sql.setCursorPosition(self.e_sql.getCursorPosition()[0], self.e_sql.getCursorPosition()[1])
+            # esco
+            return None        
+        # gestione parentesi graffa chiusa
+        if p_char == '}':                                    
+            # se sto inserendo lo stesso carattere speciale tra altri due uguali, allora non inserisco nulla e mi posiziono al carattere successivo
+            if v_char_left == '{' and v_char_right == '}':        
+                self.e_sql.setCursorPosition(self.e_sql.getCursorPosition()[0], self.e_sql.getCursorPosition()[1]+1)    
+                self.e_sql.SendScintilla(QsciScintilla.SCI_DELETEBACK)                            
+            # esco
+            return None        
     
     def tasto_destro_o_table(self, event):
         """
