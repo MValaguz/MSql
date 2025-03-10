@@ -63,6 +63,7 @@ class SecondThread(QThread):
             # | |__| |_| | |  | | |  | |/ ___ \| |\  | |_| |
             #  \____\___/|_|  |_|_|  |_/_/   \_\_| \_|____/                                                                     
             self.v_cursor.execute(self.v_command,self.v_bind_variables)                            
+            print('ESECUZIONE DEL COMANDO VERSO ORACLE TERMINATA!!!!!!!')
             # lavoro terminato ok --> emetto segnale di fine che verrà dal chiamante            
             self.signalStatus.emit("END_JOB_OK")
         except cx_Oracle.Error as e:

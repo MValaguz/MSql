@@ -53,9 +53,9 @@ class history_class(QMainWindow, Ui_history_window):
         else:
             v_where = ''
 
-        # creo un modello di dati su query
+        # creo un modello di dati su query (per questioni di velocità dall'istruzione vengono prese solo i primi 1000 caratteri)
         v_modello = QSqlQueryModel()
-        v_modello.setQuery("select strftime('%d/%m/%Y %H:%S',ORARIO) TIME, UPPER(ISTRUZIONE) INSTRUCTION, ROUND(EXEC_TIME,2) 'SEC.TIME' from SQL_HISTORY " + v_where + " order by ORARIO desc"        )
+        v_modello.setQuery("select strftime('%d/%m/%Y %H:%S',ORARIO) TIME, UPPER(SUBSTR(ISTRUZIONE,1,1000)) 'INSTRUCTION (Only first 1000 char)', ROUND(EXEC_TIME,2) 'SEC.TIME', ID from SQL_HISTORY " + v_where + " order by ORARIO desc"        )        
 
         # imposto l'oggetto di visualizzazione con il modello 
         self.o_lst1.setModel(v_modello)
@@ -64,7 +64,8 @@ class history_class(QMainWindow, Ui_history_window):
         # larghezza delle colonne fissa
         self.o_lst1.setColumnWidth(0, 120)
         self.o_lst1.setColumnWidth(1, 440)        
-        self.o_lst1.setColumnWidth(2, 70)                
+        self.o_lst1.setColumnWidth(2, 70)                        
+        self.o_lst1.setColumnWidth(3, 0)                                
         # intestazioni automatiche in base alla query
         v_horizontal_header = self.o_lst1.horizontalHeader()
         v_horizontal_header.setDefaultAlignment(Qt.AlignmentFlag.AlignLeft)
@@ -72,7 +73,11 @@ class history_class(QMainWindow, Ui_history_window):
         v_vertical_header = self.o_lst1.verticalHeader()
         v_vertical_header.setDefaultSectionSize(8)   
         self.o_lst1.show()
-        # chiudo il database in modo che non vada in blocco per insert successive da parte di MSql        
+        
+    def closeEvent(self, event):
+        """
+           chiusura della connessione al db sqlite
+        """                
         self.v_sqlite_conn.close()        
 
     def slot_purge(self):
@@ -83,12 +88,29 @@ class history_class(QMainWindow, Ui_history_window):
             purge_sql_history(self.nome_db)
             message_info('History deleted!')
             self.slot_start()
-            
+
+    def return_instruction(self, p_id):
+        """
+           dato un ID di riga, restituisce la rispettiva istruzione SQL
+        """
+        query = QSqlQuery()
+        # Esecuzione della query per leggere il contenuto desiderato
+        query.prepare("SELECT ISTRUZIONE from SQL_HISTORY WHERE ID = :id")
+        query.bindValue(":id", p_id)
+
+        if query.exec():
+            while query.next():                
+                # restituisco il valore della colonna
+                return query.value(0)                  
+        
+        # altrimenti esco senza nulla        
+        return ''
+    
 # ----------------------------------------
 # TEST APPLICAZIONE
 # ----------------------------------------
 if __name__ == "__main__":    
     app = QApplication([])    
     application = history_class('C:\\Users\\MValaguz\\AppData\\Local\\MSql\\MSql.db') 
-    application.show()
+    application.show()    
     sys.exit(app.exec())      

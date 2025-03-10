@@ -2258,16 +2258,16 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         """
            Prende la riga selezionata nell'history e la porta dentro l'editor corrente
         """       
-        # prendo indice dalla tabella (in pratica la cella che contiene l'istruzione)
+        # prendo indice dalla tabella (in pratica la cella che contiene l'id della riga dell'history)
         try:
-            index = self.win_history.o_lst1.selectedIndexes()[1]           
+            index = self.win_history.o_lst1.selectedIndexes()[3]           
         except:
             message_error('Select a row!')
             return 'ko'
-        # il valore della colonna istruction viene caricato nell'editor corrente
+        # ricerco il valore dell'istruzione corrispondente e lo carico nell'editor
         o_MSql_win2 = self.oggetto_win2_attivo()
-        if o_MSql_win2 != None:            
-            v_risultato = self.win_history.o_lst1.model().data(index)
+        if o_MSql_win2 != None:
+            v_risultato = self.win_history.return_instruction(self.win_history.o_lst1.model().data(index))                        
             # il testo che prendo dall'history ha formato eol Linux, e se necessario
             # va convertito in Windows (a seconda dell'impostazione dell'editor di destinazione)
             if o_MSql_win2.setting_eol == 'W' and '\r\n' not in v_risultato:
@@ -4988,10 +4988,11 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # apro la sezione di ricerca e posiziono il fuoco del cursore
         self.dockFindWidget.show()
         self.e_find.setFocus()  
-        # se è stato selezionato del testo lo utilizzo come base per la ricerca
+        # se è stato selezionato del testo lo utilizzo come base per la ricerca e lo seleziono
         v_testo_selezionato = self.e_sql.selectedText()
         if len(v_testo_selezionato) > 0:            
             self.e_find.setText(v_testo_selezionato)        
+            self.e_find.selectAll()
         else:
             self.e_find.setText('')        
                         
@@ -5076,12 +5077,13 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         v_testo_selezionato = self.e_sql.selectedText()
         if len(v_testo_selezionato) > 0:            
             self.e_replace_search.setText(v_testo_selezionato)        
+            self.e_replace_search.selectAll()
         else:
             self.e_replace_search.setText('')        
         
         # apro la sezione di ricerca e posiziono il fuoco del cursore
         self.dockReplaceWidget.show()        
-        self.e_replace.setFocus()
+        self.e_replace_search.setFocus()
 
     def slot_find_e_replace_find(self):
         """

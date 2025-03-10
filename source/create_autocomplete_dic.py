@@ -55,12 +55,12 @@ class create_autocomplete_dic_class(QMainWindow, Ui_create_autocomplete_dic_wind
         # apro il file di testo che conterrà il risultato con tutti i nomi delle funzioni, procedure e package, ecc
         v_file = open(self.nome_file_dic,'w')
         # la funzione put_line viene inserita di default 
-        v_file.write('dbms_output.put_line(text)' +'\n')
+        v_file.write('DBMS_OUTPUT.PUT_LINE(TEXT)' +'\n')
 
         # richiesto di analizzare procedure, funzioni e package
         if self.e_analyze_1.isChecked():
             # elenco di tutti gli oggetti funzioni, procedure e package
-            self.oracle_cursor.execute("SELECT OBJECT_NAME, OBJECT_TYPE FROM ALL_OBJECTS WHERE OWNER='" + self.user_name + "' AND OBJECT_TYPE IN ('PACKAGE','PROCEDURE','FUNCTION') ORDER BY OBJECT_TYPE, OBJECT_NAME")
+            self.oracle_cursor.execute("SELECT OBJECT_NAME, OBJECT_TYPE FROM ALL_OBJECTS WHERE OWNER='" + self.user_name + "' AND OBJECT_TYPE IN ('PACKAGE','PROCEDURE','FUNCTION') AND OBJECT_NAME != 'DBMS_NUMSYSTEM' ORDER BY OBJECT_TYPE, OBJECT_NAME")
             v_elenco_oggetti = self.oracle_cursor.fetchall()
             # leggo il sorgente di ogni oggetto di cui sopra...
             for v_record in v_elenco_oggetti:                                
