@@ -210,25 +210,15 @@
     <property name="title">
      <string>&amp;Search</string>
     </property>
-    <widget class="QMenu" name="menuBookmark">
-     <property name="title">
-      <string>Bookmark</string>
-     </property>
-     <property name="icon">
-      <iconset resource="resource.qrc">
-       <normaloff>:/icons/icons/bookmark.png</normaloff>:/icons/icons/bookmark.png</iconset>
-     </property>
-     <addaction name="actionAdd"/>
-     <addaction name="actionRemove"/>
-     <addaction name="actionSearchNext"/>
-    </widget>
     <addaction name="actionFind"/>
     <addaction name="actionFind_and_Replace"/>
     <addaction name="actionGo_To_Line"/>
     <addaction name="actionGo_to_start"/>
     <addaction name="actionGo_to_end"/>
     <addaction name="separator"/>
-    <addaction name="menuBookmark"/>
+    <addaction name="actionAdd"/>
+    <addaction name="actionRemove"/>
+    <addaction name="actionSearchNext"/>
    </widget>
    <addaction name="menuFiles"/>
    <addaction name="menuServer"/>
@@ -1511,16 +1501,28 @@
    </property>
   </action>
   <action name="actionAdd">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/bookmark.png</normaloff>:/icons/icons/bookmark.png</iconset>
+   </property>
    <property name="text">
     <string>Add Bookmark</string>
    </property>
   </action>
   <action name="actionRemove">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/bookmark_remove.png</normaloff>:/icons/icons/bookmark_remove.png</iconset>
+   </property>
    <property name="text">
     <string>Remove Bookmark</string>
    </property>
   </action>
   <action name="actionSearchNext">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/search_string.png</normaloff>:/icons/icons/search_string.png</iconset>
+   </property>
    <property name="text">
     <string>SearchNext Bookmark</string>
    </property>

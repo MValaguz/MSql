@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/bookmark_remove.png</file>
+    <file>icons/bookmark_remove.png</file>
     <file>icons/bookmark.png</file>
     <file>icons/disconnect.png</file>
     <file>icons/duoble_line.png</file>
