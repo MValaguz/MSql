@@ -50,8 +50,9 @@ from program_info_ui import Ui_program_info
 from goto_line_ui import Ui_GotoLineWindow
 from history import history_class
 from preferred_sql import preferred_sql_class
-# Classe qtdesigner per la richiesta di connessione
+# Classe qtdesigner per la richiesta di connessione e camvbio di schema
 from connect_ui import Ui_connect_window
+from select_schema_ui import Ui_select_schema_window
 # Classe per visualizzare la barra di avanzamento 
 from avanzamento import avanzamento_infinito_class
 # Utilità varie
@@ -308,6 +309,11 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                         self.e_password = rec[2]        
                 except:
                     pass
+
+        # creo il modello che conterrà elenco degli schemi
+        self.schema_model = QStringListModel()        
+        self.current_schema = ''        
+
         # se trovato server e user di default --> eseguo la connessione        
         if self.e_server_name != '' and self.e_user_name != '':                
             self.slot_connetti()           
@@ -333,7 +339,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         self.db_oggetto_tree.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.db_oggetto_tree.customContextMenuRequested.connect(self.slot_popup_menu_oggetto_tree)
         # creo le variabili che serviranno come appoggio al menu popup (punto in cui il popup è stato attivato)
-        self.v_popup_menu_zone = ''        
+        self.v_popup_menu_zone = ''     
  
         ###
         # Imposto default in base alle preferenze (setto anche le opzioni sulle voci di menu)
@@ -1117,6 +1123,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         self.l_connection.setText("Connection: " + self.e_server_name + "/" + self.e_user_name)     
         self.l_connection.setStyleSheet('background-color: ' + v_global_color + ';color: "' + v_global_background + '";')              
 
+        # imposto la proprietà di schema corrente con lo user
+        self.current_schema = self.e_user_name
+
         # se la connessione è andata a buon fine, richiedo elenco degli oggetti in modo da aggiornare il dizionario dell'editor con nuove parole chiave
         # in questa sezione viene caricata la lista v_global_my_lexer_keywords con tutti i nomi di tabelle, viste, procedure, ecc.
         # tale lista viene poi aggiornata quando viene aperto un nuovo editor o quando viene cambiata la connessione
@@ -1209,15 +1218,26 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         """
         self.object_navigator_search_timer.start(800)  
             
-    def slot_oggetti_db_scelta(self):
+    def slot_oggetti_db_scelta(self, p_owner):
+        """
+           Carica elenco oggetti
+        """                     
+        # non viene passato lo schema, verrà dunque usato quello dell'utente corrente
+        self.carica_oggetti_db_scelta()   
+
+    def carica_oggetti_db_scelta(self):
         """
            In base alla voce scelta, viene caricata la lista con elenco degli oggetti pertinenti
+           Come owner viene usata la proprietà current_schema 
         """                        
         global v_global_connesso
 
         # se non connesso --> esco
         if not v_global_connesso:
             return 'ko'
+        
+        # imposto il titolo della window inserendo lo schema
+        self.dockWidget.setWindowTitle('Objects Navigator ('+self.current_schema+')')
 
         # prendo il tipo di oggetto scelto dall'utente
         try:            
@@ -1234,22 +1254,22 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         if v_tipo_oggetto != '':            
             # chiavi primarie
             if v_tipo_oggetto == 'PRIMARY_KEY':
-                v_select = """SELECT CONSTRAINT_NAME OBJECT_NAME, DECODE(INVALID,NULL,0,1) INVALID, STATUS FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND CONSTRAINT_TYPE='P' AND SUBSTR(CONSTRAINT_NAME,1,4) != 'BIN$'"""
+                v_select = """SELECT CONSTRAINT_NAME OBJECT_NAME, DECODE(INVALID,NULL,0,1) INVALID, STATUS FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.current_schema+"""' AND CONSTRAINT_TYPE='P' AND SUBSTR(CONSTRAINT_NAME,1,4) != 'BIN$'"""
             # chiavi univoche
             elif v_tipo_oggetto == 'UNIQUE_KEY':
-                v_select = """SELECT CONSTRAINT_NAME OBJECT_NAME, DECODE(INVALID,NULL,0,1) INVALID, STATUS FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND CONSTRAINT_TYPE='U' AND SUBSTR(CONSTRAINT_NAME,1,4) != 'BIN$'"""    
+                v_select = """SELECT CONSTRAINT_NAME OBJECT_NAME, DECODE(INVALID,NULL,0,1) INVALID, STATUS FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.current_schema+"""' AND CONSTRAINT_TYPE='U' AND SUBSTR(CONSTRAINT_NAME,1,4) != 'BIN$'"""    
             # relazioni
             elif v_tipo_oggetto == 'FOREIGN_KEY':
-                v_select = """SELECT CONSTRAINT_NAME OBJECT_NAME, DECODE(INVALID,NULL,0,1) INVALID, STATUS FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND CONSTRAINT_TYPE='R' AND SUBSTR(CONSTRAINT_NAME,1,4) != 'BIN$'"""    
+                v_select = """SELECT CONSTRAINT_NAME OBJECT_NAME, DECODE(INVALID,NULL,0,1) INVALID, STATUS FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.current_schema+"""' AND CONSTRAINT_TYPE='R' AND SUBSTR(CONSTRAINT_NAME,1,4) != 'BIN$'"""    
             # check
             elif v_tipo_oggetto == 'CHECK_KEY':
-                v_select = """SELECT CONSTRAINT_NAME OBJECT_NAME, DECODE(INVALID,NULL,0,1) INVALID, STATUS FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND CONSTRAINT_TYPE='C' AND SUBSTR(CONSTRAINT_NAME,1,4) != 'BIN$' AND GENERATED != 'GENERATED NAME'"""    
+                v_select = """SELECT CONSTRAINT_NAME OBJECT_NAME, DECODE(INVALID,NULL,0,1) INVALID, STATUS FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.current_schema+"""' AND CONSTRAINT_TYPE='C' AND SUBSTR(CONSTRAINT_NAME,1,4) != 'BIN$' AND GENERATED != 'GENERATED NAME'"""    
             # indici
             elif v_tipo_oggetto == 'INDEXES':                
-                v_select = """SELECT INDEX_NAME OBJECT_NAME, 0 INVALID, 'ENABLED' STATUS FROM ALL_INDEXES WHERE OWNER='"""+self.e_user_name+"""'"""
+                v_select = """SELECT INDEX_NAME OBJECT_NAME, 0 INVALID, 'ENABLED' STATUS FROM ALL_INDEXES WHERE OWNER='"""+self.current_schema+"""'"""
             # sinonimi
             elif v_tipo_oggetto == 'SYNONYM':                
-                v_select = """SELECT SYNONYM_NAME OBJECT_NAME, 0 INVALID, 'ENABLED' STATUS FROM ALL_SYNONYMS WHERE OWNER='"""+self.e_user_name+"""'"""
+                v_select = """SELECT SYNONYM_NAME OBJECT_NAME, 0 INVALID, 'ENABLED' STATUS FROM ALL_SYNONYMS WHERE OWNER='"""+self.current_schema+"""'"""
             # il tipo oggetto rientra nella tabella ALL_OBJECT
             else:
                 # leggo elenco degli oggetti indicati (con o senza descrizione)
@@ -1271,7 +1291,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                                              'ENABLED'
                                          END STATUS                                          
                                   FROM   ALL_OBJECTS 
-                                  WHERE  OWNER='""" + self.e_user_name + """' AND 
+                                  WHERE  OWNER='""" + self.current_schema + """' AND 
                                          OBJECT_TYPE='""" + v_tipo_oggetto + """' AND
                                          SECONDARY = 'N'"""
                 else:
@@ -1287,7 +1307,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                                                     'ENABLED'
                                                  END STATUS                                          
                                           FROM   ALL_OBJECTS 
-                                          WHERE  OWNER='""" + self.e_user_name + """' AND 
+                                          WHERE  OWNER='""" + self.current_schema + """' AND 
                                                  OBJECT_TYPE='""" + v_tipo_oggetto + """' AND
                                                  SECONDARY = 'N'"""                          
         # l'utente non ha scelto nessun tipo di oggetto....si carica tutta la tabella all_objects (notare come alcuni tipi di oggetti come le foreign key non siano presenti)
@@ -1304,7 +1324,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                                      'ENABLED'
                                  END STATUS                                          
                           FROM   ALL_OBJECTS 
-                          WHERE  OWNER='""" + self.e_user_name + """' AND
+                          WHERE  OWNER='""" + self.current_schema + """' AND
                                  OBJECT_TYPE IN ('TABLE','VIEW','PACKAGE','PROCEDURE','FUNCTION','TRIGGER','SEQUENCE') AND                                      
                                  SECONDARY = 'N'"""
 
@@ -1356,7 +1376,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
 
         # Ripristino icona freccia del mouse
         Freccia_Mouse(False)        
-
+    
     def slot_popup_menu_db_elenco(self,p_position):
         """
            Visualizza popup menu quando si preme il tasto destro del mouse sulla riga elenco oggetti
@@ -1462,9 +1482,6 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
            Carica il sorgente dell'oggetto selezionato (menu popup sull'elenco) dentro l'editor
            Viene usata la variabile generale self.v_nome_oggetto che contiene il nome dell'oggetto corrente           
         """     
-        # prendo il nome dell'oggetto scelto dall'utente dalla lista degli oggetti       
-        #v_selindex = self.oggetti_db_elenco.selectedIndexes()[0]        
-        #v_nome_oggetto = v_selindex.data()
         # imposto var interna per select 
         v_select = ''
         
@@ -1492,30 +1509,30 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                               SELECT TO_CLOB('\n/\n') FROM DUAL
                               UNION ALL
                               SELECT DBMS_METADATA.GET_DEPENDENT_DDL('INDEX','"""+self.v_nome_oggetto+"""') FROM DUAL
-                              WHERE (SELECT COUNT(*) FROM ALL_INDEXES WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+self.v_nome_oggetto+"""') > 0													   
+                              WHERE (SELECT COUNT(*) FROM ALL_INDEXES WHERE OWNER='"""+self.current_schema+"""' AND TABLE_NAME='"""+self.v_nome_oggetto+"""') > 0													   
                               UNION ALL
                               SELECT TO_CLOB('\n/\n') FROM DUAL
                               UNION ALL                                                
                               SELECT DBMS_METADATA.GET_DEPENDENT_DDL('CONSTRAINT','"""+self.v_nome_oggetto+"""') FROM DUAL
-                              WHERE (SELECT COUNT(*) FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+self.v_nome_oggetto+"""' AND R_CONSTRAINT_NAME IS NULL) > 0													   
+                              WHERE (SELECT COUNT(*) FROM ALL_CONSTRAINTS WHERE OWNER='"""+self.current_schema+"""' AND TABLE_NAME='"""+self.v_nome_oggetto+"""' AND R_CONSTRAINT_NAME IS NULL) > 0													   
                               UNION ALL
                               SELECT TO_CLOB('\n/\n') FROM DUAL
                               UNION ALL                              
                               SELECT DBMS_METADATA.GET_DEPENDENT_DDL('TRIGGER','"""+self.v_nome_oggetto+"""') FROM DUAL
-                              WHERE (SELECT COUNT(*) FROM ALL_TRIGGERS WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+self.v_nome_oggetto+"""') > 0													                                 
+                              WHERE (SELECT COUNT(*) FROM ALL_TRIGGERS WHERE OWNER='"""+self.current_schema+"""' AND TABLE_NAME='"""+self.v_nome_oggetto+"""') > 0													                                 
                               UNION ALL 
                               SELECT TO_CLOB('\n/\n') FROM DUAL                              
                               UNION ALL
                               SELECT TO_CLOB('COMMENT ON TABLE ' || TABLE_NAME || ' IS ''' || REPLACE(COMMENTS,'''','''''') || ''';')
                               FROM   ALL_TAB_COMMENTS
-                              WHERE  ALL_TAB_COMMENTS.OWNER = '"""+self.e_user_name+"""'
+                              WHERE  ALL_TAB_COMMENTS.OWNER = '"""+self.current_schema+"""'
                                 AND  ALL_TAB_COMMENTS.TABLE_NAME = '"""+self.v_nome_oggetto+"""'   
                               UNION ALL 
                               SELECT TO_CLOB('\n/\n') FROM DUAL                              
                               UNION ALL
                               SELECT TO_CLOB('COMMENT ON COLUMN '|| TABLE_NAME || '.' || COLUMN_NAME || ' IS ''' || REPLACE(COMMENTS,'''','''''') || ''';\n')
                               FROM   ALL_COL_COMMENTS
-                              WHERE  ALL_COL_COMMENTS.OWNER = '"""+self.e_user_name+"""'
+                              WHERE  ALL_COL_COMMENTS.OWNER = '"""+self.current_schema+"""'
                                 AND  ALL_COL_COMMENTS.TABLE_NAME = '"""+self.v_nome_oggetto+"""'   
                            """
             elif self.v_tipo_oggetto in ('VIEW'):
@@ -1524,20 +1541,20 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                               SELECT TO_CLOB('\n/\n') FROM DUAL                              
                               UNION ALL                              
                               SELECT DBMS_METADATA.GET_DEPENDENT_DDL('TRIGGER','"""+self.v_nome_oggetto+"""') FROM DUAL
-                              WHERE (SELECT COUNT(*) FROM ALL_TRIGGERS WHERE OWNER='"""+self.e_user_name+"""' AND TABLE_NAME='"""+self.v_nome_oggetto+"""') > 0													                                 
+                              WHERE (SELECT COUNT(*) FROM ALL_TRIGGERS WHERE OWNER='"""+self.current_schema+"""' AND TABLE_NAME='"""+self.v_nome_oggetto+"""') > 0													                                 
                               UNION ALL 
                               SELECT TO_CLOB('\n/\n') FROM DUAL                              
                               UNION ALL
                               SELECT TO_CLOB('COMMENT ON TABLE ' || TABLE_NAME || ' IS ''' || REPLACE(COMMENTS,'''','''''') || ''';')
                               FROM   ALL_TAB_COMMENTS
-                              WHERE  ALL_TAB_COMMENTS.OWNER = '"""+self.e_user_name+"""'
+                              WHERE  ALL_TAB_COMMENTS.OWNER = '"""+self.current_schema+"""'
                                 AND  ALL_TAB_COMMENTS.TABLE_NAME = '"""+self.v_nome_oggetto+"""'   
                               UNION ALL 
                               SELECT TO_CLOB('\n/\n') FROM DUAL                              
                               UNION ALL
                               SELECT TO_CLOB('COMMENT ON COLUMN '|| TABLE_NAME || '.' || COLUMN_NAME || ' IS ''' || REPLACE(COMMENTS,'''','''''') || ''';\n')
                               FROM   ALL_COL_COMMENTS
-                              WHERE  ALL_COL_COMMENTS.OWNER = '"""+self.e_user_name+"""'
+                              WHERE  ALL_COL_COMMENTS.OWNER = '"""+self.current_schema+"""'
                                 AND  ALL_COL_COMMENTS.TABLE_NAME = '"""+self.v_nome_oggetto+"""'   
                            """
             elif self.v_tipo_oggetto in ('PRIMARY_KEY','UNIQUE_KEY','CHECK_KEY'):
@@ -1577,7 +1594,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                                      GRANTABLE
                               FROM   ALL_TAB_PRIVS 
                               WHERE  TABLE_NAME = '"""+self.v_nome_oggetto+"""' 
-                                 AND GRANTOR='"""+self.e_user_name+"""'
+                                 AND GRANTOR='"""+self.current_schema+"""'
                               GROUP BY GRANTEE, GRANTABLE
                               ORDER BY GRANTEE
                            """
@@ -1742,9 +1759,92 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 
         # se tutto ok, richiamo la visualizzazione
         if self.v_nome_oggetto != '':
-            self.carica_object_viewer(self.v_tipo_oggetto, self.v_nome_oggetto)
+            self.carica_object_viewer(self.current_schema, self.v_tipo_oggetto, self.v_nome_oggetto)
 
-    def carica_object_viewer(self, p_tipo_oggetto, p_nome_oggetto):
+    def slot_select_schema(self):    
+        """
+            Apre finestra per richiedere il cambio di schema
+        """            
+        # inizializzo le strutture grafice e visualizzo la dialog per richiedere il cambio di schema
+        self.dialog_select_schema = QDialog()
+        self.win_dialog_select_schema = Ui_select_schema_window()
+        self.win_dialog_select_schema.setupUi(self.dialog_select_schema)       
+        centra_window_figlia(self, self.dialog_select_schema)
+
+        # carico elenco schemi
+        self.slot_carica_elenco_schemi()
+
+        # creo evento riferito al bottone di scelta dello schema
+        self.win_dialog_select_schema.b_confirm_schema.clicked.connect(self.slot_confirm_schema)                
+        # creo evento riferito al bottone di ricerca di uno schema
+        self.win_dialog_select_schema.b_start.clicked.connect(self.slot_carica_elenco_schemi)        
+
+        self.dialog_select_schema.show()        
+        
+    def slot_carica_elenco_schemi(self):
+        """
+           Esegue il carico elenco schemi per il relativo form
+        """        
+        global v_global_connesso
+        
+        # se non connesso --> esco
+        if not v_global_connesso:
+            return 'ko'
+
+        # associo il modello degli schemi, creato dalla init, all'oggetto di elenco presente nel form
+        self.win_dialog_select_schema.e_schema_list.setModel(self.schema_model)
+                
+        # sostituisce la freccia del mouse con icona "clessidra"
+        Freccia_Mouse(True)        
+                        
+        # eseguo la select che restituisce elenco degli schemi
+        v_select = "SELECT USERNAME FROM ALL_USERS"
+        if self.win_dialog_select_schema.e_find_schema.text() != '':
+            v_select += " WHERE USERNAME LIKE '%" + self.win_dialog_select_schema.e_find_schema.text().upper() + "%'"
+        v_select += " ORDER BY USERNAME"
+        try:            
+            self.v_cursor_db_obj.execute(v_select)                    
+        except cx_Oracle.Error as e:                                                                
+            # ripristino icona freccia del mouse
+            Freccia_Mouse(False)
+            # emetto errore 
+            errorObj, = e.args                     
+            message_error("Error: " + errorObj.message)       
+            return "ko"                  
+        # ottengo un array di stringa contenente elenco degli schemi
+        v_risultato = []
+        for righe in self.v_cursor_db_obj.fetchall():
+            v_risultato.append(righe[0])                
+        # carico il risultato nel modello che essendo a sua volta collegato all'oggetto di form, farà comparire elenco
+        self.schema_model.setStringList(v_risultato)
+
+        # Ripristino icona freccia del mouse
+        Freccia_Mouse(False)      
+    
+    def slot_confirm_schema(self):
+        """
+            Conferma del nuovo schema e caricamento dell'object navigator
+        """
+        # ricerco la posizione dell'indice selezionato e ne ricavo il contenuto 
+        v_index = self.win_dialog_select_schema.e_schema_list.selectedIndexes()[0]                    
+        self.current_schema = self.schema_model.data(v_index)
+        
+        # carico l'object viewer usando lo schema scelto
+        if self.current_schema != '':
+            # cambio lo schema corrente a livello di database
+            try:            
+                self.v_cursor_db_obj.execute("ALTER SESSION SET CURRENT_SCHEMA = " + self.current_schema)                    
+            except cx_Oracle.Error as e:                                                                
+                # emetto errore 
+                errorObj, = e.args                     
+                message_error("Error: " + errorObj.message)                   
+            # ricarico elenco degli oggetti
+            self.carica_oggetti_db_scelta()        
+        
+        # chiudo la window
+        self.dialog_select_schema.close()
+    
+    def carica_object_viewer(self, p_owner, p_tipo_oggetto, p_nome_oggetto):
         """
            Funzione che si occupa di caricare i dati dell'object viewer
         """        
@@ -1760,9 +1860,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
 
         # se l'oggetto selezionato è una tabella o una vista --> preparo select per estrarre i nomi dei campi
         if self.v_tipo_oggetto == 'TABLE' or self.v_tipo_oggetto == 'VIEW':
-            print('Start loading object viewer of --> ' + self.v_nome_oggetto + ' - ' + self.v_tipo_oggetto)
+            print('Start loading object viewer of --> ' + p_owner + '.' + self.v_nome_oggetto + ' - ' + self.v_tipo_oggetto)
             # ricerco la descrizione dell'oggetto
-            self.v_cursor_db_obj.execute("SELECT COMMENTS FROM ALL_TAB_COMMENTS WHERE owner='"+self.e_user_name+"' AND TABLE_NAME='"+self.v_nome_oggetto+"'")
+            self.v_cursor_db_obj.execute("SELECT COMMENTS FROM ALL_TAB_COMMENTS WHERE owner='"+p_owner+"' AND TABLE_NAME='"+self.v_nome_oggetto+"'")
             v_record = self.v_cursor_db_obj.fetchone()
             if v_record is not None:
                 self.v_tipo_oggetto_commento = v_record[0]
@@ -1770,7 +1870,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 self.v_tipo_oggetto_commento = ''
             # creo un modello dati con 4 colonne (dove nell'intestazione ci metto il nome della tabella e la sua descrizione)
             self.db_oggetto_tree_model = QStandardItemModel()
-            self.db_oggetto_tree_model.setHorizontalHeaderLabels([self.v_nome_oggetto, self.e_user_name, '', self.v_tipo_oggetto_commento])
+            self.db_oggetto_tree_model.setHorizontalHeaderLabels([self.v_nome_oggetto, p_owner, '', self.v_tipo_oggetto_commento])
 
             ###
             # prima radice con il nome della tabella
@@ -1793,7 +1893,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                                                    DATA_DEFAULT AS VALORE_DEFAULT,
                                                    B.COMMENTS AS COMMENTO
                                             FROM   ALL_TAB_COLUMNS A, ALL_COL_COMMENTS B 
-                                            WHERE  A.OWNER='"""+self.e_user_name+"""' AND 
+                                            WHERE  A.OWNER='"""+p_owner+"""' AND 
                                                    A.TABLE_NAME ='"""+self.v_nome_oggetto+"""' AND 
                                                    A.OWNER=B.OWNER AND 
                                                    A.TABLE_NAME=B.TABLE_NAME AND 
@@ -1826,7 +1926,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                                                                 CONSTRAINT_NAME=ALL_CONSTRAINTS.CONSTRAINT_NAME) 
                                                    END AS REGOLA
                                             FROM   ALL_CONSTRAINTS 
-                                            WHERE  OWNER='"""+self.e_user_name+"""' AND 
+                                            WHERE  OWNER='"""+p_owner+"""' AND 
                                                    TABLE_NAME='"""+self.v_nome_oggetto+"""' AND
                                                    CONSTRAINT_NAME NOT LIKE 'SYS%'
                                             ORDER BY Decode(CONSTRAINT_TYPE,'P','1','R','2','3'), CONSTRAINT_NAME""")
@@ -1850,7 +1950,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                                                    CASE WHEN UNIQUENESS='UNIQUE' THEN 'unique' END UNICO, 
                                                    (SELECT LISTAGG(COLUMN_NAME,',') WITHIN GROUP (ORDER BY COLUMN_POSITION) COLONNE FROM ALL_IND_COLUMNS WHERE INDEX_OWNER=ALL_INDEXES.OWNER AND INDEX_NAME=ALL_INDEXES.INDEX_NAME) COLONNE
                                             FROM   ALL_INDEXES 
-                                            WHERE  OWNER='"""+self.e_user_name+"""' AND 
+                                            WHERE  OWNER='"""+p_owner+"""' AND 
                                                     TABLE_NAME='"""+self.v_nome_oggetto+"""'
                                                     ORDER BY INDEX_NAME""")
 
@@ -1872,7 +1972,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                                                    TRIGGER_TYPE, 
                                                    TRIGGERING_EVENT 
                                             FROM   ALL_TRIGGERS 
-                                            WHERE  OWNER='"""+self.e_user_name+"""' AND 
+                                            WHERE  OWNER='"""+p_owner+"""' AND 
                                                    TABLE_NAME='"""+self.v_nome_oggetto+"""'
                                             ORDER BY TRIGGER_NAME""")
 
@@ -1918,7 +2018,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             v_root_codice = QStandardItem('Code')
 
             # leggo il sorgente e lo metto dentro una lista!
-            self.v_cursor_db_obj.execute("""SELECT UPPER(TEXT) as TEXT, LINE FROM ALL_SOURCE WHERE OWNER='"""+self.e_user_name+"""' AND NAME='"""+self.v_nome_oggetto+"""' AND TYPE='"""+self.v_tipo_oggetto+"""' ORDER BY LINE""")
+            self.v_cursor_db_obj.execute("""SELECT UPPER(TEXT) as TEXT, LINE FROM ALL_SOURCE WHERE OWNER='"""+p_owner+"""' AND NAME='"""+self.v_nome_oggetto+"""' AND TYPE='"""+self.v_tipo_oggetto+"""' ORDER BY LINE""")
             v_lista_testo = []
             for result in self.v_cursor_db_obj:                       
                 v_lista_testo.append(result[0])
@@ -2153,6 +2253,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         self.dialog_connect = QDialog()
         self.win_dialog_connect = Ui_connect_window()
         self.win_dialog_connect.setupUi(self.dialog_connect)       
+        centra_window_figlia(self, self.dialog_connect)
         
         # imposto la maschera di editazione sul campo user in modo sia maiuscolo                        
         self.win_dialog_connect.e_user.textEdited.connect(self.slot_e_user_to_upper) 
@@ -3469,12 +3570,18 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         v_line = self.e_sql.selectedText()
         # riposiziono il cursore allo stato originario
         self.e_sql.setSelection(v_num_line, v_num_pos, v_num_line, v_num_pos)
-        # utilizzando la posizione del cursore sulla riga, estraggo la parola più prossima al cursore stesso                
-        v_oggetto = extract_word_from_cursor_pos(v_line.upper(), v_num_pos)                
+        # utilizzando la posizione del cursore sulla riga, estraggo il nome dell'oggetto che sta sotto il cursore (es. TA_AZIEN oppure SMILE.TA_AZIEN)
+        v_owner, v_oggetto = extract_object_name_from_cursor_pos(v_line.upper(), v_num_pos-1)                        
         if v_oggetto != '':
-            print('F11-Quick query on --> ' + v_oggetto)      
+            # se owner non trovato allora uso lo schema corrente
+            if v_owner is None:                
+                v_owner = self.link_to_MSql_win1_class.current_schema                              
+            # pulisco il nome dell'oggetto da eventuali caratteri speciali come ritorno a capo, tab e spazi
+            v_oggetto = v_oggetto.rstrip().lstrip()                            
+            # messaggio di debug
+            print('F11-Quick query on --> ' + v_owner + '.' + v_oggetto)      
             # tento di eseguire la query dell'oggetto selezionato (dovrebbe essere una tabella)
-            v_select = 'SELECT * FROM ' + v_oggetto
+            v_select = 'SELECT * FROM ' + v_owner + '.' + v_oggetto
             self.esegui_select(v_select, True)
         
     def slot_f12(self):
@@ -3492,14 +3599,20 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         v_line = self.e_sql.selectedText()
         # riposiziono il cursore allo stato originario
         self.e_sql.setSelection(v_num_line, v_num_pos, v_num_line, v_num_pos)
-        # utilizzando la posizione del cursore sulla riga, estraggo la parola più prossima al cursore stesso                
-        v_oggetto = extract_word_from_cursor_pos(v_line.upper(), v_num_pos)                
+        # utilizzando la posizione del cursore sulla riga, estraggo il nome dell'oggetto che sta sotto il cursore (es. TA_AZIEN oppure SMILE.TA_AZIEN)
+        v_owner, v_oggetto = extract_object_name_from_cursor_pos(v_line.upper(), v_num_pos-1)                
         if v_oggetto != '':
-            print('F12-Call Object viewer of --> ' + v_oggetto)
+            # se owner non trovato allora uso lo schema corrente
+            if v_owner is None:                
+                v_owner = self.link_to_MSql_win1_class.current_schema                              
+            # pulisco il nome dell'oggetto da eventuali caratteri speciali come ritorno a capo, tab e spazi
+            v_oggetto = v_oggetto.rstrip().lstrip()                            
+            # messaggio di debug
+            print('F12-Call Object viewer of --> ' + v_owner + '.' + v_oggetto)
             # richiamo la procedura di oracle che mi restituisce la ddl dell'oggetto (apro un cursore locale a questa funzione)
-            v_temp_cursor = v_global_connection.cursor()
+            v_temp_cursor = v_global_connection.cursor()                        
             try:
-                v_temp_cursor.execute("SELECT OBJECT_NAME, OBJECT_TYPE FROM ALL_OBJECTS WHERE OBJECT_NAME = '" + v_oggetto + "' AND OBJECT_TYPE IN ('TABLE','VIEW','PACKAGE','PROCEDURE','FUNCTION')")
+                v_temp_cursor.execute("""SELECT OBJECT_NAME, OBJECT_TYPE FROM ALL_OBJECTS WHERE OWNER = '""" + v_owner + """' AND OBJECT_NAME = '""" + v_oggetto + """' AND OBJECT_TYPE IN ('TABLE','VIEW','PACKAGE','PROCEDURE','FUNCTION')""")
             except:
                 return 'ko'
             # prendo il risultato
@@ -3509,7 +3622,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 v_nome_oggetto = v_record[0]
                 v_tipo_oggetto = v_record[1]                                   
                 # carico l'object viewer passando come parametro iniziale il puntatore all'oggetto main
-                MSql_win1_class.carica_object_viewer(self.link_to_MSql_win1_class,v_tipo_oggetto,v_nome_oggetto)                                        
+                MSql_win1_class.carica_object_viewer(self.link_to_MSql_win1_class, v_owner, v_tipo_oggetto, v_nome_oggetto)                                        
             else:
                 print('Not found ' + v_oggetto)
     
@@ -3527,6 +3640,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
 
         v_oggetto  = ''
         v_oggetto2 = ''        
+        v_trovato_punto = False
         # se non è stata fatta alcuna selezione multipla di testo....vuol dire che è stato richiesto di ricercare la primary key di un'unica tabella
         if self.e_sql.selectedText() == '':              
             # ricavo numero riga e posizione del cursore
@@ -3539,9 +3653,14 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             else:
                 v_line = v_line.replace('\n','')                        
             # riposiziono il cursore allo stato originario
-            self.e_sql.setSelection(v_num_line, v_num_pos, v_num_line, v_num_pos)
-            # utilizzando la posizione del cursore sulla riga, estraggo la parola più prossima al cursore stesso                            
-            v_oggetto = extract_word_from_cursor_pos(v_line.upper(), v_num_pos)                                                    
+            self.e_sql.setSelection(v_num_line, v_num_pos, v_num_line, v_num_pos)            
+            # utilizzando la posizione del cursore sulla riga, estraggo il nome dell'oggetto che sta sotto il cursore (es. TA_AZIEN oppure SMILE.TA_AZIEN)            
+            v_owner, v_oggetto = extract_object_name_from_cursor_pos(v_line.upper(), v_num_pos-1)                                                    
+            # se owner non trovato allora uso il nome utente di connessione
+            if v_owner is None:
+                v_owner = self.link_to_MSql_win1_class.e_user_name               
+            else:
+                v_trovato_punto = True
         # altrimenti è stato selezionato del testo e devo capire se l'utente ha scritto due tabella su cui vuole fare la join
         else:
             # ricavo numero riga e posizione del cursore
@@ -3559,8 +3678,10 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 v_oggetto = v_oggetti[0]
             if len(v_oggetti) > 1:
                 v_oggetto2 = v_oggetti[1]
+            # imposto owner sempre come nome utente
+            v_owner = self.link_to_MSql_win1_class.e_user_name               
 
-        print('CTRL_K-Key of --> ' + v_oggetto2 + ',' + v_oggetto)
+        print('CTRL_K-Key of --> ' + v_owner + '.' + v_oggetto2 + ',' + v_oggetto)
         # sostituisce la freccia del mouse con icona "clessidra"
         Freccia_Mouse(True)
         # richiamo la procedura di oracle che mi restituisce la ddl dell'oggetto (apro un cursore locale a questa funzione)
@@ -3570,18 +3691,18 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         if v_oggetto != '' and v_oggetto2 == '':            
             try:
                 v_temp_cursor.execute("""SELECT ALL_TAB_COLUMNS.COLUMN_NAME, ALL_TAB_COLUMNS.DATA_TYPE
-                                            FROM   ALL_CONSTRAINTS,
+                                         FROM   ALL_CONSTRAINTS,
                                                 ALL_CONS_COLUMNS,
                                                 ALL_TAB_COLUMNS																					
-                                            WHERE  ALL_CONSTRAINTS.OWNER           = '""" + self.link_to_MSql_win1_class.e_user_name + """'
-                                            AND  ALL_CONSTRAINTS.TABLE_NAME      = '""" + v_oggetto + """'
-                                            AND  ALL_CONSTRAINTS.CONSTRAINT_TYPE = 'P'
-                                            AND  ALL_CONSTRAINTS.OWNER           = ALL_CONS_COLUMNS.OWNER
-                                            AND  ALL_CONSTRAINTS.CONSTRAINT_NAME = ALL_CONS_COLUMNS.CONSTRAINT_NAME
-                                            AND  ALL_CONSTRAINTS.TABLE_NAME      = ALL_CONS_COLUMNS.TABLE_NAME
-                                            AND  ALL_CONS_COLUMNS.OWNER          = ALL_TAB_COLUMNS.OWNER
-                                            AND  ALL_CONS_COLUMNS.TABLE_NAME     = ALL_TAB_COLUMNS.TABLE_NAME
-                                            AND  ALL_CONS_COLUMNS.COLUMN_NAME    = ALL_TAB_COLUMNS.COLUMN_NAME
+                                         WHERE  ALL_CONSTRAINTS.OWNER           = '""" + v_owner + """'
+                                           AND  ALL_CONSTRAINTS.TABLE_NAME      = '""" + v_oggetto + """'
+                                           AND  ALL_CONSTRAINTS.CONSTRAINT_TYPE = 'P'
+                                           AND  ALL_CONSTRAINTS.OWNER           = ALL_CONS_COLUMNS.OWNER
+                                           AND  ALL_CONSTRAINTS.CONSTRAINT_NAME = ALL_CONS_COLUMNS.CONSTRAINT_NAME
+                                           AND  ALL_CONSTRAINTS.TABLE_NAME      = ALL_CONS_COLUMNS.TABLE_NAME
+                                           AND  ALL_CONS_COLUMNS.OWNER          = ALL_TAB_COLUMNS.OWNER
+                                           AND  ALL_CONS_COLUMNS.TABLE_NAME     = ALL_TAB_COLUMNS.TABLE_NAME
+                                           AND  ALL_CONS_COLUMNS.COLUMN_NAME    = ALL_TAB_COLUMNS.COLUMN_NAME
                                         ORDER BY ALL_CONS_COLUMNS.POSITION""")
             except:
                 return 'ko'
@@ -3589,7 +3710,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             v_record = v_temp_cursor.fetchall()
             # se trovati dei record....inizio a comporre la select, mettendo nella where campo per campo
             if len(v_record) > 0:
-                v_risultato = 'SELECT *' + v_eol + 'FROM   ' + v_oggetto + v_eol + 'WHERE  '
+                v_risultato = 'SELECT *' + v_eol + 'FROM   ' + v_owner + '.' + v_oggetto + v_eol + 'WHERE  '
                 v_1a_volta = True
                 for campi in v_record:                
                     if v_1a_volta:
@@ -3605,6 +3726,10 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 # cancello la parola dove presente il cursore (sia a destra che a sinistra)
                 self.e_sql.SendScintilla(QsciScintilla.SCI_DELWORDLEFT)
                 self.e_sql.SendScintilla(QsciScintilla.SCI_DELWORDRIGHT)                
+                # se l'utente aveva scritto il nome di tabella preceduto dal punto, allora devo cancellare a sinistra anche il punto e owner
+                if v_trovato_punto:
+                    self.e_sql.SendScintilla(QsciScintilla.SCI_DELWORDLEFT)
+                    self.e_sql.SendScintilla(QsciScintilla.SCI_DELWORDLEFT)
                 # ed inserisco il risultato 
                 self.e_sql.insert(v_risultato)
                 # chiudo eventuale popup di autocompletation inviando a qscintilla il tasto Esc
@@ -3624,18 +3749,18 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                                                 PKC.COLUMN_NAME AS TABLE1_COLUMN,
                                                 (SELECT DATA_TYPE FROM ALL_TAB_COLUMNS WHERE ALL_TAB_COLUMNS.TABLE_NAME=FK.TABLE_NAME  AND ALL_TAB_COLUMNS.COLUMN_NAME=FKC.COLUMN_NAME) AS DATA_TYPE,
                                                 PK.CONSTRAINT_TYPE 
-                                            FROM   USER_CONSTRAINTS  FK,
+                                         FROM   USER_CONSTRAINTS  FK,
                                                 USER_CONS_COLUMNS FKC,
                                                 USER_CONSTRAINTS  PK,
                                                 USER_CONS_COLUMNS PKC
-                                            WHERE  FK.OWNER           = '""" + self.link_to_MSql_win1_class.e_user_name + """'
-                                            AND  FK.CONSTRAINT_TYPE = 'R'
-                                            AND  FK.TABLE_NAME      = '""" + v_oggetto2 + """'
-                                            AND  PK.TABLE_NAME      = '""" + v_oggetto + """'
-                                            AND  FK.OWNER = FKC.OWNER AND FK.CONSTRAINT_NAME   = FKC.CONSTRAINT_NAME
-                                            AND  FK.OWNER = PK.OWNER  AND FK.R_CONSTRAINT_NAME = PK.CONSTRAINT_NAME
-                                            AND  PK.OWNER = PKC.OWNER AND PK.CONSTRAINT_NAME   = PKC.CONSTRAINT_NAME AND PKC.POSITION = FKC.POSITION
-                                            ORDER BY FKC.POSITION""")
+                                         WHERE  FK.OWNER           = '""" + v_owner + """'
+                                           AND  FK.CONSTRAINT_TYPE = 'R'
+                                           AND  FK.TABLE_NAME      = '""" + v_oggetto2 + """'
+                                           AND  PK.TABLE_NAME      = '""" + v_oggetto + """'
+                                           AND  FK.OWNER = FKC.OWNER AND FK.CONSTRAINT_NAME   = FKC.CONSTRAINT_NAME
+                                           AND  FK.OWNER = PK.OWNER  AND FK.R_CONSTRAINT_NAME = PK.CONSTRAINT_NAME
+                                           AND  PK.OWNER = PKC.OWNER AND PK.CONSTRAINT_NAME   = PKC.CONSTRAINT_NAME AND PKC.POSITION = FKC.POSITION
+                                         ORDER BY FKC.POSITION""")
             except:
                 return 'ko'
             # prendo il risultato e inizio a costruire una nuova select con tutti i campi che compongono la join
@@ -3659,7 +3784,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                     v_record = v_record_new                        
                 
                 # inizio la costruzione del risultato
-                v_risultato = 'SELECT * ' + v_eol + 'FROM   ' + v_oggetto + ',' + v_eol + '       ' + v_oggetto2 + v_eol + 'WHERE  '
+                v_risultato = 'SELECT * ' + v_eol + 'FROM   ' + v_owner + '.' + v_oggetto + ',' + v_eol + '       ' + v_owner + '.' + v_oggetto2 + v_eol + 'WHERE  '
                 # primary key
                 v_1a_volta = True
                 for campi in v_record:                

@@ -241,7 +241,7 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>250</width>
+     <width>261</width>
      <height>210</height>
     </size>
    </property>
@@ -293,7 +293,21 @@
          <number>0</number>
         </property>
         <item row="0" column="0">
-         <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="2,0,0">
+         <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,2,0,0">
+          <item>
+           <widget class="QPushButton" name="b_schema">
+            <property name="toolTip">
+             <string>Select a schema</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="resource.qrc">
+              <normaloff>:/icons/icons/database_config.png</normaloff>:/icons/icons/database_config.png</iconset>
+            </property>
+           </widget>
+          </item>
           <item>
            <widget class="QComboBox" name="oggetti_db_scelta">
             <property name="sizePolicy">
@@ -459,12 +473,6 @@
             <property name="icon">
              <iconset resource="resource.qrc">
               <normaloff>:/icons/icons/refresh.png</normaloff>:/icons/icons/refresh.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>18</width>
-              <height>18</height>
-             </size>
             </property>
            </widget>
           </item>
@@ -1541,6 +1549,7 @@
   <tabstop>oggetti_db_scelta</tabstop>
   <tabstop>e_view_description</tabstop>
   <tabstop>oggetti_db_refresh</tabstop>
+  <tabstop>b_schema</tabstop>
   <tabstop>oggetti_db_tipo_ricerca</tabstop>
   <tabstop>oggetti_db_ricerca</tabstop>
   <tabstop>oggetti_db_elenco</tabstop>
@@ -1558,8 +1567,8 @@
    <slot>slot_oggetti_db_scelta()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1182</x>
-     <y>119</y>
+     <x>1190</x>
+     <y>105</y>
     </hint>
     <hint type="destinationlabel">
      <x>1253</x>
@@ -1574,8 +1583,8 @@
    <slot>slot_oggetti_db_scelta()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1099</x>
-     <y>154</y>
+     <x>1104</x>
+     <y>135</y>
     </hint>
     <hint type="destinationlabel">
      <x>1055</x>
@@ -1591,7 +1600,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>1243</x>
-     <y>119</y>
+     <y>105</y>
     </hint>
     <hint type="destinationlabel">
      <x>1159</x>
@@ -1607,7 +1616,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>1244</x>
-     <y>855</y>
+     <y>560</y>
     </hint>
     <hint type="destinationlabel">
      <x>995</x>
@@ -1622,8 +1631,8 @@
    <slot>slot_oggetti_db_scelta()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1205</x>
-     <y>119</y>
+     <x>1209</x>
+     <y>105</y>
     </hint>
     <hint type="destinationlabel">
      <x>1219</x>
@@ -1655,7 +1664,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>1243</x>
-     <y>543</y>
+     <y>372</y>
     </hint>
     <hint type="destinationlabel">
      <x>800</x>
@@ -1670,12 +1679,28 @@
    <slot>slot_object_navigator_start_timer()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1147</x>
-     <y>147</y>
+     <x>1243</x>
+     <y>135</y>
     </hint>
     <hint type="destinationlabel">
      <x>1139</x>
      <y>-23</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>b_schema</sender>
+   <signal>clicked()</signal>
+   <receiver>MSql_win1</receiver>
+   <slot>slot_select_schema()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1002</x>
+     <y>100</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>182</x>
+     <y>-15</y>
     </hint>
    </hints>
   </connection>
@@ -1687,5 +1712,6 @@
   <slot>slot_db_oggetto_tree_expand()</slot>
   <slot>slot_object_viewer_find()</slot>
   <slot>slot_object_navigator_start_timer()</slot>
+  <slot>slot_select_schema()</slot>
  </slots>
 </ui>

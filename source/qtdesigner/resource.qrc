@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/database_config.png</file>
     <file>icons/bookmark_remove.png</file>
     <file>icons/bookmark_remove.png</file>
     <file>icons/bookmark.png</file>

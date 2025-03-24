@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>select_schema_window</class>
+ <widget class="QDialog" name="select_schema_window">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>191</width>
+    <height>522</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Select schema</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="resource.qrc">
+    <normaloff>:/icons/icons/MSql.ico</normaloff>:/icons/icons/MSql.ico</iconset>
+  </property>
+  <property name="modal">
+   <bool>true</bool>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="0" column="0">
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QLineEdit" name="e_find_schema"/>
+     </item>
+     <item row="0" column="1">
+      <widget class="QPushButton" name="b_start">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="resource.qrc">
+         <normaloff>:/icons/icons/go.png</normaloff>:/icons/icons/go.png</iconset>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="0">
+    <widget class="QListView" name="e_schema_list"/>
+   </item>
+   <item row="2" column="0">
+    <widget class="QPushButton" name="b_confirm_schema">
+     <property name="text">
+      <string>Select schema</string>
+     </property>
+     <property name="icon">
+      <iconset resource="resource.qrc">
+       <normaloff>:/icons/icons/database_config.png</normaloff>:/icons/icons/database_config.png</iconset>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>e_find_schema</tabstop>
+  <tabstop>b_start</tabstop>
+  <tabstop>e_schema_list</tabstop>
+  <tabstop>b_confirm_schema</tabstop>
+ </tabstops>
+ <resources>
+  <include location="resource.qrc"/>
+ </resources>
+ <connections/>
+</ui>

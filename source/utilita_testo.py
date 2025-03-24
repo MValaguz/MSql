@@ -22,32 +22,61 @@ def scrivi_lista_in_output(p_lista):
         v_file.write(riga)                
     v_file.close()
 
-def extract_word_from_cursor_pos(p_string, p_pos):
+def extract_object_name_from_cursor_pos(p_string, p_pos):
+    """
+       Data una stringa completa p_stringa e una posizione di cursore su di essa, 
+       estrae la coppia owner.object che sta "sotto" la posizione del cursore 
+       Es. p_string = SELECT * FROM SMI.OP_COM
+           p_pos = 20
+           restituisce SMI e OP_COM
+    """
+    # ricerco la parola dove posizionato cursore senza tenere conto del "." 
+    v_word = extract_word_from_cursor_pos(p_string, p_pos, False)
+    # Divide la parola se contiene un punto
+    if '.' in v_word:
+        parts = v_word.split('.', 1)
+        return parts[0], parts[1]
+    else:
+        return None, v_word
+
+def extract_word_from_cursor_pos(p_string, p_pos, p_period=True):
     """
        Data una stringa completa p_stringa e una posizione di cursore su di essa, 
        estrae la parola che sta "sotto" la posizione del cursore
        Es. p_string = CIAO A TUTTI QUANTI VOI 
            p_pos = 10
            restituisce TUTTI       
-    """    
+       Se passato il parametro p_period a False, il carattere punto non verrà considerato come separatore e ad esempio la stringa SMI.OP_COM verrà considerata come unica parola
+    """                
+    # è stato richiesto di considerare "." come separatore di parola
+    if p_period:
+        v_check1_chars = ('',' ','=',':','.','(',')',';',',',chr(9))
+        v_check2_chars = (' ','=',':','.','(',')',';',',',chr(9))
+        v_check3_chars = (' ','=',':','\n','\r','.','(',')',';',',',chr(9))
+    # ... altrimenti di non considerarlo
+    else:
+        v_check1_chars = ('',' ','=',':','(',')',';',',',chr(9))
+        v_check2_chars = (' ','=',':','(',')',';',',',chr(9))
+        v_check3_chars = (' ','=',':','\n','\r','(',')',';',',',chr(9))
     # se posizione cursore è oltre la stringa...esco    
+    
     if p_pos > len(p_string):
         return ''
     elif p_pos == len(p_string):
         p_pos -= 1
 
     # inizio a comporre la parola partendo dalla posizione del cursore (se non trovo nulla esco)
-    v_word=p_string[p_pos]    
-    if v_word is None or v_word in ('',' ','=',':','.','(',')',';',',',chr(9)):        
+    v_word=p_string[p_pos]
+    if v_word is None or v_word in v_check1_chars:        
         return ''
 
     # mi sposto a sinistra rispetto al cursore e compongo la parola    
     v_index = p_pos
     while True and v_index > 0:
-        v_index -= 1        
-        if v_index < len(p_string):            
-            if p_string[v_index] not in (' ','=',':','.','(',')',';',',',chr(9)):
-                v_word = p_string[v_index] + v_word
+        v_index -= 1                
+        if v_index < len(p_string):                 
+            if p_string[v_index] not in v_check2_chars:
+                v_word = p_string[v_index] + v_word                
             else:                
                 break
         else:
@@ -58,7 +87,7 @@ def extract_word_from_cursor_pos(p_string, p_pos):
     while True:
         v_index += 1
         if v_index < len(p_string):
-            if p_string[v_index] not in (' ','=',':','\n','\r','.','(',')',';',',',chr(9)):
+            if p_string[v_index] not in v_check3_chars:
                 v_word += p_string[v_index]
             else:
                 break
@@ -228,4 +257,10 @@ if __name__ == "__main__":
     #         for par in ele.lista_parametri:
     #             v_write.write('   ' + par + '\r\n')    
     # #scrivi_lista_in_output(['ciao\n','marco\r\n'])
-    print(extract_word_from_cursor_pos('v_peso_nu			MA_ARTRE.PESO_NU%TYPE;', 18))
+    
+    # test funzione che restituisce owner e object    
+    v_owner, v_object = extract_object_name_from_cursor_pos('	select * from ta_azien ',23)    
+    print(f"{v_owner} {v_object}")    
+    
+    # test funzione che restituisce parola sotto il cursore
+    #print(extract_word_from_cursor_pos('v_peso_nu			MA_ARTRE.PESO_NU%TYPE;', 18))
