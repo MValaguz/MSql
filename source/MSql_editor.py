@@ -1134,7 +1134,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             v_cursor = v_global_connection.cursor()            
             # carico elenco delle parole chiave per evidenziarle (in questo caso i nomi degli oggetti)
             v_select = """SELECT OBJECT_NAME
-                          FROM   ALL_OBJECTS 
+                          FROM   DBA_OBJECTS 
                           WHERE  OWNER='""" + self.e_user_name + """' AND 
                                  STATUS='VALID' AND
                                  OBJECT_TYPE IN ('SEQUENCE','PROCEDURE','PACKAGE','TABLE','VIEW','FUNCTION')"""                                                         
@@ -1276,54 +1276,54 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 if self.e_view_description.isChecked():
                     v_select = """SELECT OBJECT_NAME || 
                                          CASE WHEN OBJECT_TYPE IN ('TABLE','VIEW') THEN
-                                               ' - ' || (SELECT COMMENTS FROM ALL_TAB_COMMENTS WHERE ALL_TAB_COMMENTS.OWNER=ALL_OBJECTS.OWNER AND ALL_TAB_COMMENTS.TABLE_NAME=ALL_OBJECTS.OBJECT_NAME)                                
+                                               ' - ' || (SELECT COMMENTS FROM ALL_TAB_COMMENTS WHERE ALL_TAB_COMMENTS.OWNER=DBA_OBJECTS.OWNER AND ALL_TAB_COMMENTS.TABLE_NAME=DBA_OBJECTS.OBJECT_NAME)                                
                                          ELSE 
                                              NULL
                                          END AS OBJECT_NAME,
                                          (SELECT COUNT(*) 
-                                          FROM   ALL_OBJECTS ABJ
-                                          WHERE  ABJ.OWNER=ALL_OBJECTS.OWNER AND 
-                                                 ABJ.OBJECT_NAME=ALL_OBJECTS.OBJECT_NAME AND 
+                                          FROM   DBA_OBJECTS ABJ
+                                          WHERE  ABJ.OWNER=DBA_OBJECTS.OWNER AND 
+                                                 ABJ.OBJECT_NAME=DBA_OBJECTS.OBJECT_NAME AND 
                                                  ABJ.STATUS != 'VALID') INVALID,
                                          CASE WHEN OBJECT_TYPE IN ('TRIGGER') THEN
-                                              (SELECT STATUS FROM ALL_TRIGGERS WHERE OWNER=ALL_OBJECTS.OWNER AND TRIGGER_NAME=ALL_OBJECTS.OBJECT_NAME) 
+                                              (SELECT STATUS FROM ALL_TRIGGERS WHERE OWNER=DBA_OBJECTS.OWNER AND TRIGGER_NAME=DBA_OBJECTS.OBJECT_NAME) 
                                          ELSE
                                              'ENABLED'
                                          END STATUS                                          
-                                  FROM   ALL_OBJECTS 
+                                  FROM   DBA_OBJECTS 
                                   WHERE  OWNER='""" + self.current_schema + """' AND 
                                          OBJECT_TYPE='""" + v_tipo_oggetto + """' AND
                                          SECONDARY = 'N'"""
                 else:
                     v_select = """SELECT OBJECT_NAME,
                                          (SELECT COUNT(*) 
-                                          FROM   ALL_OBJECTS ABJ
-                                          WHERE  ABJ.OWNER=ALL_OBJECTS.OWNER AND 
-                                                 ABJ.OBJECT_NAME=ALL_OBJECTS.OBJECT_NAME AND 
+                                          FROM   DBA_OBJECTS ABJ
+                                          WHERE  ABJ.OWNER=DBA_OBJECTS.OWNER AND 
+                                                 ABJ.OBJECT_NAME=DBA_OBJECTS.OBJECT_NAME AND 
                                                  ABJ.STATUS != 'VALID') INVALID,
                                                  CASE WHEN OBJECT_TYPE IN ('TRIGGER') THEN
-                                                    (SELECT STATUS FROM ALL_TRIGGERS WHERE OWNER=ALL_OBJECTS.OWNER AND TRIGGER_NAME=ALL_OBJECTS.OBJECT_NAME) 
+                                                    (SELECT STATUS FROM ALL_TRIGGERS WHERE OWNER=DBA_OBJECTS.OWNER AND TRIGGER_NAME=DBA_OBJECTS.OBJECT_NAME) 
                                                  ELSE
                                                     'ENABLED'
                                                  END STATUS                                          
-                                          FROM   ALL_OBJECTS 
+                                          FROM   DBA_OBJECTS 
                                           WHERE  OWNER='""" + self.current_schema + """' AND 
                                                  OBJECT_TYPE='""" + v_tipo_oggetto + """' AND
                                                  SECONDARY = 'N'"""                          
-        # l'utente non ha scelto nessun tipo di oggetto....si carica tutta la tabella all_objects (notare come alcuni tipi di oggetti come le foreign key non siano presenti)
+        # l'utente non ha scelto nessun tipo di oggetto....si carica tutta la tabella dba_objects (notare come alcuni tipi di oggetti come le foreign key non siano presenti)
         else:
             v_select = """SELECT OBJECT_NAME || ' - ' || OBJECT_TYPE AS OBJECT_NAME,                                        
                                  (SELECT COUNT(*) 
-                                  FROM   ALL_OBJECTS ABJ
-                                  WHERE  ABJ.OWNER=ALL_OBJECTS.OWNER AND 
-                                         ABJ.OBJECT_NAME=ALL_OBJECTS.OBJECT_NAME AND 
+                                  FROM   DBA_OBJECTS ABJ
+                                  WHERE  ABJ.OWNER=DBA_OBJECTS.OWNER AND 
+                                         ABJ.OBJECT_NAME=DBA_OBJECTS.OBJECT_NAME AND 
                                          ABJ.STATUS != 'VALID') INVALID,
                                  CASE WHEN OBJECT_TYPE IN ('TRIGGER') THEN
-                                      (SELECT STATUS FROM ALL_TRIGGERS WHERE OWNER=ALL_OBJECTS.OWNER AND TRIGGER_NAME=ALL_OBJECTS.OBJECT_NAME)
+                                      (SELECT STATUS FROM ALL_TRIGGERS WHERE OWNER=DBA_OBJECTS.OWNER AND TRIGGER_NAME=DBA_OBJECTS.OBJECT_NAME)
                                  ELSE
                                      'ENABLED'
                                  END STATUS                                          
-                          FROM   ALL_OBJECTS 
+                          FROM   DBA_OBJECTS 
                           WHERE  OWNER='""" + self.current_schema + """' AND
                                  OBJECT_TYPE IN ('TABLE','VIEW','PACKAGE','PROCEDURE','FUNCTION','TRIGGER','SEQUENCE') AND                                      
                                  SECONDARY = 'N'"""
@@ -3612,7 +3612,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # richiamo la procedura di oracle che mi restituisce la ddl dell'oggetto (apro un cursore locale a questa funzione)
             v_temp_cursor = v_global_connection.cursor()                        
             try:
-                v_temp_cursor.execute("""SELECT OBJECT_NAME, OBJECT_TYPE FROM ALL_OBJECTS WHERE OWNER = '""" + v_owner + """' AND OBJECT_NAME = '""" + v_oggetto + """' AND OBJECT_TYPE IN ('TABLE','VIEW','PACKAGE','PROCEDURE','FUNCTION')""")
+                v_temp_cursor.execute("""SELECT OBJECT_NAME, OBJECT_TYPE FROM DBA_OBJECTS WHERE OWNER = '""" + v_owner + """' AND OBJECT_NAME = '""" + v_oggetto + """' AND OBJECT_TYPE IN ('TABLE','VIEW','PACKAGE','PROCEDURE','FUNCTION')""")
             except:
                 return 'ko'
             # prendo il risultato
