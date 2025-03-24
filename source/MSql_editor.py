@@ -1218,11 +1218,11 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         """
         self.object_navigator_search_timer.start(800)  
             
-    def slot_oggetti_db_scelta(self, p_owner):
+    def slot_oggetti_db_scelta(self):
         """
            Carica elenco oggetti
         """                     
-        # non viene passato lo schema, verrà dunque usato quello dell'utente corrente
+        # viene usato lo schema corrente
         self.carica_oggetti_db_scelta()   
 
     def carica_oggetti_db_scelta(self):
