@@ -2,6 +2,9 @@
 #  Piattaforma...: Python3.11 con libreria pyqt6
 #  Data..........: 09/08/2018 
 
+#Libreria per criptare i messaggi
+import base64
+#Librerie grafiche 
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
@@ -114,3 +117,30 @@ def centra_window_figlia(p_window_madre, p_window_figlia):
     self_geometry = p_window_figlia.frameGeometry() 
     self_geometry.moveCenter(parent_center) 
     p_window_figlia.move(self_geometry.topLeft())
+
+def cripta_messaggio(messaggio):
+    """
+       Cripta una stringa con la chiave MSql. Il valore restituito è di tipo bytes, lo stesso che deve essere passato
+       all'invio dei dati su rete
+    """
+    key = 'MSql'
+    enc = []
+    for i in range(len(messaggio)):
+        key_c = key[i % len(key)]
+        enc_c = (ord(messaggio[i]) + ord(key_c)) % 256
+        enc.append(enc_c)
+    return base64.urlsafe_b64encode(bytes(enc))
+
+def decripta_messaggio(messaggio):
+    """
+       decripta una stringa con la chiave MSql. Il valore restituito è di tipo stringa, lo stesso che deve essere 
+       passato ai campi di visualizzazione 
+    """
+    key = 'MSql'
+    dec = []
+    enc = base64.urlsafe_b64decode(messaggio)
+    for i in range(len(enc)):
+        key_c = key[i % len(key)]
+        dec_c = chr((256 + enc[i] - ord(key_c)) % 256)
+        dec.append(dec_c)
+    return "".join(dec)        

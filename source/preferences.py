@@ -21,7 +21,7 @@ from PyQt6.QtWidgets import *
 #Definizioni interfaccia
 from preferences_ui import Ui_preferences_window
 #Librerie aggiuntive interne
-from utilita import message_info, message_question_yes_no
+from utilita import message_info, message_question_yes_no, cripta_messaggio, decripta_messaggio
 #Amplifico la pathname per ricercare le icone
 QDir.addSearchPath('icons', 'qtdesigner/icons/')
 
@@ -29,9 +29,9 @@ class preferences_class():
     """
         Classe che riporta tutte le preferenze
     """
-    def __init__(self, p_nome_file_preferences):
+    def __init__(self, p_nome_file_preferences, p_nome_file_connections):
         """
-           Lettura del file delle preferenze e caricamento nella classe
+           Lettura del file delle preferenze e delle connessioni e caricamento nella classe
         """
         # Se esiste il file delle preferenze...le carico nell'oggetto
         if os.path.isfile(p_nome_file_preferences):
@@ -96,10 +96,6 @@ class preferences_class():
             self.csv_separator = v_json['csv_separator']
             # tab size
             self.tab_size = v_json['tab_size']
-            # server
-            self.elenco_server = v_json['server']
-            # users
-            self.elenco_user = v_json['users']
             # autosave snapshoot (salvataggio degli editor aperti nella cartella backup)
             if 'autosave_snapshoot_interval' in v_json:                        
                 self.autosave_snapshoot_interval = v_json['autosave_snapshoot_interval']
@@ -129,8 +125,8 @@ class preferences_class():
             self.remember_text_pos = True
             self.dark_theme = False
             self.general_zoom = 100
-            self.open_dir = 'W:\\SQL'
-            self.save_dir = 'W:\\SQL'            
+            self.open_dir = ''
+            self.save_dir = ''            
             self.end_of_line = False
             self.font_editor = 'Cascadia Code, 12, BOLD'                                
             self.font_result = 'Segoe UI, 8'
@@ -145,35 +141,40 @@ class preferences_class():
             self.tab_size = '2'
             self.open_new_editor = True
             self.refresh_dictionary = 15
-            # elenco server è composto da Titolo, TNS e Colore, Flag per la connessione di default, Flag per evidenzia colore e richiesta conferme in creazione pkg
-            self.elenco_server = [('Server Prod (ICOM_815)','ICOM_815','#aaffff','0','0','0'),
-                                  ('Server Dev (BACKUP_815)','BACKUP_815','#ffffff','1','0','0')]
-            # elenco users è composto da Titolo, User, Password
-            self.elenco_user = [('USER_SMILE','SMILE','SMILE','1'),
-                                ('USER_SMI','SMI','SMI','0'),
-                                ('USER_SMIPACK','SMIPACK','SMIPACK','0'),
-                                ('USER_SMITEC','SMITEC','SMITEC','0'),
-                                ('USER_SMIMEC','SMIMEC','SMIMEC','0'),
-                                ('USER_SMIWRAP (SMIEnergia)','SMIWRAP','SMIWRAP','0'),
-                                ('USER_ENOBERG','ENOBERG','ENOBERG','0'),
-                                ('USER_FORM (SMILab)','SMIBLOW','SMIBLOW','0'),
-                                ('USER_SARCO','SARCO','SARCO','0')]
+            
+        # Se esiste il file delle connessioni...le carico nell'oggetto
+        if os.path.isfile(p_nome_file_connections):
+            v_dump = open(p_nome_file_connections, 'rb').read()
+            v_dump = decripta_messaggio(v_dump)            
+            v_json = json.loads(v_dump)
+            # elenco server è composto da Titolo, TNS e Colore, Flag per la connessione di default, Flag per evidenzia colore e richiesta conferme in creazione pkg (es. ('Server Prod (SMILE_815)','SMILE_815','#aaffff','0','0','0') )
+            self.elenco_server = v_json['server']
+            # elenco users è composto da Titolo, User, Password, Flag per la connessione di default (es. ('USER_SMILE','SMILE','SMILE','1') )
+            self.elenco_user = v_json['users']            
+        # ...se il file non esiste non carico nulla 
+        else:            
+            # elenco server è composto da Titolo, TNS e Colore, Flag per la connessione di default, Flag per evidenzia colore e richiesta conferme in creazione pkg (es. ('Server Prod (SMILE_815)','SMILE_815','#aaffff','0','0','0') )
+            self.elenco_server = []
+            # elenco users è composto da Titolo, User, Password, Flag per la connessione di default (es. ('USER_SMILE','SMILE','SMILE','1') )
+            self.elenco_user = []
        
 class win_preferences_class(QMainWindow, Ui_preferences_window):
     """
         Gestione delle preferenze di MSql
     """                
-    def __init__(self, p_nome_file_preferences):
+    def __init__(self, p_nome_file_preferences, p_nome_file_connections):
         super(win_preferences_class, self).__init__()        
         self.setupUi(self)
 
+        # salvo nella classe i parametri ricevuti per usi successivi
         self.nome_file_preferences = p_nome_file_preferences
+        self.nome_file_connections = p_nome_file_connections
 
         # forzo il posizionamento sul primo tab
         self.o_tab_widget.setCurrentIndex(0)
         
         # creo l'oggetto preferenze che automaticamente carica il file o le preferenze di default
-        self.preferences = preferences_class(self.nome_file_preferences)        
+        self.preferences = preferences_class(self.nome_file_preferences, self.nome_file_connections)        
         # le preferenze caricate vengono riportate a video
         self.e_remember_window_pos.setChecked(self.preferences.remember_window_pos)        
         self.e_remember_text_pos.setChecked(self.preferences.remember_text_pos)        
@@ -347,6 +348,11 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
             # cancello il file delle preferenze
             if os.path.isfile(self.nome_file_preferences):
                 os.remove(self.nome_file_preferences)
+
+            if message_question_yes_no('Do you want to delete connections preferences too?') == 'Yes':
+                # cancello il file delle preferenze
+                if os.path.isfile(self.nome_file_connections):
+                    os.remove(self.nome_file_connections)
 
             # emetto messaggio di fine
             message_info('Preferences restored! Restart MSql to see the changes ;-)')
@@ -557,7 +563,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         if self.e_tab_size.text() == '':
             self.e_tab_size.setText('2')
 	
-		# scrivo nel file un elemento json contenente le informazioni inseriti dell'utente
+		# scrivo primo file delle preferenze generiche 
         v_json ={'remember_window_pos': v_remember_window_pos,
                  'remember_text_pos': v_remember_text_pos,
                  'dark_theme': v_dark_theme,
@@ -574,16 +580,24 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
                  'tab_size': self.e_tab_size.text(),
                  'auto_clear_output': v_auto_clear_output,
                  'date_format': self.e_default_date_format.currentText(),
-                 'server': v_server,
-                 'users': v_users,
                  'general_zoom':self.e_general_zoom.value(),
                  'autocompletation':v_autocompletation,
                  'open_new_editor':v_open_new_editor,
                  'refresh_dictionary':self.e_refresh_dictionary.value(),
                 }
 
-		# scrittura nel file dell'oggetto json
+		# scrittura nel file dell'oggetto json (notare come venga usata la funzione dump senza la s finale in quanto scrive byte)
         with open(self.nome_file_preferences, 'w') as outfile:json.dump(v_json, outfile)
+
+        # scrivo secondo file con i dati user e server (separato in quanto nelle versione per GitHub non viene riportato!)
+        v_json ={'server': v_server,
+                 'users': v_users                 
+                }
+
+		# scrittura nel file dell'oggetto json (che viene criptato e notare come venga usata la funzione dumps con la s finale in quanto scrive stringhe)
+        v_dump = cripta_messaggio(json.dumps(v_json))
+        with open(self.nome_file_connections, 'wb') as outfile:
+            outfile.write(v_dump)
         
         message_info('Preferences saved! Restart MSql to see the changes ;-)')
 
@@ -592,6 +606,6 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
 # ----------------------------------------
 if __name__ == "__main__":    
     app = QApplication([])
-    application = win_preferences_class('MSql.ini')
+    application = win_preferences_class('MSql.ini','MSql_connections.ini')
     application.show()
     sys.exit(app.exec())        

@@ -30,6 +30,9 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 [Files]
 Source: "C:\MSql_exe\MSql.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\MSql_exe\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+; NOTE: Il file di configurazione delle connessioni viene copiato nella dir delle preferenze solo se non già presente
+Source: "C:\Users\MValaguz\Documents\GitHub\MSql\source\MSql_connections.ini"; DestDir: "{localappdata}\MSql"; Flags: onlyifdoesntexist
+
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Registry]

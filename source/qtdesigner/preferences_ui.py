@@ -338,7 +338,7 @@ class Ui_preferences_window(object):
         self.label_14.setBuddy(self.o_users)
 
         self.retranslateUi(preferences_window)
-        self.o_tab_widget.setCurrentIndex(1)
+        self.o_tab_widget.setCurrentIndex(0)
         self.b_default_open_dir.clicked.connect(preferences_window.slot_b_default_open_dir) # type: ignore
         self.b_default_save_dir.clicked.connect(preferences_window.slot_b_default_save_dir) # type: ignore
         self.b_save.clicked.connect(preferences_window.slot_b_save) # type: ignore
@@ -404,10 +404,10 @@ class Ui_preferences_window(object):
         self.label_7.setText(_translate("preferences_window", "Remember text position:"))
         self.label_9.setText(_translate("preferences_window", "Show end of line:"))
         self.label_19.setText(_translate("preferences_window", "secs"))
-        self.label_18.setText(_translate("preferences_window", "<html><head/><body><p>Autosave snapshoot:</p></body></html>"))
+        self.label_18.setText(_translate("preferences_window", "<html><head/><body><p>Autosave snapshoot (0 for never):</p></body></html>"))
         self.label_16.setText(_translate("preferences_window", "Indentation guide:"))
         self.l_refresh_dictionary_2.setText(_translate("preferences_window", "days"))
-        self.l_refresh_dictionary_1.setText(_translate("preferences_window", "Refresh dictionary:"))
+        self.l_refresh_dictionary_1.setText(_translate("preferences_window", "Refresh dictionary (0 for never):"))
         self.o_tab_widget.setTabText(self.o_tab_widget.indexOf(self.editor), _translate("preferences_window", "Editor"))
         self.label_6.setText(_translate("preferences_window", "Make table editable:"))
         self.label_11.setText(_translate("preferences_window", "Auto Column Resize:"))

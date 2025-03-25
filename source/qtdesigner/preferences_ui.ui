@@ -22,7 +22,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="o_tab_widget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="general">
        <attribute name="title">
@@ -276,7 +276,7 @@
           <item row="5" column="0">
            <widget class="QLabel" name="label_18">
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Autosave snapshoot:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Autosave snapshoot (0 for never):&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="buddy">
              <cstring>e_autosave_snapshoot_interval</cstring>
@@ -311,7 +311,7 @@
           <item row="10" column="0">
            <widget class="QLabel" name="l_refresh_dictionary_1">
             <property name="text">
-             <string>Refresh dictionary:</string>
+             <string>Refresh dictionary (0 for never):</string>
             </property>
            </widget>
           </item>
