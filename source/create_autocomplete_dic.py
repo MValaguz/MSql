@@ -88,6 +88,7 @@ class create_autocomplete_dic_class(QMainWindow, Ui_create_autocomplete_dic_wind
                             v_nome = v_riga[v_riga.find(' ')+1:v_riga.find('(')]
                         else:
                             v_nome = v_riga[v_riga.find(' ')+1:len(v_riga)]
+                        v_nome = v_nome.lstrip().rstrip()
                         v_risultato = v_nome + '('    
                         # indico che sono all'interno di una nuova sezione, terminata la quale poi dovrò esplodere elenco parametri                       
                         v_start_sezione = True

@@ -1162,6 +1162,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 if len(v_global_my_lexer_keywords) > 0:                          
                     obj_win2.v_lexer.keywords(6)
                     obj_win2.v_lexer.carica_dizionario_per_autocompletamento()
+                
+                # aggiorno la statusbar
+                obj_win2.aggiorna_statusbar()
         
     def slot_disconnect(self):
         """
@@ -5219,6 +5222,11 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         if v_string_to_search != '':                       
             # lancio la ricerca dicendo di posizionarsi sulla prossima ricorrenza 
             v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, -1, -1, True, False, False)
+            # se sono arrivato alla fine, chiedo se si desidera ripartire dall'inizio...da notare come viene poi richiamata questa stessa funzione!
+            if not v_found:
+                if message_question_yes_no('Passed the end of file!'+chr(10)+'Move to the beginnig?') == 'Yes':                    
+                    self.e_sql.setCursorPosition(0,0)
+                    self.slot_find_e_replace_find()
     
     def slot_find_e_replace_next(self):        
         """
@@ -5226,21 +5234,28 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         """
         # testo da ricercare
         v_string_to_search = self.e_replace_search.text().upper()
-        # nuovo testo
+        # testo da sostituire
         v_string_to_replace = self.e_replace.text()
 
-        # se inserito una stringa di ricerca...
+        # se inserito una stringa di ricerca...e di sostituzione
         if v_string_to_search != '' and v_string_to_replace != '':    
             # se il testo selezionato è esattamente ciò che si sta cercando, faccio la replace 
             if self.e_sql.selectedText() == v_string_to_search:                    
                 # eseguo la replace
                 self.e_sql.replace(v_string_to_replace)                
+                # ricerco la prossima ricorrenza
+                self.slot_find_e_replace_next()
             # ... altrimenti continuo come se fosse una ricerca next
             else:
                 # ricavo la posizione dove è posizionato il cursore 
                 v_start_line, v_start_pos = self.e_sql.getCursorPosition()
                 # lancio la ricerca a partire da quella posizione
                 v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, v_start_line, v_start_pos, False, False, False)            
+                # se sono arrivato alla fine, chiedo se si desidera ripartire dall'inizio...da notare come viene poi richiamata questa stessa funzione!
+                if not v_found:
+                    if message_question_yes_no('Passed the end of file!'+chr(10)+'Move to the beginnig?') == 'Yes':                    
+                        self.e_sql.setCursorPosition(0,0)
+                        self.slot_find_e_replace_next()
 
     def slot_find_e_replace_all(self):        
         """
@@ -5734,7 +5749,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             self.link_to_MSql_win1_class.l_overwrite_enabled.setText('Insert')
 
         # label che indica il tipo di codifica                
-        if self.setting_utf8:
+        if self.setting_utf8:            
             self.link_to_MSql_win1_class.l_utf8_enabled.setText('UTF-8')
             self.link_to_MSql_win1_class.l_utf8_enabled.setStyleSheet('background-color: ' + v_global_color + ';color: "' + v_global_background + '";')              
         else:
