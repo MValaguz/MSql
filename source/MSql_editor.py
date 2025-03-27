@@ -30,7 +30,7 @@ import re
 import traceback
 import difflib
 # Librerie di data base Oracle
-import cx_Oracle, oracle_my_lib, oracle_executer
+import oracledb, oracle_my_lib, oracle_executer
 # Librerie grafiche QT
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
@@ -82,7 +82,7 @@ Tipi_Oggetti_DB = { 'Tables':'TABLE',
 # Var globali
 ###
 # Oggetto connettore DB
-v_global_connection = cx_Oracle
+v_global_connection = oracledb
 # Indica se si è connessi al DB
 v_global_connesso = False
 # Directory di lavoro del programma (per sistema operativo Windows...)
@@ -1016,7 +1016,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             try:
                 v_cursore.execute(v_select)
             # se riscontrato errore (persa connessione al db) --> emetto sia codice che messaggio
-            except cx_Oracle.Error as e:                                                            
+            except oracledb.Error as e:                                                            
                 errorObj, = e.args    
                 message_error("Error: " + errorObj.message)                                            
                 return 'ko'
@@ -1104,9 +1104,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             oracle_my_lib.inizializzo_client()              
             # connessione al DB (eventualmente come dba)
             if self.e_user_mode == 'SYSDBA':               
-                v_global_connection = cx_Oracle.connect(user=self.e_user_name, password=self.e_password, dsn=self.e_server_name, mode=cx_Oracle.SYSDBA)                        
+                v_global_connection = oracledb.connect(user=self.e_user_name, password=self.e_password, dsn=self.e_server_name, mode=oracledb.SYSDBA)                        
             else:
-                v_global_connection = cx_Oracle.connect(user=self.e_user_name, password=self.e_password, dsn=self.e_server_name)                        
+                v_global_connection = oracledb.connect(user=self.e_user_name, password=self.e_password, dsn=self.e_server_name)                        
             # imposto var che indica la connessione a oracle
             v_global_connesso = True
             # apro un cursore finalizzato alla gestione degli oggettiDB
@@ -1350,7 +1350,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # eseguo la select                
         try:            
             self.v_cursor_db_obj.execute(v_select)                    
-        except cx_Oracle.Error as e:                                                                
+        except oracledb.Error as e:                                                                
             # ripristino icona freccia del mouse
             Freccia_Mouse(False)
             # emetto errore 
@@ -1807,7 +1807,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         v_select += " ORDER BY USERNAME"
         try:            
             self.v_cursor_db_obj.execute(v_select)                    
-        except cx_Oracle.Error as e:                                                                
+        except oracledb.Error as e:                                                                
             # ripristino icona freccia del mouse
             Freccia_Mouse(False)
             # emetto errore 
@@ -1837,7 +1837,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # cambio lo schema corrente a livello di database
             try:            
                 self.v_cursor_db_obj.execute("ALTER SESSION SET CURRENT_SCHEMA = " + self.current_schema)                    
-            except cx_Oracle.Error as e:                                                                
+            except oracledb.Error as e:                                                                
                 # emetto errore 
                 errorObj, = e.args                     
                 message_error("Error: " + errorObj.message)                   
@@ -3422,7 +3422,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         for v_i in range(0,len(self.tipi_intestazioni)):
             if v_i > v_y:
                 break
-            if self.tipi_intestazioni[v_i][1] not in (cx_Oracle.DATETIME,cx_Oracle.DB_TYPE_RAW,cx_Oracle.BLOB,cx_Oracle.CLOB):                
+            if self.tipi_intestazioni[v_i][1] not in (oracledb.DATETIME,oracledb.DB_TYPE_RAW,oracledb.BLOB,oracledb.CLOB):                
                 if v_1a_volta:
                     v_1a_volta = False
                     v_where = self.nomi_intestazioni[v_i]
@@ -3467,7 +3467,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             v_desc_intestazioni = v_cursor.description   
             # controllo che effettivamente sia stato selezionato un blob (siccome è una select monocolonna uso le coordinate 0 e 1)
             print(v_desc_intestazioni[0][1])
-            if v_desc_intestazioni[0][1] != cx_Oracle.BLOB:
+            if v_desc_intestazioni[0][1] != oracledb.BLOB:
                 Freccia_Mouse(False)
                 message_error('You must select a blob cell!')
             else:                
@@ -4412,7 +4412,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                          - Codice PL-SQL puro che va eseguito e basta (al limite contiene istruzioni dbms_output)                         
                         Queste tre macro categorie vengono quindi interpretate ed eseguite da questa funzione;
                         il risultato al di fuori di queste tre casistiche è imprevedibile!
-                        Inoltre va tenuto conto che la libreria cx_Oracle ha delle sue classi specifiche per la gestione dei vari aspetti
+                        Inoltre va tenuto conto che la libreria oracledb ha delle sue classi specifiche per la gestione dei vari aspetti
         """
         global v_global_connesso
         global v_global_create_confirm
@@ -4745,14 +4745,14 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # carico la prossima riga del flusso dati
             try:
                 v_riga_dati = self.v_cursor.fetchone()
-            except cx_Oracle.DatabaseError as e: 
+            except oracledb.DatabaseError as e: 
                  # ripristino icona freccia del mouse
                 Freccia_Mouse(False)
                 # emetto errore sulla barra di stato 
                 errorObj, = e.args    
                 message_error("Error to fetch data: " + errorObj.message)                                            
                 return 'ko'
-            except cx_Oracle.InterfaceError as e: 
+            except oracledb.InterfaceError as e: 
                 # ripristino icona freccia del mouse
                 Freccia_Mouse(False)
                 # emetto errore sulla barra di stato 
@@ -4776,13 +4776,13 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                     # campo stringa
                     if isinstance(field, str):                                                 
                         self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( field ) )                                                                
-                    # campo numerico intero (se non funziona provare con i cx_Oracle type)
+                    # campo numerico intero (se non funziona provare con i oracledb type)
                     elif isinstance(field, int):                           
                         # per dare coerenza a tutte le operazioni svolte sui dati il formato di base viene definito Italiano                                
                         v_item = QTableWidgetItem('{:d}'.format(field))                        
                         v_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)   
                         self.o_table.setItem(self.v_pos_y, x, v_item)                    
-                    # campo numerico reale (se non funziona provare con i cx_Oracle type)
+                    # campo numerico reale (se non funziona provare con i oracledb type)
                     elif isinstance(field, float):   
                         # per dare coerenza a tutte le operazioni svolte sui dati il formato di base viene definito Italiano        
                         locale.setlocale(locale.LC_ALL, 'it_IT')                                             
@@ -4793,14 +4793,14 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                     elif field == None:                                 
                         self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( "" ) )                
                     # campo data
-                    elif self.tipi_intestazioni[x][1] == cx_Oracle.DATETIME:                                     
+                    elif self.tipi_intestazioni[x][1] == oracledb.DATETIME:                                     
                         self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( f"{field:{o_global_preferences.date_format}}" ) )       
                     # campo raw (si tratta di byte che vengono convertiti in stringa in formato hex)
-                    elif self.tipi_intestazioni[x][1] == cx_Oracle.DB_TYPE_RAW:                          
+                    elif self.tipi_intestazioni[x][1] == oracledb.DB_TYPE_RAW:                          
                         self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( field.hex().upper() ) )       
                     # se il contenuto è un blob...utilizzo il metodo read sul campo field, poi lo inserisco in una immagine
                     # che poi carico una label e finisce dentro la cella a video
-                    elif self.tipi_intestazioni[x][1] == cx_Oracle.BLOB:                        
+                    elif self.tipi_intestazioni[x][1] == oracledb.BLOB:                        
                         qimg = QImage.fromData(field.read())                        
                         # se nel blob non è presente un'immagine (lo capisco in base alla profondità-colore), allora carico icona di non-immagine
                         if qimg.depth() == 0:                            
@@ -4816,7 +4816,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                         # carico immagine nella cella di tabella 
                         self.o_table.setCellWidget(self.v_pos_y, x, label )                                        
                     # se il contenuto è un clob...leggo sempre tramite metodo read e lo carico in un widget di testo largo
-                    elif self.tipi_intestazioni[x][1] == cx_Oracle.CLOB:                        
+                    elif self.tipi_intestazioni[x][1] == oracledb.CLOB:                        
                         qtext = QTextEdit(field.read())    
                         # da notare come prendendo qtext e trasformandolo in plaintext le prestazioni migliorino di molto                    
                         self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( qtext.toPlainText() ) )                                                                                                                
@@ -5654,7 +5654,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # Ad esempio se ho due bind di nome V_AZIENDA e V_DIPENDENTE con valori 'TEC' e '00035' viene creato il dizionario con {'V_AZIENDA':'TEC','V_DIPENDENTE':'00035'}
         # Il motore di database ricevendo in input tale dizionario, cercherà di accoppiare per nome (e non per riferimento) le var dichiarate e inoltre gli passerà in input-output il valore
         if p_function == 'DIC':                        
-            # se il dizionario non è vuoto prendo solo i valori del dizionario e li porto nelle strutture di appoggio (da notare la getvalue...è un metodo che appartiene all'oggetto var di cx_Oracle)
+            # se il dizionario non è vuoto prendo solo i valori del dizionario e li porto nelle strutture di appoggio (da notare la getvalue...è un metodo che appartiene all'oggetto var di oracledb)
             if len(self.v_variabili_bind_dizionario) != 0:                
                 for chiave, valore in self.v_variabili_bind_dizionario.items():                    
                     v_index = self.v_variabili_bind_nome.index(chiave)                    
@@ -5668,22 +5668,22 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 v_nome_bind = ':' + self.v_variabili_bind_nome[i]
                 if v_nome_bind in p_testo_sql.upper():
                     if self.v_variabili_bind_tipo[i].find('VARCHAR2') != -1: 
-                        # creo una var di cx_Oracle! e gli assegno il valore della bind che sto copiando nel dizionario
+                        # creo una var di oracledb! e gli assegno il valore della bind che sto copiando nel dizionario
                         v_valore = self.v_cursor.var(str)
                         v_valore.setvalue(0,self.v_variabili_bind_valore[i])
-                        # carico elemento del dizionario composto da nome della bind e dal suo valore che è espresso con un oggetto cx_Oracle.var
+                        # carico elemento del dizionario composto da nome della bind e dal suo valore che è espresso con un oggetto oracledb.var
                         self.v_variabili_bind_dizionario.update( {self.v_variabili_bind_nome[i] : v_valore } )
                     if self.v_variabili_bind_tipo[i].find('NUMBER') != -1: 
-                        # creo una var di cx_Oracle! e gli assegno il valore della bind che sto copiando nel dizionario
+                        # creo una var di oracledb! e gli assegno il valore della bind che sto copiando nel dizionario
                         v_valore = self.v_cursor.var(int)
                         v_valore.setvalue(0,self.v_variabili_bind_valore[i])
-                        # carico elemento del dizionario composto da nome della bind e dal suo valore che è espresso con un oggetto cx_Oracle.var
+                        # carico elemento del dizionario composto da nome della bind e dal suo valore che è espresso con un oggetto oracledb.var
                         self.v_variabili_bind_dizionario.update( {self.v_variabili_bind_nome[i] : v_valore } )
                     if self.v_variabili_bind_tipo[i].find('DATE') != -1:                         
-                        # creo una var di cx_Oracle! e gli assegno il valore della bind che sto copiando nel dizionario
+                        # creo una var di oracledb! e gli assegno il valore della bind che sto copiando nel dizionario
                         v_valore = self.v_cursor.var(datetime.date)
                         v_valore.setvalue(0,self.v_variabili_bind_valore[i])
-                        # carico elemento del dizionario composto da nome della bind e dal suo valore che è espresso con un oggetto cx_Oracle.var
+                        # carico elemento del dizionario composto da nome della bind e dal suo valore che è espresso con un oggetto oracledb.var
                         self.v_variabili_bind_dizionario.update( {self.v_variabili_bind_nome[i] : v_valore } )            
                 print('Creazione dizionario variabili bind...')
                 print(self.v_variabili_bind_dizionario)
@@ -5694,7 +5694,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # Aggiornamento a video variabili bind
         # lista contenente le intestazioni
         if p_function in ('SHOW','ADD'):
-            # se il dizionario non è vuoto prendo solo i valori del dizionario e li porto nelle strutture di appoggio (da notare la getvalue...è un metodo che appartiene all'oggetto var di cx_Oracle)
+            # se il dizionario non è vuoto prendo solo i valori del dizionario e li porto nelle strutture di appoggio (da notare la getvalue...è un metodo che appartiene all'oggetto var di oracledb)
             if len(self.v_variabili_bind_dizionario) != 0:                
                 for chiave, valore in self.v_variabili_bind_dizionario.items():                    
                     v_index = self.v_variabili_bind_nome.index(chiave)                    
@@ -5804,7 +5804,7 @@ if __name__ == "__main__":
         v_dir_eseguibile = os.path.dirname(sys.executable)
         os.chdir(v_dir_eseguibile)
         QDir.addSearchPath('icons', '_internal/icons/')
-        QDir.addSearchPath('logos', '_internal/logos/')
+        QDir.addSearchPath('logos', '_internal/logos/')        
         v_view_splash = True
     else:
         v_view_splash = False

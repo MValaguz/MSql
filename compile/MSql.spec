@@ -3,6 +3,7 @@
 #
 # da notare come ('..\\source\\qtdesigner\\*.py','qtdesigner') sia stata sostituita da ('..\\source\\qtdesigner\\*.py','.') per funzionamento eseguibile dopo passaggio da Inno Setup
 #
+# da notare come con il passaggio alla libreria oracledb sia stato necessario specificare le librerie getpass e secrets nella sezione hiddenimports
 
 block_cipher = None
 
@@ -16,7 +17,7 @@ a = Analysis(['..\\source\\MSql_editor.py'],
 			  ('..\\source\\qtdesigner\\icons\\*.*','icons\\'),
 			  ('..\\source\\qtdesigner\\logos\\*.*','logos\\')
 	           ],
-             hiddenimports=[],             
+             hiddenimports=['getpass', 'secrets', 'asyncio', 'uuid'],             
              hookspath=[],
              runtime_hooks=[],
              excludes=[],

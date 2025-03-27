@@ -22,7 +22,7 @@ from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 # Libreria Oracle
-import cx_Oracle
+import oracledb
 # Librerie interne
 import oracle_my_lib
 #Amplifico la pathname per ricercare le icone
@@ -66,7 +66,7 @@ class SecondThread(QThread):
             print('ESECUZIONE DEL COMANDO VERSO ORACLE TERMINATA!!!!!!!')
             # lavoro terminato ok --> emetto segnale di fine che verrà dal chiamante            
             self.signalStatus.emit("END_JOB_OK")
-        except cx_Oracle.Error as e:
+        except oracledb.Error as e:
             self.v_oracle_error, = e.args
             # lavoro terminato con errore --> emetto segnale di fine che verrà dal chiamante
             self.signalStatus.emit("END_JOB_KO")
@@ -348,7 +348,7 @@ if __name__ == "__main__":
     # inizializzo libreria oracle    
     oracle_my_lib.inizializzo_client()                     
     # apro connessione
-    v_connection = cx_Oracle.connect(user='SMILE', password='SMILE', dsn='BACKUP_815')                            
+    v_connection = oracledb.connect(user='SMILE', password='SMILE', dsn='BACKUP_815')                            
     # apro un cursore
     v_cursor = v_connection.cursor()        
     # creo window principale con bottone per richiamare il test

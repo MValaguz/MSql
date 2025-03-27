@@ -3,8 +3,8 @@
 #  Data..........: 09/02/2023
 #  Descrizione...: Scopo di questa classe è wrappare la libreria di connessione a Oracle, così da rendere disponibile ai programmi MGrep un oggetto comune
 
-#Importo la libreria cx_Oracle versione dalla 8.3 in su
-import cx_Oracle
+#Importo la libreria oracledb versione dalla 8.3 in su
+import oracledb
 import os
 
 def inizializzo_client():
@@ -15,14 +15,14 @@ def inizializzo_client():
    os.environ["PATH"] = r"C:\oracle\Middleware\Oracle_Home\bin;" + os.environ["PATH"]
    #Imposto il percorso per collegarmi alla libreria Oracle a 64bit (che supporta anche UTF-8)
    try:
-      #cx_Oracle.init_oracle_client(lib_dir=r'C:\oracle\Middleware\Oracle_Home\bin')
-      cx_Oracle.init_oracle_client()
+      #oracledb.init_oracle_client(lib_dir=r'C:\oracle\Middleware\Oracle_Home\bin')
+      oracledb.init_oracle_client()
    except Exception as err:
       if str(err) == 'Oracle Client library has already been initialized':
          pass
       else:
          print('------------------------------------------------------------------------------')
-         print('ERRORE DURANTE INIZIALIZZAZIONE LIBRERIA cx_Oracle IN LIBRERIA ORACLE_MY_LIB!  ')
+         print('ERRORE DURANTE INIZIALIZZAZIONE LIBRERIA oracledb IN LIBRERIA ORACLE_MY_LIB!  ')
          print(err)
          print('------------------------------------------------------------------------------')
 
@@ -44,7 +44,7 @@ class cursore():
       
       #Mi collego a Oracle e apro un cursore
       try:
-         self.db = cx_Oracle.connect(user=self.utente, password=self.password, dsn=self.dsn)        
+         self.db = oracledb.connect(user=self.utente, password=self.password, dsn=self.dsn)        
          self.cursor = self.db.cursor()             
          self.connessione_ok = True
       except:                  

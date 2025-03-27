@@ -8,7 +8,7 @@ import sqlite3
 # Libreria delle date
 import datetime
 # Libreria oracle
-import cx_Oracle
+import oracledb
 import oracle_my_lib
 # Librerie interne MGrep
 from utilita import message_error, message_question_yes_no, message_info
@@ -243,7 +243,7 @@ def estrae_elenco_tabelle_oracle(p_type,
             p_sqlite_db_name = nome file del DB SQLite
     """
     oracle_my_lib.inizializzo_client()  
-    v_oracle_db = cx_Oracle.connect(user=p_user_db, password=p_password_db, dsn=p_dsn_db)
+    v_oracle_db = oracledb.connect(user=p_user_db, password=p_password_db, dsn=p_dsn_db)
     v_oracle_cursor = v_oracle_db.cursor()
 
     v_lista = []
@@ -267,7 +267,7 @@ def killa_sessione(p_sid,
         try:
             # connessione al DB come amministratore
             oracle_my_lib.inizializzo_client()  
-            v_connection = cx_Oracle.connect(user=p_oracle_user_sys, password=p_oracle_password_sys, dsn=p_oracle_dsn_real, mode=cx_Oracle.SYSDBA)
+            v_connection = oracledb.connect(user=p_oracle_user_sys, password=p_oracle_password_sys, dsn=p_oracle_dsn_real, mode=oracledb.SYSDBA)
             v_ok = True
         except:
             message_error('Connection to oracle rejected. Please control login information.')
