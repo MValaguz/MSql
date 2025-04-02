@@ -44,7 +44,7 @@ class history_class(QMainWindow, Ui_history_window):
         self.v_sqlite_conn = QSqlDatabase.addDatabase("QSQLITE")
         self.v_sqlite_conn.setDatabaseName(self.nome_db)
         if not self.v_sqlite_conn.open():
-            message_error('Error to open database')
+            message_error(QCoreApplication.translate('history','Error to open database'))
             return 'ko'
      
         # controllo se indicata la where
@@ -84,9 +84,9 @@ class history_class(QMainWindow, Ui_history_window):
         """
            elimino la tabella che contiene l'history
         """
-        if message_question_yes_no('Are you sure you want to delete your history?') == 'Yes':
+        if message_question_yes_no(QCoreApplication.translate('history','Are you sure you want to delete your history?')) == 'Yes':
             purge_sql_history(self.nome_db)
-            message_info('History deleted!')
+            message_info(QCoreApplication.translate('history','History deleted!'))
             self.slot_start()
 
     def return_instruction(self, p_id):

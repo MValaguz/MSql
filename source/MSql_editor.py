@@ -19,7 +19,8 @@
 #                  Quindi in MSql_win1_class vi è una continua ricerca all'oggetto editor di riferimento in modo da lavorare sull'editor corrente.
 #                  Tutta la parte di definizione grafica è stata creata tramite QtDesigner e i file da lui prodotti, convertiti tramite un'utilità, 
 #                  in classi Python da dare poi in pasto alla libreria QT.                 
-# 
+#                  Per quanto riguarda la parte di traduzione si è fatto uso di QtLinguist che sempre tramite un'utilità prende i file di programma
+#                  e crea il dizionario di partenza che poi viene tradotto; la lingua di riferimento rimane l'inglese.
 
 # Librerie di base
 import sys 
@@ -130,7 +131,7 @@ def salvataggio_editor(p_save_as, p_nome, p_testo, p_codifica_utf8):
      
         p_nome = QFileDialog.getSaveFileName(None, "Save a SQL file",v_file_save_as,"MSql files (*.msql);;SQL files (*.sql *.pls *.plb *.trg);;All files (*.*)") [0]                                  
         if not p_nome:
-            message_error('Error saving')
+            message_error(QCoreApplication.translate('Save','Error saving'))
             return 'ko'
         # se nel nome del file non è presente un suffisso --> imposto .msql            
         if p_nome.find('.') == -1:
@@ -150,7 +151,7 @@ def salvataggio_editor(p_save_as, p_nome, p_testo, p_codifica_utf8):
         v_file.close()            
         return 'ok', p_nome
     except Exception as err:
-        message_error('Error to write the file: ' + str(err))
+        message_error(QCoreApplication.translate('Save','Error to write the file:') + ' ' + str(err))
         return 'ko', None
 
 def titolo_window(p_titolo_file):
@@ -235,11 +236,11 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # Da notare come l'allineamento a destra sia effettuato tramite un addPermanentWidget e a sinistra con il addWidget
         ###                                        
         # Informazioni sul tempo di esecuzione dell'ultima istruzione
-        self.l_exec_time = QLabel("Last execution time:")
+        self.l_exec_time = QLabel(QCoreApplication.translate('MSql_win1','Last execution time:'))
         self.l_exec_time.setFrameStyle(QFrame.Shape.NoFrame)        
         self.statusBar.addWidget(self.l_exec_time)                                
         # Informazioni sulla connessione
-        self.l_connection = QLabel("Connection:")
+        self.l_connection = QLabel(QCoreApplication.translate('MSql_win1','Connection:'))
         self.l_connection.setFrameStyle(QFrame.Shape.NoFrame)
         self.l_connection.setStyleSheet('color: black;')
         self.statusBar.addWidget(self.l_connection)                                        
@@ -252,7 +253,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         self.l_num_righe_e_char = QLabel()
         self.l_num_righe_e_char.setFrameStyle(QFrame.Shape.NoFrame)
         self.statusBar.addPermanentWidget(self.l_num_righe_e_char)                
-        self.l_num_righe_e_char.setText("Lines: 0 , Length: 0")        
+        self.l_num_righe_e_char.setText(QCoreApplication.translate('MSql_win1','Lines:') + ' 0 , ' + QCoreApplication.translate('MSql_win1','Length:') + ' 0')        
         # Stato attivazione inserito di testo o overwrite
         self.l_overwrite_enabled = QLabel("INS")
         self.l_overwrite_enabled.setFrameStyle(QFrame.Shape.NoFrame)
@@ -266,10 +267,10 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         self.l_eol.setFrameStyle(QFrame.Shape.NoFrame)
         self.statusBar.addPermanentWidget(self.l_eol)                
         # Indicatore editabilità
-        self.l_tabella_editabile = QLabel("Editable table: Disabled")
+        self.l_tabella_editabile = QLabel(QCoreApplication.translate('MSql_win1','Editable table: Disabled'))
         self.l_tabella_editabile.setFrameStyle(QFrame.Shape.NoFrame)
         self.l_tabella_editabile.setStyleSheet('color: black;')
-        self.statusBar.addPermanentWidget(self.l_tabella_editabile)                
+        self.statusBar.addPermanentWidget(self.l_tabella_editabile)        
 
         ###
         # Var per la gestione dei files recenti
@@ -389,7 +390,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         if o_global_preferences.refresh_dictionary > 0 and os.path.isfile(v_global_work_dir + 'MSql_autocompletion.ini'):  
             v_data_ultima_modifica = datetime.datetime.fromtimestamp(os.stat(v_global_work_dir + 'MSql_autocompletion.ini').st_mtime)
             if (datetime.datetime.now() - v_data_ultima_modifica) > datetime.timedelta(days=o_global_preferences.refresh_dictionary):
-                message_info("The dictionary is more than " + str(o_global_preferences.refresh_dictionary) + " days old!" + chr(10) + "Remember to regenerate it!" + chr(10) + "See the menu Tools/Autocomplete dictionary ;-)")                    
+                message_info(QCoreApplication.translate('MSql_win1',"The dictionary is more than") + ' ' + str(o_global_preferences.refresh_dictionary) + QCoreApplication.translate('MSql_win1'," days old!")  + chr(10) + QCoreApplication.translate('MSql_win1',"Remember to regenerate it!") + chr(10) + QCoreApplication.translate('MSql_win1',"See the menu Tools/Autocomplete dictionary ;-)"))                    
 
         ###
         # imposto il timer che permette all'object navigator di attivare la ricerca automatica dopo 0,8 secondi dalla digitazione del testo
@@ -474,13 +475,13 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                     self.e_user_mode = 'Normal'                    
             self.slot_connetti()            
         # Connessione a un data base specifico richiedendo tutti i parametri singolarmente
-        elif p_slot.text() == 'Connect to specific database':
+        elif p_slot.text() == QCoreApplication.translate('MSql_win1','Connect to specific database'):
                 self.richiesta_connessione_specifica()        
         # Disconnessione al database corrente
-        elif p_slot.text() == 'Disconnect':
+        elif p_slot.text() == QCoreApplication.translate('MSql_win1','Disconnect'):
                 self.slot_disconnect()        
         # Apertura di un nuovo editor o di un file recente
-        elif p_slot.text() in ('New','Open','Open_db_obj') or str(p_slot.data()) == 'FILE_RECENTI':
+        elif p_slot.text() in (QCoreApplication.translate('MSql_win1','New'),QCoreApplication.translate('MSql_win1','Open'),QCoreApplication.translate('MSql_win1','Open_db_obj')) or str(p_slot.data()) == 'FILE_RECENTI':
             # se richiesto un file recente
             if str(p_slot.data()) == 'FILE_RECENTI':
                 # apro il file richiesto
@@ -489,14 +490,14 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 if v_titolo is None:
                     return None
             # se richiesto Open...
-            elif p_slot.text() == 'Open':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Open'):
                 # apro un file tramite dialog box
                 v_titolo, v_contenuto_file, v_codifica_utf8 = self.openfile(None)                
                 # se non è stato scelto alcun file --> esco da tutto!
                 if v_titolo is None:
                     return None
             # se richiesto Open_db_obj...
-            elif p_slot.text() == 'Open_db_obj':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Open_db_obj'):
                 # apro un file
                 v_titolo = p_oggetto_titolo_db
                 v_contenuto_file = p_oggetto_testo_db 
@@ -525,10 +526,10 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             sub_window.show()  
             sub_window.showMaximized()  
         # Gestione preferenze
-        elif p_slot.text() == 'Preferences':
+        elif p_slot.text() == QCoreApplication.translate('MSql_win1','Preferences'):
             self.slot_preferences()
         # Rendo l'output dell'sql editabile
-        elif p_slot.text() == 'Make table editable':
+        elif p_slot.text() == QCoreApplication.translate('MSql_win1','Make table editable'):
             if self.actionMake_table_editable.isChecked():
                 o_global_preferences.editable = True
             else:                
@@ -536,49 +537,49 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # aggiorno status bar e aggiorno oggetti
             self.slot_editable()
         # Uscita dal programma (invoco l'evento di chiusura della main window)
-        elif p_slot.text() == 'Exit':
+        elif p_slot.text() == QCoreApplication.translate('MSql_win1','Exit'):
             v_event_close = QCloseEvent()
             self.closeEvent(v_event_close)        
         # Riorganizzo le window in modalità cascata
-        elif p_slot.text() == 'Cascade':
+        elif p_slot.text() == QCoreApplication.translate('MSql_win1','Cascade'):
             self.mdiArea.setViewMode(QMdiArea.ViewMode.SubWindowView)
             self.mdiArea.cascadeSubWindows()
         # Riorganizzo le window in modalità piastrelle
-        elif p_slot.text() == 'Tile':
+        elif p_slot.text() == QCoreApplication.translate('MSql_win1','Tile'):
             self.mdiArea.setViewMode(QMdiArea.ViewMode.SubWindowView)
             self.mdiArea.tileSubWindows()           
         # Riorganizzo le window in modalità tab
-        elif p_slot.text() == 'Tabbed':
+        elif p_slot.text() == QCoreApplication.translate('MSql_win1','Tabbed'):
             self.mdiArea.setViewMode(QMdiArea.ViewMode.TabbedView)            
         # Apro file di help
-        elif p_slot.text() == 'Help':
+        elif p_slot.text() == QCoreApplication.translate('MSql_win1','Help'):
             os.system("start help\\MSql_help.html")
         # Visualizzo program info
-        elif p_slot.text() == 'Program info':            
+        elif p_slot.text() == QCoreApplication.translate('MSql_win1','Program info'):            
             self.slot_info()
         # visualizza l'objects navigator
-        elif p_slot.text() == 'Objects Navigator':
+        elif p_slot.text() == QCoreApplication.translate('MSql_win1','Objects Navigator'):
             self.dockWidget.show()
         # visualizza l'object viewer
-        elif p_slot.text() == 'Object Viewer':
+        elif p_slot.text() == QCoreApplication.translate('MSql_win1','Object Viewer'):
             self.dockWidget_2.show()
         # visualizza l'history
-        elif p_slot.text() == 'History':
+        elif p_slot.text() == QCoreApplication.translate('MSql_win1','History'):
             self.slot_history()
         # visualizza la gestione degli sql preferiti
-        elif p_slot.text() == 'My preferred SQL':
+        elif p_slot.text() == QCoreApplication.translate('MSql_win1','My preferred SQL'):
             self.slot_preferred_sql()
         # Indico che l'output sql ha le colonne con larghezza auto-adattabile
-        elif p_slot.text() == 'Auto Column Resize':
+        elif p_slot.text() == QCoreApplication.translate('MSql_win1','Auto Column Resize'):
             self.slot_menu_auto_column_resize()
         # Attivo la comparazione tra i due ultimi file in elenco
-        elif p_slot.text() == 'Compare last two text editor':
+        elif p_slot.text() == QCoreApplication.translate('MSql_win1','Compare last two text editor'):
             self.slot_compare_last_two_text_editor()
                 
         # Queste voci di menu che agiscono sull'oggetto editor, sono valide solo se l'oggetto è attivo
         if o_MSql_win2 is not None:
             # Salvataggio del file
-            if p_slot.text() == 'Save':
+            if p_slot.text() == QCoreApplication.translate('MSql_win1','Save'):
                 v_ok, v_nome_file = salvataggio_editor(False, o_MSql_win2.objectName(), o_MSql_win2.e_sql.text(), o_MSql_win2.setting_utf8)
                 if v_ok == 'ok':
                     o_MSql_win2.v_testo_modificato = False
@@ -587,7 +588,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                     self.aggiorna_elenco_file_recenti(v_nome_file)
                     self.window_attiva.setObjectName(v_nome_file) # notare come il nome della window va forzato anche sulla window attiva
             # Salvataggio del file come... (semplicemente non gli passo il titolo)
-            elif p_slot.text() == 'Save as':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Save as'):
                 v_ok, v_nome_file = salvataggio_editor(True, o_MSql_win2.objectName(), o_MSql_win2.e_sql.text(), o_MSql_win2.setting_utf8)
                 if v_ok == 'ok':                    
                     o_MSql_win2.v_testo_modificato = False                    
@@ -596,16 +597,16 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                     self.aggiorna_elenco_file_recenti(v_nome_file)                    
                     self.window_attiva.setObjectName(v_nome_file) # notare come il nome della window va forzato anche sulla window attiva
             # Chiusura dell'editor
-            elif p_slot.text() == 'Close':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Close'):
                 self.mdiArea.closeActiveSubWindow()
             # Chiusura di tutti gli editor aperti 
-            elif p_slot.text() == 'Close all':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Close all'):
                 self.mdiArea.closeAllSubWindows()
             # Creazione del dizionario termini per autocompletamento dell'editor
-            elif p_slot.text() == 'Autocomplete dictionary':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Autocomplete dictionary'):
                 self.crea_dizionario_per_autocompletamento()
             # Visualizza il carattere di end of line, ritorno a capo
-            elif p_slot.text() == 'Show end of line':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Show end of line'):
                 # riporto la preferenza di menu dentro l'oggetto delle preferenze 
                 if self.actionShow_end_of_line.isChecked():
                     o_global_preferences.end_of_line = True
@@ -614,162 +615,168 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 # attivo la scelta su tutti gli editor aperti
                 self.slot_end_of_file()
             # Ricerca di testo
-            elif p_slot.text() == 'Find':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Find'):
                 v_global_main_geometry = self.frameGeometry()                                
                 o_MSql_win2.slot_find()
             # Sostituzione di testo
-            elif p_slot.text() == 'Find and Replace':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Find and Replace'):
                 v_global_main_geometry = self.frameGeometry()
                 o_MSql_win2.slot_find_e_replace()
             # Mappa delle procedure/funzioni
-            elif p_slot.text() == 'Map procedures/functions':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Map procedures/functions'):
                 v_global_main_geometry = self.frameGeometry()
                 o_MSql_win2.slot_map()
             # Mini mappa attiva/disattiva
-            elif p_slot.text() == 'Mini map':                
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Mini map'):                
                 o_MSql_win2.slot_mini_map_visible()
             # Selezione del testo rettangolare
-            elif p_slot.text() == 'Rect selection':                
-                message_info('There are 2 ways to switch to rectangular selection mode' + chr(10) + chr(10) + '1. (Keyboard and mouse) Hold down ALT while left clicking, then dragging' + chr(10) + chr(10) + '2. (Keyboard only) Hold down ALT+Shift while using the arrow keys')                                
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Rect selection'):                
+                message_info(QCoreApplication.translate('MSql_win1','There are 2 ways to switch to rectangular selection mode') + chr(10) + chr(10) + QCoreApplication.translate('MSql_win1','1. (Keyboard and mouse) Hold down ALT while left clicking, then dragging') + chr(10) + chr(10) + QCoreApplication.translate('MSql_win1','2. (Keyboard only) Hold down ALT+Shift while using the arrow keys'))                                
             # Estrazione della chiave primaria
-            elif p_slot.text() == 'Extract primary key':                
-                message_info('To extract the primary key, position yourself on a table name and press CTRL+K. Otherwise, to join two tables, write the two tables separated by commas, select the text and press CTRL+K.')                                
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Extract primary key'):                
+                message_info(QCoreApplication.translate('MSql_win1','To extract the primary key, position yourself on a table name and press CTRL+K. Otherwise, to join two tables, write the two tables separated by commas, select the text and press CTRL+K.'))                                
             # Ricerca prossimo ='
-            elif p_slot.text() == "Find next =":                
-                message_info("To search next = press F4")                                
-            elif p_slot.text() == 'Add Bookmark':                
-                message_info('Click on the left margins of the editor and the bookmark will be highlighted with a green circle.')                                
-            elif p_slot.text() == 'Remove Bookmark':                
-                message_info('Click on the left margins of the editor, select a bookmark, and hold down the CTRL key.')                                
-            elif p_slot.text() == 'SearchNext Bookmark':                
-                message_info('With CTRL+B you can jump from one bookmark to another! When you reach the end, the search starts again from the beginning of the text.')                                
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1',"Find next ="):                
+                message_info(QCoreApplication.translate('MSql_win1',"To search next = press F4"))                                
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Add Bookmark'):                
+                message_info(QCoreApplication.translate('MSql_win1','Click on the left margins of the editor and the bookmark will be highlighted with a green circle.'))                                
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Remove Bookmark'):                
+                message_info(QCoreApplication.translate('MSql_win1','Click on the left margins of the editor, select a bookmark, and hold down the CTRL key.'))                                
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','SearchNext Bookmark'):                
+                message_info(QCoreApplication.translate('MSql_win1','With CTRL+B you can jump from one bookmark to another! When you reach the end, the search starts again from the beginning of the text.'))                                
             # Commenta il testo selezionato
-            elif p_slot.text() == 'Comment selection':                
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Comment selection'):                
                 o_MSql_win2.slot_commenta()
             # Decommenta il testo selezionato
-            elif p_slot.text() == 'Uncomment selection':                
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Uncomment selection'):                
                 o_MSql_win2.slot_scommenta()
             # Uppercase del testo selezionato
-            elif p_slot.text() == 'Uppercase':                
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Uppercase'):                
                 o_MSql_win2.e_sql.SendScintilla(QsciScintilla.SCI_UPPERCASE)
             # Lowercase del testo selezionato
-            elif p_slot.text() == 'Lowercase':                
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Lowercase'):                
                 o_MSql_win2.e_sql.SendScintilla(QsciScintilla.SCI_LOWERCASE)
             # Indenta la riga alla posizione del cursore
-            elif p_slot.text() == 'Indent to cursor':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Indent to cursor'):
                 o_MSql_win2.slot_indent_to_cursor()
             # Compressione di tutti i livelli
-            elif p_slot.text() == 'Fold/Unfold All':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Fold/Unfold All'):
                 o_MSql_win2.e_sql.foldAll()
             # Zoom In del testo
-            elif p_slot.text() == 'Zoom In':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Zoom In'):
                 o_MSql_win2.e_sql.zoomIn()
             # Zoom Out del testo
-            elif p_slot.text() == 'Zoom Out':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Zoom Out'):
                 o_MSql_win2.e_sql.zoomOut()
             # Annulla il testo
-            elif p_slot.text() == 'Undo':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Undo'):
                 o_MSql_win2.e_sql.undo()
             # Ripristina il testo
-            elif p_slot.text() == 'Redo':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Redo'):
                 o_MSql_win2.e_sql.redo()
             # Taglia il testo
-            elif p_slot.text() == 'Cut':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Cut'):
                 o_MSql_win2.e_sql.cut()
             # Copia il testo
-            elif p_slot.text() == 'Copy':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Copy'):
                 o_MSql_win2.e_sql.copy()
             # Incolla il testo
-            elif p_slot.text() == 'Paste':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Paste'):
                 o_MSql_win2.e_sql.paste()                
             # Seleziona tutto
-            elif p_slot.text() == 'Select All':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Select All'):
                 o_MSql_win2.e_sql.selectAll()
             # Elimina riga
-            elif p_slot.text() == 'Line cut':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Line cut'):
                 o_MSql_win2.e_sql.SendScintilla(QsciScintilla.SCI_LINEDELETE)
             # Traspone riga
-            elif p_slot.text() == 'Line transpose':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Line transpose'):
                 o_MSql_win2.e_sql.SendScintilla(QsciScintilla.SCI_LINETRANSPOSE)
             # Duplica riga/selezione
-            elif p_slot.text() == 'Line/Selection duplicate':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Line/Selection duplicate'):
                 o_MSql_win2.e_sql.SendScintilla(QsciScintilla.SCI_LINEDUPLICATE)
             # Cancella parola a sinistra
-            elif p_slot.text() == 'Delete start of word':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Delete start of word'):
                 o_MSql_win2.e_sql.SendScintilla(QsciScintilla.SCI_DELWORDLEFT)
             # Cancella parola a destra
-            elif p_slot.text() == 'Delete end of word':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Delete end of word'):
                 o_MSql_win2.e_sql.SendScintilla(QsciScintilla.SCI_DELWORDRIGHT)
             # Cancella riga a sinistra
-            elif p_slot.text() == 'Delete start of line':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Delete start of line'):
                 o_MSql_win2.e_sql.SendScintilla(QsciScintilla.SCI_DELLINELEFT)
             # Cancella riga a destra
-            elif p_slot.text() == 'Delete end of line':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Delete end of line'):
                 o_MSql_win2.e_sql.SendScintilla(QsciScintilla.SCI_DELLINERIGHT)                
             # Vai alla riga numero
-            elif p_slot.text() == 'Go to line':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Go to line'):
                 o_MSql_win2.slot_goto_line()
+            # Vai all'inizio dell'editor
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Go to start'):                                
+                o_MSql_win2.e_sql.SendScintilla(QsciScintilla.SCI_GOTOLINE,0)
+            # Vai alla fine dell'editor
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Go to end'):                
+                o_MSql_win2.e_sql.SendScintilla(QsciScintilla.SCI_GOTOLINE,o_MSql_win2.e_sql.SendScintilla(QsciScintilla.SCI_GETLINECOUNT)-1)
             # Esecuzione dell'sql
-            elif p_slot.text() == 'Execute':                 
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Execute'):                 
                 v_ok = o_MSql_win2.slot_esegui(False)                
                 if v_ok == 'ko':
-                    message_error('Script stopped for error!')
+                    message_error(QCoreApplication.translate('MSql_win1','Script stopped for error!'))
             # Esecuzione della singola istruzione sql
-            elif p_slot.text() == 'Execute current':                 
-                message_info('Position yourself on the instruction you want to execute and press CTRL+Enter')                                
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Execute current'):                 
+                message_info(QCoreApplication.translate('MSql_win1','Position yourself on the instruction you want to execute and press CTRL+Enter'))                                
             # Esecuzione dell'sql in modalità piano di esecuzione
-            elif p_slot.text() == 'Explain plan':                
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Explain plan'):                
                 v_ok = o_MSql_win2.slot_esegui(True)
                 if v_ok == 'ko':
-                    message_error('Error to analyze query!')
+                    message_error(QCoreApplication.translate('MSql_win1','Error to analyze query!'))
             # Commit
-            elif p_slot.text() == 'Commit':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Commit'):
                 o_MSql_win2.slot_commit_rollback('Commit')
             # Rollback
-            elif p_slot.text() == 'Rollback':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Rollback'):
                 o_MSql_win2.slot_commit_rollback('Rollback')
             # Ricerca di un oggetto
-            elif p_slot.text() == 'Find object':                
-                message_info('Position yourself in the text-editor on the object and press F12')                                
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Find object'):                
+                message_info(QCoreApplication.translate('MSql_win1','Position yourself in the text-editor on the object and press F12'))                                
             # Query veloce sul nome di tabella
-            elif p_slot.text() == 'Quick query':                
-                message_info('Position yourself in the text-editor on the table and press F11')                                
-            # Carico il risultato sql alla prima riga
-            elif p_slot.text() == 'Go to Top':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Quick query'):                
+                message_info(QCoreApplication.translate('MSql_win1','Position yourself in the text-editor on the table and press F11'))                                
+            # Carico il risultato sql alla prima riga 
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Go to Top'):                
                 o_MSql_win2.slot_go_to_top()
             # Carico il risultato sql fino all'ultima riga
-            elif p_slot.text() == 'Go to End':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Go to End'):
                 o_MSql_win2.slot_go_to_end()        
             # Esporto in formato Excel
-            elif p_slot.text() == 'Export to Excel-CSV':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Export to Excel-CSV'):
                 o_MSql_win2.slot_export_to_excel_csv()
             # Pulizia di tutto l'output
-            elif p_slot.text() == 'Clear result,output':                 
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Clear result,output'):                 
                 o_MSql_win2.slot_clear('ALL')    
             # Attiva l'auto pulizia ad ogni esecuzione di codice pl-sql
-            elif p_slot.text() == 'Auto clear output':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Auto clear output'):
                 # riporto la preferenza di menu dentro l'oggetto delle preferenze 
                 if self.actionAuto_clear_output.isChecked():                
                     o_global_preferences.auto_clear_output = True
                 else:
                     o_global_preferences.auto_clear_output = False
             # Selezione del font per l'editor
-            elif p_slot.text() == 'Font editor selector':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Font editor selector'):
                 o_MSql_win2.slot_font_editor_selector(None)
             # Selezione del font per l'output di sql
-            elif p_slot.text() == 'Font output selector':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Font output selector'):
                 o_MSql_win2.slot_font_result_selector(None)
             # Creo lo script per la modifica dei dati
-            elif p_slot.text() == 'Script the changed data':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Script the changed data'):
                 o_MSql_win2.slot_save_modified_data()
             # Prendo il testo selezionato e lo riformatto (esempio istruzione SQL che viene reindentata)
-            elif p_slot.text() == 'Format SQL statement':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Format SQL statement'):
                 o_MSql_win2.slot_format_sql_statement()
             # Estraggo dall'output una nuova select e la inserisco nell'editor (questo ha senso se utente ha inserito parametri usando il popup menu sulle colonne)
-            elif p_slot.text() == 'Extract sql from output':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Extract sql from output'):
                 o_MSql_win2.slot_extract_sql_from_output()
             # Attivo/disattivo indentation guide sull'editor
-            elif p_slot.text() == 'Indentation guide':
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Indentation guide'):
                 o_MSql_win2.slot_indentation_guide()
 
     def slot_editable(self):
@@ -780,11 +787,11 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         
         # se edit abilitato, la evidenzio
         if o_global_preferences.editable:            
-            self.l_tabella_editabile.setText("Editable table: Enabled")                        
+            self.l_tabella_editabile.setText(QCoreApplication.translate('MSql_win1','Editable table: Enabled'))                        
             self.l_tabella_editabile.setStyleSheet('color: red;')      
             self.l_tabella_editabile.setStyleSheet('background-color: red ;color: white;')             
         else:
-            self.l_tabella_editabile.setText("Editable table: Disabled")            
+            self.l_tabella_editabile.setText(QCoreApplication.translate('MSql_win1','Editable table: Disabled'))            
             if o_global_preferences.dark_theme:                
                 self.l_tabella_editabile.setStyleSheet('color: white;')      
             else:
@@ -922,7 +929,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # controllo se il file è già aperto in altra finestra di editor
             for obj_win2 in self.o_lst_window2:
                 if not obj_win2.v_editor_chiuso and  obj_win2.objectName() == v_filename:
-                    message_error('This file is already open!')
+                    message_error(QCoreApplication.translate('Open','This file is already open!'))
                     return None, None, None            
             # procedo con apertura
             try:
@@ -939,7 +946,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 # restituisco il nome e il contenuto del file                
                 return v_filename, v_file.read(), v_file_is_uft_8
             except Exception as err:
-                message_error('Error to opened the file: ' + str(err))
+                message_error(QCoreApplication.translate('Open','Error to opened the file:') + ' ' + str(err))
                 return None, None, None
         else:
             return None, None, None
@@ -1018,14 +1025,14 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # se riscontrato errore (persa connessione al db) --> emetto sia codice che messaggio
             except oracledb.Error as e:                                                            
                 errorObj, = e.args    
-                message_error("Error: " + errorObj.message)                                            
+                message_error(QCoreApplication.translate('MSql_win1',"Error:") + ' ' + errorObj.message)                                            
                 return 'ko'
 
             v_conta = v_cursore.fetchone()[0]            
             # se ci sono transazioni in sospeso richiedo come procedere
             if v_conta != 0:
                 # in caso affermativo --> eseguo la commit
-                if message_warning_yes_no('MSql detected that the current session has an open transaction. Do you want to perform commit before closing the session?') == 'Yes':
+                if message_warning_yes_no(QCoreApplication.translate('MSql_win1','MSql detected that the current session has an open transaction. Do you want to perform commit before closing the session?')) == 'Yes':
                     v_cursore.execute('COMMIT')
             # chiusura del cursore            
             v_cursore.close()
@@ -1112,7 +1119,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # apro un cursore finalizzato alla gestione degli oggettiDB
             self.v_cursor_db_obj = v_global_connection.cursor()            
         except:
-            message_error('Error to oracle connection!')    
+            message_error(QCoreApplication.translate('MSql_win1','Error to oracle connection!'))    
             v_global_connesso = False
 
         # Se mi collego come SYSDBA coloro di rosso
@@ -1120,7 +1127,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             v_global_background = 'red'
 
         # sulla statusbar, aggiorno la label della connessione        
-        self.l_connection.setText("Connection: " + self.e_server_name + "/" + self.e_user_name)     
+        self.l_connection.setText(QCoreApplication.translate('MSql_win1','Connection:') + ' ' + self.e_server_name + "/" + self.e_user_name)     
         self.l_connection.setStyleSheet('background-color: ' + v_global_color + ';color: "' + v_global_background + '";')              
 
         # imposto la proprietà di schema corrente con lo user
@@ -1206,7 +1213,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             if v_global_connesso:
                 v_global_connection.close()            
         except:
-            message_error('Error to oracle disconnection!')                
+            message_error(QCoreApplication.translate('MSql_win1','Error to oracle disconnection!'))                
         
         # imposto var che indica la connessione a oracle
         v_global_connesso = False
@@ -1240,7 +1247,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             return 'ko'
         
         # imposto il titolo della window inserendo lo schema
-        self.dockWidget.setWindowTitle('Objects Navigator ('+self.current_schema+')')
+        self.dockWidget.setWindowTitle(QCoreApplication.translate('MSql_win1','Objects Navigator') + ' (' + self.current_schema + ')')
 
         # prendo il tipo di oggetto scelto dall'utente
         try:            
@@ -1355,7 +1362,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             Freccia_Mouse(False)
             # emetto errore 
             errorObj, = e.args                     
-            message_error("Error: " + errorObj.message)       
+            message_error(QCoreApplication.translate('MSql_win1',"Error:") + ' ' + errorObj.message)       
             return "ko"                  
         # carico il risultato     
         v_righe = self.v_cursor_db_obj.fetchall()                    
@@ -1413,7 +1420,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         elif p_tipo_ela == 'CAMPO_TABELLA':            
             v_tipo_obj = self.v_nome_foglia
         else:
-            message_error('Error to create popupmenu!')
+            message_error(QCoreApplication.translate('MSql_win1','Error to create popupmenu!'))
 
         v_menu = QMenu(self)        
         if self.v_popup_menu_zone == 'FOGLIA_ALBERO' and v_tipo_obj == 'FUNCTION':            
@@ -1571,7 +1578,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             elif self.v_tipo_oggetto in ('PROCEDURE','FUNCTION','TRIGGER','SEQUENCE'):                    
                 v_select = "SELECT DBMS_METADATA.GET_DDL('"+self.v_tipo_oggetto+"','"+self.v_nome_oggetto+"') FROM DUAL"
             else:
-                message_error('Invalid object!')
+                message_error(QCoreApplication.translate('MSql_win1','Invalid object!'))
                 return 'ko'
             
             try:                            
@@ -1585,7 +1592,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                     v_testo_oggetto_db = "\n".join(v_testo_oggetto_db.splitlines()[0:-1])
             except:
                 Freccia_Mouse(False)
-                message_error('Error to retrive metadata information!')
+                message_error(QCoreApplication.translate('MSql_win1','Error to retrive metadata information!'))
                 return 'ko'
             
             ###
@@ -1664,7 +1671,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # prendo editor corrente
         o_MSql_win2 = self.oggetto_win2_attivo()
         if o_MSql_win2 == None:            
-            message_error('Open a editor!')
+            message_error(QCoreApplication.translate('MSql_win1','Open a editor!'))
             return 'ko'
                                 
         # preparo comando da inserire in editor; in pratica inserisco un ritorno a capo
@@ -1684,7 +1691,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                     v_nome_tabella = self.v_cursor_db_obj.execute("SELECT TABLE_NAME FROM ALL_CONSTRAINTS WHERE OWNER='"+self.e_user_name+"' AND CONSTRAINT_NAME='"+v_nome_obj+"'").fetchone()[0]                                                            
                     v_comando += "ALTER TABLE "+v_nome_tabella+" "+p_function+" CONSTRAINT "+v_nome_obj+";"                
                 except:                    
-                    message_error('Error to retrive referenced table name!')                                
+                    message_error(QCoreApplication.translate('MSql_win1','Error to retrive referenced table name!'))                                
                     return 'ko'
             elif v_tipo_obj == 'INDEXES':
                 try:                            
@@ -1692,12 +1699,12 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                     v_nome_tabella = self.v_cursor_db_obj.execute("SELECT TABLE_NAME FROM ALL_INDEXES WHERE OWNER='"+self.e_user_name+"' AND INDEX_NAME='"+v_nome_obj+"'").fetchone()[0]                                                                                
                     v_comando += "ALTER INDEX "+v_nome_obj+" ON "+v_nome_tabella+" "+p_function+";"            
                 except:                    
-                    message_error('Error to retrive referenced table name!')                                
+                    message_error(QCoreApplication.translate('MSql_win1','Error to retrive referenced table name!'))                                
                     return 'ko'
             elif v_tipo_obj == 'TRIGGER':                    
                 v_comando += "ALTER TRIGGER "+v_nome_obj+" "+p_function+";"            
             else:
-                message_error('Invalid object!')
+                message_error(QCoreApplication.translate('MSql_win1','Invalid object!'))
                 return 'ko'
 
         # operazione di cancellazione
@@ -1713,10 +1720,10 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                     v_nome_tabella = self.v_cursor_db_obj.execute("SELECT TABLE_NAME FROM ALL_CONSTRAINTS WHERE OWNER='"+self.e_user_name+"' AND CONSTRAINT_NAME='"+v_nome_obj+"'").fetchone()[0]                                                            
                     v_comando += "ALTER TABLE "+v_nome_tabella+" DROP CONSTRAINT "+v_nome_obj+";"                
                 except:                    
-                    message_error('Error to retrive referenced table name!')                                
+                    message_error(QCoreApplication.translate('MSql_win1','Error to retrive referenced table name!'))                                
                     return 'ko'            
             else:
-                message_error('Invalid object!')
+                message_error(QCoreApplication.translate('MSql_win1','Invalid object!'))
                 return 'ko'
 
         # operazioni sui campi di tabella 
@@ -1732,7 +1739,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             elif p_function == 'COMMENT_FIELD':
                 v_comando += "COMMENT ON COLUMN "+v_nome_obj+"."+v_tipo_obj+" IS '"+v_campi[1]+"';"                
             else:
-                message_error('Invalid field!')
+                message_error(QCoreApplication.translate('MSql_win1','Invalid field!'))
                 return 'ko'
             
         # inserisco il comando nell'editor corrente
@@ -1812,7 +1819,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             Freccia_Mouse(False)
             # emetto errore 
             errorObj, = e.args                     
-            message_error("Error: " + errorObj.message)       
+            message_error(QCoreApplication.translate('MSql_win1',"Error:") + ' ' + errorObj.message)       
             return "ko"                  
         # ottengo un array di stringa contenente elenco degli schemi
         v_risultato = []
@@ -1840,7 +1847,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             except oracledb.Error as e:                                                                
                 # emetto errore 
                 errorObj, = e.args                     
-                message_error("Error: " + errorObj.message)                   
+                message_error(QCoreApplication.translate('MSql_win1',"Error:") + ' ' + errorObj.message)                   
             # ricarico elenco degli oggetti
             self.carica_oggetti_db_scelta()        
         
@@ -2227,7 +2234,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 elif v_parent_index.data() == 'Indexes':
                     self.v_tipo_foglia = 'INDEXES'
                 else:
-                    message_error('Error during decode object type!')
+                    message_error(QCoreApplication.translate('MSql_win1','Error during decode object type!'))
                 # richiamo la creazione e gestione del popup menu
                 # notare come all'interno di questa gestione verranno usate le var di nome e tipo oggetto                
                 self.popup_menu_object(p_position,'FOGLIA')
@@ -2277,7 +2284,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         """           
         # controllo che tutte le info siano state inserite
         if self.win_dialog_connect.e_user.displayText() == '' or self.win_dialog_connect.e_password.displayText() == '' or self.win_dialog_connect.e_tns.displayText() == '':
-            message_error('Not all the requested data has been entered!')            
+            message_error(QCoreApplication.translate('MSql_win1','Not all the requested data has been entered!'))            
             return 'ko'
 
         # eseguo la connessione
@@ -2366,7 +2373,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         try:
             index = self.win_history.o_lst1.selectedIndexes()[3]           
         except:
-            message_error('Select a row!')
+            message_error(QCoreApplication.translate('MSql_win1','Select a row!'))
             return 'ko'
         # ricerco il valore dell'istruzione corrispondente e lo carico nell'editor
         o_MSql_win2 = self.oggetto_win2_attivo()
@@ -2423,7 +2430,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
 
         # se non ci sono più di 2 window aperte, il compare non va eseguito
         if len(self.mdiArea.subWindowList()) < 2:
-            message_error('For compare you must have two editor open or more!')
+            message_error(QCoreApplication.translate('MSql_win1','For compare you must have two editor open or more!'))
             return 'ko'
 
         # prendo le ultime due finestre aperte 
@@ -3449,7 +3456,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         except:         
             # sostituisce la freccia del mouse con icona "clessidra"
             Freccia_Mouse(False)   
-            message_error('Error blob fetching using the statement:' + chr(10) + v_select)                    
+            message_error(QCoreApplication.translate('MSql_win2','Error blob fetching using the statement:') + chr(10) + v_select)                    
             return ''
         
         # controllo che sia estratta solo una riga!
@@ -3460,7 +3467,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         if v_count != 1:
             # sostituisce la freccia del mouse con icona "clessidra"
             Freccia_Mouse(False)
-            message_error('Error blob fetching using the statement:' + chr(10) + v_select)            
+            message_error(QCoreApplication.translate('MSql_win2','Error blob fetching using the statement:') + chr(10) + v_select)            
         else:
             # eseguo la select che va ad estrarre il blob
             v_cursor.execute(v_select)    
@@ -3469,7 +3476,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             print(v_desc_intestazioni[0][1])
             if v_desc_intestazioni[0][1] != oracledb.BLOB:
                 Freccia_Mouse(False)
-                message_error('You must select a blob cell!')
+                message_error(QCoreApplication.translate('MSql_win2','You must select a blob cell!'))
             else:                
                 for row in v_cursor:                  
                     for count, column in enumerate(row):                   
@@ -3484,7 +3491,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                         # sostituisce la freccia del mouse con icona "clessidra"
                         Freccia_Mouse(False)
                         # messaggio di fine
-                        message_info('Blob downloaded in Downloads directory of your PC!')
+                        message_info(QCoreApplication.translate('MSql_win2','Blob downloaded in Downloads directory of your PC!'))
             
         # chiudo il cursore
         v_cursor.close()
@@ -3741,7 +3748,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 # mi posiziono sul primo campo tramite la ricerca offerta dalla funzione F4
                 self.slot_f4()
             else:
-                message_info('No PK found!')        
+                message_info(QCoreApplication.translate('MSql_win2','No PK found!'))        
         # altrimenti si è richiesto di fare la chiave di due tabelle
         else:                
             try:
@@ -3812,7 +3819,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 # mi posiziono sul primo campo tramite la ricerca offerta dalla funzione F4
                 self.slot_f4()
             else:
-                message_info('No FK found!')
+                message_info(QCoreApplication.translate('MSql_win2','No FK found!'))
             
         # sostituisce la freccia del mouse con icona "clessidra"
         Freccia_Mouse(False)                
@@ -4130,7 +4137,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
 
         if v_testo == '':
             # emetto errore sulla barra di stato 
-            message_error('No instruction!')                                 
+            message_error(QCoreApplication.translate('MSql_win2','No instruction!'))                                 
             return 'ko'
 
         # se indicato dalla preferenza, prima di partire ad eseguire, pulisco l'output
@@ -4229,7 +4236,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 # e ne visualizzo il contenuto
                 self.bind_variable(p_function='ADD', p_variabile_nome=v_split[1].upper(), p_variabile_tipo=v_split[2].upper())
             else:
-                message_error('Unknown command type: ' + v_riga_raw + '.....')
+                message_error(QCoreApplication.translate('MSql_win2','Unknown command type:' + ' ' + v_riga_raw + '.....'))
                 return 'ko'                
 
         # se a fine scansione mi ritrovo che v_plsql è ancora attiva, vuol dire che ho ancora un'istruzione in canna, e quindi la eseguo
@@ -4358,11 +4365,11 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                         self.e_sql.setSelection(v_start_line, 0, v_end_line, -1)                           
                     else:
                         # altrimenti errore
-                        message_error('No statement found as SELECT, INSERT, UPDATE, DELETE!')
+                        message_error(QCoreApplication.translate('MSql_win2','No statement found as SELECT, INSERT, UPDATE, DELETE!'))
                         return 'ko'                                    
                 else:
                     # altrimenti errore
-                    message_error('No statement found as SELECT, INSERT, UPDATE, DELETE!')
+                    message_error(QCoreApplication.translate('MSql_win2','No statement found as SELECT, INSERT, UPDATE, DELETE!'))
                     return 'ko'                                    
 
     def esegui_istruzione(self, p_istruzione, p_explain):
@@ -4450,7 +4457,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
 
         # verifico che mi sia stato passato del testo
         if p_plsql == '':
-            message_error('No script!')
+            message_error(QCoreApplication.translate('MSql_win2','No script!'))
             return 'ko'
 
         # solo se sono connesso al DB....
@@ -4465,7 +4472,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 v_create = True
                 # l'utente ha richiesto di chiedere conferma prima di procedere con questo tipo di comandi....
                 # quindi faccio comparire messaggio di conferma e se risponde di no --> interrompo
-                if v_global_create_confirm and message_question_yes_no('Are you sure to confirm this command?' + chr(10) + v_testo[0:100].rstrip()) == 'No':
+                if v_global_create_confirm and message_question_yes_no(QCoreApplication.translate('MSql_win2','Are you sure to confirm this command?') + chr(10) + v_testo[0:100].rstrip()) == 'No':
                     return 'ko'
 
             # sostituisce la freccia del mouse con icona "clessidra"
@@ -4750,14 +4757,14 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 Freccia_Mouse(False)
                 # emetto errore sulla barra di stato 
                 errorObj, = e.args    
-                message_error("Error to fetch data: " + errorObj.message)                                            
+                message_error(QCoreApplication.translate('MSql_win2',"Error to fetch data:") + ' ' + errorObj.message)                                            
                 return 'ko'
             except oracledb.InterfaceError as e: 
                 # ripristino icona freccia del mouse
                 Freccia_Mouse(False)
                 # emetto errore sulla barra di stato 
                 errorObj, = e.args    
-                message_error("Error to fetch data: " + errorObj.message)                                            
+                message_error(QCoreApplication.translate('MSql_win2',"Error to fetch data:") + ' ' + errorObj.message)                                            
                 return 'ko'
             
             # se ero a fine flusso --> esco
@@ -5016,7 +5023,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         try:
             os.startfile(v_global_work_dir + 'Export_data.csv')
         except:
-            message_error('Error in file creation!')
+            message_error(QCoreApplication.translate('MSql_win2','Error in file creation!'))
       
     def closeEvent(self, e):
         """
@@ -5054,7 +5061,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             return 'No'
 
         # ci sono dati modificati e quindi chiedo come procedere ...
-        v_scelta = message_question_yes_no_cancel("The document " + self.objectName() + " was modified." + chr(13) + "Do you want to save changes?")        
+        v_scelta = message_question_yes_no_cancel(QCoreApplication.translate('MSql_win2',"The document") + ' ' + self.objectName() + ' ' + QCoreApplication.translate('MSql_win2',"was modified.") + chr(13) + QCoreApplication.translate('MSql_win2',"Do you want to save changes?"))        
         # utente richiede di interrompere 
         if v_scelta == 'Cancel':
             return 'Cancel'
@@ -5193,7 +5200,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, -1, -1, True, False, False)
             # se sono arrivato alla fine, chiedo se si desidera ripartire dall'inizio...da notare come viene poi richiamata questa stessa funzione!
             if not v_found:
-                if message_question_yes_no('Passed the end of file!'+chr(10)+'Move to the beginnig?') == 'Yes':                    
+                if message_question_yes_no(QCoreApplication.translate('MSql_win2','Passed the end of file!')+chr(10)+QCoreApplication.translate('MSql_win2','Move to the beginnig?')) == 'Yes':                    
                     self.e_sql.setCursorPosition(0,0)
                     self.slot_find_next()
 
@@ -5224,7 +5231,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, -1, -1, True, False, False)
             # se sono arrivato alla fine, chiedo se si desidera ripartire dall'inizio...da notare come viene poi richiamata questa stessa funzione!
             if not v_found:
-                if message_question_yes_no('Passed the end of file!'+chr(10)+'Move to the beginnig?') == 'Yes':                    
+                if message_question_yes_no(QCoreApplication.translate('MSql_win2','Passed the end of file!')+chr(10)+QCoreApplication.translate('MSql_win2','Move to the beginnig?')) == 'Yes':                    
                     self.e_sql.setCursorPosition(0,0)
                     self.slot_find_e_replace_find()
     
@@ -5253,7 +5260,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, v_start_line, v_start_pos, False, False, False)            
                 # se sono arrivato alla fine, chiedo se si desidera ripartire dall'inizio...da notare come viene poi richiamata questa stessa funzione!
                 if not v_found:
-                    if message_question_yes_no('Passed the end of file!'+chr(10)+'Move to the beginnig?') == 'Yes':                    
+                    if message_question_yes_no(QCoreApplication.translate('MSql_win2','Passed the end of file!')+chr(10)+QCoreApplication.translate('MSql_win2','Move to the beginnig?')) == 'Yes':                    
                         self.e_sql.setCursorPosition(0,0)
                         self.slot_find_e_replace_next()
 
@@ -5303,7 +5310,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         try:
             v_line = int( self.win_goto_line.e_goto_line.currentText() )
         except:
-            message_error('Insert a valid number!')
+            message_error(QCoreApplication.translate('MSql_win2','Insert a valid number!'))
             return 'ko'
         
         # normalizzo il numero di riga a inizio o fine documento
@@ -5404,7 +5411,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         #v_start_line, v_start_pos, v_end_line, v_end_pos = self.e_sql.getSelection()
         v_testo_sel = self.e_sql.selectedText()        
         if v_testo_sel is None or v_testo_sel == '':
-            message_info("Please select a text with SQL statement!")
+            message_info(QCoreApplication.translate('MSql_win2',"Please select a text with SQL statement!"))
             return 'ko'
 
         # elimino il testo selezionato 
@@ -5641,7 +5648,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # Aggiornamento delle strutture interne per la gestione delle variabili bind
         if p_function == 'ADD':
             if p_variabile_tipo.find('VARCHAR2') == -1 and p_variabile_tipo.find('NUMBER') == -1 and p_variabile_tipo.find('DATE') == -1:
-                message_error(p_variabile_tipo + ' - Unrecognized type')
+                message_error(p_variabile_tipo + ' - ' + QCoreApplication.translate('MSql_win2','Unrecognized type'))
                 return 'ko'
             # Se la var bind non esiste la aggiungo e siccome non esco dalla procedura, eseguo il refresh a video
             if p_variabile_nome not in self.v_variabili_bind_nome:
@@ -5737,16 +5744,17 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
            Aggiorna i dati della statusbar 
         """
         v_totale_righe = str(self.e_sql.lines())        
-        self.link_to_MSql_win1_class.l_num_righe_e_char.setText("Lines: " + str(v_totale_righe) + ", Length: " + str(self.e_sql.length()))        
+        v_string_lines_and_length = QCoreApplication.translate('MSql_win1','Lines:') + ' ' + str(v_totale_righe) + ', ' + QCoreApplication.translate('MSql_win1','Length:') + ' ' + str(self.e_sql.length())
+        self.link_to_MSql_win1_class.l_num_righe_e_char.setText(v_string_lines_and_length)        
 
         # reimposta larghezza del margine numeri di riga...
         self.e_sql.setMarginWidth(0, '0' + v_totale_righe)        
 
         # label indicatore di overwrite
         if self.v_overwrite_enabled:
-            self.link_to_MSql_win1_class.l_overwrite_enabled.setText('Overwrite')
+            self.link_to_MSql_win1_class.l_overwrite_enabled.setText(QCoreApplication.translate('MSql_win1','Overwrite'))
         else:                
-            self.link_to_MSql_win1_class.l_overwrite_enabled.setText('Insert')
+            self.link_to_MSql_win1_class.l_overwrite_enabled.setText(QCoreApplication.translate('MSql_win1','Insert'))
 
         # label che indica il tipo di codifica                
         if self.setting_utf8:            
@@ -5773,7 +5781,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         v_seconds, v_microseconds = divmod(v_remainder, 1)
         v_tenths_of_second = int(v_microseconds * 100)
         v_tempo_formattato = f"{int(v_hours):02}:{int(v_minutes):02}:{int(v_seconds):02}.{v_tenths_of_second:02}"
-        self.link_to_MSql_win1_class.l_exec_time.setText("Last execution time: " + v_tempo_formattato)
+        self.link_to_MSql_win1_class.l_exec_time.setText(QCoreApplication.translate('MSql_win1','Last execution time:') + ' ' + v_tempo_formattato)
 
 #
 #  _______  ______ _____ ____ _____ 
@@ -5804,7 +5812,7 @@ if __name__ == "__main__":
         v_dir_eseguibile = os.path.dirname(sys.executable)
         os.chdir(v_dir_eseguibile)
         QDir.addSearchPath('icons', '_internal/icons/')
-        QDir.addSearchPath('logos', '_internal/logos/')        
+        QDir.addSearchPath('logos', '_internal/logos/')                        
         v_view_splash = True
     else:
         v_view_splash = False
@@ -5843,6 +5851,17 @@ if __name__ == "__main__":
     #             Mentre per la parte di QScintilla ho dovuto fare le impostazioni manuali (v. definizione del lexer)
     if o_global_preferences.dark_theme:        
         app.setStyleSheet(dark_theme_definition())                    
+            
+    # Carico eventuali traduzioni se la lingua è diversa rispetto all'inglese        
+    # se il programma è eseguito da pyinstaller, cambio la dir di riferimento passando a dove si trova l'eseguibile
+    if getattr(sys, 'frozen', False):         
+        v_dir_qtlinguist = "_internal/qtlinguist/"
+    else:
+        v_dir_qtlinguist = "qtlinguist"
+    if o_global_preferences.app_language == 'Italian':
+        translate = QTranslator()
+        if translate.load("02 - MSql_linguist_it.qm",v_dir_qtlinguist):            
+            app.installTranslator(translate)          
 
     # avvio del programma (aprendo eventuale file indicato su linea di comando)   
     application = MSql_win1_class(v_nome_file_da_caricare)         

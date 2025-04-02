@@ -1,0 +1,18 @@
+QtLinguist è il meccanismo creato da Qt per la traduzione dei form
+funziona partendo dal codice python dove sono presenti elementi grafici come label, menu, ecc. nello specifico il files .ui creati tramite QtDesigner
+A questi vanno aggiunte tutte le stringhe che poi vengono usati nei programmi Python veri e propri.
+
+1 Step: creazione del file .ts
+  Il file .ts è il risultato dell'analisi dei file .ui e dei file .py 
+  Il file .ts è il file che gestisce QtLinguist
+  Da QtLinguist, una volta che viene fatta la traduzione, dovrà essere generato il file .qm che è il bytecode delle traduzioni e potrà essere usato a programma
+  Quindi...il file .ts va formato eseguendo il comando 
+     pylupdate6 file1.ui file2.py ecc.... -ts file_traduzione.ts.
+	 nello specifico è stato creato un file .bat apposta che contiene elenco degli elementi da cui raccogliere i termini da tradurre
+ 	 
+2 Step: usare QtLinguist (è uno specifico programma) per tradurre i termini intercettati allo Step1 e presenti nel file .ts
+3 Step: da dentro QtLinguist creare il file .qm facendo il comando "Release" dal menu "File"
+
+4 Step: usare la traduzione in MSql attraverso l'oggetto QTranslator che usa come primo parametro il blocco di dizionario il cui titolo lo si vede dentro QtLinguist
+
+Da notare come il file .qm prodotto è di una sola lingua...ciò vuol dire che se si vorranno creare altre lingue, si dovranno creare altri file .qm che a programma poi andranno caricati all'avvio

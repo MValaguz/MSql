@@ -46,7 +46,7 @@ class create_autocomplete_dic_class(QMainWindow, Ui_create_autocomplete_dic_wind
            Creazione del file con i termini di dizionario per autocomplete
         """
         if not self.connesso:
-            message_error('You must to connect to Oracle!')
+            message_error(QCoreApplication.translate('create_autocomplete','You must to connect to Oracle!'))
             return 'ko'
         
         # creo una barra di avanzamento infinita
@@ -132,7 +132,7 @@ class create_autocomplete_dic_class(QMainWindow, Ui_create_autocomplete_dic_wind
                 v_file.write(v_record[0] +'\n')
                     
         v_file.close()
-        message_info('The autocompletion dictionary has been created! Restart MSql to see the changes ;-)')
+        message_info(QCoreApplication.translate('crate_autocomplete','The autocompletion dictionary has been created! Restart MSql to see the changes ;-)'))
       
 # ----------------------------------------
 # TEST APPLICAZIONE

@@ -119,6 +119,11 @@ class preferences_class():
                 self.refresh_dictionary = v_json['refresh_dictionary']
             else:
                 self.refresh_dictionary= 15
+            # refresh dictionary (frequenza con cui lanciare l'aggiornamento del dizionario)
+            if 'app_language' in v_json:                        
+                self.app_language = v_json['app_language']
+            else:
+                self.app_language = 'English'
         # imposto valori di default senza presenza dello specifico file
         else:
             self.remember_window_pos = True
@@ -141,6 +146,7 @@ class preferences_class():
             self.tab_size = '2'
             self.open_new_editor = True
             self.refresh_dictionary = 15
+            self.app_language = 'English'
             
         # Se esiste il file delle connessioni...le carico nell'oggetto
         if os.path.isfile(p_nome_file_connections):
@@ -196,6 +202,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         self.e_default_date_format.setCurrentText(self.preferences.date_format)
         self.e_default_csv_separator.setText(self.preferences.csv_separator)
         self.e_tab_size.setText(self.preferences.tab_size)
+        self.e_language.setCurrentText(self.preferences.app_language)
 
         ###
         # preparo elenco server        
@@ -344,18 +351,18 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         """
            Ripristina tutte preferenze di default
         """
-        if message_question_yes_no('Do you want to restore default preferences?') == 'Yes':
+        if message_question_yes_no(QCoreApplication.translate('Preferences','Do you want to restore default preferences?')) == 'Yes':
             # cancello il file delle preferenze
             if os.path.isfile(self.nome_file_preferences):
                 os.remove(self.nome_file_preferences)
 
-            if message_question_yes_no('Do you want to delete connections preferences too?') == 'Yes':
+            if message_question_yes_no(QCoreApplication.translate('Preferences','Do you want to delete connections preferences too?')) == 'Yes':
                 # cancello il file delle preferenze
                 if os.path.isfile(self.nome_file_connections):
                     os.remove(self.nome_file_connections)
 
             # emetto messaggio di fine
-            message_info('Preferences restored! Restart MSql to see the changes ;-)')
+            message_info(QCoreApplication.translate('Preferences','Preferences restored! Restart MSql to see the changes ;-)'))
             # esco dal programma delle preferenze
             self.close()
 
@@ -584,6 +591,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
                  'autocompletation':v_autocompletation,
                  'open_new_editor':v_open_new_editor,
                  'refresh_dictionary':self.e_refresh_dictionary.value(),
+                 'app_language': self.e_language.currentText()
                 }
 
 		# scrittura nel file dell'oggetto json (notare come venga usata la funzione dump senza la s finale in quanto scrive byte)
@@ -599,7 +607,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         with open(self.nome_file_connections, 'wb') as outfile:
             outfile.write(v_dump)
         
-        message_info('Preferences saved! Restart MSql to see the changes ;-)')
+        message_info(QCoreApplication.translate('Preferences','Preferences saved! Restart MSql to see the changes ;-)'))
 
 # ----------------------------------------
 # TEST APPLICAZIONE

@@ -63,7 +63,7 @@ class preferred_sql_class(QMainWindow, Ui_preferred_sql_window):
            alla chiusura controlla se ci sono delle modifiche in sospeso
         """
         if len(self.matrice) != 0:
-            v_ok =message_question_yes_no_cancel('Save the records?') 
+            v_ok =message_question_yes_no_cancel(QCoreApplication.translate('preferred','Save the records?')) 
             if v_ok == 'Yes':
                 self.slot_save()
             elif v_ok == 'No':        
@@ -198,14 +198,14 @@ class preferred_sql_class(QMainWindow, Ui_preferred_sql_window):
             # committo        
             self.v_conn.commit()            
             if v_count > 0:
-                message_info('Processed ' + str(v_count) + ' record!')
+                message_info(QCoreApplication.translate('preferred','Processed') + ' ' + str(v_count) + ' ' + QCoreApplication.translate('preferred','record!'))
             else:
-                message_info('Nothing to save!')
+                message_info(QCoreApplication.translate('preferred','Nothing to save!'))
             # eseguo il refresh e quindi la pulizia della tabella ombra
             self.slot_start()
         
         except sqlite3.IntegrityError as e:
-            message_info('Unique key error! Check NAME column!')
+            message_info(QCoreApplication.translate('preferred','Unique key error! Check NAME column!'))
             # rollback di tutta la transazione
             self.v_conn.rollback()  
                         

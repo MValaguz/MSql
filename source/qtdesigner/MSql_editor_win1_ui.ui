@@ -318,12 +318,12 @@
             </property>
             <item>
              <property name="text">
-              <string/>
+              <string notr="true"/>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Tables</string>
+              <string notr="true">Tables</string>
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
@@ -332,7 +332,7 @@
             </item>
             <item>
              <property name="text">
-              <string>Packages body</string>
+              <string notr="true">Packages body</string>
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
@@ -341,7 +341,7 @@
             </item>
             <item>
              <property name="text">
-              <string>Packages</string>
+              <string notr="true">Packages</string>
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
@@ -350,7 +350,7 @@
             </item>
             <item>
              <property name="text">
-              <string>Procedures</string>
+              <string notr="true">Procedures</string>
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
@@ -359,7 +359,7 @@
             </item>
             <item>
              <property name="text">
-              <string>Functions</string>
+              <string notr="true">Functions</string>
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
@@ -368,7 +368,7 @@
             </item>
             <item>
              <property name="text">
-              <string>Triggers</string>
+              <string notr="true">Triggers</string>
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
@@ -377,7 +377,7 @@
             </item>
             <item>
              <property name="text">
-              <string>Views</string>
+              <string notr="true">Views</string>
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
@@ -386,7 +386,7 @@
             </item>
             <item>
              <property name="text">
-              <string>Sequences</string>
+              <string notr="true">Sequences</string>
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
@@ -395,7 +395,7 @@
             </item>
             <item>
              <property name="text">
-              <string>Primary keys</string>
+              <string notr="true">Primary keys</string>
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
@@ -404,7 +404,7 @@
             </item>
             <item>
              <property name="text">
-              <string>Unique keys</string>
+              <string notr="true">Unique keys</string>
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
@@ -413,7 +413,7 @@
             </item>
             <item>
              <property name="text">
-              <string>Foreign keys</string>
+              <string notr="true">Foreign keys</string>
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
@@ -422,7 +422,7 @@
             </item>
             <item>
              <property name="text">
-              <string>Check keys</string>
+              <string notr="true">Check keys</string>
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
@@ -431,7 +431,7 @@
             </item>
             <item>
              <property name="text">
-              <string>Indexes</string>
+              <string notr="true">Indexes</string>
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
@@ -440,7 +440,7 @@
             </item>
             <item>
              <property name="text">
-              <string>Synonyms</string>
+              <string notr="true">Synonyms</string>
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
@@ -484,17 +484,17 @@
            <widget class="QComboBox" name="oggetti_db_tipo_ricerca">
             <item>
              <property name="text">
-              <string>Like</string>
+              <string notr="true">Like</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Start with</string>
+              <string notr="true">Start with</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Only invalid</string>
+              <string notr="true">Only invalid</string>
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">
@@ -503,7 +503,7 @@
             </item>
             <item>
              <property name="text">
-              <string>Only disabled</string>
+              <string notr="true">Only disabled</string>
              </property>
              <property name="icon">
               <iconset resource="resource.qrc">

@@ -62,6 +62,7 @@ class SecondThread(QThread):
             # | |  | | | | |\/| | |\/| | / _ \ |  \| | | | |
             # | |__| |_| | |  | | |  | |/ ___ \| |\  | |_| |
             #  \____\___/|_|  |_|_|  |_/_/   \_\_| \_|____/                                                                     
+            print('ESECUZIONE DEL COMANDO VERSO ORACLE AVVIATA.........')
             self.v_cursor.execute(self.v_command,self.v_bind_variables)                            
             print('ESECUZIONE DEL COMANDO VERSO ORACLE TERMINATA!!!!!!!')
             # lavoro terminato ok --> emetto segnale di fine che verrà dal chiamante            
@@ -327,22 +328,17 @@ def slot_on_click():
     # esecuzione della funzione con creazione della classe ed esecuzione della medesima
     # in questo modo le classi di thread vedono i parametri ricevuti in input e la dialog blocca 
     # tutto il programma fino al termine del thread principale    
-    # v_oracle_executer = SendCommandToOracle(v_connection,
-    #                                         v_cursor, 
-    #                                         """begin
-    #                                              MW_MAGAZZINI.PREPARA_PRELIEVO_ORDINI('SMI','B1');
-    #                                              MW_MAGAZZINI.DISPONIBILE_PRELIEVO_ORDINI('SMI','B1');
-    #                                            end;""", 
-    #                                         v_bind,
-    # v_win.frameGeometry())        
-    # v_oracle_executer.signalStatus.connect(endCommandToOracle)    
-    # v_oracle_executer.start()
-    for i in range(1,1000):
-        v_oracle_executer = SendCommandToOracle(v_connection, v_cursor, """select * from va_op_da_versare""", v_bind, v_win.frameGeometry())                                                                
-        #v_oracle_executer = SendCommandToOracle(v_connection, v_cursor, """select * from dual""", v_bind, v_win.frameGeometry())                                                                    
-        v_oracle_executer.signalStatus.connect(endCommandToOracle)    
-        v_oracle_executer.start()
-        print('fine ' + str(i))
+
+    # for i in range(1,1000):
+    #     v_oracle_executer = SendCommandToOracle(v_connection, v_cursor, """select * from va_op_da_versare""", v_bind, v_win.frameGeometry())                                                                
+    #     #v_oracle_executer = SendCommandToOracle(v_connection, v_cursor, """select * from dual""", v_bind, v_win.frameGeometry())                                                                    
+    #     v_oracle_executer.signalStatus.connect(endCommandToOracle)    
+    #     v_oracle_executer.start()
+    #     print('fine ' + str(i))
+    
+    v_oracle_executer = SendCommandToOracle(v_connection, v_cursor, open('C:\\Users\\mvalaguz\\Desktop\\JOB_CONTROLLO_SCATOLE_KARDEX versione lenta.msql','r').read(), v_bind, v_win.frameGeometry())                                                                
+    v_oracle_executer.signalStatus.connect(endCommandToOracle)    
+    v_oracle_executer.start()    
 
 if __name__ == "__main__":    
     # inizializzo libreria oracle    

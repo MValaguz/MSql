@@ -10,6 +10,8 @@ import datetime
 # Libreria oracle
 import oracledb
 import oracle_my_lib
+# Libreria grafica
+from PyQt6.QtCore import QCoreApplication
 # Librerie interne MGrep
 from utilita import message_error, message_question_yes_no, message_info
 
@@ -263,14 +265,14 @@ def killa_sessione(p_sid,
     """
         killa la sessione oracle dalla coppia p_sid e p_serial
     """
-    if message_question_yes_no("Do you want to kill the selected session?") == 'Yes':
+    if message_question_yes_no(QCoreApplication.translate('utilita_database',"Do you want to kill the selected session?")) == 'Yes':
         try:
             # connessione al DB come amministratore
             oracle_my_lib.inizializzo_client()  
             v_connection = oracledb.connect(user=p_oracle_user_sys, password=p_oracle_password_sys, dsn=p_oracle_dsn_real, mode=oracledb.SYSDBA)
             v_ok = True
         except:
-            message_error('Connection to oracle rejected. Please control login information.')
+            message_error(QCoreApplication.translate('utilita_database','Connection to oracle rejected. Please control login information.'))
             v_ok = False
 
         if v_ok:
@@ -278,7 +280,7 @@ def killa_sessione(p_sid,
             v_cursor.execute("ALTER SYSTEM KILL SESSION '" + str(p_sid).strip() + "," + str(p_serial).strip() + "'")
             v_cursor.close()
             v_connection.close()
-            message_info('The session is being closed.')
+            message_info(QCoreApplication.translate('utilita_database','The session is being closed.'))
 
 def estrae_elenco_tabelle_sqlite(p_type,
                                  p_sqlite_db_name):
@@ -498,7 +500,7 @@ def write_sql_history(p_db_name, p_testo, p_time_in_seconds):
             v_curs.execute("""INSERT INTO SQL_HISTORY(TIPO,ORARIO,ISTRUZIONE,EXEC_TIME) VALUES(?,?,?,?)""", ('SQL', datetime.datetime.now(), p_testo, p_time_in_seconds) )
             v_conn.commit()
         except sqlite3.OperationalError:
-            message_error('Error while writing in history log!' + chr(10) + 'Probably the file MSql.db is locked!')        
+            message_error(QCoreApplication.translate('utilita_database','Error while writing in history log!') + chr(10) + QCoreApplication.translate('utilita_database','Probably the file MSql.db is locked!'))        
                 
         v_conn.close()    
     
@@ -542,7 +544,7 @@ def write_files_history(p_db_name, p_file_name, p_pos_y, p_pos_x):
                 v_curs.execute("""UPDATE FILE_HISTORY SET ORARIO=?,POS_Y=?,POS_X=? WHERE FILE_NAME=?""", (datetime.datetime.now(), p_pos_y, p_pos_x, p_file_name) )
             v_conn.commit()
         except sqlite3.OperationalError:
-            message_error('Error while writing in file history log!' + chr(10) + 'Probably the file MSql.db is locked!')                        
+            message_error(QCoreApplication.translate('utilita_database','Error while writing in file history log!') + chr(10) + QCoreApplication.translate('utilita_database','Probably the file MSql.db is locked!'))                        
         
         v_conn.close()    
 
