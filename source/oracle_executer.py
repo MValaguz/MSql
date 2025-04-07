@@ -136,16 +136,19 @@ class FirstThread(QThread):
                 self.server_thread.signalStatus.connect(self.end_of_job)
                 self.server_thread.start()                
                 prec_elapsed_seconds = elapsed_time.total_seconds()
+
+            #print(f"{elapsed_time.total_seconds()} - {prec_elapsed_seconds}")
                         
             # se è trascorso un decimo di secondo emetto segnale per aggiornare la progressbar
-            if round(elapsed_time.total_seconds() - prec_elapsed_seconds, 1) == 0.1:                                 
-                minuti, secondi = divmod(elapsed_time.seconds + elapsed_time.days * 86400, 60)                                
-                self.signalStatus.emit(f"Exec time: {minuti:02}:{secondi:02}")
-                prec_elapsed_seconds = elapsed_time.total_seconds()
+            if round(elapsed_time.total_seconds() - prec_elapsed_seconds, 1) == 0.1:                                                 
+                ore, resto = divmod(elapsed_time.seconds + elapsed_time.days * 86400, 3600)
+                minuti, secondi = divmod(resto, 60)
+                self.signalStatus.emit(f"Exec time: {ore:02}:{minuti:02}:{secondi:02}")                
                 if self.server_thread.v_completato:                             
                     v_fine_lavoro = True
             
             # attesa di 100 millisecondi per non impegnare troppo la cpu su questo ciclo
+            prec_elapsed_seconds = elapsed_time.total_seconds()
             self.msleep(100)  
             
     def get_cursor(self):
@@ -207,14 +210,14 @@ class SendCommandToOracle(QDialog):
         # definizione della gif animata (che verrà ulteriormente zoomata durante la visualizzazione)
         self.gears = QLabel(self)        
         self.gridLayout.addWidget(self.gears, 0, 0, 1, 1)        
-        self.movie = QMovie("icons:gear-wheel.gif")                
+        self.movie = QMovie("icons:gear-wheel.gif")                        
         # segnale che si scatena ad ogni visualizzazione di frame e che serve solo per zoomare l'animazione
         self.movie.frameChanged.connect(self.update_movie_frame)
         self.gears.setMovie(self.movie)                
         self.movie.start()        
         # definizione della label timer 
         self.label_time = QLabel(self)
-        self.label_time.setText('Exec time: 00:00')
+        self.label_time.setText('Exec time: 00:00:00')
         self.gridLayout.addWidget(self.label_time, 0, 1, 1, 1)
         # zona del bottone di interruzione dell'operazione
         self.buttonBox = QDialogButtonBox(self)
