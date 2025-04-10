@@ -29,14 +29,17 @@ def extract_object_name_from_cursor_pos(p_string, p_pos):
        Es. p_string = SELECT * FROM SMI.OP_COM
            p_pos = 20
            restituisce SMI e OP_COM
-    """
+    """    
+    # se posizione in ingresso è fuori range (caso in cui il cursore era all'inizio) --> imposto a zero
+    if p_pos == -1:
+        p_pos = 0
     # ricerco la parola dove posizionato cursore senza tenere conto del "." 
     v_word = extract_word_from_cursor_pos(p_string, p_pos, False)
     # Divide la parola se contiene un punto
     if '.' in v_word:
         parts = v_word.split('.', 1)
         return parts[0], parts[1]
-    else:
+    else:        
         return None, v_word
 
 def extract_word_from_cursor_pos(p_string, p_pos, p_period=True):
@@ -58,16 +61,20 @@ def extract_word_from_cursor_pos(p_string, p_pos, p_period=True):
         v_check1_chars = ('',' ','=',':','(',')',';',',',chr(9))
         v_check2_chars = (' ','=',':','(',')',';',',',chr(9))
         v_check3_chars = (' ','=',':','\n','\r','(',')',';',',',chr(9))
-    # se posizione cursore è oltre la stringa...esco    
     
+    # se posizione cursore è oltre la stringa...esco        
     if p_pos > len(p_string):
         return ''
     elif p_pos == len(p_string):
         p_pos -= 1
 
+    # se il cursore è su uno spazio, se riesco lo sposto verso destra
+    if p_string[p_pos] == ' ' and p_string[p_pos+1] != None:
+        p_pos += 1
+
     # inizio a comporre la parola partendo dalla posizione del cursore (se non trovo nulla esco)
     v_word=p_string[p_pos]
-    if v_word is None or v_word in v_check1_chars:        
+    if (v_word is None or v_word in v_check1_chars):                
         return ''
 
     # mi sposto a sinistra rispetto al cursore e compongo la parola    
@@ -259,8 +266,9 @@ if __name__ == "__main__":
     # #scrivi_lista_in_output(['ciao\n','marco\r\n'])
     
     # test funzione che restituisce owner e object    
-    v_owner, v_object = extract_object_name_from_cursor_pos('	select * from ta_azien ',23)    
-    print(f"{v_owner} {v_object}")    
+    #v_owner, v_object = extract_object_name_from_cursor_pos('	select * from ta_azien ',23)    
+    #print(f"{v_owner} {v_object}")    
     
     # test funzione che restituisce parola sotto il cursore
-    #print(extract_word_from_cursor_pos('v_peso_nu			MA_ARTRE.PESO_NU%TYPE;', 18))
+    v_owner, v_oggetto = extract_object_name_from_cursor_pos('select * from ta_azien', 13)                        
+    print(f"{v_owner},{v_oggetto}")    

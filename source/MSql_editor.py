@@ -381,7 +381,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # il nuovo editor viene aperto solo in base a specifica preferenza
             if o_global_preferences.open_new_editor:
                 v_azione = QAction()
-                v_azione.setText('New')
+                v_azione.setText(QCoreApplication.translate('MSql_win1','New'))
                 self.smistamento_voci_menu(v_azione)      
 
         ###
@@ -3580,8 +3580,8 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         v_line = self.e_sql.selectedText()
         # riposiziono il cursore allo stato originario
         self.e_sql.setSelection(v_num_line, v_num_pos, v_num_line, v_num_pos)
-        # utilizzando la posizione del cursore sulla riga, estraggo il nome dell'oggetto che sta sotto il cursore (es. TA_AZIEN oppure SMILE.TA_AZIEN)
-        v_owner, v_oggetto = extract_object_name_from_cursor_pos(v_line.upper(), v_num_pos-1)                        
+        # utilizzando la posizione del cursore sulla riga, estraggo il nome dell'oggetto che sta sotto il cursore (es. TA_AZIEN oppure SMILE.TA_AZIEN)        
+        v_owner, v_oggetto = extract_object_name_from_cursor_pos(v_line.upper(), v_num_pos-1)                                
         if v_oggetto != '':
             # se owner non trovato allora uso lo schema corrente
             if v_owner is None:                
