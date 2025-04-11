@@ -4947,21 +4947,22 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             Funzione che viene richiamata quando un item della tabella viene modificato (solo quando attiva la modifica)
         """        
         if not self.v_carico_pagina_in_corso:            
-            print('Updated cell ' + str(x) + str(y))
+            print(f"Updated cell {x},{y}")
             # memorizzo nella matrice la coppia x,y della cella modificata
             self.v_matrice_dati_modificati.append((x,y))            
 
     def slot_save_modified_data(self):
         """
-           Prende tutti gli item modificati nella tabella ed esegue gli aggiornamenti!
-           Attenzione! Siccome alla fine viene fatta una commit, vengono salvate anche tutte istruzioni sql che l'utente ha eseguito in precedenza!
-        """        
-        # se il focus è rimasto nella cella, allora prendo il valore della cella e lo carico nella matrice degli item modificati
-        #self.slot_o_table_item_modificato(self.o_table.currentRow(),self.o_table.currentColumn())        
-
-        # sposto il focus così che se utente rimasto nella cella, scatta il cambio di stato
-        #QTimer.singleShot(0, self.e_sql.setFocus)
-
+           Prende tutti gli item modificati nella tabella e crea lo script per l'aggiornamento
+        """
+        # Siccome questa funzione viene richiamta da menu, può essere che il focus sia rimasto nella cella e non sia scattato il relativo change che 
+        # ha caricato la matrice dei dati modificati (di quella cella); per questo motivo si valuta se caricare anche la cella dove era il focus        
+        focused_widget = QApplication.focusWidget()                
+        # se l'elemento su cui era il focus era un item...
+        if isinstance(focused_widget, QLineEdit):                                            
+            # forzo uscita del cursore che fa automaticamente scattare la funzione di change dell'item
+            focused_widget.clearFocus()
+        
         # dalla select_corrente ricavo il nome della tabella
         v_table_name = ''
         v_elementi = self.v_select_corrente.split()        
