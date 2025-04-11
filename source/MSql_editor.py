@@ -677,9 +677,20 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # Taglia il testo
             elif p_slot.text() == QCoreApplication.translate('MSql_win1','Cut'):
                 o_MSql_win2.e_sql.cut()
-            # Copia il testo
+            # Copia il testo rispetto al widget che aveva il focus
             elif p_slot.text() == QCoreApplication.translate('MSql_win1','Copy'):
-                o_MSql_win2.e_sql.copy()
+                # Ricerco dove era il focus prima di selezionare la voce di menu
+                focused_widget = QApplication.focusWidget()
+                # Se il widget era di tipo testo, copio contenuto nella clipboard (nel caso del plaintext converto il separatore di paragrafo in ritorno a capo)
+                if isinstance(focused_widget, QPlainTextEdit):                    
+                    clipboard = QApplication.clipboard()
+                    clipboard.setText(focused_widget.textCursor().selectedText().replace('\u2029','\n'))                                                        
+                # Se il widget è la tabella dei risultati copio valore nella clipboard (ma solo se item è di testo)
+                elif isinstance(focused_widget, QTableWidget):                    
+                    v_item = focused_widget.currentItem()
+                    if isinstance(v_item, QTableWidgetItem):                    
+                        clipboard = QApplication.clipboard()
+                        clipboard.setText(v_item.text())                                                        
             # Incolla il testo
             elif p_slot.text() == QCoreApplication.translate('MSql_win1','Paste'):
                 o_MSql_win2.e_sql.paste()                
@@ -2982,7 +2993,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         self.v_mini_map_visible = True
 
         # var che indica che il testo è stato modificato
-        #self.e_sql.insert('SELECT * FROM MS_UTN')
+        #self.e_sql.insert("begin dbms_output.put_line('ciao'); end;")
         self.v_testo_modificato = False         
 
         # evidenzio i colori se richiesto
@@ -2996,7 +3007,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # sul cambio della cella imposto altro evento (vale solo quando abilitata la modifica)
         self.o_table.cellChanged.connect(self.slot_o_table_item_modificato)                
         # attivo il filtro di eventi sull'oggetto dei risultati, in modo da visualizzare il menu contestuale sulle celle
-        self.o_table.viewport().installEventFilter(self)   
+        self.o_table.viewport().installEventFilter(self)           
         # slot per controllare quando cambia il testo digitato dall'utente
         self.e_sql.textChanged.connect(self.slot_e_sql_modificato)    
         self.e_sql.cursorPositionChanged.connect(self.aggiorna_statusbar)                    
@@ -3115,7 +3126,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
            Da notare come un'istruzione di return False indirizza l'evento verso il suo svolgimento classico
         """      
         global v_global_connection
-
+        
         # controllo se l'autocompletamento è aperto (poplist con i suggerimenti...)
         if event.type() == QEvent.Type.KeyPress and source is self.e_sql and self.e_sql.SendScintilla(QsciScintilla.SCI_AUTOCGETCURRENT) != -1:  
             # se premuto invio, non lo accetto come conferma della voce proposta e chiudo l'autocompletamento

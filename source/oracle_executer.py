@@ -332,16 +332,16 @@ def slot_on_click():
     # in questo modo le classi di thread vedono i parametri ricevuti in input e la dialog blocca 
     # tutto il programma fino al termine del thread principale    
 
-    # for i in range(1,1000):
-    #     v_oracle_executer = SendCommandToOracle(v_connection, v_cursor, """select * from va_op_da_versare""", v_bind, v_win.frameGeometry())                                                                
-    #     #v_oracle_executer = SendCommandToOracle(v_connection, v_cursor, """select * from dual""", v_bind, v_win.frameGeometry())                                                                    
-    #     v_oracle_executer.signalStatus.connect(endCommandToOracle)    
-    #     v_oracle_executer.start()
-    #     print('fine ' + str(i))
+    for i in range(1,1000):
+        v_oracle_executer = SendCommandToOracle(v_connection, v_cursor, """select * from va_op_da_versare""", v_bind, v_win.frameGeometry())                                                                
+        #v_oracle_executer = SendCommandToOracle(v_connection, v_cursor, """select * from dual""", v_bind, v_win.frameGeometry())                                                                    
+        v_oracle_executer.signalStatus.connect(endCommandToOracle)    
+        v_oracle_executer.start()
+        print('fine ' + str(i))
     
-    v_oracle_executer = SendCommandToOracle(v_connection, v_cursor, open('C:\\Users\\mvalaguz\\Desktop\\JOB_CONTROLLO_SCATOLE_KARDEX versione lenta.msql','r').read(), v_bind, v_win.frameGeometry())                                                                
-    v_oracle_executer.signalStatus.connect(endCommandToOracle)    
-    v_oracle_executer.start()    
+    #v_oracle_executer = SendCommandToOracle(v_connection, v_cursor, open('C:\\Users\\mvalaguz\\Desktop\\JOB_CONTROLLO_SCATOLE_KARDEX versione lenta.msql','r').read(), v_bind, v_win.frameGeometry())                                                                
+    #v_oracle_executer.signalStatus.connect(endCommandToOracle)    
+    #v_oracle_executer.start()    
 
 if __name__ == "__main__":    
     # inizializzo libreria oracle    

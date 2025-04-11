@@ -68,7 +68,7 @@ def extract_word_from_cursor_pos(p_string, p_pos, p_period=True):
     elif p_pos == len(p_string):
         p_pos -= 1
 
-    # se il cursore è su uno spazio, se riesco lo sposto verso destra
+    # se il cursore è su uno spazio, se riesco lo sposto verso destra (modifica inserita in data 10/04/2025)
     if p_string[p_pos] == ' ' and p_string[p_pos+1] != None:
         p_pos += 1
 
