@@ -30,6 +30,7 @@ import locale
 import re
 import traceback
 import difflib
+import time
 # Librerie di data base Oracle
 import oracledb, oracle_my_lib, oracle_executer
 # Librerie grafiche QT
@@ -295,6 +296,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         ###
         self.e_server_name = ''
         self.e_user_name = ''
+        self.e_user_proxy = ''
         self.e_password = ''
         self.e_user_mode = 'Normal'        
         for rec in o_global_preferences.elenco_server:                
@@ -307,7 +309,8 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 try:
                     if rec[3] == '1':                                            
                         self.e_user_name = rec[1]
-                        self.e_password = rec[2]        
+                        self.e_password = rec[2] 
+                        self.e_user_proxy = rec[4]
                 except:
                     pass
 
@@ -472,6 +475,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 if rec[0] == p_slot.text():
                     self.e_user_name = rec[1]
                     self.e_password = rec[2]
+                    self.e_user_proxy = rec[4]
                     self.e_user_mode = 'Normal'                    
             self.slot_connetti()            
         # Connessione a un data base specifico richiedendo tutti i parametri singolarmente
@@ -1120,17 +1124,24 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 v_global_connection.close()
             # inizializzo libreria oracle    
             oracle_my_lib.inizializzo_client()              
+            # imposto la stringa di connessione utente con modalità proxy se indicata
+            v_user_connect = f"{self.e_user_name}"
+            if self.e_user_proxy != '':
+                v_user_connect += f"[{self.e_user_proxy}]"            
             # connessione al DB (eventualmente come dba)
+            print(v_user_connect)
             if self.e_user_mode == 'SYSDBA':               
-                v_global_connection = oracledb.connect(user=self.e_user_name, password=self.e_password, dsn=self.e_server_name, mode=oracledb.SYSDBA)                        
+                v_global_connection = oracledb.connect(user=v_user_connect, password=self.e_password, dsn=self.e_server_name, mode=oracledb.SYSDBA)                        
             else:
-                v_global_connection = oracledb.connect(user=self.e_user_name, password=self.e_password, dsn=self.e_server_name)                        
+                v_global_connection = oracledb.connect(user=v_user_connect, password=self.e_password, dsn=self.e_server_name)                        
             # imposto var che indica la connessione a oracle
             v_global_connesso = True
             # apro un cursore finalizzato alla gestione degli oggettiDB
             self.v_cursor_db_obj = v_global_connection.cursor()            
         except:
             message_error(QCoreApplication.translate('MSql_win1','Error to oracle connection!'))    
+            if self.e_user_proxy != '':
+                message_error(QCoreApplication.translate('MSql_win1','For via proxy connection remember to activate this using command')+chr(10)+'"ALTER USER proxy_user GRANT CONNECT THROUGH main_user;"'+chr(10)+QCoreApplication.translate('MSql_win1','using user SYS!'))    
             v_global_connesso = False
 
         # Se mi collego come SYSDBA coloro di rosso
@@ -1138,11 +1149,14 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             v_global_background = 'red'
 
         # sulla statusbar, aggiorno la label della connessione        
-        self.l_connection.setText(QCoreApplication.translate('MSql_win1','Connection:') + ' ' + self.e_server_name + "/" + self.e_user_name)     
+        self.l_connection.setText(QCoreApplication.translate('MSql_win1','Connection:') + ' ' + self.e_server_name + "/" + v_user_connect)     
         self.l_connection.setStyleSheet('background-color: ' + v_global_color + ';color: "' + v_global_background + '";')              
 
         # imposto la proprietà di schema corrente con lo user
-        self.current_schema = self.e_user_name
+        if self.e_user_proxy != '':
+            self.current_schema = self.e_user_proxy
+        else:
+            self.current_schema = self.e_user_name
 
         # se la connessione è andata a buon fine, richiedo elenco degli oggetti in modo da aggiornare il dizionario dell'editor con nuove parole chiave
         # in questa sezione viene caricata la lista v_global_my_lexer_keywords con tutti i nomi di tabelle, viste, procedure, ecc.
@@ -2278,6 +2292,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         
         # imposto la maschera di editazione sul campo user in modo sia maiuscolo                        
         self.win_dialog_connect.e_user.textEdited.connect(self.slot_e_user_to_upper) 
+        self.win_dialog_connect.e_proxy.textEdited.connect(self.slot_e_proxy_to_upper) 
 
         # creo evento riferito al bottone di connessione
         self.win_dialog_connect.b_connect.clicked.connect(self.richiesta_connessione_specifica_accept)                
@@ -2288,6 +2303,12 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
            Il nome utente viene impostato sempre maiuscolo
         """
         self.win_dialog_connect.e_user.setText(self.win_dialog_connect.e_user.text().upper())
+    
+    def slot_e_proxy_to_upper(self):
+        """
+           Il nome proxy viene impostato sempre maiuscolo
+        """
+        self.win_dialog_connect.e_proxy.setText(self.win_dialog_connect.e_proxy.text().upper())
 
     def richiesta_connessione_specifica_accept(self):
         """
@@ -2300,6 +2321,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
 
         # eseguo la connessione
         self.e_user_name = self.win_dialog_connect.e_user.displayText()
+        self.e_user_proxy = self.win_dialog_connect.e_proxy.displayText()
         self.e_password = self.win_dialog_connect.e_password.text()
         self.e_server_name = self.win_dialog_connect.e_tns.displayText()
         self.e_user_mode = self.win_dialog_connect.e_mode.currentText()
@@ -2322,13 +2344,20 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
     def slot_info(self):
         """
            Apre la window delle info
-        """   
+        """           
         global v_global_work_dir         
+        
         from program_info_ui import Ui_program_info
         self.win_program_info = QDialog()
         self.ui_program_info = Ui_program_info()
         self.ui_program_info.setupUi(self.win_program_info)
         centra_window_figlia(self, self.win_program_info)
+
+        # Se il programma è in esecuzione da pyinstaller...cerco la data di creazione dell'eseguibile MSql.exe e la imposta nel titolo
+        if getattr(sys, 'frozen', False):             
+            v_build_timestamp = time.strftime("%Y-%m-%d",time.localtime(os.path.getmtime(sys.executable)))        
+            self.win_program_info.setWindowTitle(f"MSql Info. Build time: {v_build_timestamp}")
+
         self.win_program_info.show()                        
         
     def crea_dizionario_per_autocompletamento(self):

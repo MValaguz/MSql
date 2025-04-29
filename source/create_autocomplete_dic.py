@@ -53,24 +53,41 @@ class create_autocomplete_dic_class(QMainWindow, Ui_create_autocomplete_dic_wind
         v_progress = avanzamento_infinito_class("sql_editor.gif")            
         v_counter = 0
         # apro il file di testo che conterrà il risultato con tutti i nomi delle funzioni, procedure e package, ecc
-        v_file = open(self.nome_file_dic,'w')
+        v_file = open(self.nome_file_dic,'w')        
         # la funzione put_line viene inserita di default 
         v_file.write('DBMS_OUTPUT.PUT_LINE(TEXT)' +'\n')
 
         # richiesto di analizzare procedure, funzioni e package
         if self.e_analyze_1.isChecked():
             # elenco di tutti gli oggetti funzioni, procedure e package
-            self.oracle_cursor.execute("SELECT OBJECT_NAME, OBJECT_TYPE FROM ALL_OBJECTS WHERE OWNER='" + self.user_name + "' AND OBJECT_TYPE IN ('PACKAGE','PROCEDURE','FUNCTION') AND OBJECT_NAME != 'DBMS_NUMSYSTEM' ORDER BY OBJECT_TYPE, OBJECT_NAME")
+            v_select = "SELECT OWNER, OBJECT_NAME, OBJECT_TYPE FROM ALL_OBJECTS WHERE "
+            # se richiesto di aggiungere anche oggetti APEX, siccome non so come effettivamente si chiama il proprietario, faccio una LIKE
+            if self.e_analyze_3.isChecked():
+                v_select += "(OWNER='" + self.user_name + "' OR OWNER LIKE 'APEX%') AND "
+            # se non richiesto di aggiungere anche gli oggetti pubblici, mi limito ai soli oggetti dell'utente
+            else:
+                v_select += "OWNER='" + self.user_name + "' AND "
+            v_select += "OBJECT_TYPE IN ('PACKAGE','PROCEDURE','FUNCTION') AND OBJECT_NAME != 'DBMS_NUMSYSTEM' ORDER BY OWNER, OBJECT_NAME"            
+            print(v_select)
+            self.oracle_cursor.execute(v_select)
             v_elenco_oggetti = self.oracle_cursor.fetchall()
             # leggo il sorgente di ogni oggetto di cui sopra...
             for v_record in v_elenco_oggetti:                                
                 # visualizzo barra di avanzamento e se richiesto interrompo
                 v_counter += 1
-                v_progress.avanza('Analizing ' + v_record[0] ,v_counter)
+                v_progress.avanza(f"Analizing {v_record[0]}/{v_record[1]}",v_counter)
                 if v_progress.richiesta_cancellazione:                        
                     break
+                # se il proprietario dell'oggetto non coincide con l'utente con cui sono collegato, allora controllo se per quell'oggetto esiste un sinonimo pubblico
+                v_nome_oggetto = v_record[1]
+                if v_record[0] != self.user_name:
+                    self.oracle_cursor.execute("SELECT SYNONYM_NAME FROM ALL_SYNONYMS WHERE ALL_SYNONYMS.OWNER='PUBLIC' AND ALL_SYNONYMS.TABLE_OWNER='" + v_record[0] + "' AND ALL_SYNONYMS.TABLE_NAME='" + v_record[1] + "'")                    
+                    # se esiste il sinonimo pubblico, allora nel file di dizionario verrà scritto quello al posto del nome originario v_record[1]
+                    for result in self.oracle_cursor:
+                        v_nome_oggetto = result [0]                 
+                        break   
                 # leggo il sorgente
-                self.oracle_cursor.execute("""SELECT UPPER(TEXT) FROM ALL_SOURCE WHERE OWNER='"""+self.user_name+"""' AND NAME='"""+v_record[0]+"""' AND TYPE='"""+v_record[1]+"""' ORDER BY LINE""")                
+                self.oracle_cursor.execute("""SELECT UPPER(TEXT) FROM ALL_SOURCE WHERE OWNER='"""+v_record[0]+"""' AND NAME='"""+v_record[1]+"""' AND TYPE='"""+v_record[2]+"""' ORDER BY LINE""")                
                 v_start_sezione = False
                 v_text_sezione = ''
                 v_risultato = ''
@@ -115,8 +132,8 @@ class create_autocomplete_dic_class(QMainWindow, Ui_create_autocomplete_dic_wind
                         v_text_sezione = ''
                         v_start_sezione = False
                         v_risultato += ')'
-                        if v_record[1] == 'PACKAGE':
-                            v_risultato = v_record[0] + '.' + v_risultato
+                        if v_record[2] == 'PACKAGE':
+                            v_risultato = v_nome_oggetto + '.' + v_risultato
                         v_file.write(v_risultato.lstrip() +'\n')
 
         # richiesto di analizzare tabelle e viste
@@ -132,6 +149,7 @@ class create_autocomplete_dic_class(QMainWindow, Ui_create_autocomplete_dic_wind
                 v_file.write(v_record[0] +'\n')
                     
         v_file.close()
+        v_progress.close()
         message_info(QCoreApplication.translate('crate_autocomplete','The autocompletion dictionary has been created! Restart MSql to see the changes ;-)'))
       
 # ----------------------------------------

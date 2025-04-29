@@ -221,8 +221,8 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         ###
         # preparo elenco user        
         ###
-        self.o_users.setColumnCount(4)
-        self.o_users.setHorizontalHeaderLabels(['User title','User name','Password','AutoConnection'])   
+        self.o_users.setColumnCount(5)
+        self.o_users.setHorizontalHeaderLabels(['User title','User name','Password','AutoConnection','As Proxy'])   
         v_rig = 1                
         for record in self.preferences.elenco_user:                                    
             self.o_users.setRowCount(v_rig) 
@@ -332,6 +332,11 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         except:
             v_checkbox.setChecked(False)                                                        
         self.o_users.setCellWidget(v_rig-1,3,v_widget)                                                      
+        # As proxy
+        if len(record) > 4:
+            self.o_users.setItem(v_rig-1,4,QTableWidgetItem(record[4]))                               
+        else:
+            self.o_users.setItem(v_rig-1,4,QTableWidgetItem())                               
     
     def slot_set_color_server(self):
         """
@@ -548,7 +553,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
             v_server.append( ( self.o_server.item(i,0).text(), self.o_server.item(i,1).text(), self.o_server.item(i,2).text(), v_default, v_emphasis, v_create_confirm ) )            
 
         ###
-        # elenco dei users
+        # elenco degli users
         ###
         v_users = []
         for i in range(0,self.o_users.rowCount()):
@@ -564,7 +569,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
                 v_default = '1'
             else:
                 v_default = '0'
-            v_users.append( ( self.o_users.item(i,0).text(), self.o_users.item(i,1).text() , v_password.text(), v_default) )            
+            v_users.append( ( self.o_users.item(i,0).text(), self.o_users.item(i,1).text() , v_password.text(), v_default, self.o_users.item(i,4).text()) )            
 
         # se il tabsize è vuoto --> imposto 2
         if self.e_tab_size.text() == '':

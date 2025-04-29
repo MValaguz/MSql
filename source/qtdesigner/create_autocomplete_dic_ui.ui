@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>319</width>
-    <height>144</height>
+    <width>341</width>
+    <height>140</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,63 +21,83 @@
     <normaloff>:/icons/icons/MSql.ico</normaloff>:/icons/icons/MSql.ico</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QWidget" name="layoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>300</width>
-      <height>125</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" name="verticalLayout_2">
-     <item>
-      <widget class="QGroupBox" name="groupBox">
-       <property name="title">
-        <string>Objects selector:</string>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="1" column="0">
+     <widget class="QPushButton" name="b_create">
+      <property name="text">
+       <string>Create dictionary</string>
+      </property>
+      <property name="icon">
+       <iconset resource="resource.qrc">
+        <normaloff>:/icons/icons/dictionary.png</normaloff>:/icons/icons/dictionary.png</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QGroupBox" name="groupBox">
+      <property name="title">
+       <string>Objects selector:</string>
+      </property>
+      <widget class="QCheckBox" name="e_analyze_1">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>23</y>
+         <width>233</width>
+         <height>17</height>
+        </rect>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="QCheckBox" name="e_analyze_1">
-          <property name="text">
-           <string>Analyze function, procedures and packages</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="e_analyze_2">
-          <property name="text">
-           <string>Analyze tables and views</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="b_create">
        <property name="text">
-        <string>Create dictionary</string>
+        <string>Analyze function, procedures and packages</string>
        </property>
-       <property name="icon">
-        <iconset resource="resource.qrc">
-         <normaloff>:/icons/icons/dictionary.png</normaloff>:/icons/icons/dictionary.png</iconset>
+       <property name="checked">
+        <bool>true</bool>
        </property>
       </widget>
-     </item>
-    </layout>
-   </widget>
+      <widget class="QCheckBox" name="e_analyze_2">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>46</y>
+         <width>144</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Analyze tables and views</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="e_analyze_3">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>69</y>
+         <width>332</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string/>
+       </property>
+       <property name="text">
+        <string>Analyze Apex objects</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </widget>
+    </item>
+   </layout>
   </widget>
  </widget>
  <tabstops>
   <tabstop>e_analyze_1</tabstop>
   <tabstop>e_analyze_2</tabstop>
+  <tabstop>e_analyze_3</tabstop>
   <tabstop>b_create</tabstop>
  </tabstops>
  <resources>
