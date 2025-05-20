@@ -31,12 +31,15 @@ import re
 import traceback
 import difflib
 import time
+import webbrowser
 # Librerie di data base Oracle
 import oracledb, oracle_my_lib, oracle_executer
 # Librerie grafiche QT
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
+# Libreria per la pathname usata per richiamare la documentazione
+from pathlib import Path
 # Librerie QScintilla
 from PyQt6.Qsci import *
 # Classe per la gestione delle preferenze
@@ -555,9 +558,12 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # Riorganizzo le window in modalità tab
         elif p_slot.text() == QCoreApplication.translate('MSql_win1','Tabbed'):
             self.mdiArea.setViewMode(QMdiArea.ViewMode.TabbedView)            
-        # Apro file di help
-        elif p_slot.text() == QCoreApplication.translate('MSql_win1','Help'):
-            os.system("start help\\MSql_help.html")
+        # Apro file di help (help che è stato costruito tramite la libreria Sphinx!)
+        elif p_slot.text() == QCoreApplication.translate('MSql_win1','Help'):                          
+            if getattr(sys, 'frozen', False): 
+                os.system("start _internal/help/MSql_help.html")
+            else:
+                os.system("start help/MSql_help.html")
         # Visualizzo program info
         elif p_slot.text() == QCoreApplication.translate('MSql_win1','Program info'):            
             self.slot_info()
@@ -1128,8 +1134,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             v_user_connect = f"{self.e_user_name}"
             if self.e_user_proxy != '':
                 v_user_connect += f"[{self.e_user_proxy}]"            
-            # connessione al DB (eventualmente come dba)
-            print(v_user_connect)
+            # connessione al DB (eventualmente come dba)            
             if self.e_user_mode == 'SYSDBA':               
                 v_global_connection = oracledb.connect(user=v_user_connect, password=self.e_password, dsn=self.e_server_name, mode=oracledb.SYSDBA)                        
             else:
@@ -1564,12 +1569,22 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                                 AND  ALL_TAB_COMMENTS.TABLE_NAME = '"""+self.v_nome_oggetto+"""'   
                               UNION ALL 
                               SELECT TO_CLOB('\n/\n') FROM DUAL                              
-                              UNION ALL
+                              UNION ALL                              
                               SELECT TO_CLOB('COMMENT ON COLUMN '|| TABLE_NAME || '.' || COLUMN_NAME || ' IS ''' || REPLACE(COMMENTS,'''','''''') || ''';\n')
-                              FROM   ALL_COL_COMMENTS
-                              WHERE  ALL_COL_COMMENTS.OWNER = '"""+self.current_schema+"""'
-                                AND  ALL_COL_COMMENTS.TABLE_NAME = '"""+self.v_nome_oggetto+"""'   
-                           """
+                              FROM   (
+                                      SELECT ALL_COL_COMMENTS.TABLE_NAME,
+									         ALL_COL_COMMENTS.COLUMN_NAME,
+											 ALL_COL_COMMENTS.COMMENTS
+                                      FROM   ALL_COL_COMMENTS,
+                                             ALL_TAB_COLUMNS
+                                      WHERE  ALL_COL_COMMENTS.OWNER = '"""+self.current_schema+"""'
+                                        AND  ALL_COL_COMMENTS.TABLE_NAME = '"""+self.v_nome_oggetto+"""'   
+                                        AND  ALL_TAB_COLUMNS.OWNER = ALL_COL_COMMENTS.OWNER
+                                        AND  ALL_TAB_COLUMNS.TABLE_NAME = ALL_COL_COMMENTS.TABLE_NAME
+                                        AND  ALL_TAB_COLUMNS.COLUMN_NAME = ALL_COL_COMMENTS.COLUMN_NAME
+                                      ORDER BY ALL_TAB_COLUMNS.COLUMN_ID
+                                     )
+                           """                
             elif self.v_tipo_oggetto in ('VIEW'):
                 v_select = """SELECT DBMS_METADATA.GET_DDL('"""+self.v_tipo_oggetto+"""','"""+self.v_nome_oggetto+"""') FROM DUAL
                               UNION ALL
@@ -3406,7 +3421,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             icon1.addPixmap(QPixmap("icons:copy.png"), QIcon.Mode.Normal, QIcon.State.Off)        
             v_copia = QPushButton()
             v_copia.setText('Copy item')
-            v_copia.setIcon(icon1)        
+            v_copia.setIcon(icon1)                    
             v_copia.clicked.connect(self.o_table_copia_valore)
             v_action = QWidgetAction(self.o_table_cont_menu)
             v_action.setDefaultWidget(v_copia)        
@@ -3902,6 +3917,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         v_sort_a_z = QPushButton()
         v_sort_a_z.setText('Sort asc')
         v_sort_a_z.setIcon(icon1)        
+        v_sort_a_z.setStyleSheet("QPushButton { text-align: left; padding-left: 10px; }")
         v_sort_a_z.clicked.connect(self.slot_order_asc_popup)
         v_action = QWidgetAction(self.o_table_popup)
         v_action.setDefaultWidget(v_sort_a_z)        
@@ -3913,6 +3929,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         v_sort_z_a = QPushButton()
         v_sort_z_a.setText('Sort desc')
         v_sort_z_a.setIcon(icon2)
+        v_sort_z_a.setStyleSheet("QPushButton { text-align: left; padding-left: 10px; }")
         v_sort_z_a.clicked.connect(self.slot_order_desc_popup)
         v_action = QWidgetAction(self.o_table_popup)
         v_action.setDefaultWidget(v_sort_z_a)        
@@ -3924,6 +3941,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         v_group_by = QPushButton()
         v_group_by.setText('Group by')
         v_group_by.setIcon(icon3)
+        v_group_by.setStyleSheet("QPushButton { text-align: left; padding-left: 10px; }")
         v_group_by.clicked.connect(self.slot_group_by_popup)
         v_action = QWidgetAction(self.o_table_popup)
         v_action.setDefaultWidget(v_group_by)        
@@ -3935,6 +3953,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         v_count = QPushButton()
         v_count.setText('Count')
         v_count.setIcon(icon4)
+        v_count.setStyleSheet("QPushButton { text-align: left; padding-left: 10px; }")
         v_count.clicked.connect(self.slot_count_popup)
         v_action = QWidgetAction(self.o_table_popup)
         v_action.setDefaultWidget(v_count)        
@@ -3943,12 +3962,25 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # bottone per la somma di colonna
         icon5 = QIcon()
         icon5.addPixmap(QPixmap("icons:sum.png"), QIcon.Mode.Normal, QIcon.State.Off)
-        v_count = QPushButton()
-        v_count.setText('Sum')
-        v_count.setIcon(icon5)
-        v_count.clicked.connect(self.slot_sum_popup)
+        v_sum = QPushButton()
+        v_sum.setText('Sum')
+        v_sum.setIcon(icon5)
+        v_sum.setStyleSheet("QPushButton { text-align: left; padding-left: 10px; }")
+        v_sum.clicked.connect(self.slot_sum_popup)
         v_action = QWidgetAction(self.o_table_popup)
-        v_action.setDefaultWidget(v_count)        
+        v_action.setDefaultWidget(v_sum)        
+        self.o_table_popup.addAction(v_action)
+                                
+        # bottone per inserire il nome della colonna nell'editor
+        icon6 = QIcon()
+        icon6.addPixmap(QPixmap("icons:new.png"), QIcon.Mode.Normal, QIcon.State.Off)
+        v_add = QPushButton()
+        v_add.setText('Add to editor')
+        v_add.setIcon(icon6)
+        v_add.setStyleSheet("QPushButton { text-align: left; padding-left: 10px; }")
+        v_add.clicked.connect(self.slot_add_popup)
+        v_action = QWidgetAction(self.o_table_popup)
+        v_action.setDefaultWidget(v_add)        
         self.o_table_popup.addAction(v_action)
 
         # calcolo la posizione dove deve essere visualizzato il menu popup in base alle proprietà dell'header di tabella
@@ -4108,6 +4140,25 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 
         # rieseguo la select
         self.esegui_select(v_new_select, False)
+        
+        # chiudo il menu popup
+        self.o_table_popup.close()
+
+    def slot_add_popup(self):
+        """
+           Gestione menu popup all'interno dei risultati
+           Prende il nome della colonna e lo inserisce nell'editor nel punto dove posizionato il cursore
+        """
+        # prendo l'item dell'header di tabella 
+        v_header_item = self.o_table.horizontalHeaderItem(self.o_table_popup_index)
+
+        # e lo inserisco nell'editor e sposto il cursore alla fine della parola
+        if v_header_item.text() != '':
+            self.e_sql.insert(' ' + v_header_item.text() + ',')
+            # prendo posizione cursore in riga e colonna aggiungo alla colonna la lunghezza della parola e mi posiziono alla fine
+            v_riga,v_colonna = self.e_sql.getCursorPosition()
+            v_colonna = v_colonna + len(v_header_item.text()) + 2
+            self.e_sql.setCursorPosition(v_riga,v_colonna)                
         
         # chiudo il menu popup
         self.o_table_popup.close()
@@ -5811,9 +5862,17 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         else:            
             self.link_to_MSql_win1_class.l_eol.setText("Unix (LF)")         
 
-        # posizione del cursore
+        # posizione del cursore (i tab vengono conteggiati per il numero di spazi che occupano!)
         v_y, v_x = self.e_sql.getCursorPosition()
-        self.link_to_MSql_win1_class.l_cursor_pos.setText("Ln: " + str(v_y+1) + "  Col: " + str(v_x+1))
+        v_line = self.e_sql.text(v_y)
+        v_tab_larghezza = self.e_sql.tabWidth()
+        v_visual_col = 1
+        for i in range(v_x):
+            if v_line[i] == '\t':
+                v_visual_col += v_tab_larghezza
+            else:
+                v_visual_col += 1
+        self.link_to_MSql_win1_class.l_cursor_pos.setText("Ln: " + str(v_y+1) + "  Col: " + str(v_visual_col))
 
         # tempo di esecuzione ultima istruzione                
         v_total_seconds = datetime.timedelta(seconds=v_global_exec_time).total_seconds()
@@ -5853,7 +5912,7 @@ if __name__ == "__main__":
         v_dir_eseguibile = os.path.dirname(sys.executable)
         os.chdir(v_dir_eseguibile)
         QDir.addSearchPath('icons', '_internal/icons/')
-        QDir.addSearchPath('logos', '_internal/logos/')                        
+        QDir.addSearchPath('logos', '_internal/logos/')                                
         v_view_splash = True
     else:
         v_view_splash = False

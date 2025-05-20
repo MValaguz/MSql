@@ -32,9 +32,11 @@ Source: "C:\MSql_exe\MSql.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\MSql_exe\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Il file di configurazione delle connessioni viene copiato nella dir delle preferenze solo se non già presente (questo file contiene le connessioni di default che non vanno poi condivise su GitHub)
 Source: "C:\Users\MValaguz\Documents\GitHub\MSql\source\MSql_connections.ini"; DestDir: "{localappdata}\MSql"; Flags: onlyifdoesntexist
+; NOTE: Questi sono i file dell'help
+;Source: "C:\Users\mvalaguz\Documents\GitHub\MSql\source\docs\build\*"; DestDir: "{app}\_internal\docs\build"; Flags: recursesubdirs
+
 
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
-
 [Registry]
 Root: HKA; Subkey: "Software\Classes\.msql\OpenWithProgids"; ValueType: string; ValueName: "MSqlFile.msql"; ValueData: ""; Flags: uninsdeletevalue
 Root: HKA; Subkey: "Software\Classes\MSqlFile.msql"; ValueType: string; ValueName: ""; ValueData: "MSql File"; Flags: uninsdeletekey

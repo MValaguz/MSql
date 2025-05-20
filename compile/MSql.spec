@@ -11,12 +11,12 @@ block_cipher = None
 a = Analysis(['..\\source\\MSql_editor.py'],
              pathex=[],
              binaries=[],
-             datas=[					
-		      ('..\\source\\help\\*.*','help'),										
-		      ('..\\source\\qtdesigner\\*.py','.'),
-			  ('..\\source\\qtdesigner\\icons\\*.*','icons\\'),
-			  ('..\\source\\qtdesigner\\logos\\*.*','logos\\'),
-			  ('..\\source\\qtlinguist\\*.qm','qtlinguist\\'),
+             datas=[							          						  
+							('..\\source\\help\\*.*','help'),
+		          ('..\\source\\qtdesigner\\*.py','.'),
+			        ('..\\source\\qtdesigner\\icons\\*.*','icons\\'),
+			        ('..\\source\\qtdesigner\\logos\\*.*','logos\\'),
+			        ('..\\source\\qtlinguist\\*.qm','qtlinguist\\'),
 	           ],
              hiddenimports=['getpass', 'secrets', 'asyncio', 'uuid'],             
              hookspath=[],
@@ -38,7 +38,7 @@ exe = EXE(pyz,
           strip=False,
           upx=True,
           console=False, 
-		  icon='..\\source\\qtdesigner\\icons\\MSql.ico')
+		      icon='..\\source\\qtdesigner\\icons\\MSql.ico')
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
