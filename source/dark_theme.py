@@ -35,7 +35,6 @@ QWidget
     alternate-background-color: #4f585e;
 }
 
-
 /*-----QLabel------------------------------------------------------------*/
 QLabel
 {
@@ -135,6 +134,12 @@ QListView::item:selected
      color: white;
 }
 
+QListView::item:hover
+{
+     background: #007ACC;      
+     color: white;
+}
+
 /*-----QTreeView---------------------------------------------------------------*/
 QTreeView
 {
@@ -142,6 +147,12 @@ QTreeView
 }
 
 QTreeView::item:selected
+{
+     background: #007ACC;      
+     color: white;
+}
+
+QTreeView::item:hover
 {
      background: #007ACC;      
      color: white;

@@ -561,9 +561,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # Apro file di help (help che è stato costruito tramite la libreria Sphinx!)
         elif p_slot.text() == QCoreApplication.translate('MSql_win1','Help'):                          
             if getattr(sys, 'frozen', False): 
-                os.system("start _internal/help/MSql_help.html")
+                os.system("start _internal/help/MSql_help.odt")
             else:
-                os.system("start help/MSql_help.html")
+                os.system("start help/MSql_help.odt")
         # Visualizzo program info
         elif p_slot.text() == QCoreApplication.translate('MSql_win1','Program info'):            
             self.slot_info()
@@ -1809,7 +1809,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 
         # se tutto ok, richiamo la visualizzazione
         if self.v_nome_oggetto != '':
-            self.carica_object_viewer(self.current_schema, self.v_tipo_oggetto, self.v_nome_oggetto)
+            self.carica_object_viewer(self.current_schema, self.v_tipo_oggetto, self.v_nome_oggetto, '')
 
     def slot_select_schema(self):    
         """
@@ -1894,7 +1894,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # chiudo la window
         self.dialog_select_schema.close()
     
-    def carica_object_viewer(self, p_owner, p_tipo_oggetto, p_nome_oggetto):
+    def carica_object_viewer(self, p_owner, p_tipo_oggetto, p_nome_oggetto, p_link):
         """
            Funzione che si occupa di caricare i dati dell'object viewer
         """        
@@ -1912,7 +1912,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         if self.v_tipo_oggetto == 'TABLE' or self.v_tipo_oggetto == 'VIEW':
             print('Start loading object viewer of --> ' + p_owner + '.' + self.v_nome_oggetto + ' - ' + self.v_tipo_oggetto)
             # ricerco la descrizione dell'oggetto
-            self.v_cursor_db_obj.execute("SELECT COMMENTS FROM ALL_TAB_COMMENTS WHERE owner='"+p_owner+"' AND TABLE_NAME='"+self.v_nome_oggetto+"'")
+            self.v_cursor_db_obj.execute("SELECT COMMENTS FROM ALL_TAB_COMMENTS"+p_link+" WHERE owner='"+p_owner+"' AND TABLE_NAME='"+self.v_nome_oggetto+"'")
             v_record = self.v_cursor_db_obj.fetchone()
             if v_record is not None:
                 self.v_tipo_oggetto_commento = v_record[0]
@@ -1942,7 +1942,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                                                    UPPER(Decode(A.NULLABLE,'N',' NOT NULL','')) AS COLONNA_NULLA,
                                                    DATA_DEFAULT AS VALORE_DEFAULT,
                                                    B.COMMENTS AS COMMENTO
-                                            FROM   ALL_TAB_COLUMNS A, ALL_COL_COMMENTS B 
+                                            FROM   ALL_TAB_COLUMNS"""+p_link+""" A, ALL_COL_COMMENTS"""+p_link+""" B 
                                             WHERE  A.OWNER='"""+p_owner+"""' AND 
                                                    A.TABLE_NAME ='"""+self.v_nome_oggetto+"""' AND 
                                                    A.OWNER=B.OWNER AND 
@@ -1975,7 +1975,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                                                          WHERE  OWNER=ALL_CONSTRAINTS.OWNER AND 
                                                                 CONSTRAINT_NAME=ALL_CONSTRAINTS.CONSTRAINT_NAME) 
                                                    END AS REGOLA
-                                            FROM   ALL_CONSTRAINTS 
+                                            FROM   ALL_CONSTRAINTS"""+p_link+"""
                                             WHERE  OWNER='"""+p_owner+"""' AND 
                                                    TABLE_NAME='"""+self.v_nome_oggetto+"""' AND
                                                    CONSTRAINT_NAME NOT LIKE 'SYS%'
@@ -1999,7 +1999,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                                                    CASE WHEN InStr(INDEX_TYPE,'FUNCTION') != 0 THEN 'function' END TIPO, 
                                                    CASE WHEN UNIQUENESS='UNIQUE' THEN 'unique' END UNICO, 
                                                    (SELECT LISTAGG(COLUMN_NAME,',') WITHIN GROUP (ORDER BY COLUMN_POSITION) COLONNE FROM ALL_IND_COLUMNS WHERE INDEX_OWNER=ALL_INDEXES.OWNER AND INDEX_NAME=ALL_INDEXES.INDEX_NAME) COLONNE
-                                            FROM   ALL_INDEXES 
+                                            FROM   ALL_INDEXES"""+p_link+"""
                                             WHERE  OWNER='"""+p_owner+"""' AND 
                                                     TABLE_NAME='"""+self.v_nome_oggetto+"""'
                                                     ORDER BY INDEX_NAME""")
@@ -2021,7 +2021,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             self.v_cursor_db_obj.execute("""SELECT TRIGGER_NAME, 
                                                    TRIGGER_TYPE, 
                                                    TRIGGERING_EVENT 
-                                            FROM   ALL_TRIGGERS 
+                                            FROM   ALL_TRIGGERS"""+p_link+""" 
                                             WHERE  OWNER='"""+p_owner+"""' AND 
                                                    TABLE_NAME='"""+self.v_nome_oggetto+"""'
                                             ORDER BY TRIGGER_NAME""")
@@ -2068,7 +2068,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             v_root_codice = QStandardItem('Code')
 
             # leggo il sorgente e lo metto dentro una lista!
-            self.v_cursor_db_obj.execute("""SELECT UPPER(TEXT) as TEXT, LINE FROM ALL_SOURCE WHERE OWNER='"""+p_owner+"""' AND NAME='"""+self.v_nome_oggetto+"""' AND TYPE='"""+self.v_tipo_oggetto+"""' ORDER BY LINE""")
+            self.v_cursor_db_obj.execute("""SELECT UPPER(TEXT) as TEXT, LINE FROM ALL_SOURCE"""+p_link+""" WHERE OWNER='"""+p_owner+"""' AND NAME='"""+self.v_nome_oggetto+"""' AND TYPE='"""+self.v_tipo_oggetto+"""' ORDER BY LINE""")
             v_lista_testo = []
             for result in self.v_cursor_db_obj:                       
                 v_lista_testo.append(result[0])
@@ -3673,11 +3673,17 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # pulisco il nome dell'oggetto da eventuali caratteri speciali come ritorno a capo, tab e spazi
             v_oggetto = v_oggetto.rstrip().lstrip()                            
             # messaggio di debug
-            print('F12-Call Object viewer of --> ' + v_owner + '.' + v_oggetto)
-            # richiamo la procedura di oracle che mi restituisce la ddl dell'oggetto (apro un cursore locale a questa funzione)
+            print('F12-Call Object viewer of --> ' + v_owner + '.' + v_oggetto)            
             v_temp_cursor = v_global_connection.cursor()                        
+            # controllo se nel nome dell'oggetto c'è il carattere @ che indica il link verso altro database
+            if '@' in v_oggetto:
+                v_link = v_oggetto[v_oggetto.find('@'):]
+                v_oggetto = v_oggetto[:v_oggetto.find('@')]                
+            else:
+                v_link = ''
+            # estraggo 
             try:
-                v_temp_cursor.execute("""SELECT OBJECT_NAME, OBJECT_TYPE FROM ALL_OBJECTS WHERE OWNER = '""" + v_owner + """' AND OBJECT_NAME = '""" + v_oggetto + """' AND OBJECT_TYPE IN ('TABLE','VIEW','PACKAGE','PROCEDURE','FUNCTION')""")
+                v_temp_cursor.execute("""SELECT OBJECT_NAME, OBJECT_TYPE FROM ALL_OBJECTS"""+v_link+""" WHERE OWNER = '""" + v_owner + """' AND OBJECT_NAME = '""" + v_oggetto + """' AND OBJECT_TYPE IN ('TABLE','VIEW','PACKAGE','PROCEDURE','FUNCTION')""")
             except:
                 return 'ko'
             # prendo il risultato
@@ -3687,7 +3693,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 v_nome_oggetto = v_record[0]
                 v_tipo_oggetto = v_record[1]                                   
                 # carico l'object viewer passando come parametro iniziale il puntatore all'oggetto main
-                MSql_win1_class.carica_object_viewer(self.link_to_MSql_win1_class, v_owner, v_tipo_oggetto, v_nome_oggetto)                                        
+                MSql_win1_class.carica_object_viewer(self.link_to_MSql_win1_class, v_owner, v_tipo_oggetto, v_nome_oggetto, v_link)                                        
             else:
                 print('Not found ' + v_oggetto)
     
