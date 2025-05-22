@@ -31,7 +31,6 @@ import re
 import traceback
 import difflib
 import time
-import webbrowser
 # Librerie di data base Oracle
 import oracledb, oracle_my_lib, oracle_executer
 # Librerie grafiche QT
