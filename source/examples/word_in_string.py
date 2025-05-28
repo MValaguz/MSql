@@ -1,44 +1,66 @@
-def extract_word_from_cursor_pos(p_string, p_pos):
+v_testo = """
+SELECT *
+FROM  ma_prage
+WHERE  azien_co='SMI' 
+  AND ARTIC_CO='MA400520'
+
+	
+	/
+
+SELECT * FROM 
+CP_DETOR
+WHERE AZIEN_CO='TEC'
+AND DIPEN_CO='00035'
+
+
+/
+
+select * from ta_azien
+"""
+
+def estrai_istruzione(p_testo, p_cursor):
     """
-       Data una stringa completa p_stringa e una posizione di cursore su di essa, 
-       estrae la parola che sta "sotto" la posizione del cursore
-       Es. p_string = CIAO A TUTTI QUANTI VOI 
-           p_pos = 10
-           restituisce TUTTI
+       Dato un testo p_testo, cerca l'istruzione che si trova sotto la posizione del cursore
+       Tale istruzione deve avere i seguenti delimitatori:
+         - punto e virgola
+         - / ma inserito solitario in una riga
     """
-    # se posizione cursore è oltre la stringa...esco    
-    if p_pos >= len(p_string):
-        return ''
+    p_testo = p_testo.split('\n')    
+    v_istruzione = ''
+    v_num_caratteri = 0
+    v_riga_inizio = 0
+    v_riga_fine = 0
+    v_riga = 0
+    v_found = False
+    for linea in p_testo:
+        v_riga += 1
+        v_num_caratteri += len(linea)
+        v_linea_netto = linea.lstrip().rstrip()
+        v_istruzione += ' ' + linea
+        print(f"{v_riga} {linea}")
+        
+        if len(v_linea_netto) > 0 and (v_linea_netto == '/' or v_linea_netto[-1] == ';') :                        
+            v_riga_fine = v_riga            
+            v_riga_inizio = v_riga_fine
+            v_riga_fine = 0        
+            v_found = True
+                    
+        # fine del testo, prendo ultima istruzione
+        if v_riga == len(p_testo) :            
+            print('found'+str(v_num_caratteri))
+            v_riga_fine = v_riga            
+            v_riga_inizio = v_riga_fine
+            v_riga_fine = 0        
+            v_found = True
+                    
+        if v_found:
+            if p_cursor <= v_num_caratteri:
+                return v_istruzione, v_riga_inizio, v_riga_fine
+            v_istruzione = ''
+            v_found = False
+    
+    return '',0,0
 
-    # inizio a comporre la parola partendo dalla posizione del cursore (se non trovo nulla esco)
-    v_word=p_string[p_pos]    
-    if v_word is None or v_word in ('',' ','=',':'):
-        return ''
+v_istruzione, v_inizio, v_fine = estrai_istruzione(v_testo, 190)        
 
-    # mi sposto a sinistra rispetto al cursore e compongo la parola    
-    v_index = p_pos
-    while True and v_index > 0:
-        v_index -= 1
-        if v_index < len(p_string):
-            if p_string[v_index] not in (' ','=',':'):
-                v_word = p_string[v_index] + v_word
-            else:
-                break
-        else:
-            break
-
-    # mi sposto a destra rispetto al cursore e compongo la parola
-    v_index = p_pos
-    while True:
-        v_index += 1
-        if v_index < len(p_string):
-            if p_string[v_index] not in (' ','=',':'):
-                v_word += p_string[v_index]
-            else:
-                break
-        else:
-            break
-
-    return v_word
-
-print(extract_word_from_cursor_pos("FROM   APEX_WORKSPACE_ACTIVITY_LOG", 11))
+print(f"{v_istruzione}, {v_inizio}, {v_fine}")

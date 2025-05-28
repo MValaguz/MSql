@@ -22,6 +22,9 @@
 #                  Per quanto riguarda la parte di traduzione si è fatto uso di QtLinguist che sempre tramite un'utilità prende i file di programma
 #                  e crea il dizionario di partenza che poi viene tradotto; la lingua di riferimento rimane l'inglese.
 
+# Nota bene......: Alcuni widget di PyQt sono stati personalizzati; la relativa libreria si chiama custom_widget e vengono inclusi tramite promozione 
+#                  dentro le definizioni di interfaccia di qtdesigner.
+
 # Librerie di base
 import sys 
 import os 
@@ -37,8 +40,6 @@ import oracledb, oracle_my_lib, oracle_executer
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
-# Libreria per la pathname usata per richiamare la documentazione
-from pathlib import Path
 # Librerie QScintilla
 from PyQt6.Qsci import *
 # Classe per la gestione delle preferenze
@@ -3264,40 +3265,50 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 self.slot_find_next()   
                 return True
             
-        if event.type() == QEvent.Type.DragEnter and source is self.e_sql:                                          
-            # il drag contiene elenco di item...
-            # se il drag non contiene elenco di item, quindi ad esempio del semplice testo, lascio le cose cosi come sono            
-            if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
-                # estraggo gli item e li trasformo in stringa
-                v_mime_data = event.mimeData()
-                source_item = QStandardItemModel()
-                source_item.dropMimeData(v_mime_data, Qt.DropAction.CopyAction, 0,0, QModelIndex())                                                
-                v_stringa = ''
-                for v_indice in range(0,source_item.rowCount()):
-                    if v_stringa != '':
-                        v_stringa += ',' + source_item.item(v_indice, 0).text()
-                    else:
-                        v_stringa = source_item.item(v_indice, 0).text()                                
-                # reimposto la stringa dentro l'oggetto mimedata
-                # da notare come l'oggetto v_mime_data punta direttamente all'oggetto event.mimeData!
-                v_mime_data.setText(v_stringa)                
-            # accetto il drag
-            event.accept()                        
-            return True                                            
+        # if event.type() == QEvent.Type.DragEnter and source is self.e_sql:                                          
+        #     # il drag contiene elenco di item...
+        #     # se il drag non contiene elenco di item, quindi ad esempio del semplice testo, lascio le cose cosi come sono            
+        #     if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):                
+        #         # estraggo gli item e li trasformo in stringa
+        #         v_mime_data = event.mimeData()
+        #         source_item = QStandardItemModel()
+        #         source_item.dropMimeData(v_mime_data, Qt.DropAction.CopyAction, 0,0, QModelIndex())                                                
+        #         v_stringa = ''
+        #         for v_indice in range(0,source_item.rowCount()):
+        #             if v_stringa != '':
+        #                 v_stringa += ',' + source_item.item(v_indice, 0).text()
+        #             else:
+        #                 v_stringa = source_item.item(v_indice, 0).text()                                
+        #         # reimposto la stringa dentro l'oggetto mimedata
+        #         # da notare come l'oggetto v_mime_data punta direttamente all'oggetto event.mimeData!
+        #         v_mime_data.setText(v_stringa)                
+        #     # accetto il drag
+        #     event.accept()                        
+        #     return True                                            
         
-        # individuo il drop sull'editor               
-        if event.type() == QEvent.Type.Drop and source is self.e_sql:                            
-            # e richiamo direttamente la funzione che accetta il drop di QScintilla
-            # da notare come durante il drag sia stato cambiato il contenuto dei dati nel caso 
-            # la sorgente fossero degli item (in questo caso l'object viewer)
-            self.e_sql.dropEvent(event)                
-            return True        
+        # # individuo il drop sull'editor               
+        # if event.type() == QEvent.Type.Drop and source is self.e_sql:                                                    
+        #     # e richiamo direttamente la funzione che accetta il drop di QScintilla
+        #     # da notare come durante il drag sia stato cambiato il contenuto dei dati nel caso 
+        #     # la sorgente fossero degli item (in questo caso l'object viewer)
+        #     self.e_sql.dropEvent(event)                
+        #     return True        
         
         # individuo l'attivazione della subwindow dell'editor...
         if event.type() == QEvent.Type.FocusIn:                  
             # aggiorno i dati della statusbar
             self.aggiorna_statusbar()
-                            
+
+        # individuo movimento della rotella del mouse sulla parte dei risultati e se combinata con il tasto shift allora effettuo lo scroll orizzontale destra-sinistra
+        if event.type() == QEvent.Type.Wheel and source.parent() is self.o_table:
+            wheel_event: QWheelEvent = event
+            if wheel_event.modifiers() == Qt.KeyboardModifier.ShiftModifier:                
+                if self.o_table.columnCount() > 0:
+                    delta = wheel_event.angleDelta().y()                
+                    step = delta // self.o_table.columnCount()
+                    self.o_table.horizontalScrollBar().setValue(self.o_table.horizontalScrollBar().value() - step)                
+                    return True  
+                                            
         # fine senza alcuna elaborazione e quindi si procede con esecuzione dei segnali nativi del framework       
         return False
     
@@ -4352,14 +4363,10 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
            per mantenere un comportamento coerente con l'esecuzione tramite F5.
         """
         # funzione interna creata con CoPilot che dato testo sql e posizione del cursore, restituisce istruzione corrente con posizione di 
-        # riga iniziale e finale (caso in cui l'istruzione sia terminata da ;)
-        def extract_statement_with_positions_comma(sql, cursor_position):
-            #r'(?:SELECT.*?;|INSERT.*?;|UPDATE.*?;|DELETE.*?;|CREATE TABLE.*?\);|BEGIN.*?END;)'
-            pattern = re.compile(
-                r'(?:SELECT.*?;|INSERT.*?;|UPDATE.*?;|DELETE.*?;)'
-                , re.DOTALL
-            )
-            
+        # riga iniziale e finale (caso in cui l'istruzione sia terminata da ; o da /)
+        def extract_statement_with_positions_comma_slash(sql, cursor_position):            
+            pattern = re.compile(r'(?:SELECT.*?[;/]|INSERT.*?[;/]|UPDATE.*?[;/]|DELETE.*?[;/])', re.DOTALL)                                     
+
             matches = list(pattern.finditer(sql))
             for match in matches:
                 start, end = match.span()
@@ -4367,11 +4374,10 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                     start_line = sql[:start].count('\n') + 1
                     end_line = sql[:end].count('\n')
                     return match.group(), start_line, end_line
-
             return '', 0, 0
 
         # funzione interna creata con CoPilot che dato testo sql e posizione del cursore, restituisce posizione di inizio e fine dell'istruzione, riga inizio e di fine
-        # funzione che viene usata nel caso non si stata trovata istruzione che termina con ;
+        # funzione che viene usata nel caso NON si stata trovata istruzione che termina con ; o /
         def extract_statement_with_positions_space(sql_string, cursor_position):
             # Pattern per ricercare le istruzioni SQL
             v_pattern = re.compile(r'(SELECT|INSERT|UPDATE|DELETE).*?(?=SELECT|INSERT|UPDATE|DELETE|$)', re.DOTALL | re.IGNORECASE)
@@ -4428,8 +4434,8 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             self.v_offset_numero_di_riga = 0
             # prendo posizione attuale del cursore (relativa!)
             v_pos_relativa_cursore = self.e_sql.SendScintilla(self.e_sql.SCI_GETCURRENTPOS)
-            # richiamo funzione interna per estrazione dell'istruzione sql (istruzione che termina con ;) e delle relative posizioni di riga
-            v_istruzione, v_start_line, v_end_line = extract_statement_with_positions_comma(self.e_sql.text().upper(), v_pos_relativa_cursore)                
+            # richiamo funzione interna per estrazione dell'istruzione sql (istruzione che termina con ; O /) e delle relative posizioni di riga
+            v_istruzione, v_start_line, v_end_line = extract_statement_with_positions_comma_slash(self.e_sql.text().upper(), v_pos_relativa_cursore)                
             # correggo posizioni riga
             if v_end_line < v_start_line:
                 v_end_line = v_start_line
@@ -4437,11 +4443,11 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 v_start_line -= 1
                 v_end_line += 1        
             
-            # se trovata istruzione che terminava con ;...
+            # se trovata istruzione che terminava con ;            
             if v_istruzione != '':
                 # eventuale punto e virgola finale viene tolto
-                if v_istruzione[-1] == ';':            
-                    v_istruzione = v_istruzione[0:-1]                                    
+                if v_istruzione[-1] in (';','/'):            
+                    v_istruzione = v_istruzione[0:-1]                        
                 # eseguo l'istruzione            
                 self.esegui_istruzione(v_istruzione, False)        
                 # seleziono il testo per evidenziare l'istruzione che è stata eseguita                                                            

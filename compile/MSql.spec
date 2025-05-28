@@ -12,6 +12,7 @@ a = Analysis(['..\\source\\MSql_editor.py'],
              pathex=[],
              binaries=[],
              datas=[							          						  
+							('..\\source\\custom_widget.py','.'),
 							('..\\source\\help\\*.*','help'),
 		          ('..\\source\\qtdesigner\\*.py','.'),
 			        ('..\\source\\qtdesigner\\icons\\*.*','icons\\'),

@@ -49,7 +49,7 @@
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <widget class="QsciScintilla" name="e_sql"/>
+       <widget class="MyCustomQsciScintilla" name="e_sql"/>
        <widget class="QsciScintilla" name="e_sql_mini_map"/>
       </widget>
       <widget class="QTabWidget" name="o_tab_widget">
@@ -520,6 +520,11 @@
    <class>QsciScintilla</class>
    <extends>QPlainTextEdit</extends>
    <header>qsciscintilla.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MyCustomQsciScintilla</class>
+   <extends>QPlainTextEdit</extends>
+   <header>custom_widget</header>
   </customwidget>
  </customwidgets>
  <tabstops>

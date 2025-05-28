@@ -613,7 +613,7 @@
       </layout>
      </item>
      <item row="1" column="0">
-      <widget class="QTreeView" name="db_oggetto_tree">
+      <widget class="MyCustomTreeView" name="db_oggetto_tree">
        <property name="font">
         <font>
          <pointsize>8</pointsize>
@@ -1545,6 +1545,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MyCustomTreeView</class>
+   <extends>QTreeView</extends>
+   <header>custom_widget</header>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>oggetti_db_scelta</tabstop>
   <tabstop>e_view_description</tabstop>
