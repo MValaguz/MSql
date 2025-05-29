@@ -15,6 +15,7 @@
 # Librerie di sistema
 import sys
 import datetime
+import random
 # Amplifico la pathname dell'applicazione in modo veda il contenuto della directory qtdesigner dove sono contenuti i layout
 sys.path.append('qtdesigner')
 # Librerie grafiche
@@ -210,7 +211,13 @@ class SendCommandToOracle(QDialog):
         # definizione della gif animata (che verrà ulteriormente zoomata durante la visualizzazione)
         self.gears = QLabel(self)        
         self.gridLayout.addWidget(self.gears, 0, 0, 1, 1)        
-        self.movie = QMovie("icons:gear-wheel.gif")                        
+        # la gif animata viene scelta causalmente tra quelle predefinite        
+        v_num_gif = random.choice([1, 2, 3, 4])
+        gif_map = {1: "icons:anim_wait1.gif",
+                   2: "icons:anim_wait2.gif",
+                   3: "icons:anim_wait3.gif",
+                   4: "icons:anim_wait4.gif"}
+        self.movie = QMovie(gif_map[v_num_gif])                                
         # segnale che si scatena ad ogni visualizzazione di frame e che serve solo per zoomare l'animazione
         self.movie.frameChanged.connect(self.update_movie_frame)
         self.gears.setMovie(self.movie)                
@@ -332,7 +339,7 @@ def slot_on_click():
     # in questo modo le classi di thread vedono i parametri ricevuti in input e la dialog blocca 
     # tutto il programma fino al termine del thread principale    
 
-    for i in range(1,1000):
+    for i in range(1,5):
         v_oracle_executer = SendCommandToOracle(v_connection, v_cursor, """select * from va_op_da_versare""", v_bind, v_win.frameGeometry())                                                                
         #v_oracle_executer = SendCommandToOracle(v_connection, v_cursor, """select * from dual""", v_bind, v_win.frameGeometry())                                                                    
         v_oracle_executer.signalStatus.connect(endCommandToOracle)    

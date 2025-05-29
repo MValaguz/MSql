@@ -4365,7 +4365,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # funzione interna creata con CoPilot che dato testo sql e posizione del cursore, restituisce istruzione corrente con posizione di 
         # riga iniziale e finale (caso in cui l'istruzione sia terminata da ; o da /)
         def extract_statement_with_positions_comma_slash(sql, cursor_position):            
-            pattern = re.compile(r'(?:SELECT.*?[;/]|INSERT.*?[;/]|UPDATE.*?[;/]|DELETE.*?[;/])', re.DOTALL)                                     
+            pattern = re.compile(r'(?:SELECT.*?[;/]|INSERT.*?[;/]|UPDATE.*?[;/]|DELETE.*?[;/])', re.DOTALL | re.IGNORECASE)                                     
 
             matches = list(pattern.finditer(sql))
             for match in matches:
@@ -4435,7 +4435,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # prendo posizione attuale del cursore (relativa!)
             v_pos_relativa_cursore = self.e_sql.SendScintilla(self.e_sql.SCI_GETCURRENTPOS)
             # richiamo funzione interna per estrazione dell'istruzione sql (istruzione che termina con ; O /) e delle relative posizioni di riga
-            v_istruzione, v_start_line, v_end_line = extract_statement_with_positions_comma_slash(self.e_sql.text().upper(), v_pos_relativa_cursore)                
+            v_istruzione, v_start_line, v_end_line = extract_statement_with_positions_comma_slash(self.e_sql.text(), v_pos_relativa_cursore)                
             # correggo posizioni riga
             if v_end_line < v_start_line:
                 v_end_line = v_start_line
@@ -4444,11 +4444,11 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 v_end_line += 1        
             
             # se trovata istruzione che terminava con ;            
-            if v_istruzione != '':
+            if v_istruzione != '':                
                 # eventuale punto e virgola finale viene tolto
                 if v_istruzione[-1] in (';','/'):            
                     v_istruzione = v_istruzione[0:-1]                        
-                # eseguo l'istruzione            
+                # eseguo l'istruzione                            
                 self.esegui_istruzione(v_istruzione, False)        
                 # seleziono il testo per evidenziare l'istruzione che è stata eseguita                                                            
                 if v_start_line < v_end_line:                
@@ -4457,7 +4457,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             else:
                 # se non trovato nulla --> provo a fare la ricerca di un'istruzione usando come delimitatori le parole chiave INSERT,UPDATE,DELETE,SELECT
                 # da notare come la stringa venga passata aggiungendo un ritorno a capo in fondo...questo perché se cursore è su ultima istruzione non dava le posizioni corrette
-                v_pos_start, v_pos_end, v_start_line, v_end_line = extract_statement_with_positions_space(self.e_sql.text().upper()+chr(10), v_pos_relativa_cursore)                        
+                v_pos_start, v_pos_end, v_start_line, v_end_line = extract_statement_with_positions_space(self.e_sql.text()+chr(10), v_pos_relativa_cursore)                        
                 if v_pos_start != None and v_pos_end != None:
                     v_istruzione = self.e_sql.text()[v_pos_start:v_pos_end]
                     if v_istruzione != '' and v_istruzione is not None:
