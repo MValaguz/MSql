@@ -15,7 +15,6 @@
 # Librerie di sistema
 import sys
 import datetime
-import random
 # Amplifico la pathname dell'applicazione in modo veda il contenuto della directory qtdesigner dove sono contenuti i layout
 sys.path.append('qtdesigner')
 # Librerie grafiche
@@ -192,7 +191,7 @@ class SendCommandToOracle(QDialog):
     """
     signalStatus = pyqtSignal(str)
 
-    def __init__(self, p_connection, p_cursor, p_command, p_bind_variables, p_parent_geometry):
+    def __init__(self, p_connection, p_cursor, p_command, p_bind_variables, p_parent_geometry, p_animated_gif = ''):
         super().__init__()                        
         # definizione layout della finestra di dialogo
         self.setModal(True)
@@ -212,12 +211,10 @@ class SendCommandToOracle(QDialog):
         self.gears = QLabel(self)        
         self.gridLayout.addWidget(self.gears, 0, 0, 1, 1)        
         # la gif animata viene scelta causalmente tra quelle predefinite        
-        v_num_gif = random.choice([1, 2, 3, 4])
-        gif_map = {1: "icons:anim_wait1.gif",
-                   2: "icons:anim_wait2.gif",
-                   3: "icons:anim_wait3.gif",
-                   4: "icons:anim_wait4.gif"}
-        self.movie = QMovie(gif_map[v_num_gif])                                
+        if p_animated_gif != '':                        
+            self.movie = QMovie(p_animated_gif)                                
+        else:
+            self.movie = QMovie("icons:anim_wait1")                                
         # segnale che si scatena ad ogni visualizzazione di frame e che serve solo per zoomare l'animazione
         self.movie.frameChanged.connect(self.update_movie_frame)
         self.gears.setMovie(self.movie)                

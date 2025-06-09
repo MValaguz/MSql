@@ -124,6 +124,11 @@ class preferences_class():
                 self.app_language = v_json['app_language']
             else:
                 self.app_language = 'English'
+            # nome gif animata da visualizzare durante esecuzione dei comandi
+            if 'animated_gif' in v_json:                        
+                self.animated_gif = v_json['animated_gif']
+            else:
+                self.animated_gif = ''
         # imposto valori di default senza presenza dello specifico file
         else:
             self.remember_window_pos = True
@@ -147,6 +152,7 @@ class preferences_class():
             self.open_new_editor = True
             self.refresh_dictionary = 15
             self.app_language = 'English'
+            self.animated_gif = ''
             
         # Se esiste il file delle connessioni...le carico nell'oggetto
         if os.path.isfile(p_nome_file_connections):
@@ -203,6 +209,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         self.e_default_csv_separator.setText(self.preferences.csv_separator)
         self.e_tab_size.setText(self.preferences.tab_size)
         self.e_language.setCurrentText(self.preferences.app_language)
+        self.e_default_animated_gif.setText(self.preferences.animated_gif)
 
         ###
         # preparo elenco server        
@@ -383,7 +390,15 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         """
         dirName = QFileDialog.getExistingDirectory(self, "Choose a directory")                  
         if dirName != "":
-            self.e_default_open_dir.setText( dirName )        
+            self.e_default_open_dir.setText( dirName )       
+
+    def slot_b_default_animated_gif(self):
+        """
+           apre la dialog box per selezionare un file contenente un DataBase SQLite
+        """        
+        fileName = QFileDialog.getOpenFileName(self, "Choose GIF file", '' ,"GIF files (*.gif);;All files (*.*)")       
+        if fileName[0] != "":
+            self.e_default_animated_gif.setText( fileName[0] )         
 
     def slot_b_default_save_dir(self):
         """
@@ -596,7 +611,8 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
                  'autocompletation':v_autocompletation,
                  'open_new_editor':v_open_new_editor,
                  'refresh_dictionary':self.e_refresh_dictionary.value(),
-                 'app_language': self.e_language.currentText()
+                 'app_language': self.e_language.currentText(),
+                 'animated_gif': self.e_default_animated_gif.text()
                 }
 
 		# scrittura nel file dell'oggetto json (notare come venga usata la funzione dump senza la s finale in quanto scrive byte)

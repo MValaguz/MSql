@@ -31,14 +31,7 @@
        <layout class="QGridLayout" name="gridLayout_5">
         <item row="0" column="0">
          <layout class="QGridLayout" name="gridLayout_4">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>Language:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
+          <item row="2" column="0">
            <widget class="QLabel" name="label">
             <property name="text">
              <string>Default Open Directory:</string>
@@ -48,7 +41,14 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="3">
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Language:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="3">
            <widget class="QPushButton" name="b_default_save_dir">
             <property name="icon">
              <iconset resource="resource.qrc">
@@ -56,40 +56,10 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="2">
+          <item row="2" column="2">
            <widget class="QLineEdit" name="e_default_open_dir"/>
           </item>
-          <item row="5" column="2">
-           <widget class="QCheckBox" name="e_dark_theme">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QLineEdit" name="e_default_save_dir"/>
-          </item>
-          <item row="7" column="0">
-           <widget class="QLabel" name="label_23">
-            <property name="text">
-             <string>Open new editor at open:</string>
-            </property>
-           </widget>
-          </item>
           <item row="5" column="0">
-           <widget class="QLabel" name="label_8">
-            <property name="text">
-             <string>Dark theme:</string>
-            </property>
-            <property name="buddy">
-             <cstring>e_dark_theme</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="2">
-           <widget class="QCheckBox" name="e_open_new_editor"/>
-          </item>
-          <item row="4" column="0">
            <widget class="QLabel" name="label_10">
             <property name="text">
              <string>Remember window position:</string>
@@ -99,7 +69,20 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="4">
+          <item row="3" column="2">
+           <widget class="QLineEdit" name="e_default_save_dir"/>
+          </item>
+          <item row="8" column="2">
+           <widget class="QCheckBox" name="e_open_new_editor"/>
+          </item>
+          <item row="8" column="0">
+           <widget class="QLabel" name="label_23">
+            <property name="text">
+             <string>Open new editor at open:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="4">
            <spacer name="horizontalSpacer_3">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -112,18 +95,7 @@
             </property>
            </spacer>
           </item>
-          <item row="1" column="3">
-           <widget class="QPushButton" name="b_default_open_dir">
-            <property name="icon">
-             <iconset resource="resource.qrc">
-              <normaloff>:/icons/icons/folder.png</normaloff>:/icons/icons/folder.png</iconset>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="2">
-           <widget class="QCheckBox" name="e_remember_window_pos"/>
-          </item>
-          <item row="2" column="0">
+          <item row="3" column="0">
            <widget class="QLabel" name="label_2">
             <property name="text">
              <string>Default Save Directory:</string>
@@ -133,14 +105,25 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
+          <item row="2" column="3">
+           <widget class="QPushButton" name="b_default_open_dir">
+            <property name="icon">
+             <iconset resource="resource.qrc">
+              <normaloff>:/icons/icons/folder.png</normaloff>:/icons/icons/folder.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
            <widget class="QLabel" name="label_21">
             <property name="text">
              <string>General zoom:</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="2">
+          <item row="5" column="2">
+           <widget class="QCheckBox" name="e_remember_window_pos"/>
+          </item>
+          <item row="4" column="2">
            <widget class="QSpinBox" name="e_general_zoom">
             <property name="minimum">
              <number>50</number>
@@ -156,7 +139,7 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
+          <item row="1" column="2">
            <widget class="QComboBox" name="e_language">
             <item>
              <property name="text">
@@ -168,6 +151,23 @@
               <string notr="true">Italian</string>
              </property>
             </item>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>Dark theme:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_dark_theme</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QCheckBox" name="e_dark_theme">
+            <property name="text">
+             <string/>
+            </property>
            </widget>
           </item>
          </layout>
@@ -368,16 +368,6 @@
             </property>
            </widget>
           </item>
-          <item row="6" column="0">
-           <widget class="QLabel" name="label_6">
-            <property name="text">
-             <string>Make table editable:</string>
-            </property>
-            <property name="buddy">
-             <cstring>e_default_editable</cstring>
-            </property>
-           </widget>
-          </item>
           <item row="6" column="2">
            <widget class="QCheckBox" name="e_default_editable">
             <property name="text">
@@ -395,6 +385,16 @@
             </property>
            </widget>
           </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>Make table editable:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_default_editable</cstring>
+            </property>
+           </widget>
+          </item>
           <item row="3" column="0" colspan="2">
            <widget class="QLabel" name="label_12">
             <property name="text">
@@ -405,13 +405,10 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0" colspan="2">
-           <widget class="QLabel" name="label_5">
-            <property name="text">
-             <string>Default font result:</string>
-            </property>
-            <property name="buddy">
-             <cstring>e_default_font_result</cstring>
+          <item row="2" column="2">
+           <widget class="QLineEdit" name="e_default_font_result">
+            <property name="readOnly">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -422,10 +419,13 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="2">
-           <widget class="QLineEdit" name="e_default_font_result">
-            <property name="readOnly">
-             <bool>true</bool>
+          <item row="2" column="0" colspan="2">
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>Default font result:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_default_font_result</cstring>
             </property>
            </widget>
           </item>
@@ -453,6 +453,13 @@
             </property>
            </widget>
           </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_20">
+            <property name="text">
+             <string>Date format:</string>
+            </property>
+           </widget>
+          </item>
           <item row="7" column="0" colspan="2">
            <widget class="QLabel" name="label_17">
             <property name="text">
@@ -460,13 +467,6 @@
             </property>
             <property name="buddy">
              <cstring>e_default_auto_clear_output</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_20">
-            <property name="text">
-             <string>Date format:</string>
             </property>
            </widget>
           </item>
@@ -492,6 +492,31 @@
               <string>%Y/%m/%d</string>
              </property>
             </item>
+           </widget>
+          </item>
+          <item row="8" column="0">
+           <widget class="QLabel" name="label_24">
+            <property name="text">
+             <string>Animated gif while running:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="2">
+           <widget class="QLineEdit" name="e_default_animated_gif">
+            <property name="toolTip">
+             <string>Change the animated gif that appears when the sql command is executed</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="3">
+           <widget class="QPushButton" name="b_default_animated_gif">
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="resource.qrc">
+              <normaloff>:/icons/icons/folder.png</normaloff>:/icons/icons/folder.png</iconset>
+            </property>
            </widget>
           </item>
          </layout>
@@ -702,7 +727,6 @@
   <tabstop>b_default_save_dir</tabstop>
   <tabstop>e_general_zoom</tabstop>
   <tabstop>e_remember_window_pos</tabstop>
-  <tabstop>e_dark_theme</tabstop>
   <tabstop>e_open_new_editor</tabstop>
   <tabstop>e_default_font_editor</tabstop>
   <tabstop>b_default_font_editor</tabstop>
@@ -712,6 +736,7 @@
   <tabstop>e_default_indentation_guide</tabstop>
   <tabstop>e_remember_text_pos</tabstop>
   <tabstop>e_default_autocompletation</tabstop>
+  <tabstop>e_refresh_dictionary</tabstop>
   <tabstop>e_default_font_result</tabstop>
   <tabstop>b_default_font_result</tabstop>
   <tabstop>e_default_csv_separator</tabstop>
@@ -719,17 +744,18 @@
   <tabstop>e_default_auto_column_resize</tabstop>
   <tabstop>e_default_editable</tabstop>
   <tabstop>e_default_auto_clear_output</tabstop>
+  <tabstop>e_default_animated_gif</tabstop>
+  <tabstop>b_default_animated_gif</tabstop>
   <tabstop>b_server_add</tabstop>
   <tabstop>b_server_remove</tabstop>
   <tabstop>o_server</tabstop>
   <tabstop>b_user_add</tabstop>
   <tabstop>b_user_remove</tabstop>
   <tabstop>o_users</tabstop>
-  <tabstop>b_restore</tabstop>
-  <tabstop>b_open_pref_dir</tabstop>
   <tabstop>b_save</tabstop>
   <tabstop>o_tab_widget</tabstop>
-  <tabstop>e_refresh_dictionary</tabstop>
+  <tabstop>b_restore</tabstop>
+  <tabstop>b_open_pref_dir</tabstop>
  </tabstops>
  <resources>
   <include location="resource.qrc"/>
@@ -742,8 +768,8 @@
    <slot>slot_b_default_open_dir()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>420</x>
-     <y>219</y>
+     <x>377</x>
+     <y>150</y>
     </hint>
     <hint type="destinationlabel">
      <x>410</x>
@@ -758,8 +784,8 @@
    <slot>slot_b_default_save_dir()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>420</x>
-     <y>315</y>
+     <x>377</x>
+     <y>210</y>
     </hint>
     <hint type="destinationlabel">
      <x>413</x>
@@ -774,8 +800,8 @@
    <slot>slot_b_save()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>435</x>
-     <y>511</y>
+     <x>579</x>
+     <y>488</y>
     </hint>
     <hint type="destinationlabel">
      <x>47</x>
@@ -790,8 +816,8 @@
    <slot>slot_b_restore()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>148</x>
-     <y>511</y>
+     <x>158</x>
+     <y>488</y>
     </hint>
     <hint type="destinationlabel">
      <x>91</x>
@@ -806,8 +832,8 @@
    <slot>slot_b_server_add()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>378</x>
-     <y>78</y>
+     <x>530</x>
+     <y>66</y>
     </hint>
     <hint type="destinationlabel">
      <x>445</x>
@@ -822,8 +848,8 @@
    <slot>slot_b_server_remove()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>418</x>
-     <y>78</y>
+     <x>564</x>
+     <y>66</y>
     </hint>
     <hint type="destinationlabel">
      <x>442</x>
@@ -838,8 +864,8 @@
    <slot>slot_b_user_add()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>378</x>
-     <y>288</y>
+     <x>530</x>
+     <y>271</y>
     </hint>
     <hint type="destinationlabel">
      <x>445</x>
@@ -854,8 +880,8 @@
    <slot>slot_b_user_remove()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>418</x>
-     <y>288</y>
+     <x>564</x>
+     <y>271</y>
     </hint>
     <hint type="destinationlabel">
      <x>443</x>
@@ -870,8 +896,8 @@
    <slot>slot_b_open_pref_dir()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>216</x>
-     <y>501</y>
+     <x>387</x>
+     <y>488</y>
     </hint>
     <hint type="destinationlabel">
      <x>441</x>
@@ -886,8 +912,8 @@
    <slot>slot_b_default_font_result()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>405</x>
-     <y>254</y>
+     <x>378</x>
+     <y>93</y>
     </hint>
     <hint type="destinationlabel">
      <x>445</x>
@@ -902,12 +928,28 @@
    <slot>slot_b_default_font_editor()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>420</x>
-     <y>214</y>
+     <x>397</x>
+     <y>88</y>
     </hint>
     <hint type="destinationlabel">
      <x>452</x>
      <y>152</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>b_default_animated_gif</sender>
+   <signal>clicked()</signal>
+   <receiver>preferences_window</receiver>
+   <slot>slot_b_default_animated_gif()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>363</x>
+     <y>398</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>583</x>
+     <y>346</y>
     </hint>
    </hints>
   </connection>
@@ -926,5 +968,6 @@
   <slot>slot_b_user_add()</slot>
   <slot>slot_b_user_remove()</slot>
   <slot>slot_b_open_pref_dir()</slot>
+  <slot>slot_b_default_animated_gif()</slot>
  </slots>
 </ui>

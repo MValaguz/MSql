@@ -3916,7 +3916,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # creazione del menu popup
         self.o_table_popup = QMenu(self)
         self.o_table_popup_index = p_index        
-        
+
         # creazione del campo di input per la where
         self.e_popup_where = QLineEdit()        
         self.e_popup_where.setPlaceholderText('where...')
@@ -3926,6 +3926,9 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         v_action = QWidgetAction(self.o_table_popup)
         v_action.setDefaultWidget(self.e_popup_where)        
         self.o_table_popup.addAction(v_action)
+
+        # definizione dello stile dei bottoni di menu
+        v_button_style = "QPushButton { text-align: left; padding: 5px 5px; padding-left: 10px; }"
                 
         # bottone per ordinamento ascendente
         icon1 = QIcon()
@@ -3933,7 +3936,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         v_sort_a_z = QPushButton()
         v_sort_a_z.setText('Sort asc')
         v_sort_a_z.setIcon(icon1)        
-        v_sort_a_z.setStyleSheet("QPushButton { text-align: left; padding-left: 10px; }")
+        v_sort_a_z.setStyleSheet(v_button_style)
         v_sort_a_z.clicked.connect(self.slot_order_asc_popup)
         v_action = QWidgetAction(self.o_table_popup)
         v_action.setDefaultWidget(v_sort_a_z)        
@@ -3945,7 +3948,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         v_sort_z_a = QPushButton()
         v_sort_z_a.setText('Sort desc')
         v_sort_z_a.setIcon(icon2)
-        v_sort_z_a.setStyleSheet("QPushButton { text-align: left; padding-left: 10px; }")
+        v_sort_z_a.setStyleSheet(v_button_style)
         v_sort_z_a.clicked.connect(self.slot_order_desc_popup)
         v_action = QWidgetAction(self.o_table_popup)
         v_action.setDefaultWidget(v_sort_z_a)        
@@ -3957,7 +3960,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         v_group_by = QPushButton()
         v_group_by.setText('Group by')
         v_group_by.setIcon(icon3)
-        v_group_by.setStyleSheet("QPushButton { text-align: left; padding-left: 10px; }")
+        v_group_by.setStyleSheet(v_button_style)
         v_group_by.clicked.connect(self.slot_group_by_popup)
         v_action = QWidgetAction(self.o_table_popup)
         v_action.setDefaultWidget(v_group_by)        
@@ -3969,7 +3972,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         v_count = QPushButton()
         v_count.setText('Count')
         v_count.setIcon(icon4)
-        v_count.setStyleSheet("QPushButton { text-align: left; padding-left: 10px; }")
+        v_count.setStyleSheet(v_button_style)
         v_count.clicked.connect(self.slot_count_popup)
         v_action = QWidgetAction(self.o_table_popup)
         v_action.setDefaultWidget(v_count)        
@@ -3981,7 +3984,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         v_sum = QPushButton()
         v_sum.setText('Sum')
         v_sum.setIcon(icon5)
-        v_sum.setStyleSheet("QPushButton { text-align: left; padding-left: 10px; }")
+        v_sum.setStyleSheet(v_button_style)
         v_sum.clicked.connect(self.slot_sum_popup)
         v_action = QWidgetAction(self.o_table_popup)
         v_action.setDefaultWidget(v_sum)        
@@ -3993,7 +3996,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         v_add = QPushButton()
         v_add.setText('Add to editor')
         v_add.setIcon(icon6)
-        v_add.setStyleSheet("QPushButton { text-align: left; padding-left: 10px; }")
+        v_add.setStyleSheet(v_button_style)
         v_add.clicked.connect(self.slot_add_popup)
         v_action = QWidgetAction(self.o_table_popup)
         v_action.setDefaultWidget(v_add)        
@@ -4434,7 +4437,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             self.v_offset_numero_di_riga = 0
             # prendo posizione attuale del cursore (relativa!)
             v_pos_relativa_cursore = self.e_sql.SendScintilla(self.e_sql.SCI_GETCURRENTPOS)
-            # richiamo funzione interna per estrazione dell'istruzione sql (istruzione che termina con ; O /) e delle relative posizioni di riga
+            # richiamo funzione interna per estrazione dell'istruzione sql (istruzione che termina con ; o /) e delle relative posizioni di riga
             v_istruzione, v_start_line, v_end_line = extract_statement_with_positions_comma_slash(self.e_sql.text(), v_pos_relativa_cursore)                
             # correggo posizioni riga
             if v_end_line < v_start_line:
@@ -4445,9 +4448,10 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             
             # se trovata istruzione che terminava con ;            
             if v_istruzione != '':                
-                # eventuale punto e virgola finale viene tolto
-                if v_istruzione[-1] in (';','/'):            
-                    v_istruzione = v_istruzione[0:-1]                        
+                # eventuale punto e virgola e spazi finali vengono tolti
+                v_istruzione = v_istruzione.rstrip('; ')                                                
+                # eventuale slash e spazi finali vengono tolti
+                v_istruzione = v_istruzione.rstrip('/ ')                                      
                 # eseguo l'istruzione                            
                 self.esegui_istruzione(v_istruzione, False)        
                 # seleziono il testo per evidenziare l'istruzione che è stata eseguita                                                            
@@ -4459,8 +4463,10 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 # da notare come la stringa venga passata aggiungendo un ritorno a capo in fondo...questo perché se cursore è su ultima istruzione non dava le posizioni corrette
                 v_pos_start, v_pos_end, v_start_line, v_end_line = extract_statement_with_positions_space(self.e_sql.text()+chr(10), v_pos_relativa_cursore)                        
                 if v_pos_start != None and v_pos_end != None:
-                    v_istruzione = self.e_sql.text()[v_pos_start:v_pos_end]
+                    v_istruzione = self.e_sql.text()[v_pos_start:v_pos_end]                    
                     if v_istruzione != '' and v_istruzione is not None:
+                        # eventuale punto e virgola e spazi finali vengono tolti
+                        v_istruzione = v_istruzione.rstrip('; ')                                                
                         # eseguo l'istruzione                           
                         self.esegui_istruzione(v_istruzione, False)        
                         # evidenzio il testo dell'istruzione                                                                                                    
@@ -4594,7 +4600,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             self.bind_variable(p_function='DIC',p_testo_sql=p_plsql)                                                        
             v_start_time = datetime.datetime.now()            
             self.v_set_rowcount = p_rowcount                 
-            self.v_oracle_executer = oracle_executer.SendCommandToOracle(v_global_connection, self.v_cursor, p_plsql, self.v_variabili_bind_dizionario, self.link_to_MSql_win1_class.frameGeometry())                                                                        
+            self.v_oracle_executer = oracle_executer.SendCommandToOracle(v_global_connection, self.v_cursor, p_plsql, self.v_variabili_bind_dizionario, self.link_to_MSql_win1_class.frameGeometry(), o_global_preferences.animated_gif)                                                                        
             self.v_oracle_executer.start()
         
             # riattivo la freccia del mouse
@@ -4771,7 +4777,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # esegue comando sql in modo asincrono!!! Al termine viene invocato un segnale e richiamata la funzione endSelectCommandToOracle
             self.bind_variable(p_function='DIC',p_testo_sql=v_select)                                                        
             v_start_time = datetime.datetime.now()
-            self.v_oracle_executer = oracle_executer.SendCommandToOracle(v_global_connection, self.v_cursor, v_select, self.v_variabili_bind_dizionario, self.link_to_MSql_win1_class.frameGeometry())                                                                        
+            self.v_oracle_executer = oracle_executer.SendCommandToOracle(v_global_connection, self.v_cursor, v_select, self.v_variabili_bind_dizionario, self.link_to_MSql_win1_class.frameGeometry(), o_global_preferences.animated_gif)                                                                        
             self.v_oracle_executer.start()
 
             # riattivo la freccia del mouse
