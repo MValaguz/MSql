@@ -214,7 +214,7 @@ class SendCommandToOracle(QDialog):
         if p_animated_gif != '':                        
             self.movie = QMovie(p_animated_gif)                                
         else:
-            self.movie = QMovie("icons:anim_wait1")                                
+            self.movie = QMovie("icons:anim_wait1.gif")                                
         # segnale che si scatena ad ogni visualizzazione di frame e che serve solo per zoomare l'animazione
         self.movie.frameChanged.connect(self.update_movie_frame)
         self.gears.setMovie(self.movie)                
@@ -336,7 +336,7 @@ def slot_on_click():
     # in questo modo le classi di thread vedono i parametri ricevuti in input e la dialog blocca 
     # tutto il programma fino al termine del thread principale    
 
-    for i in range(1,5):
+    for i in range(1,2):
         v_oracle_executer = SendCommandToOracle(v_connection, v_cursor, """select * from va_op_da_versare""", v_bind, v_win.frameGeometry())                                                                
         #v_oracle_executer = SendCommandToOracle(v_connection, v_cursor, """select * from dual""", v_bind, v_win.frameGeometry())                                                                    
         v_oracle_executer.signalStatus.connect(endCommandToOracle)    
