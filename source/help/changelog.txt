@@ -2,6 +2,10 @@
 MSql Changelog!
 ---------------
 
+Versione del 13/06/2025
+OK! nuova gif animata per esecuzione creata da Filippo!
+OK! sempre questione del backup automatico...parto da un Untitled1....che lascio backup....poi faccio salva con nome....a quel punto inizierà a fare il backup del nuovo lasciando il vecchio e poi andando in crash!
+
 Versione del 12/06/2025
 OK! perfezionato il funzionamento dei file di backup nel seguente modo:
     l'editor, in base alle preferenze, attiva il timer che provvede al richiamo della procedura di salvataggio; quando viene eseguito il salvataggio, il file corrente viene salvato nella cartella backup.

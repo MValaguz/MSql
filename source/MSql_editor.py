@@ -677,6 +677,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # Attivo la comparazione tra i due ultimi file in elenco
         elif p_slot.text() == QCoreApplication.translate('MSql_win1','Compare last two text editor'):
             self.slot_compare_last_two_text_editor()
+        # Creazione del dizionario termini per autocompletamento dell'editor
+        elif p_slot.text() == QCoreApplication.translate('MSql_win1','Autocomplete dictionary'):
+            self.crea_dizionario_per_autocompletamento()
                 
         # Queste voci di menu che agiscono sull'oggetto editor, sono valide solo se l'oggetto è attivo
         if o_MSql_win2 is not None:
@@ -704,9 +707,6 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # Chiusura di tutti gli editor aperti 
             elif p_slot.text() == QCoreApplication.translate('MSql_win1','Close all'):
                 self.mdiArea.closeAllSubWindows()
-            # Creazione del dizionario termini per autocompletamento dell'editor
-            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Autocomplete dictionary'):
-                self.crea_dizionario_per_autocompletamento()
             # Visualizza il carattere di end of line, ritorno a capo
             elif p_slot.text() == QCoreApplication.translate('MSql_win1','Show end of line'):
                 # riporto la preferenza di menu dentro l'oggetto delle preferenze 
