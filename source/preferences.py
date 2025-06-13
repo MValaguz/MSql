@@ -62,11 +62,6 @@ class preferences_class():
             # font
             self.font_editor = v_json['font_editor']
             self.font_result = v_json['font_result']
-            # sql editabili
-            if v_json['editable'] == 1:
-                self.editable = True
-            else:
-                self.editable = False
             # auto column resize
             if v_json['auto_column_resize'] == 1:            
                 self.auto_column_resize = True
@@ -140,8 +135,7 @@ class preferences_class():
             self.end_of_line = False
             self.font_editor = 'Cascadia Code, 12, BOLD'                                
             self.font_result = 'Segoe UI, 8'
-            self.autosave_snapshoot_interval = 60
-            self.editable = False
+            self.autosave_snapshoot_interval = 60            
             self.auto_column_resize = False
             self.indentation_guide = False
             self.auto_clear_output = True
@@ -153,6 +147,9 @@ class preferences_class():
             self.refresh_dictionary = 15
             self.app_language = 'English'
             self.animated_gif = ''
+
+        # Viene aggiunta alla classe la proprietà editable che gestisce la modalità di editazione delle tabelle (un tempo era anche una preferenza a video che poi è stata eliminata)
+        self.editable = False
             
         # Se esiste il file delle connessioni...le carico nell'oggetto
         if os.path.isfile(p_nome_file_connections):
@@ -199,8 +196,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         self.e_refresh_dictionary.setValue(self.preferences.refresh_dictionary)
         self.e_open_new_editor.setChecked(self.preferences.open_new_editor)
         self.e_default_font_editor.setText(self.preferences.font_editor)
-        self.e_default_font_result.setText(self.preferences.font_result)
-        self.e_default_editable.setChecked(self.preferences.editable)   
+        self.e_default_font_result.setText(self.preferences.font_result)        
         self.e_default_auto_column_resize.setChecked(self.preferences.auto_column_resize)
         self.e_default_indentation_guide.setChecked(self.preferences.indentation_guide)
         self.e_default_auto_clear_output.setChecked(self.preferences.auto_clear_output)
@@ -488,12 +484,6 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         else:
             v_dark_theme = 0
 
-        # il default per risultato editabile va convertito
-        if self.e_default_editable.isChecked():
-            v_editable = 1
-        else:
-            v_editable = 0
-
         # il default per end of line va convertito
         if self.e_default_end_of_line.isChecked():
             v_eol = 1
@@ -599,8 +589,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
                  'eol': v_eol,
                  'autosave_snapshoot_interval':self.e_autosave_snapshoot_interval.value(),
 		         'font_editor' :self.e_default_font_editor.text(),
-		         'font_result' : self.e_default_font_result.text(),
-                 'editable' : v_editable,
+		         'font_result' : self.e_default_font_result.text(),                 
                  'auto_column_resize': v_auto_column_resize,
                  'indentation_guide': v_indentation_guide,
                  'csv_separator': self.e_default_csv_separator.text(),

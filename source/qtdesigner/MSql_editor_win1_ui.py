@@ -629,6 +629,11 @@ class Ui_MSql_win1(object):
         self.actionIndentation_guide = QtGui.QAction(parent=MSql_win1)
         self.actionIndentation_guide.setIcon(icon58)
         self.actionIndentation_guide.setObjectName("actionIndentation_guide")
+        self.actionChange_log = QtGui.QAction(parent=MSql_win1)
+        icon79 = QtGui.QIcon()
+        icon79.addPixmap(QtGui.QPixmap("icons:change.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        self.actionChange_log.setIcon(icon79)
+        self.actionChange_log.setObjectName("actionChange_log")
         self.menuFiles.addAction(self.actionNew)
         self.menuFiles.addAction(self.actionOpen)
         self.menuFiles.addSeparator()
@@ -700,6 +705,7 @@ class Ui_MSql_win1(object):
         self.menuWindow.addAction(self.actionTabbed)
         self.menuWindow.addSeparator()
         self.menuHelp.addAction(self.actionHelp)
+        self.menuHelp.addAction(self.actionChange_log)
         self.menuHelp.addAction(self.actionProgram_info)
         self.menuTools.addAction(self.actionCompare_last_two_text_editor)
         self.menuTools.addSeparator()
@@ -936,6 +942,7 @@ class Ui_MSql_win1(object):
         self.actionRemove.setText(_translate("MSql_win1", "Remove Bookmark"))
         self.actionSearchNext.setText(_translate("MSql_win1", "SearchNext Bookmark"))
         self.actionIndentation_guide.setText(_translate("MSql_win1", "Indentation guide"))
+        self.actionChange_log.setText(_translate("MSql_win1", "Changelog"))
 from custom_widget import MyCustomTreeView
 
 

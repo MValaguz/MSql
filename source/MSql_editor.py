@@ -34,6 +34,7 @@ import re
 import traceback
 import difflib
 import time
+import psutil
 # Librerie di data base Oracle
 import oracledb, oracle_my_lib, oracle_executer
 # Librerie grafiche QT
@@ -109,12 +110,28 @@ v_global_emphasis = False
 # Indica che sui comandi sql di CREATE, va richiesta una conferma
 v_global_create_confirm = False
 
+def nome_file_backup(p_nome_file):
+    """
+       Calcola il nome file di backup
+       Il nome riporta la pathname della dir di backup il PID (process ID) di MSql attualmente in esecuzione e il nome del file di origine
+       Siccome non sono ammessi nel nome del file i caratteri : slash backslash, vengono sostituiti usando il punto
+    """
+    p_nome_file = p_nome_file.replace('/', '..')
+    p_nome_file = p_nome_file.replace('\\', '..')
+    p_nome_file = p_nome_file.replace(':','...')
+    p_nome_file = v_global_work_dir + 'backup\\' + 'PID-'+ str(os.getpid()) + 'PID-' + p_nome_file
+
+    return p_nome_file
+
 def salvataggio_editor(p_save_as, p_nome, p_testo, p_codifica_utf8):
     """
         Salvataggio di p_testo dentro il file p_nome        
         Se p_save_as è True oppure il titolo dell'editor inizia con "!" --> viene richiesto di salvarlo come nuovo file
     """
     global o_global_preferences
+
+    # salvo in var temporanea il nome ricevuto in input (lo userò per eliminare il vecchio backup)
+    p_nome_originario = p_nome
 
     # se il primo carattere del titolo inizia con un punto esclamativo, significa che il file è stato creato partendo dall'object navigator
     # e quindi l'operazione di salva deve chiedere il nome del file e la posizione dove salvare
@@ -153,8 +170,15 @@ def salvataggio_editor(p_save_as, p_nome, p_testo, p_codifica_utf8):
             v_file = open(p_nome,'w', newline='')
         v_file.write(p_testo)
         v_file.close()            
+        # procedo con il cancellare eventuale file di backup precedente (si ripartirà con un nuovo salvataggio che conterrà il nuovo nome di file)                
+        v_nome_file_backup = nome_file_backup(p_nome_originario)                
+        if os.path.exists(v_nome_file_backup):
+            os.remove(v_nome_file_backup)		
+            print('Remove old backup --> ' + v_nome_file_backup)
+        # esco con tutto ok
         return 'ok', p_nome
     except Exception as err:
+        # esco con errore
         message_error(QCoreApplication.translate('Save','Error to write the file:') + ' ' + str(err))
         return 'ko', None
 
@@ -166,6 +190,42 @@ def titolo_window(p_titolo_file):
     v_solo_nome_file_senza_suffisso = os.path.splitext(v_solo_nome_file)[0]
 
     return v_solo_nome_file_senza_suffisso
+
+class classChangeLog(QWidget):
+    """
+       Visualizza in una window specifica, il file di changelog
+    """
+    def __init__(self,p_window_padre):
+        super().__init__()
+        self.setWindowTitle("MSql-Changelog")
+        v_icon = QIcon()
+        v_icon.addPixmap(QPixmap("icons:MSql.ico"), QIcon.Mode.Normal, QIcon.State.Off)
+        self.setWindowIcon(v_icon)
+        self.setGeometry(0, 0, 600, 500)
+
+        layout = QVBoxLayout()
+        # creo un text edit di sola lettura dove visualizzo il contenuto del changelog
+        self.text_edit = QTextEdit()
+        self.text_edit.setLineWrapMode(QTextEdit.LineWrapMode.NoWrap)
+        self.text_edit.setReadOnly(True)  
+
+        # se sto eseguendo il programma da pyinstaller, vado in apposita cartella
+        v_nome_file = "help/changelog.txt"
+        if getattr(sys, 'frozen', False): 
+            v_nome_file = "_internal/" + v_nome_file               
+
+        # leggo il file di changelog
+        try:            
+            with open(v_nome_file, "r", encoding='UTF-8') as file:
+                self.text_edit.setText(file.read())
+        except:
+            pass
+
+        # imposto il layout
+        layout.addWidget(self.text_edit)
+        self.setLayout(layout)
+        # centro la window rispetto alla window padre
+        centra_window_figlia(p_window_padre, self)
 
 #
 #  __  __    _    ___ _   _  __        _____ _   _ ____   _____        __
@@ -399,6 +459,34 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 message_info(QCoreApplication.translate('MSql_win1',"The dictionary is more than") + ' ' + str(o_global_preferences.refresh_dictionary) + QCoreApplication.translate('MSql_win1'," days old!")  + chr(10) + QCoreApplication.translate('MSql_win1',"Remember to regenerate it!") + chr(10) + QCoreApplication.translate('MSql_win1',"See the menu Tools/Autocomplete dictionary ;-)"))                    
 
         ###
+        # Controllo se ci sono dei file di backup (alias snapshoot) aperti da sessioni interrotte e chiedo all'utente se li vuole ripristinare   
+        ###
+        if os.path.exists(v_global_work_dir + 'backup\\'):
+            for v_nome_file_backup in os.listdir(v_global_work_dir + 'backup\\'):
+                # estraggo dal nome del file il PID di processo
+                v_pid = v_nome_file_backup.split('PID-')[1]
+                # controllo se questo PID corrisponde ad un processo ancora attivo (vuol dire che lo snapshoot è creato da un'altra sessione di MSql ancora attiva!)
+                if not psutil.pid_exists(int(v_pid)):  
+                    # ricavo il nome del file originario
+                    v_split = v_pid = v_nome_file_backup.split('PID-')                
+                    v_nome_originario = v_split[2] 
+                    v_nome_originario = v_nome_originario.replace('...',':').replace('..','/')                    
+                    # chiedo se procedere o meno con il ripristino
+                    if message_question_yes_no(QCoreApplication.translate('MSql_win1','Found file') + chr(10) + v_nome_originario + chr(10) + QCoreApplication.translate('MSql_win1','from interrupted session! Do you want to restore it?')) == 'Yes':            
+                        # apro il file di backup
+                        v_titolo_backup, v_contenuto_file_backup, v_codifica_utf8_backup = self.openfile(v_global_work_dir + 'backup\\' + v_nome_file_backup)                                                        
+                        # richiamo l'azione di apertura dell'editor con il file di backup, mettendo nel titolo la parola RESTORED. Il file andrà salvato manualmente dall'utente. Ho usato questo approccio perché per me è più sicuro!
+                        v_azione = QAction()
+                        v_azione.setText('Open_db_obj')                                    
+                        self.smistamento_voci_menu(v_azione, titolo_window(v_nome_originario) + ' RESTORED', v_contenuto_file_backup, v_codifica_utf8_backup)                        
+                        # prendo la window appena creata che è l'ultima nella lista 
+                        o_MSql_win2 = self.o_lst_window2[-1]
+                        # e coloro lo sfondo di rosso per far capire che si tratta di un file ripristinato
+                        o_MSql_win2.setStyleSheet("background-color: red;")
+                    # il file di backup viene eliminato (sia che utente abbia risposto si che abbia risposto no!)                   
+                    os.remove(v_global_work_dir + 'backup\\' + v_nome_file_backup)
+
+        ###
         # imposto il timer che permette all'object navigator di attivare la ricerca automatica dopo 0,8 secondi dalla digitazione del testo
         ###
         self.object_navigator_search_timer = QTimer(self)
@@ -564,6 +652,10 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 os.system("start _internal/help/MSql_help.odt")
             else:
                 os.system("start help/MSql_help.odt")
+        # Apro file di della cronologia delle modifiche
+        elif p_slot.text() == QCoreApplication.translate('MSql_win1','Changelog'):                                      
+            self.v_changelog = classChangeLog(self)
+            self.v_changelog.show()
         # Visualizzo program info
         elif p_slot.text() == QCoreApplication.translate('MSql_win1','Program info'):            
             self.slot_info()
@@ -951,7 +1043,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             for obj_win2 in self.o_lst_window2:
                 if not obj_win2.v_editor_chiuso and  obj_win2.objectName() == v_filename:
                     message_error(QCoreApplication.translate('Open','This file is already open!'))
-                    return None, None, None            
+                    return None, None, None                        
             # procedo con apertura
             try:
                 # controllo se il file ha la codifica utf-8
@@ -3593,19 +3685,21 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         """        
         global v_global_work_dir
 
-        print('AUTOSAVE ' + self.objectName())
+        print('Auto backup of --> ' + self.objectName())
 
         # se la directory backup non esiste la creo
         if not os.path.isdir(v_global_work_dir + 'backup'):
             os.mkdir(v_global_work_dir + 'backup')
         
+        # ricavo il nome del file da scrivere nella cartella di backup...i caratteri che identificano il disco e la cartella vengono rimpiazzati con .. e ...
+        v_nome_file = nome_file_backup(self.objectName())        
         # creo il backup dell'editor corrente (Attenzione! Ogni editor aperto avrà il suo timer di salvataggio!)
         if self.setting_utf8:
             # scrittura usando utf-8 (il newline come parametro è molto importante per la gestione corretta degli end of line)                                                            
-            v_file = open(v_global_work_dir + 'backup\\' + titolo_window(self.objectName()) ,'w',encoding='utf-8', newline='')
+            v_file = open(v_nome_file ,'w',encoding='utf-8', newline='')
         else:
             # scrittura usando ansi (il newline come parametro è molto importante per la gestione corretta degli end of line)                                        
-            v_file = open(v_global_work_dir + 'backup\\' + titolo_window(self.objectName()),'w', newline='')
+            v_file = open(v_nome_file, 'w', newline='')
         v_file.write(self.e_sql.text())
         v_file.close()                                
     
@@ -5142,10 +5236,21 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         global o_global_preferences
         global v_global_work_dir
 
+        def delete_snapshoot():                
+            """
+               Cancello il file di backup
+            """
+            # ricavo il nome del file da scrivere nella cartella di backup...i caratteri che identificano il disco e la cartella vengono rimpiazzati con .. e ...
+            v_nome_file = nome_file_backup(self.objectName())            
+            if os.path.exists(v_nome_file):
+                os.remove(v_nome_file)				
+                print('Removed backup of --> ' + v_nome_file)
+
         v_salvare = self.check_to_save_file()                    
         # richiesto di salvare e poi di chiudere
         if v_salvare == 'Yes':        
             self.v_editor_chiuso = True            
+            delete_snapshoot()
             e.accept() 
         # interrompere la chiusura
         elif v_salvare == 'Cancel':            
@@ -5158,6 +5263,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             if o_global_preferences.remember_text_pos:
                  write_files_history(v_global_work_dir+'MSql.db', self.objectName(), v_num_line, v_num_pos)          
             # imposto indicatore di chiusura e chiudo
+            delete_snapshoot()
             self.v_editor_chiuso = True            
             self.close()    
     
@@ -5969,7 +6075,7 @@ if __name__ == "__main__":
     if o_global_preferences.dark_theme:        
         app.setStyleSheet(dark_theme_definition())                    
             
-    # Carico eventuali traduzioni se la lingua è diversa rispetto all'inglese        
+    # carico eventuali traduzioni se la lingua è diversa rispetto all'inglese        
     # se il programma è eseguito da pyinstaller, cambio la dir di riferimento passando a dove si trova l'eseguibile
     if getattr(sys, 'frozen', False):         
         v_dir_qtlinguist = "_internal/qtlinguist/"
@@ -5986,12 +6092,23 @@ if __name__ == "__main__":
     # dimensioni della window
     application.carico_posizione_window()  
     
-    # mostro la window
+    # mostro la window principale
     application.show()
 
     # nascondo la splash screen
     if v_view_splash:
         v_splash.close()
+
+    # se il programma è in esecuzione da pyinstaller...controllo se c'è una nuova versione del programma disponibile, e avverto di installarla    
+    # viene controllata solo la data perché controllando anche ore e minuti, finisce che passa il minuto rispetto a quando viene pacchettizzato e gli orari non coincidono
+    if getattr(sys, 'frozen', False):     
+        try:        
+            v_build_timestamp = time.strftime("%Y-%m-%d",time.localtime(os.path.getmtime(sys.executable)))                        
+            v_setup_timestamp = time.strftime("%Y-%m-%d",time.localtime(os.path.getmtime("O:/Install/MSql_setup/MSql_setup.exe")))                
+            if v_build_timestamp < v_setup_timestamp:
+                message_info(QCoreApplication.translate('MSql_win1',"A new versione of MSql Editor is aviable! Please go to O:\\Install\\MSql_setup and install it! Once installed, don't forget to check the changelog to see what's new!"))
+        except:
+            pass
             
-    # attivazione degli eventi
+    # attivazione e gestione degli eventi
     sys.exit(app.exec())    

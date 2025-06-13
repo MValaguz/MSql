@@ -32,9 +32,6 @@ Source: "C:\MSql_exe\MSql.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\MSql_exe\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Il file di configurazione delle connessioni viene copiato nella dir delle preferenze solo se non già presente (questo file contiene le connessioni di default che non vanno poi condivise su GitHub)
 Source: "C:\Users\MValaguz\Documents\GitHub\MSql\source\MSql_connections.ini"; DestDir: "{localappdata}\MSql"; Flags: onlyifdoesntexist
-; NOTE: Questi sono i file dell'help
-;Source: "C:\Users\mvalaguz\Documents\GitHub\MSql\source\docs\build\*"; DestDir: "{app}\_internal\docs\build"; Flags: recursesubdirs
-
 
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 [Registry]
@@ -50,3 +47,15 @@ Name: "{autoprograms}\MSql"; Filename: "{app}\MSql.exe"
 [Run]
 Filename: "{app}\MSql.exe"; Description: "{cm:LaunchProgram,MSql}"; Flags: nowait postinstall skipifsilent
 
+; Durante installazione viene cancellato il contenuto della cartella backup che contiene i precedenti backup degli editor aperti da MSql
+; questa cancellazione ha senso solo per il passaggio dalle vecchie alle nuove versioni di MSql in quanto è stata cambiata la gestione del backup dei files
+[Code]
+procedure RemovePersonalData();
+begin
+  DelTree(ExpandConstant('{localappdata}\MSql\backup'), True, True, True);
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  if CurStep = ssInstall then RemovePersonalData();
+end;

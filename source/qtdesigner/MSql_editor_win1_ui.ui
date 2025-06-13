@@ -174,6 +174,7 @@
      <string>&amp;Help</string>
     </property>
     <addaction name="actionHelp"/>
+    <addaction name="actionChange_log"/>
     <addaction name="actionProgram_info"/>
    </widget>
    <widget class="QMenu" name="menuTools">
@@ -1542,6 +1543,15 @@
    </property>
    <property name="text">
     <string>Indentation guide</string>
+   </property>
+  </action>
+  <action name="actionChange_log">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/change.png</normaloff>:/icons/icons/change.png</iconset>
+   </property>
+   <property name="text">
+    <string>Changelog</string>
    </property>
   </action>
  </widget>

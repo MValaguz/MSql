@@ -22,7 +22,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="o_tab_widget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="general">
        <attribute name="title">
@@ -368,8 +368,25 @@
             </property>
            </widget>
           </item>
+          <item row="2" column="2">
+           <widget class="QLineEdit" name="e_default_font_result">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0" colspan="2">
+           <widget class="QLabel" name="label_12">
+            <property name="text">
+             <string>CSV column separator:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_default_csv_separator</cstring>
+            </property>
+           </widget>
+          </item>
           <item row="6" column="2">
-           <widget class="QCheckBox" name="e_default_editable">
+           <widget class="QCheckBox" name="e_default_auto_clear_output">
             <property name="text">
              <string/>
             </property>
@@ -385,39 +402,16 @@
             </property>
            </widget>
           </item>
-          <item row="6" column="0">
-           <widget class="QLabel" name="label_6">
-            <property name="text">
-             <string>Make table editable:</string>
-            </property>
-            <property name="buddy">
-             <cstring>e_default_editable</cstring>
+          <item row="2" column="3">
+           <widget class="QPushButton" name="b_default_font_result">
+            <property name="icon">
+             <iconset resource="resource.qrc">
+              <normaloff>:/icons/icons/font_type.png</normaloff>:/icons/icons/font_type.png</iconset>
             </property>
            </widget>
           </item>
-          <item row="3" column="0" colspan="2">
-           <widget class="QLabel" name="label_12">
-            <property name="text">
-             <string>CSV column separator:</string>
-            </property>
-            <property name="buddy">
-             <cstring>e_default_csv_separator</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QLineEdit" name="e_default_font_result">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="2">
-           <widget class="QCheckBox" name="e_default_auto_clear_output">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
+          <item row="3" column="2">
+           <widget class="QLineEdit" name="e_default_csv_separator"/>
           </item>
           <item row="2" column="0" colspan="2">
            <widget class="QLabel" name="label_5">
@@ -428,9 +422,6 @@
              <cstring>e_default_font_result</cstring>
             </property>
            </widget>
-          </item>
-          <item row="3" column="2">
-           <widget class="QLineEdit" name="e_default_csv_separator"/>
           </item>
           <item row="2" column="4">
            <spacer name="horizontalSpacer_5">
@@ -445,14 +436,6 @@
             </property>
            </spacer>
           </item>
-          <item row="2" column="3">
-           <widget class="QPushButton" name="b_default_font_result">
-            <property name="icon">
-             <iconset resource="resource.qrc">
-              <normaloff>:/icons/icons/font_type.png</normaloff>:/icons/icons/font_type.png</iconset>
-            </property>
-           </widget>
-          </item>
           <item row="4" column="0">
            <widget class="QLabel" name="label_20">
             <property name="text">
@@ -460,13 +443,38 @@
             </property>
            </widget>
           </item>
-          <item row="7" column="0" colspan="2">
+          <item row="7" column="0">
+           <widget class="QLabel" name="label_24">
+            <property name="text">
+             <string>Animated gif while running:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="2">
+           <widget class="QLineEdit" name="e_default_animated_gif">
+            <property name="toolTip">
+             <string>Change the animated gif that appears when the sql command is executed</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0" colspan="2">
            <widget class="QLabel" name="label_17">
             <property name="text">
              <string>Auto-Clear output:</string>
             </property>
             <property name="buddy">
              <cstring>e_default_auto_clear_output</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="3">
+           <widget class="QPushButton" name="b_default_animated_gif">
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="resource.qrc">
+              <normaloff>:/icons/icons/folder.png</normaloff>:/icons/icons/folder.png</iconset>
             </property>
            </widget>
           </item>
@@ -492,31 +500,6 @@
               <string>%Y/%m/%d</string>
              </property>
             </item>
-           </widget>
-          </item>
-          <item row="8" column="0">
-           <widget class="QLabel" name="label_24">
-            <property name="text">
-             <string>Animated gif while running:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="8" column="2">
-           <widget class="QLineEdit" name="e_default_animated_gif">
-            <property name="toolTip">
-             <string>Change the animated gif that appears when the sql command is executed</string>
-            </property>
-           </widget>
-          </item>
-          <item row="8" column="3">
-           <widget class="QPushButton" name="b_default_animated_gif">
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset resource="resource.qrc">
-              <normaloff>:/icons/icons/folder.png</normaloff>:/icons/icons/folder.png</iconset>
-            </property>
            </widget>
           </item>
          </layout>
@@ -742,7 +725,6 @@
   <tabstop>e_default_csv_separator</tabstop>
   <tabstop>e_default_date_format</tabstop>
   <tabstop>e_default_auto_column_resize</tabstop>
-  <tabstop>e_default_editable</tabstop>
   <tabstop>e_default_auto_clear_output</tabstop>
   <tabstop>e_default_animated_gif</tabstop>
   <tabstop>b_default_animated_gif</tabstop>
