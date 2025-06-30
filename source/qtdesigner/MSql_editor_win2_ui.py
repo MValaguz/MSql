@@ -62,11 +62,13 @@ class Ui_MSql_win2(object):
         self.o_tab_widget.addTab(self.t_result, "")
         self.t_output = QtWidgets.QWidget()
         self.t_output.setObjectName("t_output")
-        self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.t_output)
-        self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
-        self.verticalLayout_3.setSpacing(0)
-        self.verticalLayout_3.setObjectName("verticalLayout_3")
-        self.o_output = QtWidgets.QPlainTextEdit(parent=self.t_output)
+        self.gridLayout_7 = QtWidgets.QGridLayout(self.t_output)
+        self.gridLayout_7.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout_7.setObjectName("gridLayout_7")
+        self.splitter_3 = QtWidgets.QSplitter(parent=self.t_output)
+        self.splitter_3.setOrientation(QtCore.Qt.Orientation.Horizontal)
+        self.splitter_3.setObjectName("splitter_3")
+        self.o_output = MyCustomPlainTextWithNumber(parent=self.splitter_3)
         font = QtGui.QFont()
         font.setFamily("Segoe UI")
         font.setPointSize(8)
@@ -74,7 +76,40 @@ class Ui_MSql_win2(object):
         self.o_output.setReadOnly(True)
         self.o_output.setTextInteractionFlags(QtCore.Qt.TextInteractionFlag.TextSelectableByMouse)
         self.o_output.setObjectName("o_output")
-        self.verticalLayout_3.addWidget(self.o_output)
+        self.o_output_frame = QtWidgets.QFrame(parent=self.splitter_3)
+        self.o_output_frame.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
+        self.o_output_frame.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
+        self.o_output_frame.setObjectName("o_output_frame")
+        self.gridLayout_9 = QtWidgets.QGridLayout(self.o_output_frame)
+        self.gridLayout_9.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout_9.setObjectName("gridLayout_9")
+        self.gridLayout_8 = QtWidgets.QGridLayout()
+        self.gridLayout_8.setContentsMargins(3, 4, 3, -1)
+        self.gridLayout_8.setObjectName("gridLayout_8")
+        self.label_6 = QtWidgets.QLabel(parent=self.o_output_frame)
+        self.label_6.setObjectName("label_6")
+        self.gridLayout_8.addWidget(self.label_6, 0, 0, 1, 1)
+        self.e_output_find = QtWidgets.QLineEdit(parent=self.o_output_frame)
+        self.e_output_find.setObjectName("e_output_find")
+        self.gridLayout_8.addWidget(self.e_output_find, 0, 1, 1, 1)
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.b_output_find_next = QtWidgets.QPushButton(parent=self.o_output_frame)
+        self.b_output_find_next.setObjectName("b_output_find_next")
+        self.horizontalLayout_2.addWidget(self.b_output_find_next)
+        self.b_output_find_all = QtWidgets.QPushButton(parent=self.o_output_frame)
+        self.b_output_find_all.setObjectName("b_output_find_all")
+        self.horizontalLayout_2.addWidget(self.b_output_find_all)
+        self.gridLayout_8.addLayout(self.horizontalLayout_2, 1, 0, 1, 2)
+        self.label_7 = QtWidgets.QLabel(parent=self.o_output_frame)
+        self.label_7.setObjectName("label_7")
+        self.gridLayout_8.addWidget(self.label_7, 2, 0, 1, 1)
+        self.o_output_lst_result = QtWidgets.QListView(parent=self.o_output_frame)
+        self.o_output_lst_result.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.o_output_lst_result.setObjectName("o_output_lst_result")
+        self.gridLayout_8.addWidget(self.o_output_lst_result, 3, 0, 1, 2)
+        self.gridLayout_9.addLayout(self.gridLayout_8, 0, 0, 1, 1)
+        self.gridLayout_7.addWidget(self.splitter_3, 0, 0, 1, 1)
         self.o_tab_widget.addTab(self.t_output, "")
         self.t_bind = QtWidgets.QWidget()
         self.t_bind.setObjectName("t_bind")
@@ -263,6 +298,10 @@ class Ui_MSql_win2(object):
         self.b_replace_next.clicked.connect(MSql_win2.slot_find_e_replace_next) # type: ignore
         self.b_replace_all.clicked.connect(MSql_win2.slot_find_e_replace_all) # type: ignore
         self.e_find.returnPressed.connect(self.b_find_all.click) # type: ignore
+        self.b_output_find_next.clicked.connect(MSql_win2.slot_output_find_next) # type: ignore
+        self.b_output_find_all.clicked.connect(MSql_win2.slot_output_find_all) # type: ignore
+        self.e_output_find.returnPressed.connect(self.b_output_find_all.click) # type: ignore
+        self.o_output_lst_result.clicked['QModelIndex'].connect(MSql_win2.slot_output_find_all_click) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(MSql_win2)
         MSql_win2.setTabOrder(self.e_sql, self.o_tab_widget)
         MSql_win2.setTabOrder(self.o_tab_widget, self.o_table)
@@ -283,6 +322,10 @@ class Ui_MSql_win2(object):
     def retranslateUi(self, MSql_win2):
         _translate = QtCore.QCoreApplication.translate
         self.o_tab_widget.setTabText(self.o_tab_widget.indexOf(self.t_result), _translate("MSql_win2", "Result"))
+        self.label_6.setText(_translate("MSql_win2", "Text to find"))
+        self.b_output_find_next.setText(_translate("MSql_win2", "Find next (F3)"))
+        self.b_output_find_all.setText(_translate("MSql_win2", "Find all"))
+        self.label_7.setText(_translate("MSql_win2", "Search result"))
         self.o_tab_widget.setTabText(self.o_tab_widget.indexOf(self.t_output), _translate("MSql_win2", "Output"))
         self.o_tab_widget.setTabText(self.o_tab_widget.indexOf(self.t_bind), _translate("MSql_win2", ":Binds"))
         self.o_tab_widget.setTabText(self.o_tab_widget.indexOf(self.t_plan), _translate("MSql_win2", "Plan"))
@@ -302,7 +345,7 @@ class Ui_MSql_win2(object):
         self.b_replace_next.setText(_translate("MSql_win2", "Replace"))
         self.b_replace_all.setText(_translate("MSql_win2", "Replace all"))
 from PyQt6 import Qsci
-from custom_widget import MyCustomQsciScintilla
+from custom_widget import MyCustomPlainTextWithNumber, MyCustomQsciScintilla
 
 
 if __name__ == "__main__":

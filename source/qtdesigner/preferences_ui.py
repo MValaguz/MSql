@@ -233,6 +233,10 @@ class Ui_preferences_window(object):
         self.e_default_date_format.addItem("")
         self.e_default_date_format.addItem("")
         self.gridLayout_2.addWidget(self.e_default_date_format, 4, 2, 1, 1)
+        self.l_default_animated_gif = QtWidgets.QLabel(parent=self.result)
+        self.l_default_animated_gif.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.l_default_animated_gif.setObjectName("l_default_animated_gif")
+        self.gridLayout_2.addWidget(self.l_default_animated_gif, 7, 4, 1, 1)
         self.gridLayout_8.addLayout(self.gridLayout_2, 0, 0, 1, 1)
         self.o_tab_widget.addTab(self.result, "")
         self.connections = QtWidgets.QWidget()
@@ -364,6 +368,7 @@ class Ui_preferences_window(object):
         self.b_default_font_result.clicked.connect(preferences_window.slot_b_default_font_result) # type: ignore
         self.b_default_font_editor.clicked.connect(preferences_window.slot_b_default_font_editor) # type: ignore
         self.b_default_animated_gif.clicked.connect(preferences_window.slot_b_default_animated_gif) # type: ignore
+        self.e_default_animated_gif.textChanged['QString'].connect(preferences_window.slot_e_default_animated_gif) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(preferences_window)
         preferences_window.setTabOrder(self.e_language, self.e_default_open_dir)
         preferences_window.setTabOrder(self.e_default_open_dir, self.b_default_open_dir)
@@ -436,6 +441,7 @@ class Ui_preferences_window(object):
         self.e_default_date_format.setItemText(1, _translate("preferences_window", "%Y/%m/%d %H:%M:%S"))
         self.e_default_date_format.setItemText(2, _translate("preferences_window", "%d/%m/%Y"))
         self.e_default_date_format.setItemText(3, _translate("preferences_window", "%Y/%m/%d"))
+        self.l_default_animated_gif.setText(_translate("preferences_window", "Preview della gif"))
         self.o_tab_widget.setTabText(self.o_tab_widget.indexOf(self.result), _translate("preferences_window", "Result/Output"))
         self.label_13.setText(_translate("preferences_window", "Servers:"))
         self.b_server_add.setToolTip(_translate("preferences_window", "Add a server"))

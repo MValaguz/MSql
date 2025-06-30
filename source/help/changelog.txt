@@ -2,7 +2,16 @@
 MSql Changelog!
 ---------------
 
+Versione del 30/06/2025
+OK! capita che se lancio molti comandi di seguito, vengono eseguiti lentamente....è possibile velocizzare la cosa? rif. Filippo 
+    tramite aiuto di CoPilot è stata riscritta la classe di OracleExecuter dove è stato eliminato un thread e tolta tutta la parte di wait che rallentava e creava problemi
+
+Versione del 27/06/2025
+OK! nella sezione di output pl-sql inserito i numeri di riga come se fosse un editor
+OK! nella sezione di output pl-sql inserita la ricerca del testo come presente nell'editor
+
 Versione del 13/06/2025
+OK! nelle preferenze, inserita la preview della gif animata scelta
 OK! nuova gif animata per esecuzione creata da Filippo!
 OK! sempre questione del backup automatico...parto da un Untitled1....che lascio backup....poi faccio salva con nome....a quel punto inizierà a fare il backup del nuovo lasciando il vecchio e poi andando in crash!
 
@@ -251,6 +260,11 @@ OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e part
 MSql TO DO!!!
 -------------
 
+- migliorare il ctrl+invio....nel senso che forse si potrebbe fare che se non presente ; o / si prenda nota anche di una riga vuota, oppure se arrivati in cima alla prima riga come se fosse intera istruzione; ho notato che quando lo usa Marco si incasina via...
+- quando metto dei bookmark....esempio uno all'inizio e uno verso le ultime righe in fondo....passo dal primo al secondo bookmark, tramite CTRL+B, appena mi sposto con la scrollbar o con la rotella del mouse, "salta" in posizione indefinita...
+  ho provato a inserire una prima sincronizzazione ma non va ancora bene...
+- risolvere la questione dell'antivirus dentro nell'immagine di setup
+- capita che se faccio una select, poi una update/ delete o lancio script e poi eseguo la select, esca errore "Error to fetch data: DPY-1003: the executed statement does not return rows!!! Mi capitava con lo script del calcolo prelievi...lanciavo lo script e poi la select su tabella MW_SCOP1_TMP facendo F11
 - !!!! fare debug per il crash che avviene quando faccio la selezione rettangolare con copia-incolla!!! fare una versione semplifica con qscintilla e fare dei test anche li
 - fare help (studiato di farlo con Sphinx ma troppo complicato...poi provato con QtWeb ma anche qui troppo incasinato...)quindi semplici pagine html....alla fine fatto un documento .doc e lancio apertura di quello....
   forse potrebbe andare in errore a causa della scrittura in modalità rettangolare?

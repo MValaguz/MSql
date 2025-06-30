@@ -502,6 +502,16 @@
             </item>
            </widget>
           </item>
+          <item row="7" column="4">
+           <widget class="QLabel" name="l_default_animated_gif">
+            <property name="text">
+             <string>Preview della gif</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
        </layout>
@@ -751,7 +761,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>377</x>
-     <y>150</y>
+     <y>199</y>
     </hint>
     <hint type="destinationlabel">
      <x>410</x>
@@ -767,7 +777,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>377</x>
-     <y>210</y>
+     <y>259</y>
     </hint>
     <hint type="destinationlabel">
      <x>413</x>
@@ -935,6 +945,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>e_default_animated_gif</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>preferences_window</receiver>
+   <slot>slot_e_default_animated_gif()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>228</x>
+     <y>395</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>590</x>
+     <y>393</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>slot_b_default_font_editor()</slot>
@@ -951,5 +977,6 @@
   <slot>slot_b_user_remove()</slot>
   <slot>slot_b_open_pref_dir()</slot>
   <slot>slot_b_default_animated_gif()</slot>
+  <slot>slot_e_default_animated_gif()</slot>
  </slots>
 </ui>

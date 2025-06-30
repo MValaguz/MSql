@@ -3023,9 +3023,12 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # splitter che separa l'editor dalla mini mappa (rapporto 15-1)                
         self.splitter_2.setStretchFactor(0,15)        
         self.splitter_2.setStretchFactor(1,1)        
-        # splitter che separa l'editor dall'output: imposto l'immagine per indicare lo splitter e il relativo rapporto tra il widget di editor e quello di output
+        # splitter che separa verticalmente l'editor dall'output: imposto l'immagine per indicare lo splitter e il relativo rapporto tra il widget di editor e quello di output
         self.splitter.setStretchFactor(0,8)        
         self.splitter.setStretchFactor(1,2)    
+        # splitter che separa orizzontalmente l'output all'interno del tab con la sezione di ricerca stringa dell'apposita sezione
+        self.splitter_3.setStretchFactor(0,9)        
+        self.splitter_3.setStretchFactor(1,1)    
         # imposto visivamente la maniglia degli splitter con una linea grigia
         self.splitter.setStyleSheet(""" QSplitter::handle { background-color: #667078; width: 1px; /* Larghezza della maniglia */ } """)
 
@@ -3198,7 +3201,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             v_line, v_pos = self.e_sql_mini_map.getCursorPosition()        
             # riposiziono cursore nell'editor
             self.e_sql.setCursorPosition(v_line,v_pos)
-            # blocco il segnali sulla mini mappa
+            # blocco i segnali sulla mini mappa
             self.e_sql_mini_map.blockSignals(True)                        
             # pulisco eventuale selezione sulla mini mappa
             self.e_sql_mini_map.setSelection(v_line,0,v_line,1)
@@ -4289,6 +4292,8 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         
         if p_type == 'ALL' or p_type == 'OUT':
             self.o_output.clear()
+            self.v_output_lista_posizioni = []
+            self.v_output_posizione_corrente = 0
     
     def slot_e_sql_modificato(self):
         """
@@ -5755,6 +5760,9 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         if v_new_pos != -1:
             # posiziono il cursore sulla riga indicata
             self.e_sql.setCursorPosition(v_new_pos,0)        
+            # se la mimimappa è visualizzata, devo sincronizzare anche quella
+            if self.v_mini_map_visible:
+                self.e_sql_mini_map.setCursorPosition(v_new_pos,0)        
 
     def scrive_output(self, p_messaggio, p_tipo_messaggio):
         """
@@ -5797,6 +5805,120 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # porto in primo piano la visualizzazione del tab di output
         self.o_tab_widget.setCurrentIndex(1)                         
         
+    def slot_output_find_all(self):
+        """
+           Ricerca della stringa in tutto il testo della sezione output pl-sql! 
+           Attenzione! Questa è la ricerca nell'output del testo pl-sql e non della ricerca nell'editor
+           Attenzione! La ricerca di fatto avviene due volte...la prima volta per caricare la lista laterale dove vengono riportate le righe dove la stringa presente
+                       Poi un secondo passaggio con cui si evidenziano tutte le ricorrenze e si salvano all'interno di un array le varie posizioni per poi poter fare F3
+                       La cosa è uscita un po' pasticciata per quanto riguarda anche l'uso di variabili d'oggetto.
+        """        
+        # definizione della struttura-modello per elenco dei risultati (valido solo per find all)       
+        self.output_find_all_model = QStandardItemModel()        
+        self.o_output_lst_result.setModel(self.output_find_all_model)
+
+        # prelevo la stringa da ricercare
+        v_string_to_search = self.e_output_find.text()
+        
+        # se inserito una stringa di ricerca...
+        if v_string_to_search != '':                        
+            # lancio la ricerca sul testo (la funzione richiamata si trova nel file utilita_testo.py)
+            v_founds = search_string_in_text(self.o_output.toPlainText(),v_string_to_search)
+            # ciclo di caricamento di tutte le ricorrenze
+            for i in v_founds:
+                # aggiungo il risultato al modello sotto forma di numero riga + testo della riga
+                # l'elenco delle ricorrenze a fianco dell'output si aggiorna automaticamente a video                
+                self.output_find_all_model.appendRow( QStandardItem(str(i[0]) + ' - ' + str(i[3])) )        
+
+            # cancello le var di appoggio che servono per scorrere nel testo con F3
+            self.v_output_posizione_corrente = 0
+            self.v_output_lista_posizioni = []
+            
+            # prendo il cursore della sezione di output            
+            v_cursor = self.o_output.textCursor()        
+            v_format = QTextCharFormat()  
+            # pulisco eventuali evidenziazioni precedenti
+            v_cursor.select(QTextCursor.SelectionType.Document)              
+            v_cursor.setCharFormat(v_format)  
+            # imposto il colore del pennello per successive evidenziazioni
+            v_format.setBackground(QBrush(QColor("green")))
+            
+            # creo una regular expression e l'associo al testo per la ricerca della stringa indicata
+            re = QRegularExpression(self.e_output_find.text().upper())
+            i = re.globalMatch(self.o_output.toPlainText().upper()) 
+
+            # ricerco all'interno del testo la stringa indicata ed evidenzio il testo 
+            while i.hasNext():
+                match = i.next() #QRegularExpressionMatch
+                # select the matched text and apply the desired format
+                v_cursor.setPosition(match.capturedStart(), QTextCursor.MoveMode.MoveAnchor)
+                v_cursor.setPosition(match.capturedEnd(), QTextCursor.MoveMode.KeepAnchor)
+                v_cursor.mergeCharFormat(v_format)
+                # salvo la posizione della stringa trovata per poter poi dare 
+                # la possibilità di scorrere sulle varie posizioni del testo
+                self.v_output_lista_posizioni.append(match.capturedStart())
+        
+    def slot_output_find_all_click(self, p_index):
+        """
+           Partendo dalla selezione di output_find_all, si posiziona sulla specifica riga di testo della sezione output pl-sql
+           Attenzione! Questa è la ricerca nell'output del testo pl-sql e non della ricerca nell'editor
+        """
+        # prelevo la stringa da ricercare
+        v_string_to_search = self.e_output_find.text()
+        # prendo elemento dell'elenco selezionato
+        v_selindex = self.output_find_all_model.itemFromIndex(p_index)
+        v_stringa = v_selindex.text()               
+        if v_stringa != '':
+            # dalla stringa dell'elenco, estraggo il numero di riga e mi posiziono sulla riga corretta dell'output
+            v_goto_line = v_stringa[0:v_stringa.find('-')]
+            if v_goto_line != '':                 
+                v_goto_line = int(v_goto_line)
+                # riprendo il testo che è presente nell'oggetto di output e lo suddivido in righe                
+                v_text = self.o_output.toPlainText()
+                v_linee = v_text.split("\n")                  
+                if v_goto_line <= len(v_linee):  
+                    # calcolo posizione della riga
+                    v_start_pos = sum(len(v_linee[i]) + 1 for i in range(v_goto_line - 1))  
+                    # posiziono il cursore alla riga indicata
+                    v_cursor = self.o_output.textCursor()
+                    v_cursor.setPosition(v_start_pos)
+                    self.o_output.setTextCursor(v_cursor)
+                                                        
+    def slot_output_find_next(self):
+        """
+           Ricerca la prossima ricorrenza verso il basso della sezione output pl-sql
+           Attenzione! Questa è la ricerca nell'output del testo pl-sql e non della ricerca nell'editor
+        """        
+        try:
+            v_ok = len(self.v_output_lista_posizioni)
+        except:
+            v_ok = 0
+        
+        # se elenco delle ricerche è vuoto, eseguo la ricerca su tutto il testo....
+        # questo succede se sto facendo una nuova ricerca dopo che è cambiato l'output
+        if v_ok == 0:
+            self.slot_output_find_all()
+            try:
+                v_ok = len(self.v_output_lista_posizioni)
+            except:
+                v_ok = 0
+
+        if v_ok > 0:
+            # se sono arrivato alla fine delle posizioni, ricomincio da capo, tornando in cima
+            if self.v_output_posizione_corrente >= len(self.v_output_lista_posizioni):
+                message_info(QCoreApplication.translate('MSql_win2',"End of file! Move to beginning!"))
+                self.v_output_posizione_corrente = 0
+            # ricerco la posizione del testo (contenuta nella lista della posizioni precedentemente salvate)
+            v_posizione = self.v_output_lista_posizioni[self.v_output_posizione_corrente]            
+            # visivamente prendo il cursore dell'oggetto testo e ne reimposto la posizione
+            v_cursor = self.o_output.textCursor()                                                        
+            v_cursor.setPosition(v_posizione)                                                
+            self.o_output.setTextCursor(v_cursor)            
+            # forzo il focus 
+            QTimer.singleShot(0, self.o_output.setFocus)
+            # passo alla prossima posizione dell'indice
+            self.v_output_posizione_corrente += 1										
+    
     def set_editable(self):
         """
            Questa funzione viene richiamata quando si agisce sulla checkbox di editing
@@ -5826,11 +5948,13 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             self.o_output.setStyleSheet("QPlainTextEdit {background-color: " + v_global_color + ";}")            
             self.o_bind.setStyleSheet("QTableView {background-color: " + v_global_color + ";}")
             self.o_plan.setStyleSheet("QPlainTextEdit {background-color: " + v_global_color + ";}")
+            self.o_output_frame.setStyleSheet("QFrame {background-color: " + v_global_color + ";}")
         else:
             self.o_table.setStyleSheet("")
             self.o_output.setStyleSheet("")            
             self.o_bind.setStyleSheet("")
             self.o_plan.setStyleSheet("")
+            self.o_output_frame.setStyleSheet("")
     
     def set_show_end_of_line(self):
         """
@@ -6106,7 +6230,7 @@ if __name__ == "__main__":
             v_build_timestamp = time.strftime("%Y-%m-%d",time.localtime(os.path.getmtime(sys.executable)))                        
             v_setup_timestamp = time.strftime("%Y-%m-%d",time.localtime(os.path.getmtime("O:/Install/MSql_setup/MSql_setup.exe")))                
             if v_build_timestamp < v_setup_timestamp:
-                message_info(QCoreApplication.translate('MSql_win1',"A new versione of MSql Editor is aviable! Please go to O:\\Install\\MSql_setup and install it! Once installed, don't forget to check the changelog to see what's new!"))
+                message_info(QCoreApplication.translate('MSql_win1',"A new version of MSql Editor is aviable! Please go to O:\\Install\\MSql_setup and install it! Once installed, don't forget to check the changelog to see what's new!"))
         except:
             pass
             

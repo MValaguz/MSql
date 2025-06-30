@@ -251,6 +251,30 @@ def estrai_procedure_function(p_testo):
     # restituisco la lista delle definizioni che ho trovato
     return v_lista_definizioni
 
+def search_string_in_text(p_text, p_ricerca):
+    """
+       Dato un testo in p_text, e una stringa di ricerca p_ricerca
+       restituisce un array riportante i numeri di riga dove presente p_ricerca.
+       La ricerca è case insensitive
+       Ogni elemento dell'array contiene un altro array che riporta:
+          - numero di riga
+          - posizione iniziale p_ricerca
+          - posizione finale p_ricerca
+          - testo completo della riga trovato 
+    """
+    # divido il testo in linee usando il separatore di riga
+    v_split_linee = p_text.split("\n")  
+    # predispongo array che riporta elenco delle righe dove p_ricerca trovato
+    v_array_linee = []  
+
+    # ciclo di ricerca
+    for i, v_linea in enumerate(v_split_linee):
+        v_pos = v_linea.upper().find(p_ricerca.upper())        
+        if v_pos != -1:                        
+            v_array_linee.append((i+1,v_pos,v_pos+len(p_ricerca),v_linea))  
+
+    return v_array_linee
+
 ######################################################################################################################
 # TEST DELLA FUNZIONE CHE PARTENDO DA CODICE PL-SQL, RESTITUISCE UN OGGETTO CHE CONTIENE TUTTE LE DEFINIZIONI TROVATE
 ######################################################################################################################
@@ -270,5 +294,17 @@ if __name__ == "__main__":
     #print(f"{v_owner} {v_object}")    
     
     # test funzione che restituisce parola sotto il cursore
-    v_owner, v_oggetto = extract_object_name_from_cursor_pos('select * from ta_azien', 13)                        
-    print(f"{v_owner},{v_oggetto}")    
+    #v_owner, v_oggetto = extract_object_name_from_cursor_pos('select * from ta_azien', 13)                        
+    #print(f"{v_owner},{v_oggetto}")    
+
+    # test funzione di ricerca di una stringa in un testo
+    v_testo = """
+                questo è un testo di prova
+                dove la stringa si ripete
+                su più righe
+                e dove il testo ricercato
+                è la parola stringa
+                e dove stringa è solo un esempio
+              """
+    v_lista = search_string_in_text(v_testo, 'stringa')
+    print(v_lista)

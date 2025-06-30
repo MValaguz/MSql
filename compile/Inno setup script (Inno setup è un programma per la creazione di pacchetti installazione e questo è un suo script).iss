@@ -20,7 +20,7 @@ SetupIconFile=C:\Users\MValaguz\Documents\GitHub\MSql\source\qtdesigner\icons\MS
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
-; Attiva la pagina d'inizio
+; Attiva la pagina d'inizio con immagine di presentazione. Questa parte è stata commentata perché ESET Point antivirus si bloccava su questa immagine! 
 DisableWelcomePage=no
 WizardImageFile=MSql.bmp
 

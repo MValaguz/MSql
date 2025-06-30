@@ -235,6 +235,31 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
             v_rig += 1
         self.o_users.resizeColumnsToContents()
 
+        # Carico anteprima gif animata
+        self.preview_gif_animata()
+
+    def preview_gif_animata(self):
+        """
+           Carico antemprima della gif animata
+        """
+        if self.e_default_animated_gif.text() != '':                        
+            self.movie = QMovie(self.e_default_animated_gif.text())                                
+        else:
+            self.movie = QMovie("icons:anim_wait1.gif")                                
+        
+        # segnale che si scatena ad ogni visualizzazione di frame e che serve solo per zoomare l'animazione
+        self.movie.frameChanged.connect(self.update_movie_frame)
+        self.l_default_animated_gif.setMovie(self.movie)
+        self.movie.start()        
+
+    def update_movie_frame(self):
+        """
+           Esegue lo zoom sulla gif animata degli ingranaggi
+        """
+        frame = self.movie.currentPixmap() 
+        scaled_frame = frame.scaled(70, 70, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation) 
+        self.l_default_animated_gif.setPixmap(QPixmap.fromImage(scaled_frame.toImage()))
+    
     def carico_riga_server(self, v_rig, record):
         """
            Carica una nuova riga nella tabella server
@@ -340,6 +365,12 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
             self.o_users.setItem(v_rig-1,4,QTableWidgetItem(record[4]))                               
         else:
             self.o_users.setItem(v_rig-1,4,QTableWidgetItem())                               
+    
+    def slot_e_default_animated_gif(self):
+        """
+           Aggiorna la preview della gif animata
+        """        
+        self.preview_gif_animata()
     
     def slot_set_color_server(self):
         """
