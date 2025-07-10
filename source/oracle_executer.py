@@ -9,6 +9,8 @@
 #                  Quando il lavoro è terminato un segnale di END_JOB_OK viene emesso verso l'alto tra una classe e l'altra e tramite il metodo get_cursor si accede
 #                  al cursore restituito da Oracle. Se il comando oracle ha dato errore, viene emesso comunque un segnale di END_JOB_KO (KO!) e tramite il 
 #                  metodo get_error si accede alla struttura di errore.
+#  Note..........: Questo oggetto ha avuto diverse versioni di sviluppo di cui ultima è stata riscritta tramite CoPilot, partendo da una versione dove i thread erano 2
+#                  Onestamente...alcune logiche di questa versione mi sono sconosciute!
 
 # Librerie di sistema
 import sys

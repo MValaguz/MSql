@@ -784,7 +784,7 @@
         <translation>Cronologia delle modifiche</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6131"/>
+        <location filename="../MSql_editor.py" line="6117"/>
         <location filename="../MSql_editor.py" line="303"/>
         <source>Last execution time:</source>
         <translation>Tempo ultima esecuzione:</translation>
@@ -796,13 +796,13 @@
         <translation>Connesso a:</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6086"/>
+        <location filename="../MSql_editor.py" line="6072"/>
         <location filename="../MSql_editor.py" line="320"/>
         <source>Lines:</source>
         <translation>Righe:</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6086"/>
+        <location filename="../MSql_editor.py" line="6072"/>
         <location filename="../MSql_editor.py" line="320"/>
         <source>Length:</source>
         <translation>Caratteri:</translation>
@@ -920,8 +920,8 @@
         <translation>Risultato editabile: Attivato</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1982"/>
-        <location filename="../MSql_editor.py" line="1954"/>
+        <location filename="../MSql_editor.py" line="2049"/>
+        <location filename="../MSql_editor.py" line="2021"/>
         <location filename="../MSql_editor.py" line="1487"/>
         <location filename="../MSql_editor.py" line="1141"/>
         <source>Error:</source>
@@ -958,66 +958,71 @@
         <translation>Errore nella creazione del popup menu!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1858"/>
-        <location filename="../MSql_editor.py" line="1839"/>
-        <location filename="../MSql_editor.py" line="1713"/>
+        <location filename="../MSql_editor.py" line="1925"/>
+        <location filename="../MSql_editor.py" line="1906"/>
+        <location filename="../MSql_editor.py" line="1737"/>
         <source>Invalid object!</source>
         <translation>Oggetto invalido!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1727"/>
+        <location filename="../MSql_editor.py" line="1751"/>
         <source>Error to retrive metadata information!</source>
         <translation>Errore restituito durante la richiesta dei &quot;metadata information&quot;!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1806"/>
+        <location filename="../MSql_editor.py" line="1849"/>
+        <source>No valid object!</source>
+        <translation>Oggetto non valido!</translation>
+    </message>
+    <message>
+        <location filename="../MSql_editor.py" line="1873"/>
         <source>Open a editor!</source>
         <translation>Prima apri un editor!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1855"/>
-        <location filename="../MSql_editor.py" line="1834"/>
-        <location filename="../MSql_editor.py" line="1826"/>
+        <location filename="../MSql_editor.py" line="1922"/>
+        <location filename="../MSql_editor.py" line="1901"/>
+        <location filename="../MSql_editor.py" line="1893"/>
         <source>Error to retrive referenced table name!</source>
         <translation>Errore nel recupero del nome della tabella referenziata!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1874"/>
+        <location filename="../MSql_editor.py" line="1941"/>
         <source>Invalid field!</source>
         <translation>Campo non valido!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="2369"/>
+        <location filename="../MSql_editor.py" line="2436"/>
         <source>Error during decode object type!</source>
         <translation>Errore durante la decodifica del tipo di oggetto!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="2426"/>
+        <location filename="../MSql_editor.py" line="2493"/>
         <source>Not all the requested data has been entered!</source>
         <translation>Non tutti i dati richiesti sono stati inseriti!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="2523"/>
+        <location filename="../MSql_editor.py" line="2590"/>
         <source>Select a row!</source>
         <translation>Seleziona una riga!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="2580"/>
+        <location filename="../MSql_editor.py" line="2647"/>
         <source>For compare you must have two editor open or more!</source>
         <translation>Per eseguire il confronto è necessario avere almeno due editor aperti!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6094"/>
+        <location filename="../MSql_editor.py" line="6080"/>
         <source>Overwrite</source>
         <translation>Sovrascrittura</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6096"/>
+        <location filename="../MSql_editor.py" line="6082"/>
         <source>Insert</source>
         <translation>Inserimento</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6233"/>
+        <location filename="../MSql_editor.py" line="6219"/>
         <source>A new version of MSql Editor is aviable! Please go to O:\Install\MSql_setup and install it! Once installed, don&apos;t forget to check the changelog to see what&apos;s new!</source>
         <translation>E&apos; disponibile una nuova versione di MSql! Vai in O:\Install\MSql_setup e procedi con l&apos;installazione. Una volta avviato MSql, non dimenticarti di leggere gli aggiornamenti dal menu di Aiuto!</translation>
     </message>
@@ -1148,111 +1153,114 @@
         <translation>Sostituisci tutto</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="3630"/>
-        <location filename="../MSql_editor.py" line="3619"/>
+        <location filename="../MSql_editor.py" line="3697"/>
+        <location filename="../MSql_editor.py" line="3686"/>
         <source>Error blob fetching using the statement:</source>
         <translation>Errore nel recuperare il campo di tipo blob usanto l&apos;istruzione:</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="3639"/>
+        <location filename="../MSql_editor.py" line="3706"/>
         <source>You must select a blob cell!</source>
         <translation>Devi selezionare una cella con un dato di tipo blob!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="3654"/>
+        <location filename="../MSql_editor.py" line="3721"/>
         <source>Blob downloaded in Downloads directory of your PC!</source>
         <translation>Il blob è stato scaricato nella cartella Downloads del tuo PC!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="3919"/>
+        <location filename="../MSql_editor.py" line="3986"/>
         <source>No PK found!</source>
         <translation>Non trovato la PK!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="3990"/>
+        <location filename="../MSql_editor.py" line="4057"/>
         <source>No FK found!</source>
         <translation>Non trovata la FK!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="4349"/>
+        <location filename="../MSql_editor.py" line="4418"/>
         <source>No instruction!</source>
         <translation>Nessuna istruzione!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="4579"/>
-        <location filename="../MSql_editor.py" line="4575"/>
-        <source>No statement found as SELECT, INSERT, UPDATE, DELETE!</source>
-        <translation>Non trovata un&apos;istruzione di SELECT, INSERT, UPDATE, DELETE!</translation>
+        <location filename="../MSql_editor.py" line="4565"/>
+        <source>No statement found!</source>
+        <translation>Nessun blocco istruzioni trovato!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="4667"/>
+        <location filename="../MSql_editor.py" line="4653"/>
         <source>No script!</source>
         <translation>Nessuno script!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="4682"/>
+        <location filename="../MSql_editor.py" line="4668"/>
         <source>Are you sure to confirm this command?</source>
         <translation>Sei sicuro di confermare questo comando?</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="4974"/>
-        <location filename="../MSql_editor.py" line="4967"/>
+        <location filename="../MSql_editor.py" line="4960"/>
+        <location filename="../MSql_editor.py" line="4953"/>
         <source>Error to fetch data:</source>
         <translation>Errore nel recuperare i dati:</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="5234"/>
+        <location filename="../MSql_editor.py" line="5220"/>
         <source>Error in file creation!</source>
         <translation>Errore durante la creazione del file!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="5284"/>
+        <location filename="../MSql_editor.py" line="5270"/>
         <source>The document</source>
         <translation>Il documento</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="5284"/>
+        <location filename="../MSql_editor.py" line="5270"/>
         <source>was modified.</source>
         <translation>è stato modificato.</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="5284"/>
+        <location filename="../MSql_editor.py" line="5270"/>
         <source>Do you want to save changes?</source>
         <translation>Vuoi salvare le modifiche?</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="5483"/>
-        <location filename="../MSql_editor.py" line="5454"/>
-        <location filename="../MSql_editor.py" line="5423"/>
+        <location filename="../MSql_editor.py" line="5469"/>
+        <location filename="../MSql_editor.py" line="5440"/>
+        <location filename="../MSql_editor.py" line="5409"/>
         <source>Passed the end of file!</source>
         <translation>Arrivati alla fine del file!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="5483"/>
-        <location filename="../MSql_editor.py" line="5454"/>
-        <location filename="../MSql_editor.py" line="5423"/>
+        <location filename="../MSql_editor.py" line="5469"/>
+        <location filename="../MSql_editor.py" line="5440"/>
+        <location filename="../MSql_editor.py" line="5409"/>
         <source>Move to the beginnig?</source>
         <translation>Vuoi andare all&apos;inizio del file?</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="5533"/>
+        <location filename="../MSql_editor.py" line="5519"/>
         <source>Insert a valid number!</source>
         <translation>Inserisci un numero valido!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="5634"/>
+        <location filename="../MSql_editor.py" line="5620"/>
         <source>Please select a text with SQL statement!</source>
         <translation>Seleziona un testo che contiene un&apos;istruzione di SQL valida!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="5909"/>
+        <location filename="../MSql_editor.py" line="5895"/>
         <source>End of file! Move to beginning!</source>
         <translation>Fine del file! La ricerca riparte dall&apos;inizio!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="5990"/>
+        <location filename="../MSql_editor.py" line="5976"/>
         <source>Unrecognized type</source>
         <translation>Tipo non riconosciuto</translation>
+    </message>
+    <message>
+        <source>No statement found as SELECT, INSERT, UPDATE, DELETE!</source>
+        <translation type="vanished">Non trovata un&apos;istruzione di SELECT, INSERT, UPDATE, DELETE!</translation>
     </message>
 </context>
 <context>

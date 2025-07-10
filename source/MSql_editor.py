@@ -56,7 +56,7 @@ from program_info_ui import Ui_program_info
 from goto_line_ui import Ui_GotoLineWindow
 from history import history_class
 from preferred_sql import preferred_sql_class
-# Classe qtdesigner per la richiesta di connessione e camvbio di schema
+# Classe qtdesigner per la richiesta di connessione e cambio di schema
 from connect_ui import Ui_connect_window
 from select_schema_ui import Ui_select_schema_window
 # Classe per visualizzare la barra di avanzamento 
@@ -137,7 +137,7 @@ def salvataggio_editor(p_save_as, p_nome, p_testo, p_codifica_utf8):
     # e quindi l'operazione di salva deve chiedere il nome del file e la posizione dove salvare
     if p_nome[0:1] == '!':
         p_save_as = True
-        p_nome = p_nome[1:len(p_nome)]
+        p_nome = p_nome.lstrip('!')
 
     # se indicato il save as, oppure il file è nuovo e non è mai stato salvato --> richiedo un nuovo nome di file    
     if p_save_as or (not p_save_as and p_nome[0:8]=='Untitled'):
@@ -1584,6 +1584,12 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             v_azione_drop = QAction('Drop')
             v_azione_drop.triggered.connect(self.slot_popup_menu_drop)
             v_menu.addAction(v_azione_drop)
+            # aggiungo info
+            v_menu.addSeparator()
+            # azione info
+            v_azione_info = QAction('Info')
+            v_azione_info.triggered.connect(self.slot_popup_menu_info)
+            v_menu.addAction(v_azione_info)
         # visualizzo il menu sopra la riga selezionata (della lista oggetti)
         if self.v_popup_menu_zone == 'LISTA_OGGETTI':
             v_menu.exec(self.oggetti_db_elenco.viewport().mapToGlobal(p_position))    
@@ -1613,7 +1619,25 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         """
            Carica il sorgente dell'oggetto selezionato (menu popup sull'elenco) dentro l'editor
            Viene usata la variabile generale self.v_nome_oggetto che contiene il nome dell'oggetto corrente           
-        """     
+        """ 
+        def nuovo_nome_file(p_nome_oggetto):
+            """
+               Controlla se già aperta una finestra con lo stesso nome di oggetto e se la trova cambia il nome aggiungendo un !
+            """
+            def window_attiva_con_nome_oggetto(p_nome):              
+                # scorro la lista-oggetti-editor e controllo se esiste una window con lo stesso nome ricevuto in input
+                for i in range(0,len(self.o_lst_window2)):                    
+                    if not self.o_lst_window2[i].v_editor_chiuso and self.o_lst_window2[i].objectName() == p_nome:       
+                        return True
+                return False
+            
+            # ciclo di creazione del nuovo nome (si continua ad aggiungere un ! fino a quando si non si trova che nome non usato)
+            p_nome_oggetto = '!' + p_nome_oggetto
+            while window_attiva_con_nome_oggetto(p_nome_oggetto):
+                p_nome_oggetto = '!' + p_nome_oggetto
+
+            return p_nome_oggetto
+
         # imposto var interna per select 
         v_select = ''
         
@@ -1761,7 +1785,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # Attenzione! I file caricati da Oracle hanno come eol solo LF => formato Unix e viene impostato UTF-8
             v_azione = QAction()
             v_azione.setText('Open_db_obj')
-            self.smistamento_voci_menu(v_azione, '!' + self.v_nome_oggetto + '.msql', v_testo_oggetto_db, True)        
+            self.smistamento_voci_menu(v_azione, nuovo_nome_file(self.v_nome_oggetto + '.msql'), v_testo_oggetto_db, True)        
                                         
             # Ripristino icona freccia del mouse
             Freccia_Mouse(False)
@@ -1783,6 +1807,49 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
            Crea il comando di drop dell'oggetto selezionato e lo inserisce nell'editor
         """                
         self.oggetti_db_elenco_esegui_voce_menu('DROP')
+
+    def slot_popup_menu_info(self):
+        """
+           Visualizza la window con le informazioni dell'oggetto
+        """        
+        from object_info_ui import Ui_object_info_window
+        
+        self.win_object_info = QDialog()
+        self.ui_object_info = Ui_object_info_window()
+        self.ui_object_info.setupUi(self.win_object_info)
+        centra_window_figlia(self, self.win_object_info)
+
+        # se siamo su oggetto di database...
+        if self.v_popup_menu_zone not in ('FOGLIA_ALBERO','CAMPO_TABELLA'):            
+            #estrazione delle info dalla tabella degli oggetti
+            try:
+                v_select = """SELECT OBJECT_NAME,
+                                        OWNER,
+                                        OBJECT_TYPE,
+                                        CREATED,
+                                        LAST_DDL_TIME,
+                                        STATUS
+                                FROM   ALL_OBJECTS
+                                WHERE  OBJECT_NAME = '"""+self.v_nome_oggetto+"""' 
+                                    AND OBJECT_TYPE = '"""+self.v_tipo_oggetto+"""'                              
+                            """
+                # esecuzione della select
+                self.v_cursor_db_obj.execute(v_select)                            
+                # lettura dei dati
+                for v_record in self.v_cursor_db_obj:                    
+                    self.ui_object_info.e_object_name.setText(v_record[0])
+                    self.ui_object_info.e_owner.setText(v_record[1])
+                    self.ui_object_info.e_object_type.setText(v_record[2])
+                    self.ui_object_info.e_created.setText(v_record[3].strftime('%d/%m/%Y %H:%M:%S'))
+                    self.ui_object_info.e_modified.setText(v_record[4].strftime('%d/%m/%Y %H:%M:%S'))
+                    self.ui_object_info.e_status.setText(v_record[5])
+                    # esco dopo la lettura del primo record
+                    break            
+            except:
+                message_error(QCoreApplication.translate('MSql_win1','No valid object!'))
+
+        # mostro la window
+        self.win_object_info.show()                        
 
     def oggetti_db_elenco_esegui_voce_menu(self, p_function):
         """
@@ -4311,6 +4378,8 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                       da segni di separazione come / e ;           
            
            Se si attiva p_explain la select verrà eseguita come se fosse uno script che crea il "piano di esecuzione"
+           Attenzione! Eventuali modifiche al parser, va compreso se implementarle anche nella funzione utilita_testo.extract_sql_under_cursor
+                       che viene richiamata con CTRL+INVIO
         """
         global o_global_preferences  
 
@@ -4464,61 +4533,6 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
            e viene inviata all'esecutore. Se l'utente ha selezionato del testo, viene eseguito il testo selezionato; questo
            per mantenere un comportamento coerente con l'esecuzione tramite F5.
         """
-        # funzione interna creata con CoPilot che dato testo sql e posizione del cursore, restituisce istruzione corrente con posizione di 
-        # riga iniziale e finale (caso in cui l'istruzione sia terminata da ; o da /)
-        def extract_statement_with_positions_comma_slash(sql, cursor_position):            
-            pattern = re.compile(r'(?:SELECT.*?[;/]|INSERT.*?[;/]|UPDATE.*?[;/]|DELETE.*?[;/])', re.DOTALL | re.IGNORECASE)                                     
-
-            matches = list(pattern.finditer(sql))
-            for match in matches:
-                start, end = match.span()
-                if start <= cursor_position <= end:
-                    start_line = sql[:start].count('\n') + 1
-                    end_line = sql[:end].count('\n')
-                    return match.group(), start_line, end_line
-            return '', 0, 0
-
-        # funzione interna creata con CoPilot che dato testo sql e posizione del cursore, restituisce posizione di inizio e fine dell'istruzione, riga inizio e di fine
-        # funzione che viene usata nel caso NON si stata trovata istruzione che termina con ; o /
-        def extract_statement_with_positions_space(sql_string, cursor_position):
-            # Pattern per ricercare le istruzioni SQL
-            v_pattern = re.compile(r'(SELECT|INSERT|UPDATE|DELETE).*?(?=SELECT|INSERT|UPDATE|DELETE|$)', re.DOTALL | re.IGNORECASE)
-            
-            v_matches = list(v_pattern.finditer(sql_string))
-            # Scorro la lista dei risultati
-            for v_match in v_matches:        
-                # Se trovo il risultato all'interno della posizione del cursore...
-                if v_match.start() <= cursor_position <= v_match.end():
-                    # Imposto posizione di inizio e fine            
-                    v_start_pos = v_match.start()
-                    v_end_pos = v_match.end()            
-                    # Ricerco su quale riga è la posizione di inizio
-                    v_riga_inizio = 0
-                    v_posizione = -1
-                    for c in sql_string:              
-                        v_posizione += 1
-                        if c == chr(10):
-                            v_riga_inizio += 1
-                        if v_posizione == v_start_pos:
-                            break
-                    # Ricerco su quale riga è la posizine di fine
-                    v_riga_fine = 0
-                    v_posizione = -1
-                    for c in sql_string:              
-                        v_posizione += 1
-                        if c == chr(10):
-                            v_riga_fine += 1
-                        if v_posizione == v_end_pos:
-                            break            
-                    # Esco con i risultati
-                    return v_start_pos, v_end_pos, v_riga_inizio, v_riga_fine
-            
-            return None, None, None, None
-
-        ###
-        # inizio della funzione principale
-        ###
-
         # se indicato dalla preferenza, prima di partire ad eseguire, pulisco l'output
         if o_global_preferences.auto_clear_output:
             self.slot_clear('OUT')
@@ -4530,54 +4544,26 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             self.esegui_istruzione(v_istruzione, False)        
         # ... altrimenti....
         else:
-            # prendo posizione cursore in riga e colonna
-            v_pos_line, v_pos_column = self.e_sql.getCursorPosition()
             # imposto var generali
             self.v_offset_numero_di_riga = 0
             # prendo posizione attuale del cursore (relativa!)
             v_pos_relativa_cursore = self.e_sql.SendScintilla(self.e_sql.SCI_GETCURRENTPOS)
-            # richiamo funzione interna per estrazione dell'istruzione sql (istruzione che termina con ; o /) e delle relative posizioni di riga
-            v_istruzione, v_start_line, v_end_line = extract_statement_with_positions_comma_slash(self.e_sql.text(), v_pos_relativa_cursore)                
-            # correggo posizioni riga
-            if v_end_line < v_start_line:
-                v_end_line = v_start_line
+            # richiamo funzione interna per estrazione dell'istruzione sql o pl-sql 
+            v_istruzione, v_tipo_istruzione, v_start_riga, v_end_riga = extract_sql_under_cursor(self.e_sql.text(), v_pos_relativa_cursore + 1)                            
+            # se trovata istruzione
+            if v_istruzione != '' and v_end_riga > 0:                
+                # eseguo l'istruzione SQL                              
+                if v_tipo_istruzione == 'SQL':                    
+                    self.esegui_istruzione(v_istruzione, False)        
+                # oppure codice PL-SQL  
+                elif v_tipo_istruzione == 'PL-SQL':
+                    self.esegui_plsql(v_istruzione, False)        
+                # seleziono il testo per evidenziare l'istruzione che è stata eseguita                                                                            
+                self.e_sql.setSelection(v_start_riga, 0, v_end_riga, -1)                           
             else:
-                v_start_line -= 1
-                v_end_line += 1        
-            
-            # se trovata istruzione che terminava con ;            
-            if v_istruzione != '':                
-                # eventuale punto e virgola e spazi finali vengono tolti
-                v_istruzione = v_istruzione.rstrip('; ')                                                
-                # eventuale slash e spazi finali vengono tolti
-                v_istruzione = v_istruzione.rstrip('/ ')                                      
-                # eseguo l'istruzione                            
-                self.esegui_istruzione(v_istruzione, False)        
-                # seleziono il testo per evidenziare l'istruzione che è stata eseguita                                                            
-                if v_start_line < v_end_line:                
-                    self.e_sql.setSelection(v_start_line, 0, v_end_line, -1)                           
-            # .. altrimenti
-            else:
-                # se non trovato nulla --> provo a fare la ricerca di un'istruzione usando come delimitatori le parole chiave INSERT,UPDATE,DELETE,SELECT
-                # da notare come la stringa venga passata aggiungendo un ritorno a capo in fondo...questo perché se cursore è su ultima istruzione non dava le posizioni corrette
-                v_pos_start, v_pos_end, v_start_line, v_end_line = extract_statement_with_positions_space(self.e_sql.text()+chr(10), v_pos_relativa_cursore)                        
-                if v_pos_start != None and v_pos_end != None:
-                    v_istruzione = self.e_sql.text()[v_pos_start:v_pos_end]                    
-                    if v_istruzione != '' and v_istruzione is not None:
-                        # eventuale punto e virgola e spazi finali vengono tolti
-                        v_istruzione = v_istruzione.rstrip('; ')                                                
-                        # eseguo l'istruzione                           
-                        self.esegui_istruzione(v_istruzione, False)        
-                        # evidenzio il testo dell'istruzione                                                                                                    
-                        self.e_sql.setSelection(v_start_line, 0, v_end_line, -1)                           
-                    else:
-                        # altrimenti errore
-                        message_error(QCoreApplication.translate('MSql_win2','No statement found as SELECT, INSERT, UPDATE, DELETE!'))
-                        return 'ko'                                    
-                else:
-                    # altrimenti errore
-                    message_error(QCoreApplication.translate('MSql_win2','No statement found as SELECT, INSERT, UPDATE, DELETE!'))
-                    return 'ko'                                    
+                # altrimenti errore
+                message_error(QCoreApplication.translate('MSql_win2','No statement found!'))
+                return 'ko'                                       
 
     def esegui_istruzione(self, p_istruzione, p_explain):
         """
