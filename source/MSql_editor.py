@@ -4641,8 +4641,11 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 self.v_cursor.callproc("dbms_output.get_lines", (v_m_line, v_m_num_lines))    
                 v_num_lines = int(v_m_num_lines.getvalue())
                 v_lines = v_m_line.getvalue()[:v_num_lines]                
-                for line in v_lines:                    
-                    v_dbms_ret += str(line) + '\n'                    
+                for i, line in enumerate(v_lines):                    
+                    if i < len(v_lines) - 1:
+                        v_dbms_ret += str(line) + '\n'                    
+                    else:
+                        v_dbms_ret += str(line) 
                 if v_num_lines < v_chunk:
                     break
             # restituisco la lista delle righe di dbms_output
@@ -5158,7 +5161,11 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # creo l'update (nella matrice ho la riga e la colonna corrispondente (ricordarsi che le righe partono da 0 e che la colonna 0 contiene il rowid))            
             v_valore_cella = self.o_table.item(yx[0],yx[1]).text()
             v_rowid = self.o_table.item(yx[0],0).text()
-            v_update = "UPDATE " + v_table_name + " SET " + self.nomi_intestazioni[yx[1]] + "='" + v_valore_cella + "' WHERE ROWID = '" + v_rowid + "'"
+            if self.tipi_intestazioni[yx[1]][1] == oracledb.DATETIME:                                     
+                v_valore_cella = "TO_DATE('" + v_valore_cella + "','" + da_qt_a_formato_data_oracle(o_global_preferences.date_format) + "')"            
+            else:
+                v_valore_cella = "'" + v_valore_cella + "'"
+            v_update = "UPDATE " + v_table_name + " SET " + self.nomi_intestazioni[yx[1]] + "=" + v_valore_cella + " WHERE ROWID = '" + v_rowid + "'"
             self.e_sql.append(chr(10) + v_update + ';')                
 
     def slot_export_to_excel_csv(self):

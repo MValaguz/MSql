@@ -35,6 +35,8 @@ def extract_object_name_from_cursor_pos(p_string, p_pos):
     # se posizione in ingresso è fuori range (caso in cui il cursore era all'inizio) --> imposto a zero
     if p_pos == -1:
         p_pos = 0
+    if p_string == '':
+        return None, ''
     # ricerco la parola dove posizionato cursore senza tenere conto del "." 
     v_word = extract_word_from_cursor_pos(p_string, p_pos, False)
     # Divide la parola se contiene un punto
@@ -276,6 +278,19 @@ def search_string_in_text(p_text, p_ricerca):
             v_array_linee.append((i+1,v_pos,v_pos+len(p_ricerca),v_linea))  
 
     return v_array_linee
+
+def da_qt_a_formato_data_oracle(p_formato):
+    """
+       Dato il formato data QT library, restituisce il formato data Oracle       
+    """
+    p_formato = p_formato.replace("%d","DD")
+    p_formato = p_formato.replace("%m","MM")
+    p_formato = p_formato.replace("%Y","YYYY")
+    p_formato = p_formato.replace("%H","HH24")
+    p_formato = p_formato.replace("%M","MI")
+    p_formato = p_formato.replace("%S","SS")
+
+    return p_formato
 
 def extract_sql_under_cursor(p_testo, p_cursor_pos):
     """

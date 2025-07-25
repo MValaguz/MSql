@@ -2,6 +2,13 @@
 MSql Changelog!
 ---------------
 
+Versione del 25/07/2025
+OK! se faccio F11 su una riga vuota --> errore
+OK! se faccio script esce una riga finale vuota che invece dovrebbe riportare la scritta "script executed"?
+
+Versione del 11/07/2025
+OK! In modalità di modifica dati di tabella; se il campo modificato è una data, lo script verrà creato inserendo la specifica istruzione di TO_DATE in base al formato data
+
 Versione del 08/07/2025
 OK! Inserita nel menu popup dell'object navigator la voce "info" dove escono le info dell'oggetto come data di creazione, modifica, ecc.
 OK! Rivisto il funzionamento di CTRL+INVIO. In questa versione mi sono arreso all'idea di fare una cosa intelligente per capire dove iniziasse e finisse un'istruzione anche senza simboli di separazione....
@@ -268,10 +275,17 @@ OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e part
 MSql TO DO!!!
 -------------
 
-- in modalità di modifica output inserire la modifica della data (rif. Filippo)
 - quando metto dei bookmark....esempio uno all'inizio e uno verso le ultime righe in fondo....passo dal primo al secondo bookmark, tramite CTRL+B, appena mi sposto con la scrollbar o con la rotella del mouse, "salta" in posizione indefinita...
   ho provato a inserire una prima sincronizzazione ma non va ancora bene...
 - capita che se faccio una select, poi una update/ delete o lancio script e poi eseguo la select, esca errore "Error to fetch data: DPY-1003: the executed statement does not return rows!!! Mi capitava con lo script del calcolo prelievi...lanciavo lo script e poi la select su tabella MW_SCOP1_TMP facendo F11
+  -- lanciare il calcolo
+	begin
+    MW_MAGAZZINI.PREPARA_PRELIEVO_ORDINI('SMI','B1');      ---> Esegue un calcolo di preparazione prelievo ordini produzione/vendita e buoni, compila tabella temporanea  
+    MW_MAGAZZINI.DISPONIBILE_PRELIEVO_ORDINI('SMI','B1');  ---> Attribuisce il valore disponibile per ogni ordine da prelevare
+  end;	
+	-- eseguire questa istruzione e poi premere F6 per andare a fine elenco...dovrebbe uscire errore reperimento record....da li dovrebbe partire errore interno a MSql
+	select DESCRIZIONE('MW_MLOCA','LOCAZ_CO','IDLOC_NU',NULL,NULL,TO_CHAR(POSOR_NU),NULL,NULL,NULL) from VA_MW_PREOP_TMP
+	questa istruzione se eseguita e poi faccio F6 per scorrere i record, esce proprio l'errore indicato
 - !!!! fare debug per il crash che avviene quando faccio la selezione rettangolare con copia-incolla!!! fare una versione semplifica con qscintilla e fare dei test anche li
 - continuare con l'help 
 	
