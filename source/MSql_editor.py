@@ -2641,6 +2641,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
            e apre un nuovo text editor con il lexer delle differenze (sola lettura)
         """
         global o_global_preferences
+        from diffviewer import DiffViewer
 
         # se non ci sono più di 2 window aperte, il compare non va eseguito
         if len(self.mdiArea.subWindowList()) < 2:
@@ -2669,51 +2670,23 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 if self.o_lst_window2[i].objectName() ==v_penultima_windows.objectName():                        
                     v_penultimo_editor = self.o_lst_window2[i].e_sql
                     v_penultimo_titolo = self.o_lst_window2[i].windowTitle()
-
-        # creo un nuovo editor qscintilla che andrà a fianco degli editor già presenti nella mdiArea
-        diffEditor = QsciScintilla()
-        #diffEditor.setReadOnly(True)   
-
-        # per questo editor, attivo il lexer diff che contiene la sintassi che si accorda con la libreria diff, usata per creare le differenze
-        lexer = QsciLexerDiff()
-        # se tema scuro imposto lo sfondo cmq a bianco perché se c'è anche il tema scuro di window, non si vede nulla!
-        if o_global_preferences.dark_theme:            
-            lexer.setDefaultPaper(QColor('white'))            
-        # imposto il font dell'editor in base alle preferenze 
-        if o_global_preferences.font_editor != '':
-            v_split = o_global_preferences.font_editor.split(',')            
-            v_font = QFont(str(v_split[0]),int(v_split[1]))
-            if len(v_split) > 2 and v_split[2] == ' BOLD':
-                v_font.setBold(True)            
-            lexer.setFont(v_font)    
-        diffEditor.setLexer(lexer)
-        diffEditor.setMarginLineNumbers(1, True)
-        diffEditor.setMarginWidth(1, "0000")        
-        diffEditor.setFolding(diffEditor.FoldStyle.BoxedTreeFoldStyle, 2)         
         
-        # l'editor lo associato alla mdiArea di riferimento (v. le istruzioni usate per creare nuovo editor....)
-        diff_sub_window = self.mdiArea.addSubWindow(diffEditor)                  
-        diff_sub_window.setWindowIcon(QIcon("icons:database.png"))                              
-        diff_sub_window.show()  
-        diff_sub_window.showMaximized() 
-        diff_sub_window.setWindowTitle('Compare ' + v_ultimo_titolo + ' and ' + v_penultimo_titolo)
-         
-        # viene preso il testo (convertito a seconda ci siano eol windows o linux) e portato in una struttura lista
-        # sia del primo che del secondo editor
-        v_testo1 = v_ultimo_editor.text().replace('\r','').split('\n')
-        v_testo2 = v_penultimo_editor.text().replace('\r','').split('\n')        
-
-        # crea una lista con le differenze 
-        diff = list(difflib.unified_diff(v_testo1, v_testo2, lineterm=''))
+        # imposto il font
+        v_split = o_global_preferences.font_editor.split(',')                        
+        v_font = QFont(str(v_split[0]),int(v_split[1]))
         
-        # dalla lista delle differenze ricava il testo
-        if len(diff) > 2:
-            diff_text = diff[0] + '\n' + diff[1] + '\n' + diff[2] + '\n' + '\n'.join(diff[3:])                
-        else:
-            diff_text = 'There is no differences!'
-        
-        # porta il testo dentro l'oggetto qscintilla dove è presente il lexer diff
-        diffEditor.setText(diff_text)        
+        # apro il differ 
+        viewer = DiffViewer(o_global_preferences.dark_theme,
+                            o_global_preferences.tab_size,
+                            o_global_preferences.remember_window_pos,
+                            v_ultimo_editor.text(), 
+                            v_penultimo_editor.text(), 
+                            v_ultimo_titolo, 
+                            v_penultimo_titolo,
+                            v_font)                            
+        viewer.setWindowTitle(QCoreApplication.translate('MSql_win1','Editor Compare'))
+        viewer.setWindowIcon(QIcon("icons:MSql.ico"))        
+        viewer.show()
         
 #  _     _______  _______ ____  
 # | |   | ____\ \/ / ____|  _ \ 

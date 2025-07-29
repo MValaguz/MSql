@@ -2,6 +2,9 @@
 MSql Changelog!
 ---------------
 
+Versione del 29/07/2025
+OK! rivisto il tool che evidenzia le differenze tra due editor 
+
 Versione del 25/07/2025
 OK! se faccio F11 su una riga vuota --> errore
 OK! se faccio script esce una riga finale vuota che invece dovrebbe riportare la scritta "script executed"?
@@ -289,8 +292,6 @@ MSql TO DO!!!
 - !!!! fare debug per il crash che avviene quando faccio la selezione rettangolare con copia-incolla!!! fare una versione semplifica con qscintilla e fare dei test anche li
 - continuare con l'help 
 	
-- riprendere il tool che dà differenze tra files....se possibile ragionarci e migliorarlo
-
 ---------------------------------------------
 MSql Cosa è stato valutato e non realizzato!
 ---------------------------------------------
