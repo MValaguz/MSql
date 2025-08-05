@@ -2,6 +2,20 @@
 MSql Changelog!
 ---------------
 
+Versione del 05/08/2025
+OK! select * from dual; se faccio CTRL+INVIO alla fine della riga, non va! se ci fosse un ; alla sua sinistra...meglio spostare il cursore alla sua sinistra
+OK! corretto problema che quando mettevo dei bookmark....esempio uno all'inizio e uno verso le ultime righe...
+    poi passando dal primo al secondo bookmark, tramite CTRL+B, appena mi spostavo con la scrollbar 
+		o con la rotella del mouse, "saltava" in posizione indefinita...questo problema era dovuto all'effetto ping-pong 
+    che si scatenava sulle scrollbar dell'editor e della minimappa! Senza minimappa questo effetto non si creava.    
+
+Versione del 04/08/2025
+OK! i file eseguibili sono stati firmati con un autocertificato....test per vedere se antivirus dà problemi
+OK! corretto problema su CTRL+INVIO segnalato da Filippo
+
+Versione del 01/08/2025
+OK! al passaggio da una connessione di database all'altra, vengono ripulite le sezioni dell'object navigator e dell'object viewer
+
 Versione del 29/07/2025
 OK! rivisto il tool che evidenzia le differenze tra due editor 
 
@@ -277,9 +291,10 @@ OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e part
 -------------
 MSql TO DO!!!
 -------------
-
-- quando metto dei bookmark....esempio uno all'inizio e uno verso le ultime righe in fondo....passo dal primo al secondo bookmark, tramite CTRL+B, appena mi sposto con la scrollbar o con la rotella del mouse, "salta" in posizione indefinita...
-  ho provato a inserire una prima sincronizzazione ma non va ancora bene...
+- CRTL-INVIO scrivo 
+  select *
+	from dual; 
+	
 - capita che se faccio una select, poi una update/ delete o lancio script e poi eseguo la select, esca errore "Error to fetch data: DPY-1003: the executed statement does not return rows!!! Mi capitava con lo script del calcolo prelievi...lanciavo lo script e poi la select su tabella MW_SCOP1_TMP facendo F11
   -- lanciare il calcolo
 	begin

@@ -32,7 +32,6 @@ import datetime
 import locale
 import re
 import traceback
-import difflib
 import time
 import psutil
 # Librerie di data base Oracle
@@ -67,6 +66,8 @@ from utilita_database import *
 from utilita_testo import *
 # Libreria che permette, selezionata un'istruzione sql nell'editor di indentarla automaticamente
 from sql_formatter.core import format_sql
+# Visualizzatore delle differenze tra due testi
+from diff_viewer import DiffViewer
 
 # Tipi oggetti di database
 Tipi_Oggetti_DB = { 'Tables':'TABLE',                    
@@ -1270,6 +1271,26 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             v_risultati = v_cursor.execute(v_select)            
             for v_riga in v_risultati:
                 v_global_my_lexer_keywords.append(v_riga[0])       
+
+            # se siamo nella situazione di riconnessione --> faccio il refresh dell'object navigator
+            try:
+                self.oggetti_db_lista
+            except:
+                v_esiste = False
+            else:
+                v_esiste = True
+            if v_esiste:
+                self.slot_oggetti_db_scelta()
+
+            # pulisco l'object viewer
+            try:
+                self.db_oggetto_tree_model
+            except:
+                v_esiste = False
+            else:
+                v_esiste = True
+            if v_esiste:
+                self.db_oggetto_tree_model.clear()
              
         # scorro la lista-oggetti-editor...        
         for obj_win2 in self.o_lst_window2:
@@ -2520,8 +2541,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
            Apre la window delle info
         """           
         global v_global_work_dir         
-        
-        from program_info_ui import Ui_program_info
+
         self.win_program_info = QDialog()
         self.ui_program_info = Ui_program_info()
         self.ui_program_info.setupUi(self.win_program_info)
@@ -2640,8 +2660,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
            Esegue la comparazione dei testi contenuti nei due ultimi text editor aperti
            e apre un nuovo text editor con il lexer delle differenze (sola lettura)
         """
-        global o_global_preferences
-        from diffviewer import DiffViewer
+        global o_global_preferences        
 
         # se non ci sono più di 2 window aperte, il compare non va eseguito
         if len(self.mdiArea.subWindowList()) < 2:
@@ -3230,6 +3249,8 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         self.e_sql_mini_map.verticalScrollBar().valueChanged.connect(self.slot_mini_map_sync_scrollbars) 
         # attivo slot che quando viene cliccata la mini mappa riposiziona il testo 
         self.e_sql_mini_map.selectionChanged.connect(self.slot_mini_map_click)   
+        # variabile per controllare il loop sulle scrollbar tra editor e minimappa
+        self.v_scrollbar_loop = False        
 
     def slot_mini_map_click(self):
         """
@@ -3256,7 +3277,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
            Notare come vengono bloccati gli eventi perché altrimenti si creano riposizionamenti indesiderati!
         """         
         if self.v_mini_map_visible:
-            # blocco i segnali sugli 
+            # blocco i segnali sugli oggetti
             self.e_sql.blockSignals(True)                        
             self.e_sql_mini_map.blockSignals(True)      
             self.e_sql.verticalScrollBar().blockSignals(True)                        
@@ -3267,7 +3288,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             v_line, v_pos = self.e_sql.getCursorPosition()
             self.e_sql_mini_map.setCursorPosition(v_line, 0)                        
             
-            # sincronizzo la posizione delle scrollbar tra editro e mini mappa
+            # sincronizzo la posizione delle scrollbar tra editor e mini mappa
             self.e_sql_mini_map.verticalScrollBar().setValue( self.e_sql.verticalScrollBar().value() )
             
             # riattivo i segnali sulle scrollbar
@@ -3278,13 +3299,20 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         
     def slot_mini_map_sync_scrollbars(self, value): 
         """
-           Quando si agisce sulla scrollbar dell'editor o della mini mappa, sposta il testo           
+           Quando si agisce sulla scrollbar dell'editor o della mini mappa, sposta il testo.           
+           Da notare che è stato adottato un meccanismo per impedire che ci sia il ping-pong tra le due scrollbar
         """            
-        if self.v_mini_map_visible:            
-            if self.sender() == self.e_sql.verticalScrollBar():                             
-                self.e_sql_mini_map.verticalScrollBar().setValue(value)                                                         
-            elif self.sender() == self.e_sql_mini_map.verticalScrollBar():                                         
-                self.e_sql.verticalScrollBar().setValue(value)                                                        
+        if self.v_mini_map_visible:                   
+            if self.sender() == self.e_sql.verticalScrollBar():                                             
+                if not self.v_scrollbar_loop:
+                    self.v_scrollbar_loop = True                 
+                    self.e_sql_mini_map.verticalScrollBar().setValue(value)
+                    self.v_scrollbar_loop = False
+            elif self.sender() == self.e_sql_mini_map.verticalScrollBar():                                                         
+                if not self.v_scrollbar_loop:
+                    self.v_scrollbar_loop = True                 
+                    self.e_sql.verticalScrollBar().setValue(value)                                                        
+                    self.v_scrollbar_loop = False
         
     def slot_mini_map_visible(self):
         """
@@ -4522,17 +4550,19 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # prendo posizione attuale del cursore (relativa!)
             v_pos_relativa_cursore = self.e_sql.SendScintilla(self.e_sql.SCI_GETCURRENTPOS)
             # richiamo funzione interna per estrazione dell'istruzione sql o pl-sql 
-            v_istruzione, v_tipo_istruzione, v_start_riga, v_end_riga = extract_sql_under_cursor(self.e_sql.text(), v_pos_relativa_cursore + 1)                            
+            #v_istruzione, v_tipo_istruzione, v_start_pos, v_end_pos = extract_sql_under_cursor(self.e_sql.text(), v_pos_relativa_cursore + 1)                                        
+            v_istruzione, v_start_pos, v_end_pos = extract_sql_under_cursor(self.e_sql.text(), v_pos_relativa_cursore)                                        
+            v_tipo_istruzione = 'SQL'
             # se trovata istruzione
-            if v_istruzione != '' and v_end_riga > 0:                
+            if v_istruzione != '' and v_end_pos > 0:                
                 # eseguo l'istruzione SQL                              
                 if v_tipo_istruzione == 'SQL':                    
                     self.esegui_istruzione(v_istruzione, False)        
                 # oppure codice PL-SQL  
                 elif v_tipo_istruzione == 'PL-SQL':
                     self.esegui_plsql(v_istruzione, False)        
-                # seleziono il testo per evidenziare l'istruzione che è stata eseguita                                                                            
-                self.e_sql.setSelection(v_start_riga, 0, v_end_riga, -1)                           
+                # seleziono il testo per evidenziare l'istruzione che è stata eseguita                                                                                            
+                self.e_sql.SendScintilla(self.e_sql.SCI_SETSELECTION, v_start_pos, v_end_pos)        
             else:
                 # altrimenti errore
                 message_error(QCoreApplication.translate('MSql_win2','No statement found!'))
@@ -4608,21 +4638,21 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             v_m_line = self.v_cursor.arrayvar(str, v_chunk)
             v_m_num_lines = self.v_cursor.var(int)
             v_m_num_lines.setvalue(0, v_chunk)
-
             # leggo output dello script
             while True:
                 self.v_cursor.callproc("dbms_output.get_lines", (v_m_line, v_m_num_lines))    
                 v_num_lines = int(v_m_num_lines.getvalue())
                 v_lines = v_m_line.getvalue()[:v_num_lines]                
                 for i, line in enumerate(v_lines):                    
-                    if i < len(v_lines) - 1:
-                        v_dbms_ret += str(line) + '\n'                    
-                    else:
-                        v_dbms_ret += str(line) 
+                    # if i < len(v_lines) - 1:
+                    #     v_dbms_ret += str(line) + '\n'                    
+                    # else:                        
+                    #     v_dbms_ret += str(line) + '\n'
+                    v_dbms_ret += str(line) + '\n'                                        
                 if v_num_lines < v_chunk:
                     break
-            # restituisco la lista delle righe di dbms_output
-            return v_dbms_ret
+            # restituisco la lista delle righe di dbms_output (elimino ultimo ritorno a capo)
+            return v_dbms_ret.removesuffix('\n')
 
         # verifico che mi sia stato passato del testo
         if p_plsql == '':

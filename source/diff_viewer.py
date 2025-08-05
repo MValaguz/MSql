@@ -79,7 +79,6 @@ class DiffViewer(QWidget):
         splitter.setStyleSheet("""QSplitter::handle {background-color: #444;width: 2px;}""")
 
         self.editors = []
-
         # crea i due oggetti qscintilla
         for txt, title in ((text1, title1), (text2, title2)):
             container = QWidget()
@@ -138,13 +137,15 @@ class DiffViewer(QWidget):
         main_layout.addWidget(toolbar)
         main_layout.addWidget(splitter)
 
+        # forzo lo splitter alla metà dei due editor
+        splitter.setStretchFactor(0,5)        
+        splitter.setStretchFactor(1,5)        
+
         # scroll sincronizzato
         for i, ed in enumerate(self.editors):
-            ed.verticalScrollBar().valueChanged.connect(
-                lambda v, src=i: self._sync_scroll(src, v)
-            )
+            ed.verticalScrollBar().valueChanged.connect(lambda v, src=i: self._sync_scroll(src, v))
 
-        # evidenzia differenze
+        # richiamo evidenza delle differenze
         self.highlight_diff(text1, text2)
 
     def _sync_scroll(self, src_idx, value):
@@ -193,6 +194,7 @@ class DiffViewer(QWidget):
         """
         # se utente ha richiesto di salvare la posizione della window...
         if self.window_pos:
+            print('salva pos window')
             # salvo nel registro di sistema (regedit) la posizione della window
             self.settings.setValue("geometry", self.saveGeometry())            
 
@@ -218,9 +220,6 @@ prova3"""
         title1="Testo Origine",
         title2="Testo Modificato"
     )
-    viewer.setWindowTitle("Confronto SQL Side-by-Side")
-    viewer.setWindowIcon(QIcon("icons:database.png"))
-    viewer.resize(1000, 600)
+    
     viewer.show()
-
     sys.exit(app.exec())
