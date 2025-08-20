@@ -2,6 +2,18 @@
 MSql Changelog!
 ---------------
 
+Versione del 20/08/2025
+OK! Inserito nuovo menu di Import-Export che permette di:
+    - Esportare dati da Oracle verso un db SQLite
+		- Esportare i dati da un db SQLite a un foglio Excel
+		- Importare i dati in Oracle da un file di Excel
+		- Importare i dati in Oracle da un db SQLite
+		- Visualizzare il contenuto di un db SQLite
+OK! Inserita nuova voce nel menu "Edit" detta "Text to Ascii Art" che partendo da un testo selezionato lo trasforma in ascii art 
+
+Versione del 07/08/2025
+OK! filtri su output...quando tolgo ultimo filtro non torna alla select di partenza
+
 Versione del 05/08/2025
 OK! select * from dual; se faccio CTRL+INVIO alla fine della riga, non va! se ci fosse un ; alla sua sinistra...meglio spostare il cursore alla sua sinistra
 OK! corretto problema che quando mettevo dei bookmark....esempio uno all'inizio e uno verso le ultime righe...
@@ -291,10 +303,7 @@ OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e part
 -------------
 MSql TO DO!!!
 -------------
-- CRTL-INVIO scrivo 
-  select *
-	from dual; 
-	
+- nel fare la replace di testo (replace singolo) a Filippo è capitato che uscisse errore di ricorsione...nella stringa di ricerca c'erano doppi apici
 - capita che se faccio una select, poi una update/ delete o lancio script e poi eseguo la select, esca errore "Error to fetch data: DPY-1003: the executed statement does not return rows!!! Mi capitava con lo script del calcolo prelievi...lanciavo lo script e poi la select su tabella MW_SCOP1_TMP facendo F11
   -- lanciare il calcolo
 	begin

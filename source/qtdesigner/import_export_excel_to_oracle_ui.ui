@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>import_export_window</class>
+ <widget class="QMainWindow" name="import_export_window">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>304</width>
+    <height>124</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Copy data from Excel to Oracle</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="resource.qrc">
+    <normaloff>:/icons/icons/MSql.ico</normaloff>:/icons/icons/MSql.ico</iconset>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="2" column="1" colspan="2">
+     <widget class="QComboBox" name="e_table_name">
+      <property name="editable">
+       <bool>true</bool>
+      </property>
+      <property name="maxVisibleItems">
+       <number>20</number>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="l_label2">
+      <property name="text">
+       <string>Excel file:</string>
+      </property>
+      <property name="buddy">
+       <cstring>e_excel</cstring>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="l_label5">
+      <property name="text">
+       <string>Oracle table name:</string>
+      </property>
+      <property name="buddy">
+       <cstring>e_table_name</cstring>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="1">
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="0" column="1" colspan="2">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLineEdit" name="e_excel">
+        <property name="clearButtonEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="b_excel">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="resource.qrc">
+          <normaloff>:/icons/icons/folder.png</normaloff>:/icons/icons/folder.png</iconset>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="0" colspan="3">
+     <widget class="Line" name="line_2">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="1" colspan="2">
+     <widget class="QPushButton" name="b_start">
+      <property name="text">
+       <string>Start</string>
+      </property>
+      <property name="icon">
+       <iconset resource="resource.qrc">
+        <normaloff>:/icons/icons/go.png</normaloff>:/icons/icons/go.png</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0" colspan="3">
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>e_excel</tabstop>
+  <tabstop>b_excel</tabstop>
+  <tabstop>e_table_name</tabstop>
+  <tabstop>b_start</tabstop>
+ </tabstops>
+ <resources>
+  <include location="resource.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>b_excel</sender>
+   <signal>clicked()</signal>
+   <receiver>import_export_window</receiver>
+   <slot>slot_select_excel_file()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>640</x>
+     <y>33</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>657</x>
+     <y>77</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>b_start</sender>
+   <signal>clicked()</signal>
+   <receiver>import_export_window</receiver>
+   <slot>slot_start()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>641</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>432</x>
+     <y>173</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>slot_select_excel_file()</slot>
+  <slot>slot_start()</slot>
+  <slot>slot_elenco_tabelle_oracle()</slot>
+ </slots>
+</ui>

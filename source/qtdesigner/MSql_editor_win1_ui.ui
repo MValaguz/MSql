@@ -116,6 +116,7 @@
     <addaction name="actionDelete_start_of_line"/>
     <addaction name="actionDelete_end_of_line"/>
     <addaction name="separator"/>
+    <addaction name="actionText_to_art"/>
     <addaction name="actionFormat_SQL_instruction"/>
     <addaction name="actionExtract_primary_key"/>
     <addaction name="actionNextF4"/>
@@ -221,6 +222,17 @@
     <addaction name="actionRemove"/>
     <addaction name="actionSearchNext"/>
    </widget>
+   <widget class="QMenu" name="menuImport_Export">
+    <property name="title">
+     <string>Import-E&amp;xport</string>
+    </property>
+    <addaction name="actionOracle_to_SQLite"/>
+    <addaction name="actionSQLite_to_Excel"/>
+    <addaction name="actionExcel_to_Oracle"/>
+    <addaction name="actionSQLite_to_Oracle"/>
+    <addaction name="separator"/>
+    <addaction name="actionSQLite_viewer"/>
+   </widget>
    <addaction name="menuFiles"/>
    <addaction name="menuServer"/>
    <addaction name="menuEdit"/>
@@ -229,6 +241,7 @@
    <addaction name="menuRun"/>
    <addaction name="menuSql"/>
    <addaction name="menuAdvanced"/>
+   <addaction name="menuImport_Export"/>
    <addaction name="menuTools"/>
    <addaction name="menuWindow"/>
    <addaction name="menuHelp"/>
@@ -1552,6 +1565,63 @@
    </property>
    <property name="text">
     <string>Changelog</string>
+   </property>
+  </action>
+  <action name="actionOracle_to_SQLite">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/db.png</normaloff>:/icons/icons/db.png</iconset>
+   </property>
+   <property name="text">
+    <string>Oracle to SQLite</string>
+   </property>
+  </action>
+  <action name="actionSQLite_to_Excel">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/excel.png</normaloff>:/icons/icons/excel.png</iconset>
+   </property>
+   <property name="text">
+    <string>SQLite to Excel</string>
+   </property>
+  </action>
+  <action name="actionExcel_to_Oracle">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/dbase.png</normaloff>:/icons/icons/dbase.png</iconset>
+   </property>
+   <property name="text">
+    <string>Excel to Oracle</string>
+   </property>
+  </action>
+  <action name="actionSQLite_to_Oracle">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/dbase.png</normaloff>:/icons/icons/dbase.png</iconset>
+   </property>
+   <property name="text">
+    <string>SQLite to Oracle</string>
+   </property>
+  </action>
+  <action name="actionSQLite_viewer">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/line.png</normaloff>:/icons/icons/line.png</iconset>
+   </property>
+   <property name="text">
+    <string>SQLite viewer</string>
+   </property>
+  </action>
+  <action name="actionText_to_art">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/font_art.png</normaloff>:/icons/icons/font_art.png</iconset>
+   </property>
+   <property name="text">
+    <string>Text to Ascii Art</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+A</string>
    </property>
   </action>
  </widget>

@@ -25,7 +25,7 @@ SolidCompression=yes
 WizardStyle=modern
 ; Attiva la pagina d'inizio con immagine di presentazione. Questa parte è stata commentata perché ESET Point antivirus si bloccava su questa immagine! 
 DisableWelcomePage=no
-WizardImageFile=MSql.bmp
+WizardImageFile=C:\Users\mvalaguz\Documents\GitHub\MSql\source\qtdesigner\icons\MSql.bmp
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"

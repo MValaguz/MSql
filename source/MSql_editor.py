@@ -42,6 +42,8 @@ from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 # Librerie QScintilla
 from PyQt6.Qsci import *
+# Libreria che permette di creare arte ascii grafica
+from art import text2art
 # Classe per la gestione delle preferenze
 from preferences import preferences_class
 # Definizione del solo tema dark
@@ -681,6 +683,21 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # Creazione del dizionario termini per autocompletamento dell'editor
         elif p_slot.text() == QCoreApplication.translate('MSql_win1','Autocomplete dictionary'):
             self.crea_dizionario_per_autocompletamento()
+        # Import-Export Oracle to SQLite
+        elif p_slot.text() == QCoreApplication.translate('MSql_win1','Oracle to SQLite'):
+            self.slot_import_export_oracle_to_sqlite()
+        # Import-Export SQlite to Excel
+        elif p_slot.text() == QCoreApplication.translate('MSql_win1','SQLite to Excel'):
+            self.slot_import_export_sqlite_to_excel()
+        # Import-Export Excel to Oracle
+        elif p_slot.text() == QCoreApplication.translate('MSql_win1','Excel to Oracle'):
+            self.slot_import_export_excel_to_oracle()
+        # Import-Export SQLite to Oracle
+        elif p_slot.text() == QCoreApplication.translate('MSql_win1','SQLite to Oracle'):
+            self.slot_import_export_sqlite_to_oracle()
+        # SQLite viewer
+        elif p_slot.text() == QCoreApplication.translate('MSql_win1','SQLite viewer'):
+            self.slot_sqlite_viewer()
                 
         # Queste voci di menu che agiscono sull'oggetto editor, sono valide solo se l'oggetto è attivo
         if o_MSql_win2 is not None:
@@ -762,6 +779,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # Indenta la riga alla posizione del cursore
             elif p_slot.text() == QCoreApplication.translate('MSql_win1','Indent to cursor'):
                 o_MSql_win2.slot_indent_to_cursor()
+            # Prende il testo selezionato e lo trasforma in ASCII art testo
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Text to Ascii Art'):
+                o_MSql_win2.slot_text_to_ascii_art()
             # Compressione di tutti i livelli
             elif p_slot.text() == QCoreApplication.translate('MSql_win1','Fold/Unfold All'):
                 o_MSql_win2.e_sql.foldAll()
@@ -2706,7 +2726,77 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         viewer.setWindowTitle(QCoreApplication.translate('MSql_win1','Editor Compare'))
         viewer.setWindowIcon(QIcon("icons:MSql.ico"))        
         viewer.show()
+
+    def slot_import_export_oracle_to_sqlite(self):
+        """
+           Apre la window per eseguire import dati da Oracle verso SQLite
+        """        
+        global v_global_connesso, v_global_work_dir
+        from import_export_oracle_to_sqlite import import_export_class
         
+        if not v_global_connesso:
+            message_error(QCoreApplication.translate('MSql_win1','No connection!'))
+            return 'ko'
+        
+        # apertura della window di import-export
+        self.o_import_export = import_export_class(self.e_user_name, self.e_password, self.e_server_name, v_global_work_dir)        
+        centra_window_figlia(self, self.o_import_export)
+        self.o_import_export.show()
+
+    def slot_import_export_sqlite_to_excel(self):
+        """
+           Apre la window per eseguire export dei dati da SQLite a Excel
+        """        
+        from import_export_sqlite_to_excel import import_export_class
+        
+        # apertura della window di import-export
+        self.o_import_export = import_export_class()        
+        centra_window_figlia(self, self.o_import_export)
+        self.o_import_export.show()
+
+    def slot_import_export_excel_to_oracle(self):
+        """
+           Apre la window per eseguire import dei dati da Excel a Oracle
+        """        
+        global v_global_connesso
+        from import_export_excel_to_oracle import import_export_class
+        
+        if not v_global_connesso:
+            message_error(QCoreApplication.translate('MSql_win1','No connection!'))
+            return 'ko'
+        
+        # apertura della window di import-export
+        self.o_import_export = import_export_class(self.e_user_name, self.e_password, self.e_server_name)        
+        centra_window_figlia(self, self.o_import_export)
+        self.o_import_export.show()        
+
+    def slot_import_export_sqlite_to_oracle(self):
+        """
+           Apre la window per eseguire import dei dati da SQLite a Oracle
+        """        
+        global v_global_connesso, v_global_work_dir
+        from import_export_sqlite_to_oracle import import_export_class
+        
+        if not v_global_connesso:
+            message_error(QCoreApplication.translate('MSql_win1','No connection!'))
+            return 'ko'
+        
+        # apertura della window di import-export
+        self.o_import_export = import_export_class(self.e_user_name, self.e_password, self.e_server_name, v_global_work_dir)        
+        centra_window_figlia(self, self.o_import_export)
+        self.o_import_export.show()        
+
+    def slot_sqlite_viewer(self):
+        """
+           Apre la window visualizzatore contenuto di un database-file SQLite
+        """        
+        global v_global_connesso, v_global_work_dir
+        from sqlite_viewer import sqlite_viewer_class
+                
+        self.o_sqlite_viewer = sqlite_viewer_class()        
+        centra_window_figlia(self, self.o_sqlite_viewer)
+        self.o_sqlite_viewer.show()                
+
 #  _     _______  _______ ____  
 # | |   | ____\ \/ / ____|  _ \ 
 # | |   |  _|  \  /|  _| | |_) |
@@ -4222,6 +4312,9 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
 
                 # rieseguo la select
                 self.esegui_select(v_new_select, False)
+            # se non ci sono filtri, eseguo la select di partenza
+            else:
+                self.esegui_select(self.v_select_corrente, False)
                     
         # chiudo il menu popup
         self.o_table_popup.close()
@@ -5699,7 +5792,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         """
            Indenta la riga dove è presente il cursore, alla posizione del cursore (in pratica inserisce spazi bianchi)
         """
-        # prendo coordinate cursore della mini mappa
+        # prendo coordinate cursore 
         v_num_line, v_pos = self.e_sql.getCursorPosition()                     
         if v_pos > 1:            
             # estraggo l'intera riga dove è posizionato il cursore ed elmino gli spazi e i tab a sinistra
@@ -5716,6 +5809,21 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # posiziono il cursore
             self.e_sql.setCursorPosition(v_num_line,v_pos)
 
+    def slot_text_to_ascii_art(self):
+        """
+           Trasforma il testo selezionato in arte grafica ascii
+        """
+        # estraggo il testo selezionato        
+        v_text = self.e_sql.selectedText().lstrip().rstrip()            
+        # se non è stato selezionato alcun testo --> errore
+        if v_text == '':
+            message_error(QCoreApplication.translate('MSql_win1','No text selected!'))
+            return 'ko'
+        # elimino il testo selezionato
+        self.e_sql.removeSelectedText()
+        # trasformo il testo in formato grafico ascii e lo inserisco nell'editor
+        self.e_sql.insert(text2art(v_text))        
+    
     def slot_indentation_guide(self):
         """
            Attiva/disattiva indentation guide sull'editor
