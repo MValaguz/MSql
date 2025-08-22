@@ -1,6 +1,0 @@
-uno
-due
-tre
-quattro
-
-Compare last two text editor

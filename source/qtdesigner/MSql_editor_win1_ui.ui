@@ -87,6 +87,8 @@
     </property>
     <addaction name="actionConnect"/>
     <addaction name="actionDisconnect"/>
+    <addaction name="separator"/>
+    <addaction name="actionExplore_database_link"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -116,10 +118,12 @@
     <addaction name="actionDelete_start_of_line"/>
     <addaction name="actionDelete_end_of_line"/>
     <addaction name="separator"/>
-    <addaction name="actionText_to_art"/>
     <addaction name="actionFormat_SQL_instruction"/>
     <addaction name="actionExtract_primary_key"/>
     <addaction name="actionNextF4"/>
+    <addaction name="separator"/>
+    <addaction name="actionText_to_Ascii_Art"/>
+    <addaction name="actionSet_font_Ascii_Art"/>
    </widget>
    <widget class="QMenu" name="menuRun">
     <property name="title">
@@ -200,6 +204,7 @@
     </property>
     <addaction name="actionZoom_In"/>
     <addaction name="actionZoom_Out"/>
+    <addaction name="actionFull_screen"/>
     <addaction name="separator"/>
     <addaction name="actionFold_All"/>
     <addaction name="actionShow_end_of_line"/>
@@ -1612,7 +1617,7 @@
     <string>SQLite viewer</string>
    </property>
   </action>
-  <action name="actionText_to_art">
+  <action name="actionText_to_Ascii_Art">
    <property name="icon">
     <iconset resource="resource.qrc">
      <normaloff>:/icons/icons/font_art.png</normaloff>:/icons/icons/font_art.png</iconset>
@@ -1622,6 +1627,39 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+A</string>
+   </property>
+  </action>
+  <action name="actionSet_font_Ascii_Art">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/font_type.png</normaloff>:/icons/icons/font_type.png</iconset>
+   </property>
+   <property name="text">
+    <string>Ascii art font selector</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WidgetShortcut</enum>
+   </property>
+  </action>
+  <action name="actionFull_screen">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/full_screen.png</normaloff>:/icons/icons/full_screen.png</iconset>
+   </property>
+   <property name="text">
+    <string>Full screen</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F11</string>
+   </property>
+  </action>
+  <action name="actionExplore_database_link">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/database_link.png</normaloff>:/icons/icons/database_link.png</iconset>
+   </property>
+   <property name="text">
+    <string>Explore database link</string>
    </property>
   </action>
  </widget>

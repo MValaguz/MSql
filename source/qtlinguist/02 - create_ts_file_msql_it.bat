@@ -7,7 +7,6 @@ pylupdate6 --verbose ^
   ..\qtdesigner\MSql_editor_win2_ui.ui ^
   ..\qtdesigner\preferences_ui.ui ^
   ..\qtdesigner\preferred_sql_ui.ui ^
-  ..\qtdesigner\program_info_ui.ui ^
   ..\qtdesigner\select_schema_ui.ui ^
   ..\qtdesigner\sqlite_viewer_ui.ui ^
   ..\qtdesigner\import_export_sqlite_to_oracle_ui.ui ^
@@ -25,6 +24,7 @@ pylupdate6 --verbose ^
   ..\utilita.py ^
   ..\utilita_database.py ^
   ..\diff_viewer.py ^
+	..\dblink_viewer.py ^
   ..\sqlite_viewer.py ^
 	..\copy_from_oracle_to_sqlite.py ^
 	..\copy_from_sqlite_to_oracle.py ^

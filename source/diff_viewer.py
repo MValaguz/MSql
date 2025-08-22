@@ -2,6 +2,7 @@
 #  Piattaforma...: Python3.13 con libreria pyqt6
 #  Data..........: 28/07/2025
 #  Descrizione...: Classe che visualizza le differenze tra due testi
+#  Note..........: Creata utilizzando CoPilot
 
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
@@ -12,7 +13,7 @@ import sys
 #Amplifico la pathname per ricercare le icone
 QDir.addSearchPath('icons', 'qtdesigner/icons/')
 
-class DiffViewer(QWidget):
+class classDiffViewer(QWidget):
     """ 
        Questa classe crea una window con all'interno due editor qscintilla affiancati dove carica due testi ricevuti in input,
        li confronta e mette in evidenza le differenze
@@ -212,7 +213,7 @@ UPDATE clienti SET attivo = 0 WHERE id = 5;
 prova
 prova3"""
 
-    viewer = DiffViewer(
+    viewer = classDiffViewer(
         True,
         '2',
         True,

@@ -2,6 +2,13 @@
 MSql Changelog!
 ---------------
 
+Versione del 22/08/2025
+OK! Inserita nuova voce per esplorare i link di database con rispettava form
+OK! Inserita nuova voce nel menu "View" per attivare o meno la modalità full-screen
+
+Versione del 21/08/2025
+OK! Nuova voce nel menu editor per poter selezionare il font da usare nell'ascii art
+
 Versione del 20/08/2025
 OK! Inserito nuovo menu di Import-Export che permette di:
     - Esportare dati da Oracle verso un db SQLite
