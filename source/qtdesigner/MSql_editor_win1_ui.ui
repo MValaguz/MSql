@@ -98,9 +98,11 @@
     <addaction name="actionRect_selection"/>
     <addaction name="actionUppercase_current_selection"/>
     <addaction name="actionLowercase"/>
+    <addaction name="actionHighlight_selection"/>
     <addaction name="separator"/>
     <addaction name="actionComment_selection"/>
     <addaction name="actionUncomment_selection"/>
+    <addaction name="actionComment_from_function"/>
     <addaction name="actionIndent_to_cursor"/>
     <addaction name="separator"/>
     <addaction name="actionUndo"/>
@@ -1660,6 +1662,30 @@
    </property>
    <property name="text">
     <string>Explore database link</string>
+   </property>
+  </action>
+  <action name="actionHighlight_selection">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/highlight.png</normaloff>:/icons/icons/highlight.png</iconset>
+   </property>
+   <property name="text">
+    <string>Highlight selection</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+H</string>
+   </property>
+  </action>
+  <action name="actionComment_from_function">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/dictionary.png</normaloff>:/icons/icons/dictionary.png</iconset>
+   </property>
+   <property name="text">
+    <string>Comment from function</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+F</string>
    </property>
   </action>
  </widget>

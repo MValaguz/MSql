@@ -121,3 +121,38 @@ class MyCustomPlainTextWithNumber(QPlainTextEdit):
             top = bottom
             bottom = top + self.blockBoundingRect(block).height()
             blockNumber += 1
+
+###
+# Questa classe crea una combobox per la selezione di un colore tra una serie predefinita
+###
+class MyColorComboBox(QComboBox):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._populate_colors()
+
+    def _create_color_icon(self, color: QColor, size: int = 16) -> QIcon:
+        """Crea un'icona quadrata piena del colore specificato."""
+        pix = QPixmap(size, size)
+        pix.fill(QColor("transparent"))
+        painter = QPainter(pix)
+        painter.fillRect(0, 0, size, size, color)
+        painter.end()
+        return QIcon(pix)
+
+    def _populate_colors(self):
+        # Definisco 16 colori con nome e codice esadecimale
+        palette = {
+            "Red":        "#e53935", "Pink":       "#da6c94",
+            "Purple":     "#8e24aa", "Deep Purple":"#5e35b1",
+            "Indigo":     "#3949ab", "Blue":       "#1e88e5",
+            "Light Blue": "#039be5", "Cyan":       "#00acc1",
+            "Teal":       "#00897b", "Green":      "#43a047",
+            "Light Green":"#7cb342","Lime":       "#c0ca33",
+            "Yellow":     "#fdd835","Amber":      "#ffb300",
+            "Orange":     "#fb8c00", "Deep Orange":"#f4511e"
+        }
+
+        for name, hexcol in palette.items():
+            color = QColor(hexcol)
+            icon  = self._create_color_icon(color)
+            self.addItem(icon, name, userData=color)

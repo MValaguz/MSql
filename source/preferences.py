@@ -124,6 +124,21 @@ class preferences_class():
                 self.animated_gif = v_json['animated_gif']
             else:
                 self.animated_gif = ''
+            # colore evidenziatore sia in formato letterale che in formato esadecimale (per poter gestire la combobox)
+            # fare riferimento al file custom_widget, tabella colori contenuto in classe MyColorComboBox
+            if 'highlight_color' in v_json:
+                self.highlight_color = v_json['highlight_color']                
+            else:
+                self.highlight_color = 'Green'                
+            if 'highlight_color_hex' in v_json:                
+                self.highlight_color_hex = v_json['highlight_color_hex']
+            else:            
+                self.highlight_color_hex = '#43a047'
+            # nome dell'autore-utilizzatore di MSql
+            if 'author_name' in v_json:
+                self.author_name = v_json['author_name']                
+            else:
+                self.author_name = ''
         # imposto valori di default senza presenza dello specifico file
         else:
             self.remember_window_pos = True
@@ -147,6 +162,9 @@ class preferences_class():
             self.refresh_dictionary = 15
             self.app_language = 'English'
             self.animated_gif = ''
+            self.highlight_color = 'Green' # Fare riferimento al file custom_widget, tabella colori contenuto in classe MyColorComboBox
+            self.highlight_color_hex = '#43a047' # Fare riferimento al file custom_widget, tabella colori contenuto in classe MyColorComboBox
+            self.author_name = ''
 
         # Viene aggiunta alla classe la proprietà editable che gestisce la modalità di editazione delle tabelle (un tempo era anche una preferenza a video che poi è stata eliminata)
         self.editable = False
@@ -206,6 +224,8 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         self.e_tab_size.setText(self.preferences.tab_size)
         self.e_language.setCurrentText(self.preferences.app_language)
         self.e_default_animated_gif.setText(self.preferences.animated_gif)
+        self.e_highlight_color.setCurrentText(self.preferences.highlight_color)
+        self.e_author_name.setText(self.preferences.author_name)
 
         ###
         # preparo elenco server        
@@ -632,7 +652,10 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
                  'open_new_editor':v_open_new_editor,
                  'refresh_dictionary':self.e_refresh_dictionary.value(),
                  'app_language': self.e_language.currentText(),
-                 'animated_gif': self.e_default_animated_gif.text()
+                 'animated_gif': self.e_default_animated_gif.text(),
+                 'highlight_color': self.e_highlight_color.currentText(),
+                 'highlight_color_hex': self.e_highlight_color.currentData().name(),
+                 'author_name': self.e_author_name.text()
                 }
 
 		# scrittura nel file dell'oggetto json (notare come venga usata la funzione dump senza la s finale in quanto scrive byte)

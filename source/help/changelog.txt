@@ -2,6 +2,25 @@
 MSql Changelog!
 ---------------
 
+Versione del 28/08/2025
+OK! Creata nel menu "Modifica" la nuova voce "Commenta partendo da funzione" dove selezionando testo come quello qui sotto di esempio
+  /* Procedura di supporto a caricamento elenco disegni lato Apex */
+  PROCEDURE APEX_LOAD_UT_REPOR_DISEGNI(P_AZIEN_CO IN VARCHAR2,
+                                       P_FNAME_CO IN VARCHAR2,
+                                       P_PAGE_NU  IN NUMBER,
+                                       P_DISEGNI  IN VARCHAR2) IS
+	
+	crea un commento con i dati dell'autore, la data, la descrizione e i parametri di input-output
+OK! Per soddisfare la richiesta di cui sopra è stato creato dentro le preferenze di programma, il parametro "Autore"
+
+Versione del 27/08/2025
+OK! Il colore dell'evidenziatore è selezionabile dalle preferenze, sezione "Editor"
+
+Versione del 26/08/2025
+OK! Nella sezione di ricerca stringa è possibile indicare di evidenziare la ricerca e selezionare un colore; 
+    la selezione rimane impostata e può essere "sommata" con altre evidenziazioni!
+OK! Nuova voce "highligth_selection" nel menu edit che permette di evidenziare il testo con un colore!
+
 Versione del 22/08/2025
 OK! Inserita nuova voce per esplorare i link di database con rispettava form
 OK! Inserita nuova voce nel menu "View" per attivare o meno la modalità full-screen
@@ -310,6 +329,8 @@ OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e part
 -------------
 MSql TO DO!!!
 -------------
+	il tutto partendo da una sorta di template 
+- inserire possibilità, aprendo da desktop un file .msql di aprirlo nella stessa istanza già aperta da MSql
 - nel fare la replace di testo (replace singolo) a Filippo è capitato che uscisse errore di ricorsione...nella stringa di ricerca c'erano doppi apici
 - capita che se faccio una select, poi una update/ delete o lancio script e poi eseguo la select, esca errore "Error to fetch data: DPY-1003: the executed statement does not return rows!!! Mi capitava con lo script del calcolo prelievi...lanciavo lo script e poi la select su tabella MW_SCOP1_TMP facendo F11
   -- lanciare il calcolo

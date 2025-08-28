@@ -54,7 +54,7 @@
       </widget>
       <widget class="QTabWidget" name="o_tab_widget">
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="t_result">
         <attribute name="title">
@@ -421,29 +421,72 @@
       <number>3</number>
      </property>
      <property name="rightMargin">
-      <number>3</number>
+      <number>4</number>
      </property>
      <property name="bottomMargin">
       <number>0</number>
      </property>
      <item row="0" column="0">
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>Text to find</string>
-       </property>
-       <property name="buddy">
-        <cstring>e_find</cstring>
-       </property>
-      </widget>
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <item>
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Text to find</string>
+         </property>
+         <property name="buddy">
+          <cstring>e_find</cstring>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="e_find">
+         <property name="clearButtonEnabled">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="e_find">
-       <property name="clearButtonEnabled">
-        <bool>true</bool>
-       </property>
-      </widget>
+     <item row="1" column="0">
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QLabel" name="label_8">
+           <property name="text">
+            <string>Highlight</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="e_highlight_check"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="b_clear_all_highlights">
+           <property name="toolTip">
+            <string>Clear all highlights</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="resource.qrc">
+             <normaloff>:/icons/icons/clear.png</normaloff>:/icons/icons/clear.png</iconset>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="MyColorComboBox" name="e_highlight_color">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
-     <item row="1" column="0" colspan="2">
+     <item row="2" column="0">
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
         <widget class="QPushButton" name="b_find_next">
@@ -464,7 +507,7 @@
        </item>
       </layout>
      </item>
-     <item row="2" column="0" colspan="2">
+     <item row="3" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>Search result</string>
@@ -474,7 +517,7 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="0" colspan="2">
+     <item row="4" column="0">
       <widget class="QListView" name="o_find_all_result">
        <property name="editTriggers">
         <set>QAbstractItemView::NoEditTriggers</set>
@@ -610,6 +653,11 @@
    <extends>QPlainTextEdit</extends>
    <header location="global">custom_widget</header>
   </customwidget>
+  <customwidget>
+   <class>MyColorComboBox</class>
+   <extends>QComboBox</extends>
+   <header location="global">custom_widget</header>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>e_sql</tabstop>
@@ -619,6 +667,9 @@
   <tabstop>e_map_search</tabstop>
   <tabstop>o_map</tabstop>
   <tabstop>e_find</tabstop>
+  <tabstop>e_highlight_check</tabstop>
+  <tabstop>b_clear_all_highlights</tabstop>
+  <tabstop>e_highlight_color</tabstop>
   <tabstop>b_find_next</tabstop>
   <tabstop>b_find_all</tabstop>
   <tabstop>o_find_all_result</tabstop>
@@ -628,6 +679,13 @@
   <tabstop>b_replace_next</tabstop>
   <tabstop>b_replace_all</tabstop>
   <tabstop>o_output</tabstop>
+  <tabstop>e_output_find</tabstop>
+  <tabstop>b_output_find_next</tabstop>
+  <tabstop>b_output_find_all</tabstop>
+  <tabstop>o_output_lst_result</tabstop>
+  <tabstop>o_bind</tabstop>
+  <tabstop>e_sql_mini_map</tabstop>
+  <tabstop>o_plan</tabstop>
  </tabstops>
  <resources>
   <include location="resource.qrc"/>
@@ -688,8 +746,8 @@
    <slot>slot_find_next()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>859</x>
-     <y>500</y>
+     <x>858</x>
+     <y>530</y>
     </hint>
     <hint type="destinationlabel">
      <x>1376</x>
@@ -704,8 +762,8 @@
    <slot>slot_find_all()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>989</x>
-     <y>500</y>
+     <x>988</x>
+     <y>536</y>
     </hint>
     <hint type="destinationlabel">
      <x>1374</x>
@@ -720,8 +778,8 @@
    <slot>slot_find_all_click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>990</x>
-     <y>691</y>
+     <x>989</x>
+     <y>703</y>
     </hint>
     <hint type="destinationlabel">
      <x>1375</x>
@@ -784,12 +842,12 @@
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>990</x>
-     <y>470</y>
+     <x>988</x>
+     <y>471</y>
     </hint>
     <hint type="destinationlabel">
-     <x>989</x>
-     <y>500</y>
+     <x>988</x>
+     <y>536</y>
     </hint>
    </hints>
   </connection>
@@ -800,8 +858,8 @@
    <slot>slot_output_find_next()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>446</x>
-     <y>409</y>
+     <x>380</x>
+     <y>401</y>
     </hint>
     <hint type="destinationlabel">
      <x>729</x>
@@ -816,8 +874,8 @@
    <slot>slot_output_find_all()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>645</x>
-     <y>412</y>
+     <x>558</x>
+     <y>401</y>
     </hint>
     <hint type="destinationlabel">
      <x>729</x>
@@ -832,12 +890,12 @@
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>524</x>
-     <y>378</y>
+     <x>448</x>
+     <y>375</y>
     </hint>
     <hint type="destinationlabel">
-     <x>601</x>
-     <y>402</y>
+     <x>558</x>
+     <y>401</y>
     </hint>
    </hints>
   </connection>
@@ -848,12 +906,44 @@
    <slot>slot_output_find_all_click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>542</x>
-     <y>538</y>
+     <x>402</x>
+     <y>450</y>
     </hint>
     <hint type="destinationlabel">
      <x>727</x>
      <y>323</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>e_highlight_check</sender>
+   <signal>clicked()</signal>
+   <receiver>MSql_win2</receiver>
+   <slot>slot_e_highlight_check()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>805</x>
+     <y>486</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>729</x>
+     <y>373</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>b_clear_all_highlights</sender>
+   <signal>clicked()</signal>
+   <receiver>MSql_win2</receiver>
+   <slot>slot_clear_all_highlights()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>857</x>
+     <y>504</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>727</x>
+     <y>401</y>
     </hint>
    </hints>
   </connection>
@@ -870,5 +960,7 @@
   <slot>slot_output_find_next()</slot>
   <slot>slot_output_find_all()</slot>
   <slot>slot_output_find_all_click()</slot>
+  <slot>slot_e_highlight_check()</slot>
+  <slot>slot_clear_all_highlights()</slot>
  </slots>
 </ui>

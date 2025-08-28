@@ -853,12 +853,17 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # Decommenta il testo selezionato
             elif p_slot.objectName() == 'actionUncomment_selection':                
                 o_MSql_win2.slot_scommenta()
+            # Creazione di documentazione da intestazione di funzione-procedura PL-SQL
+            elif p_slot.objectName() == 'actionComment_from_function':
+                o_MSql_win2.slot_comment_from_function()
             # Uppercase del testo selezionato
             elif p_slot.objectName() == 'actionUppercase_current_selection':                
                 o_MSql_win2.e_sql.SendScintilla(QsciScintilla.SCI_UPPERCASE)
             # Lowercase del testo selezionato
             elif p_slot.objectName() == 'actionLowercase':                
                 o_MSql_win2.e_sql.SendScintilla(QsciScintilla.SCI_LOWERCASE)
+            elif p_slot.objectName() == 'actionHighlight_selection':
+                o_MSql_win2.slot_highligth_selection()            
             # Indenta la riga alla posizione del cursore
             elif p_slot.objectName() == 'actionIndent_to_cursor':
                 o_MSql_win2.slot_indent_to_cursor()            
@@ -3346,7 +3351,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # la select corrente è quella che l'utente seleziona nell'editor e da cui si parte per aggiungere 
         # altre caratteristiche tramite i popup menu sulle colonne
         self.v_select_corrente = ''
-        self.v_plsql_corrente = ''
+        self.v_plsql_corrente = ''        
         # select effettivamente eseguita dal motore Oracle
         self.v_select_eseguita = ''
         self.v_set_rowcount = False
@@ -3373,7 +3378,9 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 v_font.bold(True)
             self.slot_font_result_selector(v_font)
         # imposto editabile o meno sulla parte di risultato
-        self.set_editable()            
+        self.set_editable()       
+        # array degli highlights (usato nell'ambito delle ricerche di stringhe)     
+        self.v_array_indicator = []
 
         ###
         # Precaricamento (se passato un contenuto di file) 
@@ -5591,6 +5598,66 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             if v_num > 1:
                 # lancio la ricerca su tutto e senza effetti a video (da notare come findFirst è un metodo di QScintilla)...
                 v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, 0, 0, False, False, False)
+
+            # se richiesto di evidenziare il testo, richiamo specifica funzione che ricerca il testo e lo fissa con colore specificato 
+            if self.e_highlight_check.isChecked():                                                
+                v_qcolor = self.e_highlight_color.currentData()                
+                self.slot_find_all_highlight(v_string_to_search, v_qcolor)
+     
+    def slot_e_highlight_check(self):
+        """
+           Evento che si attiva sul cambio della checkbox e_highlight_check e che attiva/disattiva la combobox per la scelta del colore 
+        """
+        if self.e_highlight_check.isChecked():
+            self.e_highlight_color.setEnabled(True)
+        else:
+            self.e_highlight_color.setEnabled(False)
+
+    def slot_clear_all_highlights(self):
+        """
+           Evento che si attiva sul click del bottone b_clear_all_highlights e svolge la pulizia di tutte le evidenziazioni
+        """
+        doc_len = self.e_sql.length()
+        # scorro l'array che contiene gli indicatori attivi e li cancello dal testo
+        for v_indicator in self.v_array_indicator:            
+            self.e_sql.SendScintilla(self.e_sql.SCI_SETINDICATORCURRENT,v_indicator)
+            self.e_sql.SendScintilla(self.e_sql.SCI_INDICATORCLEARRANGE,0, doc_len)
+        # pulisco array con elenco degli indicatori
+        self.v_array_indicator.clear()
+
+    def slot_find_all_highlight(self, p_stringa: str, color: QColor):
+        """
+           Nell'ambito della ricerca di tutte le ricorrenze, evidenzia con il colore scelto le stringhe corrispondenti
+        """
+        if not p_stringa:
+            return
+
+        # calcolo un nuovo indicatore (tra 0 e 31) ma per sicurezza mi tengo tra il 10 e il 31                
+        v_indicator = len(self.v_array_indicator) + 11
+        if v_indicator > 31:
+            return
+        else:
+            self.v_array_indicator.append(v_indicator)
+
+        # definisco lo stile “straight box” per evidenziare la parola e il rispettivo colore scelto dall'utente
+        self.e_sql.indicatorDefine(QsciScintilla.IndicatorStyle.StraightBoxIndicator,v_indicator)
+        self.e_sql.setIndicatorDrawUnder(True, v_indicator)        
+        self.e_sql.setIndicatorForegroundColor(color, v_indicator)
+
+        # ciclo di ricerca della stringa indicata...
+        v_found = self.e_sql.findFirst(p_stringa, False, False, False, False, True, 0, 0, False, False, False)
+        while v_found:
+            # prendo la selezione
+            sl, si, el, ei = self.e_sql.getSelection()
+            # converto in offset assoluti
+            start  = self.e_sql.positionFromLineIndex(sl, si)
+            end    = self.e_sql.positionFromLineIndex(el, ei)
+            length = end - start
+            # applico l’indicatore 
+            self.e_sql.SendScintilla(self.e_sql.SCI_SETINDICATORCURRENT,v_indicator)
+            self.e_sql.SendScintilla(self.e_sql.SCI_INDICATORFILLRANGE,start, length)
+            # prossimo match                            
+            v_found = self.e_sql.findFirst(p_stringa, False, False, False, False, True, sl + 1, -1, False, False, False)                        
         
     def slot_find_all_click(self, p_index):
         """
@@ -5900,6 +5967,42 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # inserisco il nuovo testo al posto di quello eliminato
         self.e_sql.insert(v_new_text)        
     
+    def slot_comment_from_function(self):
+        """
+           Partendo dalla selezione di testo dove presente la parte dichiarativa di una funzione-procedura PL-SQL,
+           crea il commento di documentazione iniziale con Autore, Data creazione, Descrizione, Parametri input-output
+        """
+        global o_global_preferences
+
+        if self.e_sql.selectedText() == '':     
+            message_info(QCoreApplication.translate('MSql_win1','Select the text that includes the declaration of a PL-SQL function-procedure to obtain a comment reporting: Author, Creation date, Description and input-output parameters'))
+            return 'ko'
+                
+        # partendo dal testo selezionato che deve avere una dichiarazione di PROCEDURE-FUNCTION e relativi parametri, apro un window dove ci sarà 
+        # riportato commento con intestazione e documentazione della stessa 
+        v_commento = commenta_una_procedura_funzione(self.e_sql.selectedText(), o_global_preferences.author_name)
+
+        # creazione della window
+        self.o_win_commento = QWidget()
+        self.o_win_commento.setWindowTitle("MSql-Create procedure-function comment")
+        v_icon = QIcon()
+        v_icon.addPixmap(QPixmap("icons:MSql.ico"), QIcon.Mode.Normal, QIcon.State.Off)
+        self.o_win_commento.setWindowIcon(v_icon)
+        self.o_win_commento.setGeometry(0, 0, 900, 300)
+
+        # nella window inserisco un item di testo dove andrà visualizzato il commento che è stato creato
+        layout = QVBoxLayout()        
+        v_text_edit = QTextEdit()
+        v_text_edit.setFont(QFont("Courier New",11))        
+        v_text_edit.setPlainText(v_commento)
+
+        # visualizzo la window
+        layout.addWidget(v_text_edit)
+        self.o_win_commento.setLayout(layout)
+        self.o_win_commento.show()
+        # centro la window rispetto alla window padre
+        centra_window_figlia(self, self.o_win_commento)
+        
     def slot_indent_to_cursor(self):
         """
            Indenta la riga dove è presente il cursore, alla posizione del cursore (in pratica inserisce spazi bianchi)
@@ -6191,6 +6294,30 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         else:
             self.e_sql.SendScintilla(QsciScintillaBase.SCI_SETVIEWWS,QsciScintillaBase.SCWS_INVISIBLE)           
 
+    def slot_highligth_selection(self):
+        """
+           Richiamata tramite voce del menu edit o tramite CTRL+SHIFT+H, evidenzia con il colore giallo il testo evidenziato
+           Attenzione! Viene usato l'indicatore-evidenziatore nr.5 di qscintilla.                       
+        """
+        global o_global_preferences
+
+        # viene usato indicatore fisso numero 5!
+        v_indicator = 5
+        # definisco lo stile “straight box” per evidenziare la parola 
+        self.e_sql.indicatorDefine(QsciScintilla.IndicatorStyle.StraightBoxIndicator,v_indicator)
+        self.e_sql.setIndicatorDrawUnder(True, v_indicator)        
+        # come colore utilizzo quello impostato nell'apposita preferenza
+        self.e_sql.setIndicatorForegroundColor(QColor(o_global_preferences.highlight_color_hex), v_indicator)        
+        # prendo la selezione
+        sl, si, el, ei = self.e_sql.getSelection()
+        # converto in offset assoluti
+        start  = self.e_sql.positionFromLineIndex(sl, si)
+        end    = self.e_sql.positionFromLineIndex(el, ei)
+        length = end - start
+        # applico l’indicatore 
+        self.e_sql.SendScintilla(self.e_sql.SCI_SETINDICATORCURRENT,v_indicator)
+        self.e_sql.SendScintilla(self.e_sql.SCI_INDICATORFILLRANGE,start, length)
+    
     def bind_variable(self, p_function, p_variabile_nome=None, p_variabile_tipo=None, p_testo_sql=None):
         """
            Gestione delle struttura delle variabili bind

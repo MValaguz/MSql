@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/highlight.png</file>
     <file>icons/database_link.png</file>
     <file>icons/full_screen.png</file>
     <file>icons/font_art.png</file>
