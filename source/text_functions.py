@@ -60,26 +60,31 @@ class class_text_functions(QDialog, Ui_text_functions_window):
         self.e_parameter1.setText('')               
         self.e_parameter2.setText('')               
         self.e_parameter3.setText('')               
+        self.e_parameter4.setText('')               
         if p_index.data() == 'Split':            
             self.e_description.setText(QCoreApplication.translate('text_functions','Takes the selected text and splits it into multiple lines using the comma as the identifier'))            
-            self.e_parameter1.setPlaceholderText(QCoreApplication.translate('text_functions','indicate the delimiter char (default comma)'))
-            self.e_parameter2.setPlaceholderText(QCoreApplication.translate('text_functions','T --> insert delimiter for each line'))
+            self.e_parameter1.setPlaceholderText(QCoreApplication.translate('text_functions','input:  indicate the delimiter char (default comma)'))
+            self.e_parameter2.setPlaceholderText(QCoreApplication.translate('text_functions','effect: char to add at end of line'))
             self.e_parameter3.setPlaceholderText("")
+            self.e_parameter4.setPlaceholderText("")
         elif p_index.data() == 'Compress':            
             self.e_description.setText(QCoreApplication.translate('text_functions','Takes the selected text, which must span multiple lines, and creates a single line with the starting lines, where the line break is a comma. Any commas preceding the line break in the starting text will be ignored'))
-            self.e_parameter1.setPlaceholderText(QCoreApplication.translate('text_functions','indicate the separator char (ex. comma)'))
+            self.e_parameter1.setPlaceholderText(QCoreApplication.translate('text_functions','input: indicate the separator char (ex. comma)'))
             self.e_parameter2.setPlaceholderText("")
             self.e_parameter3.setPlaceholderText("")
+            self.e_parameter4.setPlaceholderText("")
         elif p_index.data() == 'Align Columns':            
             self.e_description.setText(QCoreApplication.translate('text_functions','Takes the selected text, which must have a columnar format and sorts its structure both visually and by row sorting. Ex. \n 7 8 9 \n 6 7 8 \n 5 6 7'))
-            self.e_parameter1.setPlaceholderText(QCoreApplication.translate('text_functions','column delimeter (blank space as default)'))
-            self.e_parameter2.setPlaceholderText(QCoreApplication.translate('text_functions','result column width'))
-            self.e_parameter3.setPlaceholderText(QCoreApplication.translate('text_functions','column sort (none for default)'))
+            self.e_parameter1.setPlaceholderText(QCoreApplication.translate('text_functions','input:  column delimeter (blank space as default)'))
+            self.e_parameter2.setPlaceholderText(QCoreApplication.translate('text_functions','effect: column width'))
+            self.e_parameter3.setPlaceholderText(QCoreApplication.translate('text_functions','effect: add column separator (blank space as default)'))
+            self.e_parameter4.setPlaceholderText(QCoreApplication.translate('text_functions','effect: number sort column (none for default)'))            
         elif p_index.data() == 'Matrix decorator':            
             self.e_description.setText(QCoreApplication.translate('text_functions','Takes the selected text, which must contain a text array. Adds the specified decorator to each cell element.. Ex. \n 7 8 9 \n 6 7 8 \n 5 6 7'))
-            self.e_parameter1.setPlaceholderText(QCoreApplication.translate('text_functions','column delimeter (blank space as default)'))
-            self.e_parameter2.setPlaceholderText(QCoreApplication.translate('text_functions','char decorator'))            
-            self.e_parameter3.setPlaceholderText("")
+            self.e_parameter1.setPlaceholderText(QCoreApplication.translate('text_functions','input:  column delimeter (blank space as default)'))
+            self.e_parameter2.setPlaceholderText(QCoreApplication.translate('text_functions','effect: char decorator'))            
+            self.e_parameter3.setPlaceholderText(QCoreApplication.translate('text_functions','effect: char to add at end of line'))
+            self.e_parameter4.setPlaceholderText("")
 
     def slot_b_start_clicked(self):
         """
@@ -90,34 +95,31 @@ class class_text_functions(QDialog, Ui_text_functions_window):
         elif self.e_list_functions.currentIndex().data() == 'Compress':           
             self.e_output_text.setText(self.comprime_il_testo(self.e_input_text.toPlainText(), self.e_parameter1.text()))
         elif self.e_list_functions.currentIndex().data() == 'Align Columns':
-            self.e_output_text.setText(self.allinea_colonne(self.e_input_text.toPlainText(), self.e_parameter1.text(), self.e_parameter2.text(), self.e_parameter3.text()))
+            self.e_output_text.setText(self.allinea_colonne(self.e_input_text.toPlainText(), self.e_parameter1.text(), self.e_parameter2.text(), self.e_parameter3.text(), self.e_parameter4.text()))
         elif self.e_list_functions.currentIndex().data() == 'Matrix decorator':
-            self.e_output_text.setText(self.decora_matrice(self.e_input_text.toPlainText(), self.e_parameter1.text(), self.e_parameter2.text()))
+            self.e_output_text.setText(self.decora_matrice(self.e_input_text.toPlainText(), self.e_parameter1.text(), self.e_parameter2.text(), self.e_parameter3.text()))
 
     def splitta_il_testo(self, p_testo, p_parameter1, p_parameter2):
         """
            Viene preso il testo e diviso su più righe
            Parameter1: eventuale carattere delimitatore di parola (es. :)
-           Parameter2: se T indica che a fine riga verrà inserito il carattere delimitatore
+           Parameter2: se indicato inserisce il carattere a fine riga
         """        
         if p_parameter1 == '':
             p_parameter1 = ','
         v_risultato = ''
         # splitto il testo usando eventuale parametro in input        
         v_split = p_testo.split(p_parameter1)                            
-        # creo il risultato prendendo tutte le righe dello split
-        v_ind = 0
+        # creo il risultato prendendo tutte le righe dello split        
         for riga in v_split:
             # viene pulita la stringa a destra             
             riga = riga.rstrip(p_parameter1+' ')            
             # metto la riga nel risultato nettificandola a sinistra
-            v_risultato += riga.lstrip()
-            v_ind += 1
-            # aggiungo il delimitaore e il ritorno a capo
-            if v_ind != len(v_split):
-                if p_parameter2.upper() == 'T':   
-                    v_risultato += p_parameter1
-                v_risultato += '\n'
+            v_risultato += riga.lstrip()            
+            # aggiungo il delimitatore e il ritorno a capo
+            if p_parameter2 != '':   
+                v_risultato += p_parameter2
+            v_risultato += '\n'
 
         return v_risultato
     
@@ -137,16 +139,17 @@ class class_text_functions(QDialog, Ui_text_functions_window):
                 righe_pulite.append(riga_pulita)
     
         # Unisce le righe con il separatore
-        return p_parameter1.join(righe_pulite)        
-
-    def allinea_colonne(self, p_testo, p_delimitatore, p_larghezza, p_colonna_ordinamento):
+        return p_parameter1.join(righe_pulite)   
+         
+    def allinea_colonne(self, p_testo, p_delimitatore, p_larghezza, p_delimitatore_output, p_colonna_ordinamento):
         """
         Allinea le colonne di una stringa multilinea e le ordina opzionalmente.
-        
+
         - p_testo: stringa con righe separate da newline (\n)
         - p_delimitatore: carattere che separa le colonne (es. "," o "\t" o None per split automatico)
         - p_larghezza: larghezza fissa da applicare a tutte le colonne (int)
-        - p_colonna_ordinamento: indice della colonna su cui ordinare (0-based)
+        - p_delimitatore_output: carattere da usare per separare le celle in output (default: spazio)
+        - p_colonna_ordinamento: indice della colonna su cui ordinare (1-based)        
         """
         # controllo che p_larghezza sia integer
         try:
@@ -159,6 +162,10 @@ class class_text_functions(QDialog, Ui_text_functions_window):
             p_colonna_ordinamento = int(p_colonna_ordinamento) - 1
         except:
             p_colonna_ordinamento = ''
+
+        # valore di default
+        if p_delimitatore_output == '':
+            p_delimitatore_output = ' '
 
         # Step 1: Converti la stringa in lista di righe
         righe = p_testo.strip().splitlines()
@@ -180,17 +187,23 @@ class class_text_functions(QDialog, Ui_text_functions_window):
         num_colonne = max(len(r) for r in colonne_split)
         righe_allineate = []
         for riga in colonne_split:
-            riga_formattata = ""
+            celle_formattate = []
             for i in range(num_colonne):
                 valore = riga[i] if i < len(riga) else ""
-                riga_formattata += valore.ljust(p_larghezza)
-            righe_allineate.append(riga_formattata.rstrip())
+                celle_formattate.append(valore.ljust(p_larghezza))
+            riga_formattata = p_delimitatore_output.join(celle_formattate).rstrip()
+            righe_allineate.append(riga_formattata)
 
         return "\n".join(righe_allineate)
 
-    def decora_matrice(self, p_testo, p_delimitatore, p_decoratore):
+    def decora_matrice(self, p_testo, p_delimitatore, p_decoratore, p_eol):
         """
-           Funzione per decorare le celle di una matrice
+        Funzione per decorare le celle di una matrice.
+
+        - p_testo: stringa multilinea che rappresenta la matrice
+        - p_delimitatore: carattere che separa le colonne (es. ' ', ',', '\t')
+        - p_decoratore: carattere da mettere attorno a ogni cella (es. "'", '"')
+        - p_eol: stringa da aggiungere alla fine di ogni riga (es. ',', ';', '')
         """
         # imposto valori di default
         if p_delimitatore == '':
@@ -203,16 +216,15 @@ class class_text_functions(QDialog, Ui_text_functions_window):
 
         # Costruisce un pattern flessibile per delimitatori
         if p_delimitatore == ' ':
-            # Spazi, tabulazioni, ecc.
             pattern = r'[ \t]+'
         else:
-            # Delimitatore con eventuali spazi attorno
             pattern = rf'\s*{re.escape(p_delimitatore)}\s*'
 
         for riga in righe:
             celle = re.split(pattern, riga.strip())
             celle_decorate = [f"{p_decoratore}{cella}{p_decoratore}" for cella in celle if cella]
-            matrice_decorata.append(p_delimitatore.join(celle_decorate))
+            riga_decorata = p_delimitatore.join(celle_decorate) + p_eol
+            matrice_decorata.append(riga_decorata)
 
         return '\n'.join(matrice_decorata)
 

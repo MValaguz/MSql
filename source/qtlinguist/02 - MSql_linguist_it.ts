@@ -2179,32 +2179,33 @@
 <context>
     <name>text_functions</name>
     <message>
-        <location filename="../text_functions.py" line="64"/>
+        <location filename="../text_functions.py" line="65"/>
         <source>Takes the selected text and splits it into multiple lines using the comma as the identifier</source>
         <translation>Prende il testo e lo separa laddove presente il delimitatore (di default la virgola) portandolo su una nuova riga</translation>
     </message>
     <message>
-        <location filename="../text_functions.py" line="65"/>
-        <source>indicate the delimiter char (default comma)</source>
-        <translation>indicare carattere delimitatore (default virgola)</translation>
-    </message>
-    <message>
         <location filename="../text_functions.py" line="66"/>
-        <source>T --&gt; insert delimiter for each line</source>
-        <translation>T --&gt; inserisce il delimitatore a fine di ogni riga</translation>
+        <source>input:  indicate the delimiter char (default comma)</source>
+        <translation>input: indica il carattere da controllare come delimitatore (default spazio)</translation>
     </message>
     <message>
-        <location filename="../text_functions.py" line="69"/>
+        <location filename="../text_functions.py" line="86"/>
+        <location filename="../text_functions.py" line="67"/>
+        <source>effect: char to add at end of line</source>
+        <translation>effetto: carattere da aggiungere alla fine di ogni linea</translation>
+    </message>
+    <message>
+        <location filename="../text_functions.py" line="71"/>
         <source>Takes the selected text, which must span multiple lines, and creates a single line with the starting lines, where the line break is a comma. Any commas preceding the line break in the starting text will be ignored</source>
         <translation>Prende il testo e lo comprime in unica riga</translation>
     </message>
     <message>
-        <location filename="../text_functions.py" line="70"/>
-        <source>indicate the separator char (ex. comma)</source>
-        <translation>indicare eventuale delimitatore aggiuntivo</translation>
+        <location filename="../text_functions.py" line="72"/>
+        <source>input: indicate the separator char (ex. comma)</source>
+        <translation>input: indicare il carattere usato come saparatore (es. virgola)</translation>
     </message>
     <message>
-        <location filename="../text_functions.py" line="74"/>
+        <location filename="../text_functions.py" line="77"/>
         <source>Takes the selected text, which must have a columnar format and sorts its structure both visually and by row sorting. Ex. 
  7 8 9 
  6 7 8 
@@ -2215,23 +2216,28 @@
  5 6 7</translation>
     </message>
     <message>
-        <location filename="../text_functions.py" line="80"/>
-        <location filename="../text_functions.py" line="75"/>
-        <source>column delimeter (blank space as default)</source>
-        <translation>delimitatore di colonna (di default lo spazio)</translation>
-    </message>
-    <message>
-        <location filename="../text_functions.py" line="76"/>
-        <source>result column width</source>
-        <translation>larghezza delle colonne (default 15 caratteri)</translation>
-    </message>
-    <message>
-        <location filename="../text_functions.py" line="77"/>
-        <source>column sort (none for default)</source>
-        <translation>Numero di colonna su cui svolgere ordinamento (di default non esegue ordinamento)</translation>
+        <location filename="../text_functions.py" line="84"/>
+        <location filename="../text_functions.py" line="78"/>
+        <source>input:  column delimeter (blank space as default)</source>
+        <translation>input: indicare il carattere che delimita le colonna (default spazio)</translation>
     </message>
     <message>
         <location filename="../text_functions.py" line="79"/>
+        <source>effect: column width</source>
+        <translation>effetto: larghezza da attribuire alle colonne (default 15)</translation>
+    </message>
+    <message>
+        <location filename="../text_functions.py" line="80"/>
+        <source>effect: add column separator (blank space as default)</source>
+        <translation>effetto: carattere da aggiungere come separatore di colonna (di default spazio)</translation>
+    </message>
+    <message>
+        <location filename="../text_functions.py" line="81"/>
+        <source>effect: number sort column (none for default)</source>
+        <translation>effetto: eventuale numero di colonna su cui fare ordinamento (di default nessun ordinamento)</translation>
+    </message>
+    <message>
+        <location filename="../text_functions.py" line="83"/>
         <source>Takes the selected text, which must contain a text array. Adds the specified decorator to each cell element.. Ex. 
  7 8 9 
  6 7 8 
@@ -2241,9 +2247,45 @@
  5 6 7</translation>
     </message>
     <message>
-        <location filename="../text_functions.py" line="81"/>
+        <location filename="../text_functions.py" line="85"/>
+        <source>effect: char decorator</source>
+        <translation>effetto: carattere da usare per decorare ogni cella</translation>
+    </message>
+    <message>
+        <source>indicate the delimiter char (default comma)</source>
+        <translation type="vanished">indicare carattere delimitatore (default virgola)</translation>
+    </message>
+    <message>
+        <source>T --&gt; insert delimiter for each line</source>
+        <translation type="vanished">T --&gt; inserisce il delimitatore a fine di ogni riga</translation>
+    </message>
+    <message>
+        <source>indicate the separator char (ex. comma)</source>
+        <translation type="vanished">indicare eventuale delimitatore aggiuntivo</translation>
+    </message>
+    <message>
+        <source>column delimeter (blank space as default)</source>
+        <translation type="vanished">delimitatore di colonna (di default lo spazio)</translation>
+    </message>
+    <message>
+        <source>result column width</source>
+        <translation type="vanished">larghezza delle colonne (default 15 caratteri)</translation>
+    </message>
+    <message>
+        <source>column separator (blank space as default)</source>
+        <translation type="vanished">carattere indicante il separatore di colonna (spazio come default)</translation>
+    </message>
+    <message>
+        <source>column sort (none for default)</source>
+        <translation type="vanished">Numero di colonna su cui svolgere ordinamento (di default non esegue ordinamento)</translation>
+    </message>
+    <message>
         <source>char decorator</source>
-        <translation>carattere decoratore di cella</translation>
+        <translation type="vanished">carattere decoratore di cella</translation>
+    </message>
+    <message>
+        <source>char to add at end of line</source>
+        <translation type="vanished">carattere da aggiungere a fine riga</translation>
     </message>
     <message>
         <source>indicate the delimiter char (default comma and blank space)</source>

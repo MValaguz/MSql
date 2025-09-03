@@ -23,7 +23,7 @@
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
         <widget class="QLabel" name="label">
@@ -55,7 +55,7 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="0">
          <widget class="QLabel" name="label_4">
@@ -93,6 +93,9 @@
            <widget class="QLineEdit" name="e_parameter3"/>
           </item>
           <item>
+           <widget class="QLineEdit" name="e_parameter4"/>
+          </item>
+          <item>
            <widget class="QPushButton" name="b_start">
             <property name="text">
              <string>Execute function</string>
@@ -107,7 +110,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <widget class="QLabel" name="label_5">
@@ -151,6 +154,7 @@
   <tabstop>e_parameter1</tabstop>
   <tabstop>e_parameter2</tabstop>
   <tabstop>e_parameter3</tabstop>
+  <tabstop>e_parameter4</tabstop>
   <tabstop>b_start</tabstop>
   <tabstop>e_output_text</tabstop>
   <tabstop>b_copy_output</tabstop>
