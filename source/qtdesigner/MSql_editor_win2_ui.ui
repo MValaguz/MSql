@@ -54,7 +54,7 @@
       </widget>
       <widget class="QTabWidget" name="o_tab_widget">
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="t_result">
         <attribute name="title">

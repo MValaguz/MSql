@@ -126,6 +126,8 @@
     <addaction name="separator"/>
     <addaction name="actionText_to_Ascii_Art"/>
     <addaction name="actionSet_font_Ascii_Art"/>
+    <addaction name="separator"/>
+    <addaction name="actionText_functions"/>
    </widget>
    <widget class="QMenu" name="menuRun">
     <property name="title">
@@ -1628,7 +1630,7 @@
     <string>Text to Ascii Art</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Shift+A</string>
+    <string notr="true">Ctrl+Alt+A</string>
    </property>
   </action>
   <action name="actionSet_font_Ascii_Art">
@@ -1638,9 +1640,6 @@
    </property>
    <property name="text">
     <string>Ascii art font selector</string>
-   </property>
-   <property name="shortcutContext">
-    <enum>Qt::WidgetShortcut</enum>
    </property>
   </action>
   <action name="actionFull_screen">
@@ -1686,6 +1685,18 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+F</string>
+   </property>
+  </action>
+  <action name="actionText_functions">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/functions.png</normaloff>:/icons/icons/functions.png</iconset>
+   </property>
+   <property name="text">
+    <string>Text functions</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+T</string>
    </property>
   </action>
  </widget>

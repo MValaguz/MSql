@@ -13,6 +13,7 @@ pylupdate6 --verbose ^
   ..\qtdesigner\import_export_excel_to_oracle_ui.ui ^
   ..\qtdesigner\import_export_sqlite_to_excel_ui.ui ^
   ..\qtdesigner\import_export_oracle_to_sqlite_ui.ui ^
+	..\qtdesigner\text_functions_ui.ui ^
   ..\avanzamento.py ^
   ..\create_autocomplete_dic.py ^
   ..\history.py ^
@@ -32,5 +33,6 @@ pylupdate6 --verbose ^
   ..\import_export_excel_to_oracle.py ^
   ..\import_export_sqlite_to_excel.py ^
   ..\import_export_oracle_to_sqlite.py ^
+	..\text_functions.py ^
   -ts "02 - MSql_linguist_it.ts"
 pause

@@ -873,7 +873,10 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # Apro la window per la selezione del font da utilizzare con ASCII art testo
             elif p_slot.objectName() == 'actionSet_font_Ascii_Art':                                
                 self.o_fontartviewer = classFontArtViewer(self)
-                self.o_fontartviewer.show()                
+                self.o_fontartviewer.show()      
+            # Apro la window con la gestione delle funzioni di testo
+            elif p_slot.objectName() == 'actionText_functions':
+                self.slot_text_functions(o_MSql_win2.e_sql.selectedText())
             # Compressione di tutti i livelli
             elif p_slot.objectName() == 'actionFold_All':
                 o_MSql_win2.e_sql.foldAll()
@@ -2914,6 +2917,16 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         if o_MSql_win2 != None:            
             o_MSql_win2.e_sql.insert(p_current_obj_name+'@'+p_current_link)        
 
+    def slot_text_functions(self,p_testo):
+        """
+           Apre la window per la gestione delle funzioni di testo
+        """
+        from text_functions import class_text_functions
+
+        self.o_text_funtions = class_text_functions(p_testo)        
+        centra_window_figlia(self, self.o_text_funtions)
+        self.o_text_funtions.show()
+
 #  _     _______  _______ ____  
 # | |   | ____\ \/ / ____|  _ \ 
 # | |   |  _|  \  /|  _| | |_) |
@@ -4049,7 +4062,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # riposiziono il cursore allo stato originario
         self.e_sql.setSelection(v_num_line, v_num_pos, v_num_line, v_num_pos)
         # utilizzando la posizione del cursore sulla riga, estraggo il nome dell'oggetto che sta sotto il cursore (es. TA_AZIEN oppure SMILE.TA_AZIEN)
-        v_owner, v_oggetto = extract_object_name_from_cursor_pos(v_line.upper(), v_num_pos-1)                
+        v_owner, v_oggetto = extract_object_name_from_cursor_pos(v_line.upper(), v_num_pos-1)                        
         if v_oggetto != '':
             # se owner non trovato allora uso lo schema corrente
             if v_owner is None:                
@@ -6511,7 +6524,7 @@ if __name__ == "__main__":
         v_view_splash = True
     else:
         v_view_splash = False
-            
+                
     # controllo se programma è stato richiamato da linea di comando passando il nome di un file    
     v_nome_file_da_caricare = ''
     try:
@@ -6532,7 +6545,7 @@ if __name__ == "__main__":
     # eventuale preferenza di zoom di tutto il programma (introdotto a partire PyQt6)    
     os.environ['QT_SCALE_FACTOR'] = str(o_global_preferences.general_zoom / 100)
 
-    # creazione dell'applicazione
+    # creazione dell'applicazione interfaccia QT
     app = QApplication(sys.argv)     
     
     # carica l'immagine dello splash screen e lo mantiene visualizzato per 3 secondi
@@ -6559,11 +6572,9 @@ if __name__ == "__main__":
             app.installTranslator(translate)          
 
     # avvio del programma (aprendo eventuale file indicato su linea di comando)   
-    application = MSql_win1_class(v_nome_file_da_caricare)         
-    
+    application = MSql_win1_class(v_nome_file_da_caricare)             
     # dimensioni della window
-    application.carico_posizione_window()  
-    
+    application.carico_posizione_window()      
     # mostro la window principale
     application.show()
 

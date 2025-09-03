@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>text_functions_window</class>
+ <widget class="QDialog" name="text_functions_window">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>896</width>
+    <height>435</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Text functions</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="resource.qrc">
+    <normaloff>:/icons/icons/MSql.ico</normaloff>:/icons/icons/MSql.ico</iconset>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="0" column="0">
+    <widget class="QSplitter" name="splitter_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <widget class="QWidget" name="">
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>List functions:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QListWidget" name="e_list_functions"/>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Description:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTextEdit" name="e_description">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <widget class="QWidget" name="">
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>Input:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QTextEdit" name="e_input_text">
+          <property name="font">
+           <font>
+            <family>Courier New</family>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>Parameters:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QLineEdit" name="e_parameter1"/>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="e_parameter2"/>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="e_parameter3"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="b_start">
+            <property name="text">
+             <string>Execute function</string>
+            </property>
+            <property name="icon">
+             <iconset resource="resource.qrc">
+              <normaloff>:/icons/icons/go.png</normaloff>:/icons/icons/go.png</iconset>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>Output:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTextEdit" name="e_output_text">
+          <property name="font">
+           <font>
+            <family>Courier New</family>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="b_copy_output">
+          <property name="text">
+           <string>Copy to clipboard</string>
+          </property>
+          <property name="icon">
+           <iconset resource="resource.qrc">
+            <normaloff>:/icons/icons/copy.png</normaloff>:/icons/icons/copy.png</iconset>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>e_list_functions</tabstop>
+  <tabstop>e_description</tabstop>
+  <tabstop>e_input_text</tabstop>
+  <tabstop>e_parameter1</tabstop>
+  <tabstop>e_parameter2</tabstop>
+  <tabstop>e_parameter3</tabstop>
+  <tabstop>b_start</tabstop>
+  <tabstop>e_output_text</tabstop>
+  <tabstop>b_copy_output</tabstop>
+ </tabstops>
+ <resources>
+  <include location="resource.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>e_list_functions</sender>
+   <signal>clicked(QModelIndex)</signal>
+   <receiver>text_functions_window</receiver>
+   <slot>slot_e_list_functions_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>154</x>
+     <y>75</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>255</x>
+     <y>4</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>b_start</sender>
+   <signal>clicked()</signal>
+   <receiver>text_functions_window</receiver>
+   <slot>slot_b_start_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>561</x>
+     <y>282</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>753</x>
+     <y>248</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>b_copy_output</sender>
+   <signal>clicked()</signal>
+   <receiver>text_functions_window</receiver>
+   <slot>slot_b_copy_output()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>660</x>
+     <y>276</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>847</x>
+     <y>258</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>slot_e_list_functions_clicked()</slot>
+  <slot>slot_b_start_clicked()</slot>
+  <slot>slot_b_copy_output()</slot>
+ </slots>
+</ui>

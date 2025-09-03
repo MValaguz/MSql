@@ -313,7 +313,7 @@ class Ui_MSql_win2(object):
         self.label_5.setBuddy(self.e_replace)
 
         self.retranslateUi(MSql_win2)
-        self.o_tab_widget.setCurrentIndex(2)
+        self.o_tab_widget.setCurrentIndex(0)
         self.b_refresh_map.clicked.connect(MSql_win2.slot_refresh_map) # type: ignore
         self.o_map.clicked['QModelIndex'].connect(MSql_win2.slot_o_map_selected) # type: ignore
         self.e_map_search.returnPressed.connect(MSql_win2.slot_refresh_map) # type: ignore

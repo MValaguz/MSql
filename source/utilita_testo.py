@@ -30,7 +30,11 @@ def extract_object_name_from_cursor_pos(p_string, p_pos):
        estrae la coppia owner.object che sta "sotto" la posizione del cursore 
        Es. p_string = SELECT * FROM SMI.OP_COM
            p_pos = 20
-           restituisce SMI e OP_COM
+           restituisce SMI e OP_COM       
+       Corretto questo caso dove restituica TA_AZIEN.AZIEN_CO quando invece deve restituire TA_AZIEN
+       In pratica se punto si trova a destra della posizione indicata, non viene restituita la doppia stringa
+       p_string = SELECT * FROM TA_AZIEN.AZIEN_CO 
+       Corretto anche il caso SMILE.TA_AZIEN.AZIEN_CO
     """    
     # se posizione in ingresso è fuori range (caso in cui il cursore era all'inizio) --> imposto a zero
     if p_pos == -1:
@@ -38,10 +42,18 @@ def extract_object_name_from_cursor_pos(p_string, p_pos):
     if p_string == '':
         return None, ''
     # ricerco la parola dove posizionato cursore senza tenere conto del "." 
-    v_word = extract_word_from_cursor_pos(p_string, p_pos, False)
-    # Divide la parola se contiene un punto
-    if '.' in v_word:
-        parts = v_word.split('.', 1)
+    v_word_with_dot = extract_word_from_cursor_pos(p_string, p_pos, False)
+    v_word = extract_word_from_cursor_pos(p_string, p_pos, True)
+    # divido la parola se contiene un punto    
+    v_pos_dot = v_word_with_dot.find('.')
+    #print(f"{v_pos_dot} {v_word_with_dot} {v_word}")
+    v_indice = v_word_with_dot.find(v_word) + len(v_word)
+    v_word_with_dot = v_word_with_dot[:v_indice]    
+    #print(f"{v_pos_dot} {v_word_with_dot} {v_word}")
+    # se trovato il punto, controllo che il punto non sia alla destra della posizione in quanto va considerato solo se a sinitra
+    # questo per evitare casi dove c'è NOME_TABELLA.NOME_CAMPO rispetto a NOME_SCHEMA.NOME_TABELLA
+    if v_pos_dot != -1 and v_word_with_dot.find(v_word) > v_pos_dot:
+        parts = v_word_with_dot.split('.', 1)        
         return parts[0], parts[1]
     else:        
         return None, v_word
@@ -501,7 +513,7 @@ def commenta_una_procedura_funzione(p_testo, p_autore):
 ######################################################################################################################
 # TEST DELLA FUNZIONE CHE PARTENDO DA CODICE PL-SQL, RESTITUISCE UN OGGETTO CHE CONTIENE TUTTE LE DEFINIZIONI TROVATE
 ######################################################################################################################
-#if __name__ == "__main__":       
+if __name__ == "__main__":       
     # v_file = open('c:\Msql\APEX_AJAX_UPLOAD.msql','r', newline='').read()   
     # v_lista_def = estrai_procedure_function(v_file.split(chr(10)))
     # # emetto a video il contenuto di tutto quello che ho trovato nel testo
@@ -513,7 +525,9 @@ def commenta_una_procedura_funzione(p_testo, p_autore):
     # #scrivi_lista_in_output(['ciao\n','marco\r\n'])
     
     # test funzione che restituisce owner e object    
-    #v_owner, v_object = extract_object_name_from_cursor_pos('	select * from ta_azien ',23)    
+    v_owner, v_object = extract_object_name_from_cursor_pos('select smile.oc_ortes.azien_co ',19)    
+    print(f"{v_owner} {v_object}")    
+    #v_owner, v_object = extract_object_name_from_cursor_pos('select * from smi.op_com ',20)    
     #print(f"{v_owner} {v_object}")    
     
     # test funzione che restituisce parola sotto il cursore
@@ -584,9 +598,9 @@ def commenta_una_procedura_funzione(p_testo, p_autore):
     #     print(f"{v_istruzione} ,{v_riga_inizio},{v_riga_fine}")
     #     #print(v_testo[v_riga_inizio:v_riga_fine],)   
 
-if __name__ == "__main__":      
-   print(commenta_una_procedura_funzione("""
-                                         /* Restituisce T se l'utente è abilitato alla nuova funzionalità  di APEX */
-FUNCTION APEX_CTR_WMS_ABILITAZIONE(P_AZIEN_CO    IN VARCHAR2
-                                  ,P_LOGIN_CO    IN VARCHAR2) RETURN VARCHAR2 IS""",
-                                     'Marco Valaguzza'))
+# if __name__ == "__main__":      
+#    print(commenta_una_procedura_funzione("""
+#                                          /* Restituisce T se l'utente è abilitato alla nuova funzionalità  di APEX */
+# FUNCTION APEX_CTR_WMS_ABILITAZIONE(P_AZIEN_CO    IN VARCHAR2
+#                                   ,P_LOGIN_CO    IN VARCHAR2) RETURN VARCHAR2 IS""",
+#                                      'Marco Valaguzza'))

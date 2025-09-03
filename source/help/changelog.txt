@@ -2,6 +2,13 @@
 MSql Changelog!
 ---------------
 
+Versione del 03/09/2025
+OK! Nuove funzioni aggiunte in "Gestione funzioni manipolazione testo" per la gestione di colonne-matrici
+
+Versione del 02/09/2025
+OK! Correzione problema segnalato da Diego su F12 e F11 in questi casi SMILE.TA_AZIEN.AZIEN_CO
+OK! Creata nel menu "Modifica" la nuova voce "Funzioni manipolazione testo" e iniziato a creare le prime funzioni di "Split" e di "Compress"
+
 Versione del 28/08/2025
 OK! Creata nel menu "Modifica" la nuova voce "Commenta partendo da funzione" dove selezionando testo come quello qui sotto di esempio
   /* Procedura di supporto a caricamento elenco disegni lato Apex */
@@ -329,8 +336,6 @@ OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e part
 -------------
 MSql TO DO!!!
 -------------
-	il tutto partendo da una sorta di template 
-- inserire possibilità, aprendo da desktop un file .msql di aprirlo nella stessa istanza già aperta da MSql
 - nel fare la replace di testo (replace singolo) a Filippo è capitato che uscisse errore di ricorsione...nella stringa di ricerca c'erano doppi apici
 - capita che se faccio una select, poi una update/ delete o lancio script e poi eseguo la select, esca errore "Error to fetch data: DPY-1003: the executed statement does not return rows!!! Mi capitava con lo script del calcolo prelievi...lanciavo lo script e poi la select su tabella MW_SCOP1_TMP facendo F11
   -- lanciare il calcolo
