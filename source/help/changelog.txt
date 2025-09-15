@@ -2,6 +2,10 @@
 MSql Changelog!
 ---------------
 
+Versione del 05/09/2025
+OK! se MSql è già in esecuzione e faccio doppio click su un file del desktop, fare in modo di aprire il nuovo file nel MSql che è già aperto;
+    usato il metodo SIM dove all'avvio MSql crea un "server" che di scambio dati con altra istanza di MSql
+
 Versione del 03/09/2025
 OK! Nuove funzioni aggiunte in "Gestione funzioni manipolazione testo" per la gestione di colonne-matrici
 
@@ -336,6 +340,7 @@ OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e part
 -------------
 MSql TO DO!!!
 -------------
+- se quando avvio MSql lo avvio massimizzato, escono tutti errore di QPainter, mentre se finestra non massimizzata nulla del genere...come mai? è un problema che avviene anche se minimizzo e poi riporto a normal...qualcosa proprio nel repaint degli oggetti
 - nel fare la replace di testo (replace singolo) a Filippo è capitato che uscisse errore di ricorsione...nella stringa di ricerca c'erano doppi apici
 - capita che se faccio una select, poi una update/ delete o lancio script e poi eseguo la select, esca errore "Error to fetch data: DPY-1003: the executed statement does not return rows!!! Mi capitava con lo script del calcolo prelievi...lanciavo lo script e poi la select su tabella MW_SCOP1_TMP facendo F11
   -- lanciare il calcolo

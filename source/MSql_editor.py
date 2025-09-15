@@ -42,6 +42,8 @@ from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 # Librerie QScintilla
 from PyQt6.Qsci import *
+# Libreria network usata per capire se MSql è già in esecuzione
+from PyQt6.QtNetwork import *
 # Libreria che permette di creare arte ascii grafica
 from art import text2art, FONT_NAMES
 # Classe per la gestione delle preferenze
@@ -302,6 +304,64 @@ class classFontArtViewer(QWidget):
 
         v_global_font_ascii_art = item.text()        
         self.close()
+
+class classSingleInstanceManager(QObject):
+    """
+       Classe che avvia un server che controlla all'avvio di MSql, se ci sono altre istanze di MSql in esecuzione
+       Questa classe è utilizzata per permettere di aprire un file, facendo doppio click da desktop, nella stessa
+       istanza già in esecuzione di MSql. Il codice di chiamata è tutto concentrato nella sezione di Start.
+    """
+    # Adesso emettiamo un singolo percorso (str), non più lista
+    messageReceived = pyqtSignal(str)    
+
+    def __init__(self, server_name: str):
+        super().__init__()
+        self.server_name = server_name
+        self.server = None
+
+    def try_send_to_running_instance(self, file_path: str) -> bool:
+        socket = QLocalSocket()
+        socket.connectToServer(self.server_name)
+        if not socket.waitForConnected(200):
+            socket.abort()
+            return False
+
+        try:
+            # Invia il percorso come stringa UTF-8
+            data = file_path.encode("utf-8")
+            socket.write(data)
+            socket.flush()
+            socket.waitForBytesWritten(200)
+        finally:
+            socket.disconnectFromServer()
+            socket.close()
+
+        return True
+
+    def start_listening(self) -> bool:
+        QLocalServer.removeServer(self.server_name)
+        self.server = QLocalServer(self)
+        if not self.server.listen(self.server_name):
+            return False
+        self.server.newConnection.connect(self._handle_new_connection)
+        return True
+
+    def _handle_new_connection(self):
+        while self.server.hasPendingConnections():
+            sock = self.server.nextPendingConnection()
+            sock.readyRead.connect(lambda s=sock: self._read_message(s))
+
+    def _read_message(self, socket: QLocalSocket):
+        raw = socket.readAll().data()
+        try:
+            # Decodifica semplice del path
+            path = raw.decode("utf-8")            
+            self.messageReceived.emit(path)
+        except Exception as e:
+            print(f"Errore da clasInstanceManager gestore SIM! Messaggio non valido: {e}")
+        finally:
+            socket.disconnectFromServer()
+            socket.close()
 
 #
 #  __  __    _    ___ _   _  __        _____ _   _ ____   _____        __
@@ -655,8 +715,8 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # Esplora i link di database
         elif p_slot.objectName() == 'actionExplore_database_link':
             self.slot_explore_database_link()
-        # Apertura di un nuovo editor o di un file recente
-        elif p_slot.text() in (QCoreApplication.translate('MSql_win1','New'),QCoreApplication.translate('MSql_win1','Open'),QCoreApplication.translate('MSql_win1','Open_db_obj')) or str(p_slot.data()) == 'FILE_RECENTI':
+        # Apertura di un nuovo editor o di un file recente o di una chiamata esterna da parte di altra istanza MSql
+        elif p_slot.text() in (QCoreApplication.translate('MSql_win1','New'),QCoreApplication.translate('MSql_win1','Open'),QCoreApplication.translate('MSql_win1','Open_db_obj')) or p_slot.text() in ('OPEN_FROM_SIM') or str(p_slot.data()) == 'FILE_RECENTI':
             # se richiesto un file recente
             if str(p_slot.data()) == 'FILE_RECENTI':
                 # apro il file richiesto
@@ -668,6 +728,13 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             elif p_slot.text() == QCoreApplication.translate('MSql_win1','Open'):
                 # apro un file tramite dialog box
                 v_titolo, v_contenuto_file, v_codifica_utf8 = self.openfile(None)                
+                # se non è stato scelto alcun file --> esco da tutto!
+                if v_titolo is None:
+                    return None
+            # se richiesto Open da altra istanza MSql...il nome del file da aprire è nella proprietà objectname dell'azione ricevuta in input
+            elif p_slot.text() in 'OPEN_FROM_SIM':
+                # apro il file il cui nome trovo nell'object name (v. funzione slot_open_file_from_SIM dove è stato caricato)
+                v_titolo, v_contenuto_file, v_codifica_utf8 = self.openfile(p_slot.objectName())                
                 # se non è stato scelto alcun file --> esco da tutto!
                 if v_titolo is None:
                     return None
@@ -6506,6 +6573,24 @@ def excepthook(exc_type, exc_value, exc_tb):
     tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
     message_error(tb)    
 
+#  ____   ___  __  __ 
+# / ___| |_ _||  \/  |
+# \___ \  | | | |\/| |
+#  ___) | | | | |  | |
+# |____/ |___||_|  |_|
+# Single Instance Manager                    
+def slot_open_file_from_SIM(p_path):
+    """
+       Gestione richiesta di apertura file da altra istanza di MSql (v. definizione della classe classSingleInstanceManager)
+    """
+    print('Ricevuto richiesta di apertura file da parte di altre istanza MSql del file: '+p_path)
+    # creo un'azione che fa scattare lo smistamento delle voci di menu indicando che si richiede un open ma specifico da istanza esterna
+    v_azione = QAction()
+    v_azione.setText(QCoreApplication.translate('MSql_win1','OPEN_FROM_SIM'))
+    # nel none dell'oggetto azione, ci metto il nome del file da aprire...per comodità di smistamento voce di menu
+    v_azione.setObjectName(p_path)
+    application.smistamento_voci_menu(v_azione)      
+
 #
 #  ____ _____  _    ____ _____ 
 # / ___|_   _|/ \  |  _ \_   _|
@@ -6514,6 +6599,8 @@ def excepthook(exc_type, exc_value, exc_tb):
 # |____/ |_/_/   \_\_| \_\|_|  
 #
 if __name__ == "__main__":    
+    # nome programma
+    QCoreApplication.setApplicationName("MSql")    
     # se il programma è eseguito da pyinstaller, cambio la dir di riferimento passando a dove si trova l'eseguibile
     # in questo modo dovrebbe riuscire a trovare tutte le risorse
     if getattr(sys, 'frozen', False): 
@@ -6539,8 +6626,21 @@ if __name__ == "__main__":
     if not os.path.isdir(v_global_work_dir):
         os.makedirs(v_global_work_dir)
 
-    # sovrascrive l'hook delle eccezioni; in pratica se avverrà un errore imprevisto, dovrebbe uscire un messaggio a video...
+    # sovrascrive l'hook delle eccezioni; in pratica se avverrà un errore imprevisto, 
+    # uscirà messaggio a video e il programma non andrà in crash...
     sys.excepthook = excepthook
+
+    # creazione del servizio che serve per capire se MSql è già in esecuzione in altra istanza
+    v_MSql_SIM = classSingleInstanceManager('MSql_SIM')  
+    # se esiste un'istanza, invia i file ed esce-termina
+    if v_nome_file_da_caricare != '' and v_MSql_SIM.try_send_to_running_instance(v_nome_file_da_caricare):
+        print('MSql già attivo --> apro il file in quella istanza e termino questa!')
+        sys.exit()
+    # altrimenti avvia come istanza primaria
+    if not v_MSql_SIM.start_listening():
+        # non sono riuscito a mettermi in ascolto: termina        
+        print('Non riesco a capire se MSql è già attivo!')
+        sys.exit()
 
     # eventuale preferenza di zoom di tutto il programma (introdotto a partire PyQt6)    
     os.environ['QT_SCALE_FACTOR'] = str(o_global_preferences.general_zoom / 100)
@@ -6571,17 +6671,21 @@ if __name__ == "__main__":
         if translate.load("02 - MSql_linguist_it.qm",v_dir_qtlinguist):            
             app.installTranslator(translate)          
 
-    # avvio del programma (aprendo eventuale file indicato su linea di comando)   
+    ##
+    # AVVIO DEL PROGRAMMA con creazione dell'oggetto della window1 (aprendo eventuale file indicato su linea di comando)   
+    ##
     application = MSql_win1_class(v_nome_file_da_caricare)             
+    # collego il segnale per i futuri file inviati    
+    v_MSql_SIM.messageReceived.connect(slot_open_file_from_SIM)
     # dimensioni della window
     application.carico_posizione_window()      
-    # mostro la window principale
+    # mostro la window principale    
     application.show()
 
     # nascondo la splash screen
     if v_view_splash:
         v_splash.close()
-
+    
     # se il programma è in esecuzione da pyinstaller...controllo se c'è una nuova versione del programma disponibile, e avverto di installarla    
     # viene controllata solo la data perché controllando anche ore e minuti, finisce che passa il minuto rispetto a quando viene pacchettizzato e gli orari non coincidono
     if getattr(sys, 'frozen', False):     
