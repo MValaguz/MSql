@@ -35,6 +35,13 @@ Source: "C:\MSql_exe\MSql.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\MSql_exe\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Il file di configurazione delle connessioni viene copiato nella dir delle preferenze solo se non già presente (questo file contiene le connessioni di default che non vanno poi condivise su GitHub)
 Source: "C:\Users\MValaguz\Documents\GitHub\MSql\source\MSql_connections.ini"; DestDir: "{localappdata}\MSql"; Flags: onlyifdoesntexist
+; NOTE: Queste istruzioni servono per installare il Font Fira 
+Source: "font\FiraCode-Bold.ttf"; DestDir: "{fonts}"; Flags: onlyifdoesntexist uninsneveruninstall
+Source: "font\FiraCode-Light.ttf"; DestDir: "{fonts}"; Flags: onlyifdoesntexist uninsneveruninstall
+Source: "font\FiraCode-Medium.ttf"; DestDir: "{fonts}"; Flags: onlyifdoesntexist uninsneveruninstall
+Source: "font\FiraCode-Regular.ttf"; DestDir: "{fonts}"; Flags: onlyifdoesntexist uninsneveruninstall
+Source: "font\FiraCode-Retina.ttf"; DestDir: "{fonts}"; Flags: onlyifdoesntexist uninsneveruninstall
+Source: "font\FiraCode-SemiBold.ttf"; DestDir: "{fonts}"; Flags: onlyifdoesntexist uninsneveruninstall
 
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 [Registry]
@@ -43,6 +50,13 @@ Root: HKA; Subkey: "Software\Classes\MSqlFile.msql"; ValueType: string; ValueNam
 Root: HKA; Subkey: "Software\Classes\MSqlFile.msql\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\MSql.exe,0"
 Root: HKA; Subkey: "Software\Classes\MSqlFile.msql\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\MSql.exe"" ""%1"""
 Root: HKA; Subkey: "Software\Classes\Applications\MSql.exe\SupportedTypes"; ValueType: string; ValueName: ".msql"; ValueData: ""
+; NOTE: Questi istruzioni caricano il font Fira nel registry
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"; ValueType: string; ValueName: "Fira Code (TrueType)"; ValueData: "FiraCode-Bold.ttf"; Flags: uninsdeletevalue
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"; ValueType: string; ValueName: "Fira Code (TrueType)"; ValueData: "FiraCode-Light.ttf"; Flags: uninsdeletevalue
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"; ValueType: string; ValueName: "Fira Code (TrueType)"; ValueData: "FiraCode-Medium.ttf"; Flags: uninsdeletevalue
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"; ValueType: string; ValueName: "Fira Code (TrueType)"; ValueData: "FiraCode-Regular.ttf"; Flags: uninsdeletevalue
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"; ValueType: string; ValueName: "Fira Code (TrueType)"; ValueData: "FiraCode-Retina.ttf"; Flags: uninsdeletevalue
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"; ValueType: string; ValueName: "Fira Code (TrueType)"; ValueData: "FiraCode-SemiBold.ttf"; Flags: uninsdeletevalue
 
 [Icons]
 Name: "{autoprograms}\MSql"; Filename: "{app}\MSql.exe"

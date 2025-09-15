@@ -148,7 +148,8 @@ class preferences_class():
             self.open_dir = ''
             self.save_dir = ''            
             self.end_of_line = False
-            self.font_editor = 'Cascadia Code, 12, BOLD'                                
+            #self.font_editor = 'Cascadia Code, 12, BOLD'                                
+            self.font_editor = 'Fira Code, 11'                                
             self.font_result = 'Segoe UI, 8'
             self.autosave_snapshoot_interval = 60            
             self.auto_column_resize = False

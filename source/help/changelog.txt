@@ -2,6 +2,10 @@
 MSql Changelog!
 ---------------
 
+Versione del 15/09/2025
+OK! su indicazione di Filippo, inserito interpretazione dell'istruzione WITH (Common Table Expression (CTE), utile per query modulari)  
+OK! inserito nel setup il font "Fira code"...una volta installato MSql è sufficiente sceglierlo tra i font disponibili
+
 Versione del 05/09/2025
 OK! se MSql è già in esecuzione e faccio doppio click su un file del desktop, fare in modo di aprire il nuovo file nel MSql che è già aperto;
     usato il metodo SIM dove all'avvio MSql crea un "server" che di scambio dati con altra istanza di MSql

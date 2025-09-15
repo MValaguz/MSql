@@ -4783,14 +4783,14 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             elif v_istruzione and not fine_istruzione(v_riga):
                  v_istruzione_str += chr(10) + v_riga
             # inizio select, insert, update, delete.... monoriga
-            elif not v_istruzione and v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','GRANT','REVOKE','ALTER','DROP','COMMENT','TRUNCATE') and v_riga[-1] == ';':
+            elif not v_istruzione and v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','GRANT','REVOKE','ALTER','DROP','COMMENT','TRUNCATE','WITH') and v_riga[-1] == ';':
                 v_istruzione_str = v_riga[0:len(v_riga)-1]
                 v_ok = self.esegui_istruzione(v_istruzione_str, p_explain)
                 if v_ok == 'ko':
                     return 'ko'
                 v_istruzione_str = ''
             # inizio select, insert, update, delete.... multiriga            
-            elif v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','GRANT','REVOKE','ALTER','DROP','COMMENT','TRUNCATE'):
+            elif v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','GRANT','REVOKE','ALTER','DROP','COMMENT','TRUNCATE','WITH'):
                 v_istruzione = True
                 v_istruzione_str = v_riga
             # riga di codice pl-sql (da notare come lo script verrà composto con v_riga_raw)             
@@ -4869,7 +4869,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # esecuzione normale...
         if not p_explain:    
             # se trovo select eseguo select
-            if p_istruzione[0:6].upper() == 'SELECT':                
+            if p_istruzione[0:6].upper() == 'SELECT' or p_istruzione[0:4].upper() == 'WITH':                
                 v_ok = self.esegui_select(p_istruzione, True)
             # ..altrimenti esegue come script
             else:                 
