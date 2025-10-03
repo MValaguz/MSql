@@ -3771,14 +3771,19 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         """
         # ricavo numero riga e posizione del cursore
         v_num_line, v_num_pos = self.e_sql.getCursorPosition()                                            
-        # se colonna è presente, estraggo il carattere corrente
-        if v_num_pos > 1:
+        # estraggo il carattere corrente, precedente e successivo        
+        if v_num_pos > 1:            
             v_char_left = self.e_sql.text(v_num_line)[v_num_pos-1]                             
+            try:
+                v_char_curr = self.e_sql.text(v_num_line)[v_num_pos]                             
+            except:
+                v_char_curr = ' '
             try:
                 v_char_right = self.e_sql.text(v_num_line)[v_num_pos]                             
             except:
                 v_char_right = ' '
         else:
+            v_char_curr = ' '
             v_char_left = ' '   
             v_char_right = ' '   
         
@@ -3789,10 +3794,16 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # se sto scrivendo un carattere speciale sopra un testo selezionato, il testo selezionato viene prima eliminato        
         if self.e_sql.selectedText() != '':               
             self.e_sql.cut()                
+
+        # se il carattere corrente è uguale al carattere ricevuto in input non faccio nulla; quindi cancello il carattere appena inserito e mi sposto a destra
+        if v_char_curr == p_char:            
+            self.e_sql.setCursorPosition(self.e_sql.getCursorPosition()[0], self.e_sql.getCursorPosition()[1]+1)    
+            self.e_sql.SendScintilla(QsciScintilla.SCI_DELETEBACK)     
+            return None
         
         # gestione singolo apice 
-        if p_char == "'":
-            # inserisco apice se a destra e sinistra ho degli spazi oppure sono tra due parentesi
+        if p_char == "'":            
+            # inserisco apice se a destra e sinistra ho degli spazi oppure sono tra due parentesi            
             if (v_char_left == " " and v_char_right == " ") or (v_char_left in '(,[,{' and v_char_right in '),],}') or (v_char_left == '=' and v_char_right == ' '):       
                 self.e_sql.insert("'")
                 self.e_sql.setCursorPosition(self.e_sql.getCursorPosition()[0], self.e_sql.getCursorPosition()[1])
@@ -4028,6 +4039,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         """                        
         # inizializzo le strutture grafiche e visualizzo la dialog per la ricerca del testo
         self.win_dialog_zoom_item = QDialog()                        
+        self.win_dialog_zoom_item.setWindowFlag(Qt.WindowType.WindowMinimizeButtonHint | Qt.WindowType.WindowMaximizeButtonHint)
         self.win_dialog_zoom_item.resize(300, 200)
         self.win_dialog_zoom_item.setWindowTitle('Zoom item')
         v_icon = QIcon()
@@ -4035,8 +4047,14 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         self.win_dialog_zoom_item.setWindowIcon(v_icon)
         self.win_dialog_zoom_item_gl = QGridLayout(self.win_dialog_zoom_item)
         self.win_dialog_zoom_lineEdit = QPlainTextEdit(self.win_dialog_zoom_item)        
+        self.win_dialog_zoom_lineEdit.setReadOnly(True)
         self.win_dialog_zoom_item_gl.addWidget(self.win_dialog_zoom_lineEdit, 0, 0, 1, 1)
-        self.win_dialog_zoom_lineEdit.setPlainText(self.v_o_table_current_item.text())
+        # siccome mi posso trovare di fronte ad un clob di grandi dimensioni...nella parte di caricamento ho caricato il clob completo dentro
+        # la parte data dell'item e una preview nella parte per il video, quindi quando sono nello zoom, se prensente la parte data, prendo quella    
+        if self.v_o_table_current_item.data(Qt.ItemDataRole.UserRole) == None:
+            self.win_dialog_zoom_lineEdit.setPlainText(self.v_o_table_current_item.text())
+        else:
+            self.win_dialog_zoom_lineEdit.setPlainText(self.v_o_table_current_item.data(Qt.ItemDataRole.UserRole))
         self.win_dialog_zoom_item.show()
 
     def slot_save_snapshoot(self):
@@ -5315,9 +5333,16 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                         self.o_table.setCellWidget(self.v_pos_y, x, label )                                        
                     # se il contenuto è un clob...leggo sempre tramite metodo read e lo carico in un widget di testo largo
                     elif self.tipi_intestazioni[x][1] == oracledb.CLOB:                        
-                        qtext = QTextEdit(field.read())    
-                        # da notare come prendendo qtext e trasformandolo in plaintext le prestazioni migliorino di molto                    
-                        self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( qtext.toPlainText() ) )                                                                                                                
+                        # a video viene caricata un'antemprima di 1000 caratteri al massimo, e il dato vero e proprio viene
+                        # caricato nell'item ma "nascosto" dentro la sezione data. In fase di zoom dell'item, verrà fatto un controllo e preso da li                        
+                        text = field.read()
+                        if len(text) > 1000:
+                            preview = text[:1000] + ' !!! DATA TRUNCATED !!!'
+                        else:
+                            preview = text
+                        item = QTableWidgetItem(preview)
+                        item.setData(Qt.ItemDataRole.UserRole, text)
+                        self.o_table.setItem(self.v_pos_y, x, item)
                     x += 1
                 # conto le righe (il numeratore è partito da 0, quindi è corretto che venga incrementato a questo punto)
                 self.v_pos_y += 1                
@@ -5844,14 +5869,15 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # se inserito una stringa di ricerca...
         if v_string_to_search != '' and v_string_to_replace != '':                        
             # lancio la ricerca su tutto e senza effetti a video (da notare come findFirst è un metodo di QScintilla)...
-            v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, 0, 0, False, False, False)
+            v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, 0, 0, False, False, False)            
             while v_found:
                 # ricavo la posizione in coordinate dove è stata trovata la stringa
                 v_start_line, v_start_pos, v_end_line, v_end_pos = self.e_sql.getSelection()
                 # eseguo la replace
-                self.e_sql.replace(v_string_to_replace)
-                # proseguo la ricerca alla posizione successiva
-                v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, v_start_line, v_start_pos + 1, False, False, False)                        
+                self.e_sql.replace(v_string_to_replace)                                
+                # sostituito con findnext in quanto se la stringa da ricercare conteneva un pezzo della stringa da sostituire, poi andava in loop
+                # v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, v_start_line, v_start_pos + 1, False, False, False)                        
+                v_found = self.e_sql.findNext()
 
     def slot_goto_line(self):
         """

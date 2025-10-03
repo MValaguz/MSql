@@ -2,6 +2,17 @@
 MSql Changelog!
 ---------------
 
+Versione del 01/10/2025
+OK! Migliorato la gestione dell'autoinserimento (es. scrittura di parentesi aperta e l'editor inserisce parentesi chiusa) facendo in modo che il carattere di chiusura venga ignorato se già presente:
+    es. select * from ta_azien where azien_co='SMI' --> alla prima digitazione di ' viene messo il secondo apice, ma una volta riempita la stringa posso scrivere un secondo apice per chiuderla senza dovermi spostare con il cursore
+OK! Marco ha caricato una tabella che contiene dei clob molto grandi TA_JSON_LOG e MSql va in tilt durante il caricamento!
+    Soluzione: In pratica MSql adesso prende al massimo 1000 caratteri in visualizzazione (una sorta di preview). Se il campo supera i 1000 caratteri viene comunque messa una dicitura finale
+		!!! DATA TRUNCATED !!! che indica all'utente che i dati sono troncati. Quando però si eseguirà lo zoom tramite tasto destro sulla cella, verrà caricato il contenuto completo. 
+		La window di zoom ora ha anche la possibilità di essere massimizzata ed è di sola lettura.
+
+Versione del 22/09/2025
+OK! corretto problema sulla funzione replace all che in caso di stringa da sostituire che conteneva parte della stringa di ricerca, lo mandava in loop
+
 Versione del 15/09/2025
 OK! su indicazione di Filippo, inserito interpretazione dell'istruzione WITH (Common Table Expression (CTE), utile per query modulari)  
 OK! inserito nel setup il font "Fira code"...una volta installato MSql è sufficiente sceglierlo tra i font disponibili
@@ -343,9 +354,11 @@ OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e part
 
 -------------
 MSql TO DO!!!
--------------
-- se quando avvio MSql lo avvio massimizzato, escono tutti errore di QPainter, mentre se finestra non massimizzata nulla del genere...come mai? è un problema che avviene anche se minimizzo e poi riporto a normal...qualcosa proprio nel repaint degli oggetti
-- nel fare la replace di testo (replace singolo) a Filippo è capitato che uscisse errore di ricorsione...nella stringa di ricerca c'erano doppi apici
+-------------		
+- ci sarebbe ancora la questione che quando faccio ctrl+invio venga comunque eseguita istruzione anche se non esiste un delimitatore come ; o /
+  attenzione! con Diego abbiamo visto istruzione begin dbms_output.put_line('ciao'); end; e non funziona nel senso che la interpreta come una select
+- se quando avvio MSql lo avvio massimizzato, escono tutti errori di QPainter, mentre se finestra non massimizzata nulla del genere...come mai? è un problema che avviene anche se minimizzo e poi riporto a normal...qualcosa proprio nel repaint degli oggetti
+  attenzione! mi sono accorto che questi errori escono anche con MGrep...e devo dire che in una versione precedente delle librerie Pyqt6 non uscivano questi errori!
 - capita che se faccio una select, poi una update/ delete o lancio script e poi eseguo la select, esca errore "Error to fetch data: DPY-1003: the executed statement does not return rows!!! Mi capitava con lo script del calcolo prelievi...lanciavo lo script e poi la select su tabella MW_SCOP1_TMP facendo F11
   -- lanciare il calcolo
 	begin
