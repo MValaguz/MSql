@@ -2,6 +2,20 @@
 MSql Changelog!
 ---------------
 
+Versione del 07/10/2025
+OK! inserito il nuovo strumento per la gestione del file system; è richiamabile tramite il menu strumenti 
+    oppure con l'icona che si trova in basso a sinistra che ha il simbolo di una cartella. All'apertura di
+		questo strumento se nelle preferenze è stata definita una cartella di apertura, viene presa quella, altrimenti
+		il classico desktop
+OK! inserita la gestione della direttiva CONNECT				
+		-- sintassi connect con user normale
+		connect username/password@tns_alias
+		-- sintassi da usare nel caso ci si voglia collegare come proxy				
+		connect proxy_user[destination_user]/proxy_password@tns_alias
+OK!  Il comando Ctrl+invio è ancora insoddisfacente...	
+     Attenzione! con Diego abbiamo visto istruzione begin dbms_output.put_line('ciao'); end; e non funziona nel senso che la interpreta come una select
+	   sarebbe sufficiente che venga cercata la parola begin...se la trova esegue come codice
+
 Versione del 01/10/2025
 OK! Migliorato la gestione dell'autoinserimento (es. scrittura di parentesi aperta e l'editor inserisce parentesi chiusa) facendo in modo che il carattere di chiusura venga ignorato se già presente:
     es. select * from ta_azien where azien_co='SMI' --> alla prima digitazione di ' viene messo il secondo apice, ma una volta riempita la stringa posso scrivere un secondo apice per chiuderla senza dovermi spostare con il cursore
@@ -355,8 +369,6 @@ OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e part
 -------------
 MSql TO DO!!!
 -------------		
-- ci sarebbe ancora la questione che quando faccio ctrl+invio venga comunque eseguita istruzione anche se non esiste un delimitatore come ; o /
-  attenzione! con Diego abbiamo visto istruzione begin dbms_output.put_line('ciao'); end; e non funziona nel senso che la interpreta come una select
 - se quando avvio MSql lo avvio massimizzato, escono tutti errori di QPainter, mentre se finestra non massimizzata nulla del genere...come mai? è un problema che avviene anche se minimizzo e poi riporto a normal...qualcosa proprio nel repaint degli oggetti
   attenzione! mi sono accorto che questi errori escono anche con MGrep...e devo dire che in una versione precedente delle librerie Pyqt6 non uscivano questi errori!
 - capita che se faccio una select, poi una update/ delete o lancio script e poi eseguo la select, esca errore "Error to fetch data: DPY-1003: the executed statement does not return rows!!! Mi capitava con lo script del calcolo prelievi...lanciavo lo script e poi la select su tabella MW_SCOP1_TMP facendo F11

@@ -306,6 +306,8 @@ def da_qt_a_formato_data_oracle(p_formato):
 
 def extract_sql_under_cursor(p_testo: str, p_cursor_pos: int):
     """
+    ATTENZIONE! Funzione che verrà sostituita da extract_section_under_cursor, quindi obsoleta
+
     Estrae l'istruzione SQL sotto p_cursor_pos in p_testo,
     considerando come separatori i caratteri ';' e '/' ma trattando '/'
     come terminatore solo se, tolti spazi/tab, è l’unico carattere
@@ -510,6 +512,211 @@ def commenta_una_procedura_funzione(p_testo, p_autore):
     
     return v_risultato
 
+# Funzione creata da CoPilot con le seguenti direttive
+# vorrei creare una funzione python che ricevendo in pasto la stringa "connect username/password@tns_alias" 
+# o quella con proxy "connect proxy_user[destination_user]/proxy_password@tns_alias" 
+# restituisca i parametri di connessione separati
+def extract_connect_info_from_string(connect_string):
+    """
+        Da una stringa di connect, estrai info di connessione a Oracle DB.
+    """
+    
+    # Rimuove eventuale prefisso "connect"
+    connect_string = connect_string.strip()
+    if connect_string.lower().startswith("connect "):
+        connect_string = connect_string[8:].strip()
+
+    # Regex per proxy: proxy_user[destination_user]/proxy_password@tns_alias
+    proxy_pattern = r'^([\w.-]+)\[([\w.-]+)\]/(.+?)@(.+)$'
+    # Regex per standard: username/password@tns_alias
+    standard_pattern = r'^([\w.-]+)/(.+?)@(.+)$'
+
+    proxy_match = re.match(proxy_pattern, connect_string)
+    if proxy_match:
+        return {
+            "e_user_name": proxy_match.group(2),  # destination_user
+            "e_user_proxy": proxy_match.group(1),  # proxy_user
+            "e_password": proxy_match.group(3),
+            "e_server_name": proxy_match.group(4),
+            "e_user_mode": "proxy"
+        }
+
+    standard_match = re.match(standard_pattern, connect_string)
+    if standard_match:
+        return {
+            "e_user_name": standard_match.group(1),
+            "e_user_proxy": "",
+            "e_password": standard_match.group(2),
+            "e_server_name": standard_match.group(3),
+            "e_user_mode": "standard"
+        }
+
+    return {}
+
+# Funzione creata da CoPilot con le seguenti direttive
+# ho un testo che è diviso in sezioni logiche
+# un primo modo per identificare il termine di una sezione logica è il carattere "punto e virgola" che può trovarsi in qualsiasi posizione del testo
+# un secondo modo per identificare il termine di una sezione è una riga isolata dove è presente solo il carattere slash (ignorare spazi o/o tab)
+# un terzo modo per identificare il termine di una sezione è che ci sia una riga vuota (ignorare spazi e/o tab) prima e dopo la sezione stessa
+# ora vorrei creare una funzione python che ricevendo in ingresso il testo (che può essere formattato avendo come carattere di fine riga sia LF che CRLF)
+# e un altro parametro di input che indica il carattere su cui è posizionato il cursore, restituisca la sezione di testo.
+# La funzione, partendo dalla posizione del cursore, vada indietro sul testo a cercare un inizio di sezione e poi vada avanti, rispetto al cursore, cercando una fine di sezione.
+# Quindi restituisca due parametri che indicano la posizione di inizio e fine sezione
+# Attenzione! Se una sezione viene in qualche modo identificata tramite slash (ad inizio e fine testo se non c'è, è come se ci fosse),
+# allora questa sezione ha la priorità sul cercare una seconda sezione con punto "punto e virgola" (ad inizio e fine testo se non c'è, è come se ci fosse),.
+# Lo stesso nel caso di cerchi la terza sezione, solo a fronte del fatto che non trovato nulla con i due metodi precedenti
+# la funzione si deve chiamare extract_section_under_cursor
+def extract_section_under_cursor(text: str, cursor_pos: int):
+    """
+    Restituisce (start, end) della sezione logica contenente il cursore.
+    - Accetta testo con terminatori LF, CRLF o CR.
+    - Priorità: sezioni delimitate da righe che contengono solo '/' (ignorando spazi/tab).
+    - Se non ci sono slash, usa ';' come delimitatore (ultimo ';' prima del cursore e primo ';' dopo).
+    - Indici ritornati sono relativi al testo originale e possono essere usati per slicing.
+    """
+
+    # --- Normalizza la posizione del cursore dentro i limiti del testo
+    if cursor_pos < 0:
+        cursor_pos = 0
+    if cursor_pos > len(text):
+        cursor_pos = len(text)
+
+    # --- Suddivido il testo in righe preservando gli offset originali
+    # Evito l'uso di re: scorro carattere per carattere e riconosco \r\n, \r e \n
+    lines: List[Dict] = []
+    i = 0
+    n = len(text)
+    while i < n:
+        line_start = i
+        # avanza fino a trovare \r o \n oppure la fine del testo
+        while i < n and text[i] not in ('\r', '\n'):
+            i += 1
+        # testo della riga (senza terminatore)
+        line_text = text[line_start:i]
+
+        # determina la lunghezza del terminatore di riga (0, 1 o 2)
+        if i < n and text[i] == '\r':
+            if i + 1 < n and text[i + 1] == '\n':
+                line_break_len = 2  # CRLF
+            else:
+                line_break_len = 1  # solo CR
+        elif i < n and text[i] == '\n':
+            line_break_len = 1  # solo LF
+        else:
+            line_break_len = 0  # fine testo senza newline
+
+        line_end = i + line_break_len  # indice subito dopo il terminatore di riga
+        # salvo informazioni utili: testo riga, inizio, fine (incluso newline), fine parte testo
+        lines.append({
+            'text': line_text,
+            'start': line_start,
+            'end': line_end,
+            'line_only_end': line_start + len(line_text)
+        })
+
+        # salto oltre il terminatore
+        i = line_end
+
+    # se il testo è vuoto, restituisco (0,0)
+    if not lines:
+        return 0, 0
+
+    # --- Trovo l'indice della riga che contiene il cursore
+    cursor_line_idx = len(lines) - 1
+    for idx, ln in enumerate(lines):
+        # la riga contiene il cursore se il cursore è tra start e end (inclusi bordi)
+        if ln['start'] <= cursor_pos <= ln['end']:
+            cursor_line_idx = idx
+            break
+
+    # --- Helper: verifica se una riga è "slash line"
+    def is_slash_line(s: str) -> bool:
+        # vogliamo True solo se, dopo aver rimosso spazi e tab ai lati, la riga è esattamente "/"
+        left = 0
+        right = len(s) - 1
+        # rimuovo spazi e tab da sinistra
+        while left <= right and s[left] in (' ', '\t'):
+            left += 1
+        # rimuovo spazi e tab da destra
+        while right >= left and s[right] in (' ', '\t'):
+            right -= 1
+        # se l'area rimanente è esattamente un singolo carattere '/' allora è una slash line
+        return left == right and left < len(s) and s[left] == '/'
+
+    # --- Lista indici delle righe che sono slash
+    slash_indices = [i for i, ln in enumerate(lines) if is_slash_line(ln['text'])]
+
+    # --- Se esistono righe slash, usiamo la delimitazione slash con priorità
+    if slash_indices:
+        # cerco la slash precedente rispetto alla riga del cursore (scendendo dall'alto)
+        prev_slash_idx = None
+        for i in range(cursor_line_idx, -1, -1):
+            if i in slash_indices:
+                prev_slash_idx = i
+                break
+
+        # determina inizio sezione: subito dopo la riga slash precedente (includendo newline)
+        if prev_slash_idx is not None:
+            start = lines[prev_slash_idx]['end']
+        else:
+            # se non c'è slash precedente, inizio sezione = inizio del testo
+            start = 0
+
+        # cerco la slash successiva rispetto alla riga del cursore
+        next_slash_idx = None
+        for i in range(cursor_line_idx, len(lines)):
+            if i in slash_indices:
+                # se il cursore è nella riga slash corrente, saltiamo questa come "successiva"
+                # e consideriamo come precedente quella riga (la sezione è la successiva dopo questa riga)
+                if i == cursor_line_idx and lines[i]['start'] <= cursor_pos <= lines[i]['end']:
+                    if prev_slash_idx is None:
+                        prev_slash_idx = i
+                        start = lines[i]['end']
+                    continue
+                next_slash_idx = i
+                break
+
+        # determina fine sezione: inizio della riga slash successiva (esclude la riga slash)
+        if next_slash_idx is not None:
+            end = lines[next_slash_idx]['start']
+        else:
+            # se non c'è slash successiva, fine sezione = fine del testo
+            end = len(text)
+
+        # sicurezza: assicurarsi che la sezione contenga il cursore; se qualcosa non quadra,
+        # ritorniamo i bordi del testo per evitare risultati inconsistenti
+        if start > cursor_pos:
+            start = 0
+        if end < cursor_pos:
+            end = len(text)
+
+        return start, end
+
+    # --- Se non ci sono slash, fallback su delimitatori ';'
+    # Trovo l'ultimo punto e virgola prima del cursore
+    last_semicolon = -1
+    # iterazione fino a cursor_pos-1 per trovare l'ultima occorrenza
+    for i in range(0, min(len(text), cursor_pos)):
+        if text[i] == ';':
+            last_semicolon = i
+    sem_start = last_semicolon + 1 if last_semicolon != -1 else 0
+
+    # Trovo il primo punto e virgola a partire da cursor_pos (incluso)
+    next_semicolon = -1
+    for i in range(cursor_pos, len(text)):
+        if text[i] == ';':
+            next_semicolon = i
+            break
+    sem_end = next_semicolon if next_semicolon != -1 else len(text)
+
+    # Assicuro che la sezione contenga il cursore; in caso contrario estendo ai bordi
+    if sem_start > cursor_pos:
+        sem_start = 0
+    if sem_end < cursor_pos:
+        sem_end = len(text)
+
+    return sem_start, sem_end
+
 ######################################################################################################################
 # TEST DELLA FUNZIONE CHE PARTENDO DA CODICE PL-SQL, RESTITUISCE UN OGGETTO CHE CONTIENE TUTTE LE DEFINIZIONI TROVATE
 ######################################################################################################################
@@ -525,8 +732,8 @@ if __name__ == "__main__":
     # #scrivi_lista_in_output(['ciao\n','marco\r\n'])
     
     # test funzione che restituisce owner e object    
-    v_owner, v_object = extract_object_name_from_cursor_pos('select smile.oc_ortes.azien_co ',19)    
-    print(f"{v_owner} {v_object}")    
+    #v_owner, v_object = extract_object_name_from_cursor_pos('select smile.oc_ortes.azien_co ',19)    
+    #print(f"{v_owner} {v_object}")    
     #v_owner, v_object = extract_object_name_from_cursor_pos('select * from smi.op_com ',20)    
     #print(f"{v_owner} {v_object}")    
     
@@ -598,9 +805,57 @@ if __name__ == "__main__":
     #     print(f"{v_istruzione} ,{v_riga_inizio},{v_riga_fine}")
     #     #print(v_testo[v_riga_inizio:v_riga_fine],)   
 
-# if __name__ == "__main__":      
-#    print(commenta_una_procedura_funzione("""
-#                                          /* Restituisce T se l'utente è abilitato alla nuova funzionalità  di APEX */
-# FUNCTION APEX_CTR_WMS_ABILITAZIONE(P_AZIEN_CO    IN VARCHAR2
-#                                   ,P_LOGIN_CO    IN VARCHAR2) RETURN VARCHAR2 IS""",
-#                                      'Marco Valaguzza'))
+    v_testo = """    select * 
+    from   ta_azien
+    where  azien_co='SMI'
+    /
+    SELECT * 
+    FROM CP_DIPEN 
+    WHERE AZIEN_CO='SMI' AND 
+          DIPEN_CO='00035'
+    /
+    SELECT * 
+    FROM CP_DIPEN 
+    WHERE AZIEN_CO='TEC' AND 
+          DIPEN_CO='00035'
+    union
+    SELECT * 
+    FROM CP_DIPEN 
+    WHERE AZIEN_CO='SMI' AND 
+          DIPEN_CO='00035'
+    /			
+    declare
+      v_ok varchar2(100);
+    begin
+      v_ok := 'ciao';
+    	dbms_output.put_line(v_ok);
+    end;			
+    /
+    SELECT *
+    FROM   MW_PRELI_TMP
+    WHERE  TIPOR_DO = 'O'
+       AND ESERC_CO = '2025'
+       AND DEPOS_CO = 'B1'
+       AND TORDI_CO = 'ORPI'
+       AND ORDIN_NU = 10
+       AND ARTIC_CO IS NOT NULL
+       /* LA QTA MANCANTE VIENE NETTIFICATA CON LA QTA DI LISTA */
+       AND QTAMA_NU - QTALI_NU = 0
+       AND (SELECT DIVPR_CO
+         FROM   MA_PRAGE
+         WHERE  MA_PRAGE.AZIEN_CO = MW_PRELI_TMP.AZIEN_CO
+            AND MA_PRAGE.ARTIC_CO = MW_PRELI_TMP.ARTIC_CO) IS NOT NULL
+       AND RIFOP_CO IS NOT NULL
+    ORDER BY DATAP_DA, PRIOR_NU
+/		
+
+select * from ta_azien
+
+select * from ma_depos
+"""
+    v_start, v_end = extract_section_under_cursor(v_testo, 20)
+    print(v_testo[v_start:v_end])
+    v_start, v_end = extract_section_under_cursor(v_testo, 400)
+    print(v_testo[v_start:v_end])
+    v_start, v_end = extract_section_under_cursor(v_testo, 1100)
+    print(v_testo[v_start:v_end])

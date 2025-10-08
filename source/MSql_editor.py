@@ -363,6 +363,27 @@ class classSingleInstanceManager(QObject):
             socket.disconnectFromServer()
             socket.close()
 
+class MyFileExtensionFilterProxyModel(QSortFilterProxyModel):
+    """
+       Questa classe viene usata per filtrare i file mostrati nel file system tree view 
+    """
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        # Estensioni consentite
+        self.allowed_extensions = ['.msql', '.sql', '.txt', '.pls', '.plb', '.csv', '.tsv', '.json', '.xml']
+
+    def filterAcceptsRow(self, source_row, source_parent):
+        index = self.sourceModel().index(source_row, 0, source_parent)
+        if not index.isValid():
+            return False
+
+        # Se è una directory, accetta sempre
+        if self.sourceModel().isDir(index):
+            return True
+
+        # Controlla estensione del file
+        file_name = self.sourceModel().fileName(index).lower()
+        return any(file_name.endswith(ext) for ext in self.allowed_extensions)
 #
 #  __  __    _    ___ _   _  __        _____ _   _ ____   _____        __
 # |  \/  |  / \  |_ _| \ | | \ \      / /_ _| \ | |  _ \ / _ \ \      / /
@@ -435,6 +456,13 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # Aggiunta di windget alla statusbar con: flag editabilità, numero di caratteri, indicatore di overwrite, ecc..
         # Da notare come l'allineamento a destra sia effettuato tramite un addPermanentWidget e a sinistra con il addWidget
         ###                                        
+        # Bottone con icona per aprire la dock del file system
+        self.fs_button = QPushButton()
+        self.fs_button.setIcon(QIcon("icons:folder.png")) 
+        self.fs_button.setIconSize(QSize(8,8))
+        self.fs_button.setToolTip(QCoreApplication.translate('MSql_win1','Open file system dock'))        
+        self.fs_button.clicked.connect(self.slot_mostra_file_system_dock)
+        self.statusBar.addWidget(self.fs_button)  
         # Informazioni sul tempo di esecuzione dell'ultima istruzione
         self.l_exec_time = QLabel(QCoreApplication.translate('MSql_win1','Last execution time:'))
         self.l_exec_time.setFrameStyle(QFrame.Shape.NoFrame)        
@@ -470,7 +498,30 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         self.l_tabella_editabile = QLabel(QCoreApplication.translate('MSql_win1','Editable table: Disabled'))
         self.l_tabella_editabile.setFrameStyle(QFrame.Shape.NoFrame)
         self.l_tabella_editabile.setStyleSheet('color: black;')
-        self.statusBar.addPermanentWidget(self.l_tabella_editabile)        
+        self.statusBar.addPermanentWidget(self.l_tabella_editabile)      
+
+        ###
+        # Caricamento della dock con il file system (partendo da disco C) 
+        ###        
+        self.file_system_model = QFileSystemModel()
+        self.file_system_model.setRootPath(QDir.rootPath())
+        self.file_system_proxy_model = MyFileExtensionFilterProxyModel()
+        self.file_system_proxy_model.setSourceModel(self.file_system_model)
+        self.o_file_system.setModel(self.file_system_proxy_model)
+        # Espande la cartella desktop o quella impostata nelle preferenze
+        if o_global_preferences.open_dir != '':
+            v_path = o_global_preferences.open_dir
+        else:
+            v_path = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DesktopLocation)
+        # ottengo l'indice dal modello originale
+        source_index = self.file_system_model.index(v_path)
+        # converto l'indice nel modello proxy
+        proxy_index = self.file_system_proxy_model.mapFromSource(source_index)
+        # uso l'indice proxy per espandere e selezionare
+        self.o_file_system.expand(proxy_index)
+        self.o_file_system.scrollTo(proxy_index)
+        self.o_file_system.setCurrentIndex(proxy_index)
+        self.o_file_system.setColumnWidth(0, 250)
 
         ###
         # Var per la gestione dei files recenti
@@ -685,7 +736,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         global o_global_preferences                
         global v_global_main_geometry
         
-        #print('Voce di menù --> ' + str(p_slot.data()))                    
+        #print('Dato di menù --> ' + str(p_slot.data()))                    
         #print('Nome menu    --> ' + p_slot.objectName())
         #print('Voce di menù --> ' + p_slot.text())    
 
@@ -716,7 +767,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         elif p_slot.objectName() == 'actionExplore_database_link':
             self.slot_explore_database_link()
         # Apertura di un nuovo editor o di un file recente o di una chiamata esterna da parte di altra istanza MSql
-        elif p_slot.text() in (QCoreApplication.translate('MSql_win1','New'),QCoreApplication.translate('MSql_win1','Open'),QCoreApplication.translate('MSql_win1','Open_db_obj')) or p_slot.text() in ('OPEN_FROM_SIM') or str(p_slot.data()) == 'FILE_RECENTI':
+        elif p_slot.text() in (QCoreApplication.translate('MSql_win1','New'),QCoreApplication.translate('MSql_win1','Open'),QCoreApplication.translate('MSql_win1','Open_db_obj')) or p_slot.text() in ('OPEN_FROM_SIM') or str(p_slot.data()) == 'FILE_RECENTI':            
             # se richiesto un file recente
             if str(p_slot.data()) == 'FILE_RECENTI':
                 # apro il file richiesto
@@ -812,6 +863,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # visualizza l'object viewer
         elif p_slot.objectName() == 'actionObject_Viewer':
             self.dockWidget_2.show()
+        # visualizza il file system
+        elif p_slot.objectName() == 'actionFile_system':
+            self.slot_mostra_file_system_dock()
         # visualizza l'history
         elif p_slot.objectName() == 'actionHistory':
             self.slot_history()
@@ -2994,6 +3048,30 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         centra_window_figlia(self, self.o_text_funtions)
         self.o_text_funtions.show()
 
+    def slot_mostra_file_system_dock(self):
+        """
+           Mostra/nasconde il dock del file system
+        """
+        if self.dockWidget_3.isVisible():
+            self.dockWidget_3.hide()
+        else:
+            self.dockWidget_3.show()
+
+    def slot_file_system_double_click(self, p_index):
+        """
+        Evento che si scatena quando viene fatto doppio click su un file all'interno del file system
+        """
+        # mappo l'indice dal proxy al modello sorgente
+        source_index = self.file_system_proxy_model.mapToSource(p_index)
+        # uso l'indice sorgente per ottenere il percorso del file
+        v_file_name = self.file_system_model.filePath(source_index)    
+        # se è un file, lo apro nell'editor
+        if v_file_name != '':
+            v_titolo, v_contenuto_file, v_codifica_utf8 = self.openfile(v_file_name)
+            v_azione = QAction()
+            v_azione.setText('Open_db_obj')
+            self.smistamento_voci_menu(v_azione, v_titolo, v_contenuto_file, v_codifica_utf8)
+          
 #  _     _______  _______ ____  
 # | |   | ____\ \/ / ____|  _ \ 
 # | |   |  _|  \  /|  _| | |_) |
@@ -4689,8 +4767,6 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                       da segni di separazione come / e ;           
            
            Se si attiva p_explain la select verrà eseguita come se fosse uno script che crea il "piano di esecuzione"
-           Attenzione! Eventuali modifiche al parser, va compreso se implementarle anche nella funzione utilita_testo.extract_sql_under_cursor
-                       che viene richiamata con CTRL+INVIO
         """
         global o_global_preferences  
 
@@ -4807,6 +4883,18 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 if v_ok == 'ko':
                     return 'ko'
                 v_istruzione_str = ''
+            # comando connect di tipo monoriga 
+            # viene usata la funzione che ricava dalla stringa i parametri di connessione
+            # poi vengono impostati i parametri di connessione dell'oggetto principale!
+            # e quindi richiamata la funzione connetti che è presente in quell'oggetto!
+            elif not v_istruzione and v_riga.split()[0].upper() == 'CONNECT':
+                v_parametri = extract_connect_info_from_string(v_riga)                
+                self.link_to_MSql_win1_class.e_user_name = v_parametri["e_user_name"]
+                self.link_to_MSql_win1_class.e_user_proxy = v_parametri["e_user_proxy"]
+                self.link_to_MSql_win1_class.e_password = v_parametri["e_password"]
+                self.link_to_MSql_win1_class.e_server_name = v_parametri["e_server_name"]
+                self.link_to_MSql_win1_class.e_user_mode = v_parametri["e_user_mode"]
+                self.link_to_MSql_win1_class.slot_connetti()
             # inizio select, insert, update, delete.... multiriga            
             elif v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','GRANT','REVOKE','ALTER','DROP','COMMENT','TRUNCATE','WITH'):
                 v_istruzione = True
@@ -4861,13 +4949,18 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             v_pos_relativa_cursore = self.e_sql.SendScintilla(self.e_sql.SCI_GETCURRENTPOS)
             # richiamo funzione interna per estrazione dell'istruzione sql o pl-sql 
             #v_istruzione, v_tipo_istruzione, v_start_pos, v_end_pos = extract_sql_under_cursor(self.e_sql.text(), v_pos_relativa_cursore + 1)                                        
-            v_istruzione, v_start_pos, v_end_pos = extract_sql_under_cursor(self.e_sql.text(), v_pos_relativa_cursore)                                        
-            v_tipo_istruzione = 'SQL'
+            #v_istruzione, v_start_pos, v_end_pos = extract_sql_under_cursor(self.e_sql.text(), v_pos_relativa_cursore)                                        
+            v_start_pos, v_end_pos = extract_section_under_cursor(self.e_sql.text(), v_pos_relativa_cursore)
+            v_istruzione = self.e_sql.text()[v_start_pos:v_end_pos]
+            if 'BEGIN' in v_istruzione.upper():
+                v_tipo_istruzione = 'PL-SQL'
+            else:
+                v_tipo_istruzione = 'SQL'            
             # se trovata istruzione
             if v_istruzione != '' and v_end_pos > 0:                
                 # eseguo l'istruzione SQL                              
                 if v_tipo_istruzione == 'SQL':                    
-                    self.esegui_istruzione(v_istruzione, False)        
+                    self.esegui_select(v_istruzione, True)                    
                 # oppure codice PL-SQL  
                 elif v_tipo_istruzione == 'PL-SQL':
                     self.esegui_plsql(v_istruzione, False)        

@@ -201,6 +201,7 @@
     <addaction name="separator"/>
     <addaction name="actionObjects_Navigator"/>
     <addaction name="actionObject_Viewer"/>
+    <addaction name="actionFile_system"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -706,6 +707,36 @@
    <addaction name="actionCreate_autocompletation_dictionary"/>
    <addaction name="actionPreferences"/>
    <addaction name="actionProgram_info"/>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget_3">
+   <property name="windowTitle">
+    <string>File system</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_3">
+    <layout class="QGridLayout" name="gridLayout_3">
+     <property name="leftMargin">
+      <number>3</number>
+     </property>
+     <property name="topMargin">
+      <number>3</number>
+     </property>
+     <property name="rightMargin">
+      <number>3</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <property name="horizontalSpacing">
+      <number>4</number>
+     </property>
+     <item row="0" column="0">
+      <widget class="QTreeView" name="o_file_system"/>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <action name="actionOpen">
    <property name="icon">
@@ -1699,6 +1730,15 @@
     <string>Ctrl+Alt+T</string>
    </property>
   </action>
+  <action name="actionFile_system">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/folder.png</normaloff>:/icons/icons/folder.png</iconset>
+   </property>
+   <property name="text">
+    <string>File system</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -1866,6 +1906,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>o_file_system</sender>
+   <signal>doubleClicked(QModelIndex)</signal>
+   <receiver>MSql_win1</receiver>
+   <slot>slot_file_system_double_click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>131</x>
+     <y>219</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>264</x>
+     <y>86</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>slot_oggetti_db_scelta()</slot>
@@ -1875,5 +1931,6 @@
   <slot>slot_object_viewer_find()</slot>
   <slot>slot_object_navigator_start_timer()</slot>
   <slot>slot_select_schema()</slot>
+  <slot>slot_file_system_double_click()</slot>
  </slots>
 </ui>

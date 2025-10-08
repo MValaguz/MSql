@@ -267,6 +267,19 @@ class Ui_MSql_win1(object):
         self.toolBar = QtWidgets.QToolBar(parent=MSql_win1)
         self.toolBar.setObjectName("toolBar")
         MSql_win1.addToolBar(QtCore.Qt.ToolBarArea.TopToolBarArea, self.toolBar)
+        self.dockWidget_3 = QtWidgets.QDockWidget(parent=MSql_win1)
+        self.dockWidget_3.setObjectName("dockWidget_3")
+        self.dockWidgetContents_3 = QtWidgets.QWidget()
+        self.dockWidgetContents_3.setObjectName("dockWidgetContents_3")
+        self.gridLayout_3 = QtWidgets.QGridLayout(self.dockWidgetContents_3)
+        self.gridLayout_3.setContentsMargins(3, 3, 3, 0)
+        self.gridLayout_3.setHorizontalSpacing(4)
+        self.gridLayout_3.setObjectName("gridLayout_3")
+        self.o_file_system = QtWidgets.QTreeView(parent=self.dockWidgetContents_3)
+        self.o_file_system.setObjectName("o_file_system")
+        self.gridLayout_3.addWidget(self.o_file_system, 0, 0, 1, 1)
+        self.dockWidget_3.setWidget(self.dockWidgetContents_3)
+        MSql_win1.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.dockWidget_3)
         self.actionOpen = QtGui.QAction(parent=MSql_win1)
         icon19 = QtGui.QIcon()
         icon19.addPixmap(QtGui.QPixmap("icons:folder.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
@@ -691,6 +704,9 @@ class Ui_MSql_win1(object):
         icon88.addPixmap(QtGui.QPixmap("icons:functions.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         self.actionText_functions.setIcon(icon88)
         self.actionText_functions.setObjectName("actionText_functions")
+        self.actionFile_system = QtGui.QAction(parent=MSql_win1)
+        self.actionFile_system.setIcon(icon19)
+        self.actionFile_system.setObjectName("actionFile_system")
         self.menuFiles.addAction(self.actionNew)
         self.menuFiles.addAction(self.actionOpen)
         self.menuFiles.addSeparator()
@@ -784,6 +800,7 @@ class Ui_MSql_win1(object):
         self.menuTools.addSeparator()
         self.menuTools.addAction(self.actionObjects_Navigator)
         self.menuTools.addAction(self.actionObject_Viewer)
+        self.menuTools.addAction(self.actionFile_system)
         self.menuView.addAction(self.actionZoom_In)
         self.menuView.addAction(self.actionZoom_Out)
         self.menuView.addAction(self.actionFull_screen)
@@ -866,6 +883,7 @@ class Ui_MSql_win1(object):
         self.e_object_viewer_find.editingFinished.connect(MSql_win1.slot_object_viewer_find) # type: ignore
         self.oggetti_db_ricerca.textChanged['QString'].connect(MSql_win1.slot_object_navigator_start_timer) # type: ignore
         self.b_schema.clicked.connect(MSql_win1.slot_select_schema) # type: ignore
+        self.o_file_system.doubleClicked['QModelIndex'].connect(MSql_win1.slot_file_system_double_click) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(MSql_win1)
         MSql_win1.setTabOrder(self.oggetti_db_scelta, self.e_view_description)
         MSql_win1.setTabOrder(self.e_view_description, self.oggetti_db_refresh)
@@ -897,6 +915,7 @@ class Ui_MSql_win1(object):
         self.dockWidget_2.setWindowTitle(_translate("MSql_win1", "Object Viewer"))
         self.label.setText(_translate("MSql_win1", "Like"))
         self.toolBar.setWindowTitle(_translate("MSql_win1", "toolBar"))
+        self.dockWidget_3.setWindowTitle(_translate("MSql_win1", "File system"))
         self.actionOpen.setText(_translate("MSql_win1", "Open"))
         self.actionOpen.setShortcut(_translate("MSql_win1", "Ctrl+O"))
         self.actionSave.setText(_translate("MSql_win1", "Save"))
@@ -1034,6 +1053,7 @@ class Ui_MSql_win1(object):
         self.actionComment_from_function.setShortcut(_translate("MSql_win1", "Ctrl+Alt+F"))
         self.actionText_functions.setText(_translate("MSql_win1", "Text functions"))
         self.actionText_functions.setShortcut(_translate("MSql_win1", "Ctrl+Alt+T"))
+        self.actionFile_system.setText(_translate("MSql_win1", "File system"))
 from custom_widget import MyCustomTreeView
 
 
