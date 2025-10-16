@@ -2,6 +2,20 @@
 MSql Changelog!
 ---------------
 
+Versione del 15/10/2025
+OK! segnalato da Diego...istruzione update zxxxx set campo='minuscolo' --> facendo ctrl+invio in realtà aggiorna in maiuscolo!
+OK! nella creazione di un trigger che conteneva errore non mi ha dato errore!
+OK! inserito bottone di refresh sulla dock file system e fatto in modo che all'avvio non venga aperta e quindi non venga nemmeno caricata...perché cmq ci mette del tempo!
+OK! fare debug per il crash che avviene quando faccio la selezione rettangolare con copia-incolla!!! Il problema è stato riscontrato nel fatto che sull'editor
+    era stato attivato il controllo dell'evento "selezione testo" per fare in modo che in caso di doppio click su una parola, venissero evidenziate tutte le parole uguali 
+		alla parola selezionata, presenti nel testo. In pratica l'evento di selezione rettangolare e questo evento gestito male andavano in ricorsione e poi in crash.
+		A questo punto inserito evento specifico di doppio click che quindi si svincola dalla selezione di un testo generico.
+		Questa modifica ha introdotto il fatto che facendo doppio click sulla parola, evidenzia tutte le corrispondenze nel testo e quando poi si fa click 
+		rimane l'evidenzia....ma basta fare di nuovo doppio click su una zona vuota e su altra parola che l'evidenzia si sposta...a questo punto lasciato così!
+
+Versione del 10/10/2025
+OK! bug segnalato da Diego sempre su comando CTRL+INVIO
+
 Versione del 07/10/2025
 OK! inserito il nuovo strumento per la gestione del file system; è richiamabile tramite il menu strumenti 
     oppure con l'icona che si trova in basso a sinistra che ha il simbolo di una cartella. All'apertura di
@@ -369,8 +383,7 @@ OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e part
 -------------
 MSql TO DO!!!
 -------------		
-- se quando avvio MSql lo avvio massimizzato, escono tutti errori di QPainter, mentre se finestra non massimizzata nulla del genere...come mai? è un problema che avviene anche se minimizzo e poi riporto a normal...qualcosa proprio nel repaint degli oggetti
-  attenzione! mi sono accorto che questi errori escono anche con MGrep...e devo dire che in una versione precedente delle librerie Pyqt6 non uscivano questi errori!
+- quando eseguo degli script come la creazione delle tabelle e c'è errore...si posiziona nel punto sbagliato!!!
 - capita che se faccio una select, poi una update/ delete o lancio script e poi eseguo la select, esca errore "Error to fetch data: DPY-1003: the executed statement does not return rows!!! Mi capitava con lo script del calcolo prelievi...lanciavo lo script e poi la select su tabella MW_SCOP1_TMP facendo F11
   -- lanciare il calcolo
 	begin
@@ -380,8 +393,9 @@ MSql TO DO!!!
 	-- eseguire questa istruzione e poi premere F6 per andare a fine elenco...dovrebbe uscire errore reperimento record....da li dovrebbe partire errore interno a MSql
 	select DESCRIZIONE('MW_MLOCA','LOCAZ_CO','IDLOC_NU',NULL,NULL,TO_CHAR(POSOR_NU),NULL,NULL,NULL) from VA_MW_PREOP_TMP
 	questa istruzione se eseguita e poi faccio F6 per scorrere i record, esce proprio l'errore indicato
-- !!!! fare debug per il crash che avviene quando faccio la selezione rettangolare con copia-incolla!!! fare una versione semplifica con qscintilla e fare dei test anche li
 - continuare con l'help 
+- se quando avvio MSql lo avvio massimizzato, escono tutti errori di QPainter, mentre se finestra non massimizzata nulla del genere...come mai? è un problema che avviene anche se minimizzo e poi riporto a normal...qualcosa proprio nel repaint degli oggetti
+  attenzione! mi sono accorto che questi errori escono anche con MGrep...e devo dire che in una versione precedente delle librerie Pyqt6 non uscivano questi errori!
 	
 ---------------------------------------------
 MSql Cosa è stato valutato e non realizzato!

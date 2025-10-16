@@ -365,25 +365,34 @@ class classSingleInstanceManager(QObject):
 
 class MyFileExtensionFilterProxyModel(QSortFilterProxyModel):
     """
-       Questa classe viene usata per filtrare i file mostrati nel file system tree view 
+        Filtra i file mostrati nel file system tree view:
+        - Esclude file e cartelle nascoste
+        - Mostra tutte le cartelle visibili per navigare
+        - Mostra solo i file che NON hanno estensioni vietate
     """
     def __init__(self, parent=None):
         super().__init__(parent)
-        # Estensioni consentite
-        self.allowed_extensions = ['.msql', '.sql', '.txt', '.pls', '.plb', '.csv', '.tsv', '.json', '.xml']
+        self.not_allowed_extensions = ['.dat', '.rnd', '.dll', '.bat','.exe', '.rhk']
 
     def filterAcceptsRow(self, source_row, source_parent):
         index = self.sourceModel().index(source_row, 0, source_parent)
         if not index.isValid():
             return False
 
-        # Se è una directory, accetta sempre
-        if self.sourceModel().isDir(index):
+        file_info = QFileInfo(self.sourceModel().filePath(index))
+
+        # Escludi file e cartelle nascoste
+        if file_info.isHidden() or file_info.fileName().startswith('.'):
+            return False
+
+        # Mostra cartelle visibili
+        if file_info.isDir():
             return True
 
-        # Controlla estensione del file
-        file_name = self.sourceModel().fileName(index).lower()
-        return any(file_name.endswith(ext) for ext in self.allowed_extensions)
+        # Mostra solo file che NON hanno estensioni vietate
+        file_name = file_info.fileName().lower()
+        return not any(file_name.endswith(ext) for ext in self.not_allowed_extensions)
+
 #
 #  __  __    _    ___ _   _  __        _____ _   _ ____   _____        __
 # |  \/  |  / \  |_ _| \ | | \ \      / /_ _| \ | |  _ \ / _ \ \      / /
@@ -499,29 +508,6 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         self.l_tabella_editabile.setFrameStyle(QFrame.Shape.NoFrame)
         self.l_tabella_editabile.setStyleSheet('color: black;')
         self.statusBar.addPermanentWidget(self.l_tabella_editabile)      
-
-        ###
-        # Caricamento della dock con il file system (partendo da disco C) 
-        ###        
-        self.file_system_model = QFileSystemModel()
-        self.file_system_model.setRootPath(QDir.rootPath())
-        self.file_system_proxy_model = MyFileExtensionFilterProxyModel()
-        self.file_system_proxy_model.setSourceModel(self.file_system_model)
-        self.o_file_system.setModel(self.file_system_proxy_model)
-        # Espande la cartella desktop o quella impostata nelle preferenze
-        if o_global_preferences.open_dir != '':
-            v_path = o_global_preferences.open_dir
-        else:
-            v_path = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DesktopLocation)
-        # ottengo l'indice dal modello originale
-        source_index = self.file_system_model.index(v_path)
-        # converto l'indice nel modello proxy
-        proxy_index = self.file_system_proxy_model.mapFromSource(source_index)
-        # uso l'indice proxy per espandere e selezionare
-        self.o_file_system.expand(proxy_index)
-        self.o_file_system.scrollTo(proxy_index)
-        self.o_file_system.setCurrentIndex(proxy_index)
-        self.o_file_system.setColumnWidth(0, 250)
 
         ###
         # Var per la gestione dei files recenti
@@ -1341,7 +1327,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # recupero dal registro di sistema (regedit) la posizione delle dock                
             windowstate = self.settings.value("windowstate")
             if windowstate:
-                self.restoreState(windowstate)                        
+                self.restoreState(windowstate)      
+            # la dock del file system parte sempre nascosta
+            self.dockWidget_3.hide()                  
                         
     def salvo_posizione_window(self):
         """
@@ -3054,12 +3042,14 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         """
         if self.dockWidget_3.isVisible():
             self.dockWidget_3.hide()
+        # quando viene mostrato, esegue il refresh del file system
         else:
+            self.slot_file_system_refresh()
             self.dockWidget_3.show()
 
     def slot_file_system_double_click(self, p_index):
         """
-        Evento che si scatena quando viene fatto doppio click su un file all'interno del file system
+            Evento che si scatena quando viene fatto doppio click su un file all'interno del file system
         """
         # mappo l'indice dal proxy al modello sorgente
         source_index = self.file_system_proxy_model.mapToSource(p_index)
@@ -3067,11 +3057,40 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         v_file_name = self.file_system_model.filePath(source_index)    
         # se è un file, lo apro nell'editor
         if v_file_name != '':
-            v_titolo, v_contenuto_file, v_codifica_utf8 = self.openfile(v_file_name)
-            v_azione = QAction()
-            v_azione.setText('Open_db_obj')
-            self.smistamento_voci_menu(v_azione, v_titolo, v_contenuto_file, v_codifica_utf8)
-          
+            # apro il file di testo con MSql
+            if v_file_name.lower().endswith(('.msql', '.sql', '.txt', '.pls', '.plb', '.csv', '.json','.trg')):
+                v_titolo, v_contenuto_file, v_codifica_utf8 = self.openfile(v_file_name)
+                v_azione = QAction()
+                v_azione.setText('Open_db_obj')
+                self.smistamento_voci_menu(v_azione, v_titolo, v_contenuto_file, v_codifica_utf8)            
+            # ... altrimenti apro un file che non è di testo con applicazione predefinita di windows
+            else:
+                os.startfile(v_file_name)          
+
+    def slot_file_system_refresh(self):            
+        """
+           Esegue il refresh del file system
+        """
+        self.file_system_model = QFileSystemModel()
+        self.file_system_model.setRootPath(QDir.rootPath())
+        self.file_system_proxy_model = MyFileExtensionFilterProxyModel()
+        self.file_system_proxy_model.setSourceModel(self.file_system_model)
+        self.o_file_system.setModel(self.file_system_proxy_model)
+        # Espande la cartella desktop o quella impostata nelle preferenze
+        if o_global_preferences.open_dir != '':
+            v_path = o_global_preferences.open_dir
+        else:
+            v_path = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DesktopLocation)
+        # ottengo l'indice dal modello originale
+        source_index = self.file_system_model.index(v_path)
+        # converto l'indice nel modello proxy
+        proxy_index = self.file_system_proxy_model.mapFromSource(source_index)
+        # uso l'indice proxy per espandere e selezionare
+        self.o_file_system.expand(proxy_index)
+        self.o_file_system.scrollTo(proxy_index)
+        self.o_file_system.setCurrentIndex(proxy_index)
+        self.o_file_system.setColumnWidth(0, 250)
+
 #  _     _______  _______ ____  
 # | |   | ____\ \/ / ____|  _ \ 
 # | |   |  _|  \  /|  _| | |_) |
@@ -3165,9 +3184,9 @@ class My_MSql_Lexer(QsciLexerSQL):
             # imposto gli elementi che servono all'interno dell'editor per attivare la funzione
             # tale per cui quando utente fa doppio click su una parola, vengono evidenziate tutte 
             # le parole uguali presenti nel testo!         
-            self.p_editor.selectionChanged.connect(self.cambio_di_selezione_testo)        
-            self.selection_lock = False
-            self.SELECTION_INDICATOR = 4    
+            #self.p_editor.MouseButtonDblClick.connect(self.cambio_di_selezione_testo)        
+            #self.selection_lock = False
+            #self.SELECTION_INDICATOR = 4    
         # se siamo in apertura della mini mappa...
         else:
             # nascondo il margine del folding e numeri di riga
@@ -3278,133 +3297,6 @@ class My_MSql_Lexer(QsciLexerSQL):
         """
         return ['.']
 
-    def cambio_di_selezione_testo(self):
-        """
-           Viene richiamata ogni volta che viene selezionato del testo
-           E' usata per quando utente facendo doppio click su una parola, il programma evidenzia tutti i punti dove quella parola è presente nel testo
-        """
-        # la variabile lock viene usata per evitare problemi di ricorsione
-        if self.selection_lock == False:
-            self.selection_lock = True
-            selected_text = self.p_editor.selectedText()            
-            self.clear_selection_highlights()
-            # la funzione isidentifier non riconosce i numeri!
-            if selected_text.isidentifier():                            
-                self._highlight_selected_text(selected_text,case_sensitive=False,regular_expression=True)
-            self.selection_lock = False        
-
-    def clear_selection_highlights(self):
-        """
-           Pulisce gli indicatori delle parole 
-        """        
-        self.p_editor.clearIndicatorRange(0,0,self.p_editor.lines(),self.p_editor.lineLength(self.p_editor.lines()-1),self.SELECTION_INDICATOR)
-
-    def _highlight_selected_text(self,
-                                 highlight_text,
-                                 case_sensitive=False,
-                                 regular_expression=False):
-        """
-           Same as the highlight_text function, but adapted for the use
-           with the __selection_changed functionality.
-        """
-        # Setup the indicator style, the highlight indicator will be 0
-        self.set_indicator("selection")
-        # Get all instances of the text using list comprehension and the re module
-        matches = self.find_all(highlight_text,case_sensitive,regular_expression,text_to_bytes=True,whole_words=True)
-        # Check if the match list is empty
-        if matches:
-            # Use the raw highlight function to set the highlight indicators
-            self.highlight_raw(matches)
-
-    def highlight_raw(self, highlight_list):
-        """
-           Core highlight function that uses Scintilla messages to style indicators.
-           QScintilla's fillIndicatorRange function is to slow for large numbers of
-           highlights!
-           INFO:   This is done using the scintilla "INDICATORS" described in the official
-                   scintilla API (http://www.scintilla.org/ScintillaDoc.html#Indicators)
-        """
-        scintilla_command = QsciScintillaBase.SCI_INDICATORFILLRANGE
-        for highlight in highlight_list:
-            start   = highlight[1]
-            length  = highlight[3] - highlight[1]
-            self.p_editor.SendScintilla(scintilla_command,start,length)
-
-    def _set_indicator(self,
-                       indicator,
-                       fore_color):
-        """
-           Set the indicator settings
-        """
-        self.p_editor.indicatorDefine(QsciScintilla.IndicatorStyle.StraightBoxIndicator,indicator)
-        self.p_editor.setIndicatorForegroundColor(QColor(fore_color),indicator)
-        self.p_editor.SendScintilla(QsciScintillaBase.SCI_SETINDICATORCURRENT,indicator)
-
-    def set_indicator(self, indicator):
-        """
-          Select the indicator that will be used for use with
-          Scintilla's indicator functionality
-        """                
-        if indicator == "selection":
-            # indica il colore da dare alla selezione
-            self._set_indicator(self.SELECTION_INDICATOR,'#643A93FF')        
-
-    def find_all(self,
-                 search_text,
-                 case_sensitive=False,
-                 regular_expression=False,
-                 text_to_bytes=False,
-                 whole_words=False):
-        """
-           Find all instances of a string and return a list of (line, index_start, index_end)
-        """
-        #Find all instances of the search string and return the list
-        matches = self.index_strings_in_text(search_text,self.p_editor.text(),case_sensitive,regular_expression,text_to_bytes,whole_words)
-        return matches
-
-    def index_strings_in_text(self,
-                              search_text, 
-                              text, 
-                              case_sensitive=False, 
-                              regular_expression=False, 
-                              text_to_bytes=False,
-                              whole_words=False):
-        """ 
-           Return all instances of the searched text in the text string
-           as a list of tuples(0, match_start_position, 0, match_end_position).
-        
-           Parameters:
-               - search_text:
-                   the text/expression to search for in the text parameter
-               - text:
-                   the text that will be searched through
-               - case_sensitive:
-                   case sensitivity of the performed search
-               - regular_expression:
-                   selection of whether the search string is a regular expression or not
-               - text_to_bytes:
-                   whether to transform the search_text and text parameters into byte objects
-               - whole_words:
-                   match only whole words
-        """
-        # Check if whole words only should be matched
-        if whole_words == True:
-            search_text = r"\b(" + search_text + r")\b"
-        # Convert text to bytes so that utf-8 characters will be parsed correctly
-        if text_to_bytes == True:
-            search_text = bytes(search_text, "utf-8")
-            text = bytes(text, "utf-8")
-        # Set the search text according to the regular expression selection
-        if regular_expression == False:
-            search_text = re.escape(search_text)
-        # Compile expression according to case sensitivity flag
-        if case_sensitive == True:
-            compiled_search_re = re.compile(search_text)
-        else:
-            compiled_search_re = re.compile(search_text, re.IGNORECASE)
-        # Create the list with all of the matches
-        list_of_matches = [(0, match.start(), 0, match.end()) for match in re.finditer(compiled_search_re, text)]
-        return list_of_matches
 
 #
 #  _____ ____ ___ _____ ___  ____  
@@ -4877,7 +4769,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             elif v_istruzione and not fine_istruzione(v_riga):
                  v_istruzione_str += chr(10) + v_riga
             # inizio select, insert, update, delete.... monoriga
-            elif not v_istruzione and v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','GRANT','REVOKE','ALTER','DROP','COMMENT','TRUNCATE','WITH') and v_riga[-1] == ';':
+            elif not v_istruzione and v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','GRANT','REVOKE','ALTER','DROP','COMMENT','TRUNCATE','WITH','RENAME') and v_riga[-1] == ';':
                 v_istruzione_str = v_riga[0:len(v_riga)-1]
                 v_ok = self.esegui_istruzione(v_istruzione_str, p_explain)
                 if v_ok == 'ko':
@@ -4896,7 +4788,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 self.link_to_MSql_win1_class.e_user_mode = v_parametri["e_user_mode"]
                 self.link_to_MSql_win1_class.slot_connetti()
             # inizio select, insert, update, delete.... multiriga            
-            elif v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','GRANT','REVOKE','ALTER','DROP','COMMENT','TRUNCATE','WITH'):
+            elif v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','ALTER','WITH'):
                 v_istruzione = True
                 v_istruzione_str = v_riga
             # riga di codice pl-sql (da notare come lo script verrà composto con v_riga_raw)             
@@ -4952,18 +4844,15 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             #v_istruzione, v_start_pos, v_end_pos = extract_sql_under_cursor(self.e_sql.text(), v_pos_relativa_cursore)                                        
             v_start_pos, v_end_pos = extract_section_under_cursor(self.e_sql.text(), v_pos_relativa_cursore)
             v_istruzione = self.e_sql.text()[v_start_pos:v_end_pos]
-            if 'BEGIN' in v_istruzione.upper():
-                v_tipo_istruzione = 'PL-SQL'
-            else:
-                v_tipo_istruzione = 'SQL'            
+            # l'istruzione viene ripulita anche dai commenti iniziali
+            v_istruzione = pulisci_commenti_inizio_riga(v_istruzione)
             # se trovata istruzione
             if v_istruzione != '' and v_end_pos > 0:                
-                # eseguo l'istruzione SQL                              
-                if v_tipo_istruzione == 'SQL':                    
-                    self.esegui_select(v_istruzione, True)                    
-                # oppure codice PL-SQL  
-                elif v_tipo_istruzione == 'PL-SQL':
+                # per capire se puro codice pl-sql controllo inizio (stessa stringa che viene controllata nella funzione slot_esegui)
+                if v_istruzione.upper().startswith(('DECLARE','BEGIN','CREATE','REPLACE','FUNCTION','PROCEDURE')):
                     self.esegui_plsql(v_istruzione, False)        
+                else:                
+                    self.esegui_istruzione(v_istruzione, False)
                 # seleziono il testo per evidenziare l'istruzione che è stata eseguita                                                                                            
                 self.e_sql.SendScintilla(self.e_sql.SCI_SETSELECTION, v_start_pos, v_end_pos)        
             else:
@@ -5124,7 +5013,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 # esco con errore
                 return 'ko'
 
-            if self.v_oracle_executer.get_status() == 'END_JOB_OK':   
+            if self.v_oracle_executer.get_status() == 'END_JOB_OK':                   
                 # calcolo tempo esecuzione e aggiorno a video            
                 v_global_exec_time = (datetime.datetime.now() - v_start_time).total_seconds()
                 self.aggiorna_statusbar()
@@ -5139,25 +5028,33 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 if v_create:                    
                     # nettifica del testo, togliendo spazi e ritorni a capo
                     v_testo = v_testo.upper().lstrip().replace('\n',' ')                
-                    # cerco che tipo di oggetto è stato richiesto di creare                
-                    if 'PACKAGEBODY' in v_testo.replace(' ',''):
-                        v_tipo_script = 'PACKAGE BODY' 
-                    elif 'PACKAGE' in v_testo:
-                        v_tipo_script = 'PACKAGE' 
-                    elif 'PROCEDURE' in v_testo:
-                        v_tipo_script = 'PROCEDURE' 
-                    elif 'FUNCTION' in v_testo:
-                        v_tipo_script = 'FUNCTION' 
-                    elif 'TABLE' in v_testo:
-                        v_tipo_script = 'TABLE'
-                    elif 'VIEW' in v_testo:
-                        v_tipo_script = 'VIEW' 
-                    elif 'TRIGGER' in v_testo:
-                        v_tipo_script = 'TRIGGER' 
-                    elif 'SEQUENCE' in v_testo:
-                        v_tipo_script = 'SEQUENCE' 
-                    else:
-                        v_tipo_script = ''                        
+                    # # cerco che tipo di oggetto è stato richiesto di creare                
+                    # if 'PACKAGEBODY' in v_testo.replace(' ',''):
+                    #     v_tipo_script = 'PACKAGE BODY' 
+                    # elif 'PACKAGE' in v_testo:
+                    #     v_tipo_script = 'PACKAGE' 
+                    # elif 'PROCEDURE' in v_testo:
+                    #     v_tipo_script = 'PROCEDURE' 
+                    # elif 'FUNCTION' in v_testo:
+                    #     v_tipo_script = 'FUNCTION' 
+                    # elif 'TABLE' in v_testo:
+                    #     v_tipo_script = 'TABLE'
+                    # elif 'VIEW' in v_testo:
+                    #     v_tipo_script = 'VIEW' 
+                    # elif 'TRIGGER' in v_testo:
+                    #     v_tipo_script = 'TRIGGER' 
+                    # elif 'SEQUENCE' in v_testo:
+                    #     v_tipo_script = 'SEQUENCE' 
+                    # else:
+                    #     v_tipo_script = ''                        
+                    # ora devo cercare il tipo oggetto che è stato richiesto di creare....e quindi splitto il testo in parole
+                    v_split = v_testo.split()
+                    v_tipo_script = ''
+                    # inizio a scorrere le parole presenti in questa parte di testo...
+                    for v_parola in v_split:                                        
+                        if v_parola in ('PACKAGEBODY','PACKAGE','PROCEDURE','FUNCTION','TABLE','VIEW','TRIGGER','SEQUENCE'):
+                            v_tipo_script = v_parola
+                            break
                     # ora devo cercare il nome del testo che è stato richiesto di creare....e quindi splitto il testo in parole
                     v_split = v_testo.split()
                     v_nome_script = ''
@@ -5199,7 +5096,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                         self.scrive_output(extract_word_from_cursor_pos(v_testo,1)  + ' ' + v_tipo_script + ' ' + v_nome_script + ' SUCCESSFULLY!','I')
                 
                 # altrimenti siamo di fronte ad uno script di pl-sql interno o di insert,update,delete,grant che vanno gestiti con apposito output
-                else:                
+                else:                           
                     # leggo la parte di dbms_output
                     v_dbms_ret = get_dbms_output_flow()
 

@@ -277,7 +277,11 @@ class Ui_MSql_win1(object):
         self.gridLayout_3.setObjectName("gridLayout_3")
         self.o_file_system = QtWidgets.QTreeView(parent=self.dockWidgetContents_3)
         self.o_file_system.setObjectName("o_file_system")
-        self.gridLayout_3.addWidget(self.o_file_system, 0, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.o_file_system, 1, 0, 1, 1)
+        self.b_refresh = QtWidgets.QPushButton(parent=self.dockWidgetContents_3)
+        self.b_refresh.setIcon(icon16)
+        self.b_refresh.setObjectName("b_refresh")
+        self.gridLayout_3.addWidget(self.b_refresh, 0, 0, 1, 1)
         self.dockWidget_3.setWidget(self.dockWidgetContents_3)
         MSql_win1.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.dockWidget_3)
         self.actionOpen = QtGui.QAction(parent=MSql_win1)
@@ -884,15 +888,18 @@ class Ui_MSql_win1(object):
         self.oggetti_db_ricerca.textChanged['QString'].connect(MSql_win1.slot_object_navigator_start_timer) # type: ignore
         self.b_schema.clicked.connect(MSql_win1.slot_select_schema) # type: ignore
         self.o_file_system.doubleClicked['QModelIndex'].connect(MSql_win1.slot_file_system_double_click) # type: ignore
+        self.b_refresh.clicked.connect(MSql_win1.slot_file_system_refresh) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(MSql_win1)
+        MSql_win1.setTabOrder(self.b_schema, self.oggetti_db_scelta)
         MSql_win1.setTabOrder(self.oggetti_db_scelta, self.e_view_description)
         MSql_win1.setTabOrder(self.e_view_description, self.oggetti_db_refresh)
-        MSql_win1.setTabOrder(self.oggetti_db_refresh, self.b_schema)
-        MSql_win1.setTabOrder(self.b_schema, self.oggetti_db_tipo_ricerca)
+        MSql_win1.setTabOrder(self.oggetti_db_refresh, self.oggetti_db_tipo_ricerca)
         MSql_win1.setTabOrder(self.oggetti_db_tipo_ricerca, self.oggetti_db_ricerca)
         MSql_win1.setTabOrder(self.oggetti_db_ricerca, self.oggetti_db_elenco)
         MSql_win1.setTabOrder(self.oggetti_db_elenco, self.e_object_viewer_find)
         MSql_win1.setTabOrder(self.e_object_viewer_find, self.db_oggetto_tree)
+        MSql_win1.setTabOrder(self.db_oggetto_tree, self.b_refresh)
+        MSql_win1.setTabOrder(self.b_refresh, self.o_file_system)
 
     def retranslateUi(self, MSql_win1):
         _translate = QtCore.QCoreApplication.translate
@@ -916,6 +923,7 @@ class Ui_MSql_win1(object):
         self.label.setText(_translate("MSql_win1", "Like"))
         self.toolBar.setWindowTitle(_translate("MSql_win1", "toolBar"))
         self.dockWidget_3.setWindowTitle(_translate("MSql_win1", "File system"))
+        self.b_refresh.setText(_translate("MSql_win1", "Refresh"))
         self.actionOpen.setText(_translate("MSql_win1", "Open"))
         self.actionOpen.setShortcut(_translate("MSql_win1", "Ctrl+O"))
         self.actionSave.setText(_translate("MSql_win1", "Save"))

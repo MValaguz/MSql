@@ -512,6 +512,49 @@ def commenta_una_procedura_funzione(p_testo, p_autore):
     
     return v_risultato
 
+def pulisci_commenti_inizio_riga(text: str) -> str:
+    """
+    Rimuove i commenti all'inizio del testo:
+    - righe che iniziano con -- (fino a newline)
+    - blocchi /* ... */ (anche multilinea)
+    Continua a rimuovere finché all'inizio c'è un commento o spazi vuoti.
+    Restituisce il testo rimanente (senza i commenti iniziali).
+    """
+    if text is None:
+        return ""
+
+    i = 0
+    n = len(text)
+
+    while True:
+        # Salta spazi bianchi iniziali (ma non altri contenuti)
+        m = re.match(r'\s*', text[i:])
+        if m:
+            i += m.end()
+
+        if text.startswith('--', i):
+            # rimuove fino al primo newline (incluso) o fino alla fine
+            nl = text.find('\n', i)
+            if nl == -1:
+                # tutta la riga è commento: risultato vuoto
+                return ""
+            i = nl + 1
+            continue
+
+        if text.startswith('/*', i):
+            # trova la chiusura */
+            end = text.find('*/', i + 2)
+            if end == -1:
+                # commento non chiuso: rimuoviamo tutto fino alla fine
+                return ""
+            i = end + 2
+            continue
+
+        # se non ci sono commenti iniziali, fermati
+        break
+
+    return text[i:]
+
 # Funzione creata da CoPilot con le seguenti direttive
 # vorrei creare una funzione python che ricevendo in pasto la stringa "connect username/password@tns_alias" 
 # o quella con proxy "connect proxy_user[destination_user]/proxy_password@tns_alias" 
