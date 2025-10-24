@@ -2,6 +2,13 @@
 MSql Changelog!
 ---------------
 
+Versione del 24/10/2025
+OK! Quando si creava un trigger,  MSql non si accorgeva se c'erano errori al suo interno! 
+    Inoltre una volta risolto questo problema, ci si è accorti che gli errori erano su numeri di riga 
+		diversi rispetto a quelli del sorgente. Il problema è stato individuato nel fatto che Oracle nei trigger
+		numera le istruzioni a partire dalla prima DECLARE; quindi viene creato un punto di offset che viene
+		riportato sia sulla lista errori che sul posizionamento.
+
 Versione del 15/10/2025
 OK! segnalato da Diego...istruzione update zxxxx set campo='minuscolo' --> facendo ctrl+invio in realtà aggiorna in maiuscolo!
 OK! nella creazione di un trigger che conteneva errore non mi ha dato errore!
@@ -383,7 +390,6 @@ OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e part
 -------------
 MSql TO DO!!!
 -------------		
-- quando eseguo degli script come la creazione delle tabelle e c'è errore...si posiziona nel punto sbagliato!!!
 - capita che se faccio una select, poi una update/ delete o lancio script e poi eseguo la select, esca errore "Error to fetch data: DPY-1003: the executed statement does not return rows!!! Mi capitava con lo script del calcolo prelievi...lanciavo lo script e poi la select su tabella MW_SCOP1_TMP facendo F11
   -- lanciare il calcolo
 	begin

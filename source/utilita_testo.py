@@ -291,6 +291,13 @@ def search_string_in_text(p_text, p_ricerca):
 
     return v_array_linee
 
+def search_first_string_in_text(p_testo, p_pattern):
+    """
+       Restituisce il numero di riga della prima occorrenza che matcha il pattern regex p_pattern
+    """
+    return next((i for i, line in enumerate(p_testo.splitlines(), 0)
+                 if re.search(p_pattern, line, re.IGNORECASE)), None)
+
 def da_qt_a_formato_data_oracle(p_formato):
     """
        Dato il formato data QT library, restituisce il formato data Oracle       

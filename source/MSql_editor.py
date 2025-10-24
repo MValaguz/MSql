@@ -4982,7 +4982,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # esegue comando sql in modo asincrono!!! Al termine viene invocato un segnale e richiamata la funzione endSelectCommandToOracle
             self.bind_variable(p_function='DIC',p_testo_sql=p_plsql)                                                        
             v_start_time = datetime.datetime.now()            
-            self.v_set_rowcount = p_rowcount                 
+            self.v_set_rowcount = p_rowcount      
             self.v_oracle_executer = oracle_executer.SendCommandToOracle(v_global_connection, self.v_cursor, p_plsql, self.v_variabili_bind_dizionario, self.link_to_MSql_win1_class.frameGeometry(), o_global_preferences.animated_gif)                                                                        
             self.v_oracle_executer.start()
         
@@ -5027,26 +5027,9 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 # da notare come la stringa che si ricerca abbia uno spazio finale in modo non venga confusa con altro (ad esempio la funzione replace())                
                 if v_create:                    
                     # nettifica del testo, togliendo spazi e ritorni a capo
+                    v_testo = v_testo[:50000]
                     v_testo = v_testo.upper().lstrip().replace('\n',' ')                
-                    # # cerco che tipo di oggetto è stato richiesto di creare                
-                    # if 'PACKAGEBODY' in v_testo.replace(' ',''):
-                    #     v_tipo_script = 'PACKAGE BODY' 
-                    # elif 'PACKAGE' in v_testo:
-                    #     v_tipo_script = 'PACKAGE' 
-                    # elif 'PROCEDURE' in v_testo:
-                    #     v_tipo_script = 'PROCEDURE' 
-                    # elif 'FUNCTION' in v_testo:
-                    #     v_tipo_script = 'FUNCTION' 
-                    # elif 'TABLE' in v_testo:
-                    #     v_tipo_script = 'TABLE'
-                    # elif 'VIEW' in v_testo:
-                    #     v_tipo_script = 'VIEW' 
-                    # elif 'TRIGGER' in v_testo:
-                    #     v_tipo_script = 'TRIGGER' 
-                    # elif 'SEQUENCE' in v_testo:
-                    #     v_tipo_script = 'SEQUENCE' 
-                    # else:
-                    #     v_tipo_script = ''                        
+                    v_testo = v_testo.replace('PACKAGE BODY','PACKAGEBODY')                    
                     # ora devo cercare il tipo oggetto che è stato richiesto di creare....e quindi splitto il testo in parole
                     v_split = v_testo.split()
                     v_tipo_script = ''
@@ -5055,12 +5038,15 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                         if v_parola in ('PACKAGEBODY','PACKAGE','PROCEDURE','FUNCTION','TABLE','VIEW','TRIGGER','SEQUENCE'):
                             v_tipo_script = v_parola
                             break
+                    # ripristo il tipo script in un formato più "standard" (es. PACKAGE BODY invece di PACKAGEBODY)
+                    if v_tipo_script == 'PACKAGEBODY':
+                        v_tipo_script = 'PACKAGE BODY'
                     # ora devo cercare il nome del testo che è stato richiesto di creare....e quindi splitto il testo in parole
                     v_split = v_testo.split()
                     v_nome_script = ''
                     # inizio a scorrere le parole presenti in questa parte di testo...
                     for v_parola in v_split:                                        
-                        if v_parola not in ('CREATE','OR','REPLACE','ALTER','DROP','PACKAGE','BODY','EDITIONABLE','NONEDITIONABLE','TABLE','PROCEDURE','FUNCTION','TRIGGER','VIEW','SEQUENCE','PUBLIC','SYNONYM','TYPE'):
+                        if v_parola not in ('CREATE','OR','REPLACE','ALTER','DROP','PACKAGE','PACKAGEBODY','EDITIONABLE','NONEDITIONABLE','TABLE','PROCEDURE','FUNCTION','TRIGGER','VIEW','SEQUENCE','PUBLIC','SYNONYM','TYPE'):
                             v_nome_script = v_parola
                             break
                     # nettifico il nome dell'oggetto che potrebbe essere nel formato "SMILE"."NOME_OGGETTO"                
@@ -5072,20 +5058,26 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                         v_nome_script = v_nome_script.split('(')[0]
 
                 # quindi...se lo script era di "CREATE"...controllo se in compilazione ci sono stati errori...
+                # attenzione! per certi tipi di oggetto (es. trigger) il numero di riga a cui viene segnalato l'errore è a contare dalla riga di DECLARE!
                 if v_create:
-                    print('CREAZIONE DELLO SCRIPT --> Tipo: ' + v_tipo_script + ' Nome: ' + v_nome_script)
-                    # con questa select dico a Oracle di darmi eventuali errori presenti su un oggetto                  
-                    self.v_cursor.execute("SELECT LINE,POSITION,TEXT FROM USER_ERRORS WHERE NAME = '" + v_nome_script + "' and TYPE = '" + v_tipo_script + "' ORDER BY NAME, TYPE, LINE, POSITION")
+                    if v_tipo_script == 'TRIGGER':
+                        # ricerco a che riga si trova la prima DECLARE e questo è un ulteriore offset da sommare alla riga di errore
+                        v_other_offset = search_first_string_in_text(p_plsql, r'\bDECLARE\b')
+                    else:
+                        v_other_offset = 0
+                    print(f"CREAZIONE DELLO SCRIPT --> Tipo: {v_tipo_script} Nome: {v_nome_script} Riga offset: {self.v_offset_numero_di_riga} Altra riga offset: {v_other_offset}")                                        
+                    # con questa select dico a Oracle di darmi eventuali errori presenti su un oggetto                 
+                    self.v_cursor.execute("SELECT LINE,POSITION,TEXT FROM USER_ERRORS WHERE NAME = '" + v_nome_script + "' and TYPE = '" + v_tipo_script + "'")
                     v_errori = self.v_cursor.fetchall()
                     # errori riscontrati --> li emetto nella parte di output e mi posiziono sull'editor alla riga e colonna indicate
                     if v_errori:
                         v_1a_volta = True
                         for info in v_errori:
                             # emetto gli errori riscontrati
-                            self.scrive_output("Error at line " + str(info[0]) + " position " + str(info[1]) + " " + info[2], 'E')                                                
+                            self.scrive_output(f"Error at line {info[0] + v_other_offset} position {info[1]} {info[2]}", 'E')                                                
                             # solo per il primo errore mi posiziono sull'editor alle coordinate indicate
-                            if v_1a_volta:                            
-                                v_riga = info[0]-1 + self.v_offset_numero_di_riga
+                            if v_1a_volta:                                                            
+                                v_riga = info[0]-1 + self.v_offset_numero_di_riga + v_other_offset
                                 v_colonna = info[1]-1                                                        
                                 self.e_sql.setCursorPosition(v_riga,v_colonna)                            
                                 v_1a_volta = False
