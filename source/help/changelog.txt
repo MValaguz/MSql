@@ -2,6 +2,10 @@
 MSql Changelog!
 ---------------
 
+Versione del 27/10/2025
+OK! Quando vengono letti dei blob la window di wait ormai si è chiusa ma non si capisce che sta caricando i dati....bisognerebbe provare a farla uscire ma senza il bottone di cancel
+    Inserita una nuova Window con messaggio "Rendering" che viene visualizzata durante la fase di carico della prima pagina.
+
 Versione del 24/10/2025
 OK! Quando si creava un trigger,  MSql non si accorgeva se c'erano errori al suo interno! 
     Inoltre una volta risolto questo problema, ci si è accorti che gli errori erano su numeri di riga 
@@ -390,6 +394,14 @@ OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e part
 -------------
 MSql TO DO!!!
 -------------		
+- Marco T. consigliava di riprovare a inserire il collegamento con chatgpt....in questo caso farsi aprire il servizio api da Filippo
+- pensare ad una dock da mettere nella sezione dei risultati che permetta di:
+  - esportare i dati (indicare eventuale file)
+	- fine elenco
+	- inizio elenco
+	- attivare la modalità AND o OR della ricerca
+	- esportare la select
+	- pensare ad altre funzionalità
 - capita che se faccio una select, poi una update/ delete o lancio script e poi eseguo la select, esca errore "Error to fetch data: DPY-1003: the executed statement does not return rows!!! Mi capitava con lo script del calcolo prelievi...lanciavo lo script e poi la select su tabella MW_SCOP1_TMP facendo F11
   -- lanciare il calcolo
 	begin

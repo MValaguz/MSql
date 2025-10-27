@@ -5213,8 +5213,8 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                             v_new_header_item.setText(nome_colonna)
                             self.o_table.setHorizontalHeaderItem(v_pos,v_new_header_item)
                                 
-                # se tutto ok, posso procedere con il caricare la prima pagina                            
-                self.carica_pagina()   
+                # se tutto ok, posso procedere con il caricare la prima pagina                                            
+                self.carica_pagina(p_wait_window=True)                   
 
                 # refresh della sezione variabili bind
                 if len(self.v_variabili_bind_nome) != 0:
@@ -5229,12 +5229,18 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # esco con tutto ok
         return None
     
-    def carica_pagina(self):
+    def carica_pagina(self, p_wait_window=False):
         """
            Carica i dati del flusso record preparato da esegui_select
+           Se p_wait_window è True viene mostrata una finestra di attesa durante il caricamento (con la scritta "Rendering..")
         """
         global v_global_connesso
         global o_global_preferences
+
+        # visualizzo la waiting window se richiesto
+        if p_wait_window:
+            v_wait_window = oracle_executer.WaitRenderingDialog()
+            v_wait_window.show()
 
         if v_global_connesso and self.v_esecuzione_ok:
             # indico che sto caricando la pagina
@@ -5268,6 +5274,9 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # carico i dati presi dal db dentro il modello                        
             while True:
                 x = 0   
+                # processo gli eventuali eventi di sistema (in modo da non bloccare l'interfaccia)
+                if p_wait_window:                    
+                    QApplication.processEvents()
                 # imposto altezza della riga (sotto un certo numero non va)
                 self.o_table.setRowHeight(self.v_pos_y, self.v_altezza_font_output)                                         
                 for field in v_riga_dati:                                                                                                                        
@@ -5357,6 +5366,10 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # se ero a fine flusso --> esco con codice specifico
             if v_riga_dati == None:
                 return 'ko'
+            
+        # chiudo la waiting window se era stata aperta
+        if p_wait_window and v_global_connesso is not None:
+            v_wait_window.close()
     
     def slot_scrollbar_azionata(self, posizione):
         """

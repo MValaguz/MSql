@@ -233,6 +233,46 @@ class SendCommandToOracle(QDialog):
            Se lo status è KO, restituisce e.args di oracledb.Error
         """
         return self._error
+    
+class WaitRenderingDialog(QDialog):
+    """
+       Finestra semplice "Rendering..." con immagine statica.
+       Nessun bottone e nessun timer.
+       Si chiude tramite close_dialog().
+    """
+    def __init__(self, parent_geometry=None, image_path='icons:anim_wait1.gif'):
+        super().__init__()
+        self.setModal(True)
+        self.setWindowTitle("…please wait…")
+        self.resize(200, 80)
+
+        # icona finestra
+        self.setWindowIcon(QIcon("icons:MSql.ico"))
+
+        # immagine statica (ridimensionata se necessario)
+        self.label_image = QLabel(self)
+        pix = QPixmap(image_path)
+        pix_scaled = pix.scaled(
+            64, 64,
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation
+        )
+        self.label_image.setPixmap(pix_scaled)
+
+        # testo
+        self.label_text = QLabel(QCoreApplication.translate('oracle_executer',"Rendering..."))     
+
+        # layout
+        layout = QGridLayout(self)
+        layout.addWidget(self.label_image, 0, 0)
+        layout.addWidget(self.label_text, 0, 1)
+
+        # centra rispetto al parent
+        if parent_geometry:
+            pc = parent_geometry.center()
+            fg = self.frameGeometry()
+            fg.moveCenter(pc)
+            self.move(fg.topLeft())            
 
 # ------------------------------------------------
 # TEST APPLICAZIONE ESECUZIONE COMANDO ORACLE
