@@ -2,6 +2,24 @@
 MSql Changelog!
 ---------------
 
+Versione del 30/10/2025
+OK! nella sezione di file system inserito la ricerca per stringa (è possibile usare le regular expression)
+		+-------------------------------+-----------------------------------------------+-----------------------------------------------------------+
+		| Testo nel campo di ricerca    | Corrispondenza effettiva                      | Descrizione                                               |
+		+-------------------------------+-----------------------------------------------+-----------------------------------------------------------+
+		| .sql                          | file.sql, test.msql                           | Contiene ".sql" in qualsiasi parte del nome               |
+		| .sql$                         | file.sql                                      | Termina con ".sql"                                        |
+		| \.sql$                        | file.sql                                      | Termina esattamente con ".sql" (punto interpretato come .)|
+		| (?i)\.sql$                    | file.sql, report.SQL                          | Termina con ".sql" o ".SQL" (case-insensitive)            |
+		| ^a.*\.txt$                    | appunti.txt                                   | Inizia con "a" e termina con ".txt"                       |
+		| report                        | report_finale.txt, myreport.sql               | Contiene "report" ovunque nel nome                        |
+		| .*2025.*                      | bilancio_2025.xlsx                            | Contiene "2025" nel nome                                  |
+		| ^test_                        | test_log.txt                                  | Inizia con "test_"                                        |
+		| ^[a-z0-9_]+\.csv$             | dati1.csv                                     | File CSV con nome minuscolo/numerico/underscore           |
+		| ^.*\.(py|sql|csv)$            | main.py, query.sql, export.csv                | Termina con una di più estensioni                         |
+		| (?i)^readme(\.txt)?$          | README, readme.txt                            | "readme" o "readme.txt" (case-insensitive)                |
+		+-------------------------------+-----------------------------------------------+-----------------------------------------------------------+
+
 Versione del 27/10/2025
 OK! Quando vengono letti dei blob la window di wait ormai si è chiusa ma non si capisce che sta caricando i dati....bisognerebbe provare a farla uscire ma senza il bottone di cancel
     Inserita una nuova Window con messaggio "Rendering" che viene visualizzata durante la fase di carico della prima pagina.
@@ -394,14 +412,11 @@ OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e part
 -------------
 MSql TO DO!!!
 -------------		
-- Marco T. consigliava di riprovare a inserire il collegamento con chatgpt....in questo caso farsi aprire il servizio api da Filippo
-- pensare ad una dock da mettere nella sezione dei risultati che permetta di:
-  - esportare i dati (indicare eventuale file)
-	- fine elenco
-	- inizio elenco
-	- attivare la modalità AND o OR della ricerca
-	- esportare la select
-	- pensare ad altre funzionalità
+- nell'object navigator inserire anche la tipologia degli oggetti Type...in realtà facendo una group by sulla vista all_objects si vede che si sono molti altri tipi di oggetti. 
+  Pensavo che l'idea sarebbe di mettere una nuova voce nell'elenco degli oggetti chiamata "Others" dove vengono fatti vedere tutti gli oggetti che non rientrano nell'elenco. 
+	La voce vuota deve continuare a comprendere solo gli oggetti principali e non tutti!
+- se lancio un drop table xxxxx senza il ; finale, non funziona!
+- Marco T. consigliava di riprovare a inserire il collegamento con chatgpt....in questo caso farsi aprire il servizio api da Filippo! Fatto un test per scoprire che alla fine non funziona perché è richiesto un abbonamento
 - capita che se faccio una select, poi una update/ delete o lancio script e poi eseguo la select, esca errore "Error to fetch data: DPY-1003: the executed statement does not return rows!!! Mi capitava con lo script del calcolo prelievi...lanciavo lo script e poi la select su tabella MW_SCOP1_TMP facendo F11
   -- lanciare il calcolo
 	begin
@@ -418,6 +433,14 @@ MSql TO DO!!!
 ---------------------------------------------
 MSql Cosa è stato valutato e non realizzato!
 ---------------------------------------------
+KO! pensare ad una dock da mettere nella sezione dei risultati che permetta di:
+		- esportare i dati (indicare eventuale file)
+		- fine elenco
+		- inizio elenco
+		- attivare la modalità AND o OR della ricerca
+		- esportare la select
+		- pensare ad altre funzionalità
+		Ho tentato le modifiche ma al momento non è possibile inserire in un blocco una toolbar nativa....ho provato con un layout specifico usando i toolbutton ma il risultato non mi ha soddisfatto si in termini grafici che in termini di scrittura del codice
 
 KO! -valutare integrazione con oracle cloud OCI....ho valutato ma poi non sono riuscito a creare un account gratuito lato OCI oracle....quindi lasciato perdere....
 KO! -pensare di gestire i dati di un db MySQL...ho provato ad installare e connettermi come MySQL ma veramente sarebbe troppo arduo tenere in piedi anche quella gestione

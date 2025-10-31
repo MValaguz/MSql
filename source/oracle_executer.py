@@ -236,20 +236,21 @@ class SendCommandToOracle(QDialog):
     
 class WaitRenderingDialog(QDialog):
     """
-       Finestra semplice "Rendering..." con immagine statica.
-       Nessun bottone e nessun timer.
-       Si chiude tramite close_dialog().
+        Finestra "Rendering..." senza bordi né titolo.
+        Nessun bottone e nessun timer.
+        Si chiude tramite close_dialog().
     """
-    def __init__(self, parent_geometry=None, image_path='icons:anim_wait1.gif'):
-        super().__init__()
+    def __init__(self, widget: QWidget = None):
+        super().__init__()  
         self.setModal(True)
-        self.setWindowTitle("…please wait…")
         self.resize(200, 80)
 
-        # icona finestra
+        # finestra senza bordi/titolo
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Window)
         self.setWindowIcon(QIcon("icons:MSql.ico"))
 
-        # immagine statica (ridimensionata se necessario)
+        # immagine
+        image_path = 'icons:MSql.gif'
         self.label_image = QLabel(self)
         pix = QPixmap(image_path)
         pix_scaled = pix.scaled(
@@ -260,19 +261,42 @@ class WaitRenderingDialog(QDialog):
         self.label_image.setPixmap(pix_scaled)
 
         # testo
-        self.label_text = QLabel(QCoreApplication.translate('oracle_executer',"Rendering..."))     
+        self.label_text = QLabel(QCoreApplication.translate('oracle_executer', "Rendering..."))
+        self.label_text.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
 
         # layout
         layout = QGridLayout(self)
         layout.addWidget(self.label_image, 0, 0)
         layout.addWidget(self.label_text, 0, 1)
+        layout.setContentsMargins(10, 10, 10, 10)
 
-        # centra rispetto al parent
-        if parent_geometry:
-            pc = parent_geometry.center()
-            fg = self.frameGeometry()
-            fg.moveCenter(pc)
-            self.move(fg.topLeft())            
+        # centratura
+        if widget is not None:
+            bg_color = widget.palette().color(widget.backgroundRole())
+            self.setStyleSheet(f"background-color: {bg_color.name()}")
+            self.center_over_widget(widget)
+
+    def center_over_widget(self, widget: QWidget):
+        """
+            Centra la dialog sopra il widget passato.
+        """
+        rect = widget.geometry()
+        top_left = widget.mapToGlobal(rect.topLeft())
+        bottom_right = widget.mapToGlobal(rect.bottomRight())
+
+        center_x = (top_left.x() + bottom_right.x()) // 2
+        center_y = (top_left.y() + bottom_right.y()) // 2
+
+        dialog_width = self.width()
+        dialog_height = self.height()
+
+        self.move(center_x - dialog_width // 2, center_y - dialog_height // 2)
+
+    def close_dialog(self):
+        """
+            Chiude la finestra in modo sicuro.
+        """
+        self.close()
 
 # ------------------------------------------------
 # TEST APPLICAZIONE ESECUZIONE COMANDO ORACLE

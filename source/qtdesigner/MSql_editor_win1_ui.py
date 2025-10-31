@@ -272,16 +272,23 @@ class Ui_MSql_win1(object):
         self.dockWidgetContents_3 = QtWidgets.QWidget()
         self.dockWidgetContents_3.setObjectName("dockWidgetContents_3")
         self.gridLayout_3 = QtWidgets.QGridLayout(self.dockWidgetContents_3)
-        self.gridLayout_3.setContentsMargins(3, 3, 3, 0)
-        self.gridLayout_3.setHorizontalSpacing(4)
         self.gridLayout_3.setObjectName("gridLayout_3")
-        self.o_file_system = QtWidgets.QTreeView(parent=self.dockWidgetContents_3)
-        self.o_file_system.setObjectName("o_file_system")
-        self.gridLayout_3.addWidget(self.o_file_system, 1, 0, 1, 1)
+        self.horizontalLayout_5 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_5.setObjectName("horizontalLayout_5")
+        self.label_2 = QtWidgets.QLabel(parent=self.dockWidgetContents_3)
+        self.label_2.setObjectName("label_2")
+        self.horizontalLayout_5.addWidget(self.label_2)
+        self.e_file_system_search = QtWidgets.QLineEdit(parent=self.dockWidgetContents_3)
+        self.e_file_system_search.setObjectName("e_file_system_search")
+        self.horizontalLayout_5.addWidget(self.e_file_system_search)
         self.b_refresh = QtWidgets.QPushButton(parent=self.dockWidgetContents_3)
         self.b_refresh.setIcon(icon16)
         self.b_refresh.setObjectName("b_refresh")
-        self.gridLayout_3.addWidget(self.b_refresh, 0, 0, 1, 1)
+        self.horizontalLayout_5.addWidget(self.b_refresh)
+        self.gridLayout_3.addLayout(self.horizontalLayout_5, 0, 0, 1, 1)
+        self.o_file_system = QtWidgets.QTreeView(parent=self.dockWidgetContents_3)
+        self.o_file_system.setObjectName("o_file_system")
+        self.gridLayout_3.addWidget(self.o_file_system, 1, 0, 1, 1)
         self.dockWidget_3.setWidget(self.dockWidgetContents_3)
         MSql_win1.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.dockWidget_3)
         self.actionOpen = QtGui.QAction(parent=MSql_win1)
@@ -898,8 +905,7 @@ class Ui_MSql_win1(object):
         MSql_win1.setTabOrder(self.oggetti_db_ricerca, self.oggetti_db_elenco)
         MSql_win1.setTabOrder(self.oggetti_db_elenco, self.e_object_viewer_find)
         MSql_win1.setTabOrder(self.e_object_viewer_find, self.db_oggetto_tree)
-        MSql_win1.setTabOrder(self.db_oggetto_tree, self.b_refresh)
-        MSql_win1.setTabOrder(self.b_refresh, self.o_file_system)
+        MSql_win1.setTabOrder(self.db_oggetto_tree, self.o_file_system)
 
     def retranslateUi(self, MSql_win1):
         _translate = QtCore.QCoreApplication.translate
@@ -923,6 +929,32 @@ class Ui_MSql_win1(object):
         self.label.setText(_translate("MSql_win1", "Like"))
         self.toolBar.setWindowTitle(_translate("MSql_win1", "toolBar"))
         self.dockWidget_3.setWindowTitle(_translate("MSql_win1", "File system"))
+        self.label_2.setText(_translate("MSql_win1", "Filter:"))
+        self.e_file_system_search.setToolTip(_translate("MSql_win1", "<table border=\"1\" cellspacing=\"0\" cellpadding=\"4\" style=\"border-collapse:collapse; font-family: Consolas, monospace; font-size: 10pt;\">\n"
+"  <thead style=\"background-color:#f0f0f0; font-weight:bold;\">\n"
+"    <tr>\n"
+"      <th>Search field text</th>\n"
+"      <th>Actual matches</th>\n"
+"      <th>Description</th>\n"
+"    </tr>\n"
+"  </thead>\n"
+"  <tbody>\n"
+"    <tr><td>.sql</td><td>file.sql, test.msql</td><td>Contains \".sql\" anywhere in the name</td></tr>\n"
+"    <tr><td>.sql$</td><td>file.sql</td><td>Ends with \".sql\"</td></tr>\n"
+"    <tr><td>\\.sql$</td><td>file.sql</td><td>Ends exactly with \".sql\" (dot treated literally)</td></tr>\n"
+"    <tr><td>(?i)\\.sql$</td><td>file.sql, report.SQL</td><td>Ends with \".sql\" or \".SQL\" (case-insensitive)</td></tr>\n"
+"    <tr><td>^a.*\\.txt$</td><td>appunti.txt</td><td>Starts with \"a\" and ends with \".txt\"</td></tr>\n"
+"    <tr><td>report</td><td>report_finale.txt, myreport.sql</td><td>Contains \"report\" anywhere in the name</td></tr>\n"
+"    <tr><td>.*2025.*</td><td>bilancio_2025.xlsx</td><td>Contains \"2025\" in the name</td></tr>\n"
+"    <tr><td>^test_</td><td>test_log.txt</td><td>Starts with \"test_\"</td></tr>\n"
+"    <tr><td>^[a-z0-9_]+\\.csv$</td><td>dati1.csv</td><td>CSV file with lowercase/numeric/underscore name</td></tr>\n"
+"    <tr><td>^.*\\.(py|sql|csv)$</td><td>main.py, query.sql, export.csv</td><td>Ends with one of several extensions</td></tr>\n"
+"    <tr><td>(?i)^readme(\\.txt)?$</td><td>README, readme.txt</td><td>\"readme\" or \"readme.txt\" (case-insensitive)</td></tr>\n"
+"  </tbody>\n"
+"</table>\n"
+"\n"
+""))
+        self.b_refresh.setToolTip(_translate("MSql_win1", "Start search (you can use regular expression)"))
         self.b_refresh.setText(_translate("MSql_win1", "Refresh"))
         self.actionOpen.setText(_translate("MSql_win1", "Open"))
         self.actionOpen.setShortcut(_translate("MSql_win1", "Ctrl+O"))

@@ -365,33 +365,44 @@ class classSingleInstanceManager(QObject):
 
 class MyFileExtensionFilterProxyModel(QSortFilterProxyModel):
     """
-        Filtra i file mostrati nel file system tree view:
+       Filtra i file mostrati nel file system tree view:
         - Esclude file e cartelle nascoste
         - Mostra tutte le cartelle visibili per navigare
         - Mostra solo i file che NON hanno estensioni vietate
+        - (Opzionale) Applica un filtro regex sui nomi dei file
     """
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.not_allowed_extensions = ['.dat', '.rnd', '.dll', '.bat','.exe', '.rhk']
+        self.not_allowed_extensions = ['.dat', '.rnd', '.dll', '.bat', '.exe', '.rhk']
+        self.setRecursiveFilteringEnabled(True)
 
     def filterAcceptsRow(self, source_row, source_parent):
-        index = self.sourceModel().index(source_row, 0, source_parent)
+        model = self.sourceModel()
+        index = model.index(source_row, 0, source_parent)
         if not index.isValid():
             return False
 
-        file_info = QFileInfo(self.sourceModel().filePath(index))
+        file_info = QFileInfo(model.filePath(index))
 
         # Escludi file e cartelle nascoste
         if file_info.isHidden() or file_info.fileName().startswith('.'):
             return False
 
-        # Mostra cartelle visibili
+        # Le cartelle visibili devono sempre comparire per la navigazione
         if file_info.isDir():
             return True
 
-        # Mostra solo file che NON hanno estensioni vietate
+        # Escludi file con estensioni vietate
         file_name = file_info.fileName().lower()
-        return not any(file_name.endswith(ext) for ext in self.not_allowed_extensions)
+        if any(file_name.endswith(ext) for ext in self.not_allowed_extensions):
+            return False
+
+        # Applica filtro regex (solo ai file)
+        regex = self.filterRegularExpression()
+        if regex and regex.pattern():
+            return regex.match(file_name).hasMatch()
+
+        return True
 
 #
 #  __  __    _    ___ _   _  __        _____ _   _ ____   _____        __
@@ -3067,25 +3078,49 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             else:
                 os.startfile(v_file_name)          
 
-    def slot_file_system_refresh(self):            
+    def slot_file_system_refresh(self):
         """
-           Esegue il refresh del file system
+           Esegue il refresh del file system con filtro regex opzionale.
+           Chiamata dal bottone b_refresh.
         """
+        # Crea il modello del file system
         self.file_system_model = QFileSystemModel()
         self.file_system_model.setRootPath(QDir.rootPath())
+
+        # Crea il proxy model personalizzato
         self.file_system_proxy_model = MyFileExtensionFilterProxyModel()
         self.file_system_proxy_model.setSourceModel(self.file_system_model)
+
+        # Legge l'eventuale testo di ricerca
+        search_text = ""
+        if hasattr(self, 'e_file_system_search'):
+            search_text = self.e_file_system_search.text().strip()
+
+        # Applica il filtro se presente
+        if search_text:
+            try:
+                regex = QRegularExpression(search_text, QRegularExpression.PatternOption.CaseInsensitiveOption)
+                self.file_system_proxy_model.setFilterRegularExpression(regex)
+            except Exception as e:
+                print(f"Regex non valida: {e}")
+                self.file_system_proxy_model.setFilterRegularExpression(QRegularExpression(""))
+        else:
+            self.file_system_proxy_model.setFilterRegularExpression(QRegularExpression(""))
+
+        # Collega il modello alla vista
         self.o_file_system.setModel(self.file_system_proxy_model)
-        # Espande la cartella desktop o quella impostata nelle preferenze
+
+        # Imposta la cartella iniziale (desktop o quella salvata)
         if o_global_preferences.open_dir != '':
             v_path = o_global_preferences.open_dir
         else:
             v_path = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DesktopLocation)
-        # ottengo l'indice dal modello originale
+
+        # Ottieni l'indice dal modello di origine
         source_index = self.file_system_model.index(v_path)
-        # converto l'indice nel modello proxy
         proxy_index = self.file_system_proxy_model.mapFromSource(source_index)
-        # uso l'indice proxy per espandere e selezionare
+
+        # Mostra la cartella e imposta larghezza colonne
         self.o_file_system.expand(proxy_index)
         self.o_file_system.scrollTo(proxy_index)
         self.o_file_system.setCurrentIndex(proxy_index)
@@ -3320,6 +3355,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
 
         # incapsulo la classe grafica da qtdesigner
         super(MSql_win2_class, self).__init__()        
+        # includo tutte le componenti grafiche definite nel file ui
         self.setupUi(self)
                 
         # imposto il titolo della nuova window (da notare come il nome completo dal file-editor sia annegato nel nome dell'oggetto!)        
@@ -3406,9 +3442,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         self.v_select_eseguita = ''
         self.v_set_rowcount = False
         # inizializzo var che indica che l'esecuzione è andata ok
-        self.v_esecuzione_ok = False  
-        # inizializzo var che indica che si è in fase di caricamento dei dati
-        self.v_carico_pagina_in_corso = False   
+        self.v_esecuzione_ok = False          
         # inizializzo la var che conterrà eventuale matrice dei dati modificati
         self.v_matrice_dati_modificati = []
         # inizializzo la var che contiene le intestazioni dell'output in tabella
@@ -5231,145 +5265,119 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
     
     def carica_pagina(self, p_wait_window=False):
         """
-           Carica i dati del flusso record preparato da esegui_select
-           Se p_wait_window è True viene mostrata una finestra di attesa durante il caricamento (con la scritta "Rendering..")
+            Carica i dati del flusso record preparato da esegui_select.
+            Se p_wait_window è True viene mostrata una finestra di attesa durante il caricamento (con la scritta "Rendering..")
         """
         global v_global_connesso
         global o_global_preferences
 
-        # visualizzo la waiting window se richiesto
-        if p_wait_window:
-            v_wait_window = oracle_executer.WaitRenderingDialog()
-            v_wait_window.show()
+        # prerequisiti
+        if not (v_global_connesso and self.v_esecuzione_ok):
+            return 'ko'
 
-        if v_global_connesso and self.v_esecuzione_ok:
-            # indico che sto caricando la pagina
-            self.v_carico_pagina_in_corso = True
-
-            # carico la prossima riga del flusso dati
+        # funzione interna per il caricamento vero e proprio
+        def _do_load():
             try:
-                v_riga_dati = self.v_cursor.fetchone()
-            except oracledb.DatabaseError as e: 
-                 # ripristino icona freccia del mouse
-                Freccia_Mouse(False)
-                # emetto errore sulla barra di stato 
-                errorObj, = e.args    
-                message_error(QCoreApplication.translate('MSql_win2',"Error to fetch data:") + ' ' + errorObj.message)                                            
-                return 'ko'
-            except oracledb.InterfaceError as e: 
-                # ripristino icona freccia del mouse
-                Freccia_Mouse(False)
-                # emetto errore sulla barra di stato 
-                errorObj, = e.args    
-                message_error(QCoreApplication.translate('MSql_win2',"Error to fetch data:") + ' ' + errorObj.message)                                            
-                return 'ko'
-            
-            # se ero a fine flusso --> esco
-            if v_riga_dati == None:
-                return 'ko'
+                self.o_table.setUpdatesEnabled(False)
+                self.o_table.blockSignals(True)
 
-            # imposto la riga a 1 (inizio caricamento prima riga del flusso dati)
-            if self.v_pos_y == 0:
-                self.o_table.setRowCount(1)                        
-            # carico i dati presi dal db dentro il modello                        
-            while True:
-                x = 0   
-                # processo gli eventuali eventi di sistema (in modo da non bloccare l'interfaccia)
-                if p_wait_window:                    
-                    QApplication.processEvents()
-                # imposto altezza della riga (sotto un certo numero non va)
-                self.o_table.setRowHeight(self.v_pos_y, self.v_altezza_font_output)                                         
-                for field in v_riga_dati:                                                                                                                        
-                    # campo stringa
-                    if isinstance(field, str):                                                 
-                        self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( field ) )                                                                
-                    # campo numerico intero (se non funziona provare con i oracledb type)
-                    elif isinstance(field, int):                           
-                        # per dare coerenza a tutte le operazioni svolte sui dati il formato di base viene definito Italiano                                
-                        v_item = QTableWidgetItem('{:d}'.format(field))                        
-                        v_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)   
-                        self.o_table.setItem(self.v_pos_y, x, v_item)                    
-                    # campo numerico reale (se non funziona provare con i oracledb type)
-                    elif isinstance(field, float):   
-                        # per dare coerenza a tutte le operazioni svolte sui dati il formato di base viene definito Italiano        
-                        locale.setlocale(locale.LC_ALL, 'it_IT')                                             
-                        v_item = QTableWidgetItem(locale.str(field))                        
-                        v_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)   
-                        self.o_table.setItem(self.v_pos_y, x, v_item)                    
-                    # campo nullo
-                    elif field == None:                                 
-                        self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( "" ) )                
-                    # campo data
-                    elif self.tipi_intestazioni[x][1] == oracledb.DATETIME:                                     
-                        self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( f"{field:{o_global_preferences.date_format}}" ) )       
-                    # campo raw (si tratta di byte che vengono convertiti in stringa in formato hex)
-                    elif self.tipi_intestazioni[x][1] == oracledb.DB_TYPE_RAW:                          
-                        self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( field.hex().upper() ) )       
-                    # se il contenuto è un blob...utilizzo il metodo read sul campo field, poi lo inserisco in una immagine
-                    # che poi carico una label e finisce dentro la cella a video
-                    elif self.tipi_intestazioni[x][1] == oracledb.BLOB:                        
-                        qimg = QImage.fromData(field.read())                        
-                        # se nel blob non è presente un'immagine (lo capisco in base alla profondità-colore), allora carico icona di non-immagine
-                        if qimg.depth() == 0:                            
-                            pixmap = QPixmap("icons:no_image.png")                                                        
-                        # se è presente un'immagine, carico immagine del blob...
-                        else:
-                            pixmap = QPixmap.fromImage(qimg)                           
-                        label = QLabel()
-                        label.setPixmap(pixmap)      
-                        # metto sfondo bianco se è attivo il tema scuro
-                        if o_global_preferences.dark_theme:
-                            label.setStyleSheet('background-color:white')                  
-                        # carico immagine nella cella di tabella 
-                        self.o_table.setCellWidget(self.v_pos_y, x, label )                                        
-                    # se il contenuto è un clob...leggo sempre tramite metodo read e lo carico in un widget di testo largo
-                    elif self.tipi_intestazioni[x][1] == oracledb.CLOB:                        
-                        # a video viene caricata un'antemprima di 1000 caratteri al massimo, e il dato vero e proprio viene
-                        # caricato nell'item ma "nascosto" dentro la sezione data. In fase di zoom dell'item, verrà fatto un controllo e preso da li                        
-                        text = field.read()
-                        if len(text) > 1000:
-                            preview = text[:1000] + ' !!! DATA TRUNCATED !!!'
-                        else:
-                            preview = text
-                        item = QTableWidgetItem(preview)
-                        item.setData(Qt.ItemDataRole.UserRole, text)
-                        self.o_table.setItem(self.v_pos_y, x, item)
-                    x += 1
-                # conto le righe (il numeratore è partito da 0, quindi è corretto che venga incrementato a questo punto)
-                self.v_pos_y += 1                
-                # aumento il numero di righe nella tabella a video
-                self.o_table.setRowCount(self.v_pos_y + 1)                   
-                # se raggiunto il numero di righe per pagina (100) --> esco dal ciclo
-                if self.v_pos_y % 100 == 0:                
-                    break
-                # carico la prossima riga del flusso dati
-                v_riga_dati = self.v_cursor.fetchone()
-                # se raggiunta ultima riga del flusso di dati --> esco dal ciclo
-                if v_riga_dati == None:
-                    # tolgo la riga che avevo aggiunto
-                    self.o_table.setRowCount(self.v_pos_y)                        
-                    break
-            
-            # indico di calcolare automaticamente la larghezza delle colonne
-            if o_global_preferences.auto_column_resize:                
-                self.o_table.resizeColumnsToContents()
+                try:
+                    v_riga_dati = self.v_cursor.fetchone()
+                except (oracledb.DatabaseError, oracledb.InterfaceError) as e:
+                    errorObj, = e.args
+                    message_error(QCoreApplication.translate('MSql_win2', "Error to fetch data:") + ' ' + errorObj.message)
+                    return 'ko'
 
-            # indico che carico pagina terminato
-            self.v_carico_pagina_in_corso = False
+                if v_riga_dati is None:
+                    return 'ko'
 
-            # se è stato richiesto di permettere la modifica dei dati, vuol dire che è presente come prima colonna il rowid, che quindi va nascosta!
-            if o_global_preferences.editable:
-                self.o_table.setColumnHidden(0, True)
-            else:
-                self.o_table.setColumnHidden(0, False)
+                if self.v_pos_y == 0:
+                    self.o_table.setRowCount(1)
 
-            # se ero a fine flusso --> esco con codice specifico
-            if v_riga_dati == None:
-                return 'ko'
-            
-        # chiudo la waiting window se era stata aperta
-        if p_wait_window and v_global_connesso is not None:
-            v_wait_window.close()
+                while True:
+                    x = 0
+                    self.o_table.setRowHeight(self.v_pos_y, self.v_altezza_font_output)
+
+                    for field in v_riga_dati:
+                        if isinstance(field, str):
+                            self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem(field))
+                        elif isinstance(field, int):
+                            v_item = QTableWidgetItem(f"{field:d}")
+                            v_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                            self.o_table.setItem(self.v_pos_y, x, v_item)
+                        elif isinstance(field, float):
+                            try:
+                                locale.setlocale(locale.LC_ALL, 'it_IT')
+                                v_item = QTableWidgetItem(locale.str(field))
+                            except Exception:
+                                v_item = QTableWidgetItem(str(field))
+                            v_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                            self.o_table.setItem(self.v_pos_y, x, v_item)
+                        elif field is None:
+                            self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem(""))
+                        elif self.tipi_intestazioni[x][1] == oracledb.DATETIME:
+                            self.o_table.setItem(
+                                self.v_pos_y, x,
+                                QTableWidgetItem(f"{field:{o_global_preferences.date_format}}")
+                            )
+                        elif self.tipi_intestazioni[x][1] == oracledb.DB_TYPE_RAW:
+                            self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem(field.hex().upper()))
+                        elif self.tipi_intestazioni[x][1] == oracledb.BLOB:
+                            qimg = QImage.fromData(field.read())
+                            pixmap = QPixmap.fromImage(qimg) if qimg.depth() > 0 else QPixmap("icons:no_image.png")
+                            label = QLabel()
+                            label.setPixmap(pixmap)
+                            if o_global_preferences.dark_theme:
+                                label.setStyleSheet('background-color:white')
+                            self.o_table.setCellWidget(self.v_pos_y, x, label)
+                        elif self.tipi_intestazioni[x][1] == oracledb.CLOB:
+                            text = field.read()
+                            preview = text[:1000] + ' !!! DATA TRUNCATED !!!' if len(text) > 1000 else text
+                            item = QTableWidgetItem(preview)
+                            item.setData(Qt.ItemDataRole.UserRole, text)
+                            self.o_table.setItem(self.v_pos_y, x, item)
+                        x += 1
+
+                    self.v_pos_y += 1
+                    self.o_table.setRowCount(self.v_pos_y + 1)
+
+                    if self.v_pos_y % 100 == 0:
+                        if p_wait_window and self.v_wait_window:
+                            QApplication.processEvents(QEventLoop.ProcessEventsFlag.AllEvents)
+                        break
+
+                    v_riga_dati = self.v_cursor.fetchone()
+                    if v_riga_dati is None:
+                        self.o_table.setRowCount(self.v_pos_y)
+                        break
+
+                if o_global_preferences.auto_column_resize:
+                    self.o_table.resizeColumnsToContents()
+
+                self.o_table.setColumnHidden(0, o_global_preferences.editable)
+
+            finally:
+                self.o_table.blockSignals(False)
+                self.o_table.setUpdatesEnabled(True)
+                self.o_table.viewport().update()
+
+                if p_wait_window and getattr(self, "v_wait_window", None):
+                    self.v_wait_window.close()
+                    self.v_wait_window = None
+
+        # --- parte principale ---
+        if p_wait_window:
+            self.v_wait_window = oracle_executer.WaitRenderingDialog(self.o_table)
+            self.v_wait_window.show()
+            QApplication.processEvents(QEventLoop.ProcessEventsFlag.AllEvents)
+
+            # ritarda l’avvio del caricamento di 50 ms
+            QTimer.singleShot(50, _do_load)
+        else:
+            v_ok = _do_load()
+            return v_ok
+        
+        return ''
     
     def slot_scrollbar_azionata(self, posizione):
         """
@@ -5445,11 +5453,10 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
     def slot_o_table_item_modificato(self, x, y):
         """
             Funzione che viene richiamata quando un item della tabella viene modificato (solo quando attiva la modifica)
-        """        
-        if not self.v_carico_pagina_in_corso:            
-            print(f"Updated cell {x},{y}")
-            # memorizzo nella matrice la coppia x,y della cella modificata
-            self.v_matrice_dati_modificati.append((x,y))            
+        """                
+        print(f"Updated cell {x},{y}")
+        # memorizzo nella matrice la coppia x,y della cella modificata
+        self.v_matrice_dati_modificati.append((x,y))            
 
     def slot_save_modified_data(self):
         """

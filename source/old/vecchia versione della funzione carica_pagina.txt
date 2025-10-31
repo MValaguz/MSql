@@ -1,0 +1,141 @@
+    def carica_pagina(self, p_wait_window=False):
+        """
+           Carica i dati del flusso record preparato da esegui_select
+           Se p_wait_window è True viene mostrata una finestra di attesa durante il caricamento (con la scritta "Rendering..")
+        """
+        global v_global_connesso
+        global o_global_preferences
+
+        # visualizzo la waiting window se richiesto
+        if p_wait_window:
+            v_wait_window = oracle_executer.WaitRenderingDialog(self.o_table)            
+            v_wait_window.show()              
+
+        if v_global_connesso and self.v_esecuzione_ok:
+            # indico che sto caricando la pagina
+            self.v_carico_pagina_in_corso = True
+
+            # carico la prossima riga del flusso dati
+            try:
+                v_riga_dati = self.v_cursor.fetchone()
+            except oracledb.DatabaseError as e: 
+                 # ripristino icona freccia del mouse
+                Freccia_Mouse(False)
+                # emetto errore sulla barra di stato 
+                errorObj, = e.args    
+                message_error(QCoreApplication.translate('MSql_win2',"Error to fetch data:") + ' ' + errorObj.message)                                            
+                return 'ko'
+            except oracledb.InterfaceError as e: 
+                # ripristino icona freccia del mouse
+                Freccia_Mouse(False)
+                # emetto errore sulla barra di stato 
+                errorObj, = e.args    
+                message_error(QCoreApplication.translate('MSql_win2',"Error to fetch data:") + ' ' + errorObj.message)                                            
+                return 'ko'
+            
+            # se ero a fine flusso --> esco
+            if v_riga_dati == None:
+                return 'ko'
+
+            # imposto la riga a 1 (inizio caricamento prima riga del flusso dati)
+            if self.v_pos_y == 0:
+                self.o_table.setRowCount(1)                        
+            # carico i dati presi dal db dentro il modello                        
+            while True:
+                x = 0   
+                # quando è attiva la dialog di caricamento pagina, processo gli eventuali eventi di sistema (in modo da non bloccare l'interfaccia)
+                if p_wait_window:                    
+                    QApplication.processEvents()                    
+                # imposto altezza della riga (sotto un certo numero non va)
+                self.o_table.setRowHeight(self.v_pos_y, self.v_altezza_font_output)                                         
+                for field in v_riga_dati:                                                                                                                        
+                    # campo stringa
+                    if isinstance(field, str):                                                 
+                        self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( field ) )                                                                
+                    # campo numerico intero (se non funziona provare con i oracledb type)
+                    elif isinstance(field, int):                           
+                        # per dare coerenza a tutte le operazioni svolte sui dati il formato di base viene definito Italiano                                
+                        v_item = QTableWidgetItem('{:d}'.format(field))                        
+                        v_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)   
+                        self.o_table.setItem(self.v_pos_y, x, v_item)                    
+                    # campo numerico reale (se non funziona provare con i oracledb type)
+                    elif isinstance(field, float):   
+                        # per dare coerenza a tutte le operazioni svolte sui dati il formato di base viene definito Italiano        
+                        locale.setlocale(locale.LC_ALL, 'it_IT')                                             
+                        v_item = QTableWidgetItem(locale.str(field))                        
+                        v_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)   
+                        self.o_table.setItem(self.v_pos_y, x, v_item)                    
+                    # campo nullo
+                    elif field == None:                                 
+                        self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( "" ) )                
+                    # campo data
+                    elif self.tipi_intestazioni[x][1] == oracledb.DATETIME:                                     
+                        self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( f"{field:{o_global_preferences.date_format}}" ) )       
+                    # campo raw (si tratta di byte che vengono convertiti in stringa in formato hex)
+                    elif self.tipi_intestazioni[x][1] == oracledb.DB_TYPE_RAW:                          
+                        self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem( field.hex().upper() ) )       
+                    # se il contenuto è un blob...utilizzo il metodo read sul campo field, poi lo inserisco in una immagine
+                    # che poi carico una label e finisce dentro la cella a video
+                    elif self.tipi_intestazioni[x][1] == oracledb.BLOB:                        
+                        qimg = QImage.fromData(field.read())                        
+                        # se nel blob non è presente un'immagine (lo capisco in base alla profondità-colore), allora carico icona di non-immagine
+                        if qimg.depth() == 0:                            
+                            pixmap = QPixmap("icons:no_image.png")                                                        
+                        # se è presente un'immagine, carico immagine del blob...
+                        else:
+                            pixmap = QPixmap.fromImage(qimg)                           
+                        label = QLabel()
+                        label.setPixmap(pixmap)      
+                        # metto sfondo bianco se è attivo il tema scuro
+                        if o_global_preferences.dark_theme:
+                            label.setStyleSheet('background-color:white')                  
+                        # carico immagine nella cella di tabella 
+                        self.o_table.setCellWidget(self.v_pos_y, x, label )                                        
+                    # se il contenuto è un clob...leggo sempre tramite metodo read e lo carico in un widget di testo largo
+                    elif self.tipi_intestazioni[x][1] == oracledb.CLOB:                        
+                        # a video viene caricata un'antemprima di 1000 caratteri al massimo, e il dato vero e proprio viene
+                        # caricato nell'item ma "nascosto" dentro la sezione data. In fase di zoom dell'item, verrà fatto un controllo e preso da li                        
+                        text = field.read()
+                        if len(text) > 1000:
+                            preview = text[:1000] + ' !!! DATA TRUNCATED !!!'
+                        else:
+                            preview = text
+                        item = QTableWidgetItem(preview)
+                        item.setData(Qt.ItemDataRole.UserRole, text)
+                        self.o_table.setItem(self.v_pos_y, x, item)
+                    x += 1
+                # conto le righe (il numeratore è partito da 0, quindi è corretto che venga incrementato a questo punto)
+                self.v_pos_y += 1                
+                # aumento il numero di righe nella tabella a video
+                self.o_table.setRowCount(self.v_pos_y + 1)                   
+                # se raggiunto il numero di righe per pagina (100) --> esco dal ciclo
+                if self.v_pos_y % 100 == 0:                
+                    break
+                # carico la prossima riga del flusso dati
+                v_riga_dati = self.v_cursor.fetchone()
+                # se raggiunta ultima riga del flusso di dati --> esco dal ciclo
+                if v_riga_dati == None:
+                    # tolgo la riga che avevo aggiunto
+                    self.o_table.setRowCount(self.v_pos_y)                        
+                    break
+            
+            # indico di calcolare automaticamente la larghezza delle colonne
+            if o_global_preferences.auto_column_resize:                
+                self.o_table.resizeColumnsToContents()
+
+            # indico che carico pagina terminato
+            self.v_carico_pagina_in_corso = False
+
+            # se è stato richiesto di permettere la modifica dei dati, vuol dire che è presente come prima colonna il rowid, che quindi va nascosta!
+            if o_global_preferences.editable:
+                self.o_table.setColumnHidden(0, True)
+            else:
+                self.o_table.setColumnHidden(0, False)
+
+            # se ero a fine flusso --> esco con codice specifico
+            if v_riga_dati == None:
+                return 'ko'
+            
+        # chiudo la waiting window se era stata aperta        
+        if p_wait_window:            
+            v_wait_window.close()
