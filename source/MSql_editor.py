@@ -87,7 +87,8 @@ Tipi_Oggetti_DB = { 'Tables':'TABLE',
                     'Foreign keys': 'FOREIGN_KEY',
                     'Check keys': 'CHECK_KEY',
                     'Indexes': 'INDEXES',
-                    'Synonyms': 'SYNONYM' }
+                    'Synonyms': 'SYNONYM',
+                    'Others' : 'OTHERS'}
 
 ###
 # Var globali
@@ -215,6 +216,11 @@ class classChangeLog(QWidget):
         self.text_edit = QTextEdit()
         self.text_edit.setLineWrapMode(QTextEdit.LineWrapMode.NoWrap)
         self.text_edit.setReadOnly(True)  
+        # imposto font a larghezza fissa per migliore visualizzazione
+        v_font = QFont()
+        v_font.setFamily("Courier New")
+        v_font.setPointSize(10)
+        self.text_edit.setFont(v_font)
 
         # se sto eseguendo il programma da pyinstaller, vado in apposita cartella
         v_nome_file = "help/changelog.txt"
@@ -1658,6 +1664,19 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # sinonimi
             elif v_tipo_oggetto == 'SYNONYM':                
                 v_select = """SELECT SYNONYM_NAME OBJECT_NAME, 0 INVALID, 'ENABLED' STATUS FROM ALL_SYNONYMS WHERE OWNER='"""+self.current_schema+"""'"""
+            # altri oggetti (type, java, ecc.)
+            elif v_tipo_oggetto == 'OTHERS':
+                v_select = """SELECT OBJECT_NAME || ' - ' || OBJECT_TYPE AS OBJECT_NAME,                                        
+                                 (SELECT COUNT(*) 
+                                  FROM   ALL_OBJECTS ABJ
+                                  WHERE  ABJ.OWNER=ALL_OBJECTS.OWNER AND 
+                                         ABJ.OBJECT_NAME=ALL_OBJECTS.OBJECT_NAME AND 
+                                         ABJ.STATUS != 'VALID') INVALID,
+                                 'ENABLED' STATUS                                 
+                              FROM   ALL_OBJECTS 
+                              WHERE  OWNER='""" + self.current_schema + """' AND
+                                     OBJECT_TYPE NOT IN ('TABLE','VIEW','PACKAGE','PROCEDURE','FUNCTION','TRIGGER','SEQUENCE','INDEX','SYNONYM','PACKAGE BODY','JAVA CLASS','LOB') AND 
+                                     SECONDARY = 'N'"""
             # il tipo oggetto rientra nella tabella ALL_OBJECT
             else:
                 # leggo elenco degli oggetti indicati (con o senza descrizione)
@@ -1819,6 +1838,11 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             v_azione_comment = QAction('Extract comment')
             v_azione_comment.triggered.connect(self.slot_popup_menu_comment_field)
             v_menu.addAction(v_azione_comment)            
+        elif v_tipo_obj == 'OTHERS':            
+            # azione load ddl
+            v_azione_load_ddl = QAction('Load DDL')
+            v_azione_load_ddl.triggered.connect(self.slot_popup_menu_load_ddl)
+            v_menu.addAction(v_azione_load_ddl)
         else:
             # azione load ddl
             v_azione_load_ddl = QAction('Load DDL')
@@ -1989,7 +2013,23 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 v_select = "SELECT DBMS_METADATA.GET_DDL('SYNONYM','"+self.v_nome_oggetto+"') FROM DUAL"
             elif self.v_tipo_oggetto in ('PROCEDURE','FUNCTION','TRIGGER','SEQUENCE'):                    
                 v_select = "SELECT DBMS_METADATA.GET_DDL('"+self.v_tipo_oggetto+"','"+self.v_nome_oggetto+"') FROM DUAL"
+            elif self.v_tipo_oggetto == 'OTHERS': 
+                self.v_tipo_oggetto = self.v_nome_oggetto.split(' - ')[1]
+                self.v_nome_oggetto = self.v_nome_oggetto.split(' - ')[0]        
+                if self.v_tipo_oggetto == 'JOB':
+                    v_select = "SELECT DBMS_METADATA.GET_DDL('PROCOBJ','"+self.v_nome_oggetto+"') FROM DUAL"            
+                elif self.v_tipo_oggetto == 'JAVA SOURCE':                    
+                    v_select = "SELECT DBMS_METADATA.GET_DDL('JAVA_SOURCE','"+self.v_nome_oggetto+"') FROM DUAL"            
+                elif self.v_tipo_oggetto == 'TYPE BODY':                    
+                    v_select = "SELECT DBMS_METADATA.GET_DDL('TYPE_BODY','"+self.v_nome_oggetto+"') FROM DUAL"            
+                elif self.v_tipo_oggetto == 'TYPE':                    
+                    v_select = "SELECT DBMS_METADATA.GET_DDL('TYPE','"+self.v_nome_oggetto+"') FROM DUAL"            
+                else:
+                    Freccia_Mouse(False)
+                    message_error(QCoreApplication.translate('MSql_win1','Invalid object!'))
+                    return 'ko'
             else:
+                Freccia_Mouse(False)
                 message_error(QCoreApplication.translate('MSql_win1','Invalid object!'))
                 return 'ko'
             
@@ -3107,8 +3147,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         else:
             self.file_system_proxy_model.setFilterRegularExpression(QRegularExpression(""))
 
-        # Collega il modello alla vista
+        # Collega il modello alla vista e indica di ordinare in ordine crescente per nome file
         self.o_file_system.setModel(self.file_system_proxy_model)
+        self.o_file_system.sortByColumn(0, Qt.SortOrder.AscendingOrder)
 
         # Imposta la cartella iniziale (desktop o quella salvata)
         if o_global_preferences.open_dir != '':
@@ -4826,7 +4867,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 v_istruzione = True
                 v_istruzione_str = v_riga
             # riga di codice pl-sql (da notare come lo script verrà composto con v_riga_raw)             
-            elif v_riga.split()[0].upper() in ('DECLARE','BEGIN','CREATE','REPLACE','FUNCTION','PROCEDURE'):
+            elif v_riga.split()[0].upper() in ('DECLARE','BEGIN','CREATE','REPLACE','FUNCTION','PROCEDURE','DROP'):
                 print('Inizio plsql ')
                 v_plsql = True
                 v_plsql_idx += 1
@@ -5266,7 +5307,8 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
     def carica_pagina(self, p_wait_window=False):
         """
             Carica i dati del flusso record preparato da esegui_select.
-            Se p_wait_window è True viene mostrata una finestra di attesa durante il caricamento (con la scritta "Rendering..")
+            Se p_wait_window è True viene mostrata una finestra di attesa durante il caricamento (con la scritta "Rendering..").
+            La funzione ritorna solo quando il caricamento è completato, restituendo 'ok' o 'ko'.
         """
         global v_global_connesso
         global o_global_preferences
@@ -5275,8 +5317,12 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         if not (v_global_connesso and self.v_esecuzione_ok):
             return 'ko'
 
-        # funzione interna per il caricamento vero e proprio
+        v_ok = 'ok'          # valore di ritorno predefinito
+        v_local_loop = None  # variabile che conterrà il QEventLoop locale
+
+        # funzione interna che esegue il caricamento vero e proprio
         def _do_load():
+            nonlocal v_ok, v_local_loop
             try:
                 self.o_table.setUpdatesEnabled(False)
                 self.o_table.blockSignals(True)
@@ -5286,10 +5332,12 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 except (oracledb.DatabaseError, oracledb.InterfaceError) as e:
                     errorObj, = e.args
                     message_error(QCoreApplication.translate('MSql_win2', "Error to fetch data:") + ' ' + errorObj.message)
-                    return 'ko'
+                    v_ok = 'ko'
+                    return
 
                 if v_riga_dati is None:
-                    return 'ko'
+                    v_ok = 'ko'
+                    return
 
                 if self.v_pos_y == 0:
                     self.o_table.setRowCount(1)
@@ -5357,13 +5405,19 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 self.o_table.setColumnHidden(0, o_global_preferences.editable)
 
             finally:
+                # ripristino interfaccia
                 self.o_table.blockSignals(False)
                 self.o_table.setUpdatesEnabled(True)
                 self.o_table.viewport().update()
 
+                # chiusura finestra di attesa
                 if p_wait_window and getattr(self, "v_wait_window", None):
                     self.v_wait_window.close()
                     self.v_wait_window = None
+
+                # 🔓 sblocca il loop locale se attivo
+                if v_local_loop is not None and v_local_loop.isRunning():
+                    v_local_loop.quit()
 
         # --- parte principale ---
         if p_wait_window:
@@ -5371,14 +5425,17 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             self.v_wait_window.show()
             QApplication.processEvents(QEventLoop.ProcessEventsFlag.AllEvents)
 
-            # ritarda l’avvio del caricamento di 50 ms
+            # Crea e avvia il loop di attesa locale
+            v_local_loop = QEventLoop()
             QTimer.singleShot(50, _do_load)
+
+            # blocca fino al completamento di _do_load()
+            v_local_loop.exec()
         else:
-            v_ok = _do_load()
-            return v_ok
-        
-        return ''
-    
+            _do_load()
+
+        return v_ok
+
     def slot_scrollbar_azionata(self, posizione):
         """
             Controllo avanzamento della scrollbar per tenere sotto controllo elenchi di grandi dimensioni
@@ -5675,7 +5732,10 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
            Ricerca della stringa in tutto il testo
         """
         # pulisco elenco
-        self.find_all_model.clear()
+        self.find_all_model.clear()        
+        
+        # creo la mappa delle procedure-function presenti nel testo per aggiungere il loro nome ai risultati
+        v_lista_def = estrai_procedure_function(self.e_sql.text().split('\n'))            
 
         # prelevo la stringa da ricercare
         v_string_to_search = self.e_find.text()
@@ -5690,6 +5750,23 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 v_start_line, v_start_pos, v_end_line, v_end_pos = self.e_sql.getSelection()
                 # inizio a costruire la riga di risultato che riporta il numero della riga dove stringa trovata + il suo testo 
                 v_risultato = str(v_start_line + 1) + ' - '
+                
+                # aggiunta del nome della procedure-function se presente                
+                v_index = -1
+                for v_def in v_lista_def:                
+                    # controllo in quale procedure-function è stata trovata la stringa
+                    v_index += 1
+                    if v_start_line > v_lista_def[0].numero_riga_testo:                        
+                        if v_def.numero_riga_testo == (v_start_line + 1):
+                            v_risultato = v_risultato + ' [' + v_def.nome_definizione.upper() + '] ' 
+                            break
+                        elif v_def.numero_riga_testo > v_start_line and (v_index - 1) > -1:
+                            v_risultato = v_risultato + ' [' + v_lista_def[v_index-1].nome_definizione.upper() + '] ' 
+                            break
+                        elif v_index == (len(v_lista_def) -1):
+                            v_risultato = v_risultato + ' [' + v_def.nome_definizione.upper() + '] ' 
+                            break
+
                 # per prendere la riga devo fare una selezione di tutta riga... (fino all'inizio della riga successiva visto che non conosco il fine riga...)
                 self.e_sql.setSelection(v_start_line, 0, v_start_line + 1, -1)
                 # aggiungo al numero di riga il testo completo della riga (vado ad eliminare spazi a sinistra e ritorni a capo)
@@ -5701,6 +5778,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, v_start_line + 1, -1, False, False, False)                        
                 # conto le ricorrenze
                 v_num += 1
+            
             # se trovate più ricorrenze ... mi posiziono sulla prima rilanciando la ricerca dall'inizio...
             if v_num > 1:
                 # lancio la ricerca su tutto e senza effetti a video (da notare come findFirst è un metodo di QScintilla)...

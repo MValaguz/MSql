@@ -2,6 +2,15 @@
 MSql Changelog!
 ---------------
 
+Versione del 06/11/2025
+OK! Ora, nella ricerca stringa, se il testo è strutturato con procedure-function, nel risultato oltre al numero di riga 
+    viene riportato anche il nome della procedura-function dove è stata trovata la stringa
+
+Versione del 31/10/2025
+OK! se lancio un "drop table xxxxx" senza il ; finale, non funziona! 
+OK! nell'object navigator, nella lista di selezione tipologia oggetti, inserita anche la voce "Other" che in pratica comprende tutto ciò che non rientra negli altri tipi di oggetti;
+    Vengono sostanzialmente visualizzati i JOB e i TYPE su cui è possibile, tramite tasto destro, importare nell'editor il rispettivo DDL.
+    
 Versione del 30/10/2025
 OK! nella sezione di file system inserito la ricerca per stringa (è possibile usare le regular expression)
 		+-------------------------------+-----------------------------------------------+-----------------------------------------------------------+
@@ -411,12 +420,10 @@ OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e part
 
 -------------
 MSql TO DO!!!
--------------		
-- nell'object navigator inserire anche la tipologia degli oggetti Type...in realtà facendo una group by sulla vista all_objects si vede che si sono molti altri tipi di oggetti. 
-  Pensavo che l'idea sarebbe di mettere una nuova voce nell'elenco degli oggetti chiamata "Others" dove vengono fatti vedere tutti gli oggetti che non rientrano nell'elenco. 
-	La voce vuota deve continuare a comprendere solo gli oggetti principali e non tutti!
-- se lancio un drop table xxxxx senza il ; finale, non funziona!
-- Marco T. consigliava di riprovare a inserire il collegamento con chatgpt....in questo caso farsi aprire il servizio api da Filippo! Fatto un test per scoprire che alla fine non funziona perché è richiesto un abbonamento
+-------------
+- Anche il comment monoriga senza punto e virgola non funziona!
+- Segnalato da Diego....ho testo dove voglio sostituire i doppi apici con apice...fatto ricerca-modifica e faccio il trova e sostituisci ma singolo...va in ricorsione!
+- Va migliorata l'esecuzione di script che contengono comandi DDL perché ad esempio nell'esecuzione degli script Modula, nella creazione delle tabelle, si blocca nell'esecuzione completa e va usata quella passo-passo		
 - capita che se faccio una select, poi una update/ delete o lancio script e poi eseguo la select, esca errore "Error to fetch data: DPY-1003: the executed statement does not return rows!!! Mi capitava con lo script del calcolo prelievi...lanciavo lo script e poi la select su tabella MW_SCOP1_TMP facendo F11
   -- lanciare il calcolo
 	begin

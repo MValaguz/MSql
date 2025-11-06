@@ -471,6 +471,15 @@
                <normaloff>:/icons/icons/synonym.png</normaloff>:/icons/icons/synonym.png</iconset>
              </property>
             </item>
+            <item>
+             <property name="text">
+              <string notr="true">Others</string>
+             </property>
+             <property name="icon">
+              <iconset resource="resource.qrc">
+               <normaloff>:/icons/icons/help.png</normaloff>:/icons/icons/help.png</iconset>
+             </property>
+            </item>
            </widget>
           </item>
           <item>
