@@ -4,19 +4,18 @@
 #  Descrizione...: Gestione delle funzioni di testo
 
 #Librerie sistema
+import os
 import sys
 import re
-#Amplifico la pathname dell'applicazione in modo veda il contenuto della directory qtdesigner dove sono contenuti i layout
-sys.path.append('qtdesigner')
 #Librerie grafiche
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
-from text_functions_ui import Ui_text_functions_window
+from qtdesigner.text_functions_ui import Ui_text_functions_window
 #Import dei moduli interni
 from utilita import message_error
 #Amplifico la pathname per ricercare le icone
-QDir.addSearchPath('icons', 'qtdesigner/icons/')
+QDir.addSearchPath('icons', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'qtdesigner', 'icons'))
 
 class class_text_functions(QDialog, Ui_text_functions_window):
     """

@@ -4,18 +4,17 @@
 #  Descrizione...: Visualizza l'history dei comandi eseguiti in MSql
 
 #Librerie sistema
+import os
 import sys
-#Amplifico la pathname dell'applicazione in modo veda il contenuto della directory qtdesigner dove sono contenuti i layout
-sys.path.append('qtdesigner')
 #Librerie grafiche
 from PyQt6.QtWidgets import *
 from PyQt6.QtSql import *
 from PyQt6.QtCore import *
-from history_ui import Ui_history_window
+from qtdesigner.history_ui import Ui_history_window
 from utilita import message_error, message_question_yes_no, message_info
 from utilita_database import purge_sql_history
 #Amplifico la pathname per ricercare le icone
-QDir.addSearchPath('icons', 'qtdesigner/icons/')
+QDir.addSearchPath('icons', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'qtdesigner', 'icons'))
 
 class history_class(QMainWindow, Ui_history_window):
     """

@@ -9,9 +9,10 @@ from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 from PyQt6.Qsci import *
 import difflib
+import os
 import sys
 #Amplifico la pathname per ricercare le icone
-QDir.addSearchPath('icons', 'qtdesigner/icons/')
+QDir.addSearchPath('icons', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'qtdesigner', 'icons'))
 
 class classDiffViewer(QWidget):
     """ 

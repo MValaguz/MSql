@@ -3,13 +3,14 @@
 #  Data..........: 09/08/2018 
 
 #Libreria per criptare i messaggi
+import os
 import base64
 #Librerie grafiche 
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 #Amplifico la pathname per ricercare le icone
-QDir.addSearchPath('icons', 'qtdesigner/icons/')
+QDir.addSearchPath('icons', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'qtdesigner', 'icons'))
 
 def message_error(p_message):
     """

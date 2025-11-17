@@ -6,13 +6,11 @@
 #Librerie sistema
 import sys
 import os
-#Amplifico la pathname dell'applicazione in modo veda il contenuto della directory qtdesigner dove sono contenuti i layout
-sys.path.append('qtdesigner')
 #Librerie grafiche
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
-from import_export_sqlite_to_excel_ui import Ui_import_export_window
+from qtdesigner.import_export_sqlite_to_excel_ui import Ui_import_export_window
 #Librerie di data base
 import sqlite3 
 import utilita_database
@@ -21,7 +19,7 @@ from copy_from_oracle_to_sqlite import copy_from_oracle_to_sqlite
 #Libreria per export in excel
 from xlsxwriter.workbook import Workbook
 #Amplifico la pathname per ricercare le icone
-QDir.addSearchPath('icons', 'qtdesigner/icons/')
+QDir.addSearchPath('icons', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'qtdesigner', 'icons'))
 
 class import_export_class(QMainWindow, Ui_import_export_window):
     """

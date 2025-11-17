@@ -18,7 +18,7 @@ from PyQt6.QtWidgets import *
 from utilita_database import estrae_struttura_tabella_sqlite        
 from utilita import message_error, message_info, message_question_yes_no
 #Amplifico la pathname per ricercare le icone
-QDir.addSearchPath('icons', 'qtdesigner/icons/')
+QDir.addSearchPath('icons', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'qtdesigner', 'icons'))
 
 class copy_from_sqlite_to_oracle(QWidget):
     """

@@ -22,14 +22,13 @@
 #                  XL_CELL_BLANK 	     6 	        empty string ''. Note: this type will appear only when open_workbook(..., formatting_info=True) is used.
 
 #Librerie sistema
+import os
 import sys
-#Amplifico la pathname dell'applicazione in modo veda il contenuto della directory qtdesigner dove sono contenuti i layout
-sys.path.append('qtdesigner')
 #Librerie grafiche
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
-from import_export_excel_to_oracle_ui import Ui_import_export_window
+from qtdesigner.import_export_excel_to_oracle_ui import Ui_import_export_window
 #Librerie di data base
 import oracledb
 import oracle_my_lib
@@ -42,7 +41,7 @@ from xlrd import xldate
 # Liberia regular expression
 import  re
 #Amplifico la pathname per ricercare le icone
-QDir.addSearchPath('icons', 'qtdesigner/icons/')
+QDir.addSearchPath('icons', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'qtdesigner', 'icons'))
 
 def slugify(text, lower=1):
     """

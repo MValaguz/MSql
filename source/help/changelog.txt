@@ -421,6 +421,7 @@ OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e part
 -------------
 MSql TO DO!!!
 -------------
+- Provare a creare una versione lato linux, installando i driver per connettersi a Oracle...
 - Anche il comment monoriga senza punto e virgola non funziona!
 - Segnalato da Diego....ho testo dove voglio sostituire i doppi apici con apice...fatto ricerca-modifica e faccio il trova e sostituisci ma singolo...va in ricorsione!
 - Va migliorata l'esecuzione di script che contengono comandi DDL perché ad esempio nell'esecuzione degli script Modula, nella creazione delle tabelle, si blocca nell'esecuzione completa e va usata quella passo-passo		

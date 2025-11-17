@@ -12,18 +12,16 @@
 import sys
 import os
 import json
-#Amplifico la pathname dell'applicazione in modo veda il contenuto della directory qtdesigner dove sono contenuti i layout
-sys.path.append('qtdesigner')
 #Librerie grafiche
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 #Definizioni interfaccia
-from preferences_ui import Ui_preferences_window
+from qtdesigner.preferences_ui import Ui_preferences_window
 #Librerie aggiuntive interne
 from utilita import message_info, message_question_yes_no, cripta_messaggio, decripta_messaggio
 #Amplifico la pathname per ricercare le icone
-QDir.addSearchPath('icons', 'qtdesigner/icons/')
+QDir.addSearchPath('icons', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'qtdesigner', 'icons'))
 
 class preferences_class():
     """

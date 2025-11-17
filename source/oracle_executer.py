@@ -13,10 +13,8 @@
 #                  Onestamente...alcune logiche di questa versione mi sono sconosciute!
 
 # Librerie di sistema
+import os
 import sys
-import datetime
-# Amplifico la pathname dell'applicazione in modo veda il contenuto della directory qtdesigner dove sono contenuti i layout
-sys.path.append('qtdesigner')
 # Librerie grafiche
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
@@ -26,7 +24,7 @@ import oracledb
 # Librerie interne
 import oracle_my_lib
 #Amplifico la pathname per ricercare le icone
-QDir.addSearchPath('icons', 'qtdesigner/icons/')
+QDir.addSearchPath('icons', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'qtdesigner', 'icons'))
 
 class OracleWorker(QObject):
     """

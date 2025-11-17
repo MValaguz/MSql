@@ -51,17 +51,17 @@ from preferences import preferences_class
 # Definizione del solo tema dark
 from dark_theme import dark_theme_definition
 # Classi qtdesigner (win1 è la window principale, win2 la window dell'editor)
-from MSql_editor_win1_ui import Ui_MSql_win1
-from MSql_editor_win2_ui import Ui_MSql_win2
+from qtdesigner.MSql_editor_win1_ui import Ui_MSql_win1
+from qtdesigner.MSql_editor_win2_ui import Ui_MSql_win2
 # Classe qtdesigner per informazioni di programma
-from program_info_ui import Ui_program_info
+from qtdesigner.program_info_ui import Ui_program_info
 # Classi qtdesigner per la ricerca e la sostituzione di stringhe di testo, per il posizionamento...
-from goto_line_ui import Ui_GotoLineWindow
+from qtdesigner.goto_line_ui import Ui_GotoLineWindow
 from history import history_class
 from preferred_sql import preferred_sql_class
 # Classe qtdesigner per la richiesta di connessione e cambio di schema
-from connect_ui import Ui_connect_window
-from select_schema_ui import Ui_select_schema_window
+from qtdesigner.connect_ui import Ui_connect_window
+from qtdesigner.select_schema_ui import Ui_select_schema_window
 # Classe per visualizzare la barra di avanzamento 
 from avanzamento import avanzamento_infinito_class
 # Utilità varie
@@ -6712,8 +6712,8 @@ if __name__ == "__main__":
     if getattr(sys, 'frozen', False): 
         v_dir_eseguibile = os.path.dirname(sys.executable)
         os.chdir(v_dir_eseguibile)
-        QDir.addSearchPath('icons', '_internal/icons/')
-        QDir.addSearchPath('logos', '_internal/logos/')                                
+        QDir.addSearchPath('icons', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'icons'))
+        QDir.addSearchPath('logos', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logos'))
         v_view_splash = True
     else:
         v_view_splash = False
