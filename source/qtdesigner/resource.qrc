@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/split.png</file>
     <file>icons/functions.png</file>
     <file>icons/highlight.png</file>
     <file>icons/database_link.png</file>

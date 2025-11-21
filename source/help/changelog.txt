@@ -2,9 +2,9 @@
 MSql Changelog!
 ---------------
 
-Versione del 20/11/2025
+Versione del 21/11/2025
 OK! Inizio adattamenti per funzionare in ambiente Linux
-OK! Ottimizzazione gestione minimappa passando al nuovo oggetto QSciDocument che permette di condividere la stessa area di memoria tra editor e minimappa
+OK! Nuova voce nel menu "View" detta "Editor view" che apre lateralmente all'editor una vista non editabile ma desincronizzata rispetto all'editor; 
 
 Versione del 06/11/2025
 OK! Ora, nella ricerca stringa, se il testo è strutturato con procedure-function, nel risultato oltre al numero di riga 
@@ -427,12 +427,7 @@ MSql TO DO!!!
 -------------
 - Fare una sorta di calcolatrice sui campi; tipo...prendo il campo1 e lo moltiplico o divido  per il campo 2....una cosa che compare una calcolatrice a video e si popola mano a mano che clicco sulle celle
 - Provare a usare Git direttamente da dentro VS-Code senza passare dalla versione desktop
-- Implementare dentro oggetto qscintilla il qscidocument che andrebbe a modificare il funzionamento della minimappa e successivamente permetterebbe la creazione di un o più view
-- Provare a creare una versione lato linux, installando i driver per connettersi a Oracle...
-  in cartella qtdesigner creare il file __init__.py
-	l'import degli oggetti deve essere preceduto da qtdesigner.
-	- Sostituire la path della ricerca icone come segue
-	QDir.addSearchPath('icons', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'qtdesigner', 'icons'))
+- Installare sulla macchina virtuale linux i driver per connettersi a Oracle
 - Anche il comment monoriga senza punto e virgola non funziona!
 - Segnalato da Diego....ho testo dove voglio sostituire i doppi apici con apice...fatto ricerca-modifica e faccio il trova e sostituisci ma singolo...va in ricorsione!
 - Va migliorata l'esecuzione di script che contengono comandi DDL perché ad esempio nell'esecuzione degli script Modula, nella creazione delle tabelle, si blocca nell'esecuzione completa e va usata quella passo-passo		

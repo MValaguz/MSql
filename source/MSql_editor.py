@@ -1131,6 +1131,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # Attivo/disattivo indentation guide sull'editor
             elif p_slot.objectName() == 'actionIndentation_guide':
                 o_MSql_win2.slot_indentation_guide()
+            # Creo una view laterale per l'editor attivo    
+            elif p_slot.objectName() == 'actionEditor_view':                
+                o_MSql_win2.slot_editor_view()            
 
     def slot_editable(self):
         """
@@ -3214,8 +3217,11 @@ class My_MSql_Lexer(QsciLexerSQL):
                 self.p_editor.setCaretLineBackgroundColor(QColor("#FFFF99"))        
                 self.p_editor.setCaretForegroundColor(QColor("black"))        
         
+            # imposto i numeri di riga
             self.p_editor.setMarginType(0, QsciScintilla.MarginType.NumberMargin)        
-            self.p_editor.setMarginsFont(QFont("Courier New",9))                                   
+            self.p_editor.setMarginsFont(QFont("Courier New",9))                                               
+            self.p_editor.setMarginLineNumbers(0, True)
+            self.p_editor.setMarginWidth(0, "00000")  # 5 cifre max
         
             # attivo il matching sulle parentesi con uno specifico colore
             self.p_editor.setBraceMatching(QsciScintilla.BraceMatch.SloppyBraceMatch)            
@@ -6504,6 +6510,33 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         self.e_sql.SendScintilla(self.e_sql.SCI_SETINDICATORCURRENT,v_indicator)
         self.e_sql.SendScintilla(self.e_sql.SCI_INDICATORFILLRANGE,start, length)
     
+    def slot_editor_view(self):
+        """
+           Crea a fianco dell'editor principale, una view di sola lettura che replica il contenuto dell'editor principale   
+           Se la funzione viene richiamata e la view è già presente, la toglie
+        """
+        if hasattr(self, 'view_splitter'):
+            # tolgo la view
+            self.view_splitter.deleteLater()
+            del self.view_splitter
+            return 'ok'
+        # creo la view            
+        self.view_splitter = QSplitter(parent=self.splitter_2)
+        self.view_splitter.setOrientation(Qt.Orientation.Vertical)
+        self.view_splitter.setObjectName("view_splitter")
+        self.e_sql_view = QsciScintilla(parent=self.view_splitter)
+        self.e_sql_view.setObjectName("e_sql_view")
+        # attivo il lexer sulla view        
+        self.v_lexer_view = My_MSql_Lexer(self.e_sql_view, False)                
+        self.e_sql_view.setLexer(self.v_lexer_view)
+        # imposto la view come sola lettura
+        self.e_sql_view.setReadOnly(True)        
+        # imposto il testo della view uguale a quello dell'editor
+        self.e_sql_view.setText(self.e_sql.text())
+        # modifico il rapporto di divisione tra editor e view   
+        self.splitter_2.setStretchFactor(0,10)                
+        self.splitter_2.setStretchFactor(2,10)                
+        
     def bind_variable(self, p_function, p_variabile_nome=None, p_variabile_tipo=None, p_testo_sql=None):
         """
            Gestione delle struttura delle variabili bind

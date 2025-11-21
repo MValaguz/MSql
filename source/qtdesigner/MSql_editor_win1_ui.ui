@@ -215,6 +215,7 @@
     <addaction name="actionShow_end_of_line"/>
     <addaction name="actionIndentation_guide"/>
     <addaction name="actionMini_map"/>
+    <addaction name="actionEditor_view"/>
     <addaction name="separator"/>
     <addaction name="actionFont_editor_selector"/>
    </widget>
@@ -1786,6 +1787,15 @@
    </property>
    <property name="text">
     <string>File system</string>
+   </property>
+  </action>
+  <action name="actionEditor_view">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/split.png</normaloff>:/icons/icons/split.png</iconset>
+   </property>
+   <property name="text">
+    <string>Editor view</string>
    </property>
   </action>
  </widget>

@@ -720,6 +720,11 @@ class Ui_MSql_win1(object):
         self.actionFile_system = QtGui.QAction(parent=MSql_win1)
         self.actionFile_system.setIcon(icon20)
         self.actionFile_system.setObjectName("actionFile_system")
+        self.actionEditor_view = QtGui.QAction(parent=MSql_win1)
+        icon89 = QtGui.QIcon()
+        icon89.addPixmap(QtGui.QPixmap("icons:split.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        self.actionEditor_view.setIcon(icon89)
+        self.actionEditor_view.setObjectName("actionEditor_view")
         self.menuFiles.addAction(self.actionNew)
         self.menuFiles.addAction(self.actionOpen)
         self.menuFiles.addSeparator()
@@ -822,6 +827,7 @@ class Ui_MSql_win1(object):
         self.menuView.addAction(self.actionShow_end_of_line)
         self.menuView.addAction(self.actionIndentation_guide)
         self.menuView.addAction(self.actionMini_map)
+        self.menuView.addAction(self.actionEditor_view)
         self.menuView.addSeparator()
         self.menuView.addAction(self.actionFont_editor_selector)
         self.menuSearch.addAction(self.actionFind)
@@ -1096,6 +1102,7 @@ class Ui_MSql_win1(object):
         self.actionText_functions.setText(_translate("MSql_win1", "Text functions"))
         self.actionText_functions.setShortcut(_translate("MSql_win1", "Ctrl+Alt+T"))
         self.actionFile_system.setText(_translate("MSql_win1", "File system"))
+        self.actionEditor_view.setText(_translate("MSql_win1", "Editor view"))
 from custom_widget import MyCustomTreeView
 
 
