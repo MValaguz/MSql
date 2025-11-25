@@ -2,9 +2,11 @@
 MSql Changelog!
 ---------------
 
-Versione del 21/11/2025
-OK! Inizio adattamenti per funzionare in ambiente Linux
-OK! Nuova voce nel menu "View" detta "Editor view" che apre lateralmente all'editor una vista non editabile ma desincronizzata rispetto all'editor; 
+Versione del 25/11/2025
+OK! Nuova voce nel menu "View" detta "Editor view" che apre lateralmente all'editor una vista non editabile ma desincronizzata rispetto all'editor; si permette in questo modo di poter visualizzare una parte di codice dell'editor  
+    mentre si sta lavorando su un'altra. Su questa view è permessa solo operazione di "Find" di stringhe, agendo sull'apposita checkbox 
+OK! Nel menù "Tools" ora è presente la Calcolatrice; una volta attivata, può essere alimentata della celle dei risultati; premendo il tasto destro, compare la nuova voce "Copy to calc" che copia il valore della cella dentro la calcolatrice.		
+OK! Sono iniziati gli adattamenti per funzionare in ambiente Linux!!!!
 
 Versione del 06/11/2025
 OK! Ora, nella ricerca stringa, se il testo è strutturato con procedure-function, nel risultato oltre al numero di riga 
@@ -425,7 +427,6 @@ OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e part
 -------------
 MSql TO DO!!!
 -------------
-- Fare una sorta di calcolatrice sui campi; tipo...prendo il campo1 e lo moltiplico o divido  per il campo 2....una cosa che compare una calcolatrice a video e si popola mano a mano che clicco sulle celle
 - Provare a usare Git direttamente da dentro VS-Code senza passare dalla versione desktop
 - Installare sulla macchina virtuale linux i driver per connettersi a Oracle
 - Anche il comment monoriga senza punto e virgola non funziona!

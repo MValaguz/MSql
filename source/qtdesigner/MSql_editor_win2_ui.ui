@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>994</width>
-    <height>884</height>
+    <height>873</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -413,18 +413,18 @@
     <number>2</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_2">
-    <layout class="QGridLayout" name="gridLayout_4">
+    <layout class="QGridLayout" name="gridLayout_10">
      <property name="leftMargin">
-      <number>1</number>
+      <number>0</number>
      </property>
      <property name="topMargin">
       <number>3</number>
      </property>
      <property name="rightMargin">
-      <number>4</number>
+      <number>3</number>
      </property>
      <property name="bottomMargin">
-      <number>0</number>
+      <number>3</number>
      </property>
      <item row="0" column="0">
       <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -448,11 +448,32 @@
       </layout>
      </item>
      <item row="1" column="0">
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_find_into_view">
+         <property name="text">
+          <string>Find into view</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QCheckBox" name="e_find_into_view">
+         <property name="toolTip">
+          <string>Execute the find into the view</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="2" column="0">
       <layout class="QHBoxLayout" name="horizontalLayout_4">
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
-          <widget class="QLabel" name="label_8">
+          <widget class="QLabel" name="label_highlight">
            <property name="text">
             <string>Highlight</string>
            </property>
@@ -486,7 +507,7 @@
        </item>
       </layout>
      </item>
-     <item row="2" column="0">
+     <item row="3" column="0">
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
         <widget class="QPushButton" name="b_find_next">
@@ -507,7 +528,7 @@
        </item>
       </layout>
      </item>
-     <item row="3" column="0">
+     <item row="4" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>Search result</string>
@@ -517,7 +538,7 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="0">
+     <item row="5" column="0">
       <widget class="QListView" name="o_find_all_result">
        <property name="editTriggers">
         <set>QAbstractItemView::NoEditTriggers</set>
@@ -746,11 +767,11 @@
    <slot>slot_find_next()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>858</x>
-     <y>530</y>
+     <x>859</x>
+     <y>557</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1376</x>
+     <x>993</x>
      <y>556</y>
     </hint>
    </hints>
@@ -766,7 +787,7 @@
      <y>536</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1374</x>
+     <x>993</x>
      <y>547</y>
     </hint>
    </hints>
@@ -778,11 +799,11 @@
    <slot>slot_find_all_click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>989</x>
-     <y>703</y>
+     <x>990</x>
+     <y>697</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1375</x>
+     <x>993</x>
      <y>705</y>
     </hint>
    </hints>
@@ -815,7 +836,7 @@
     </hint>
     <hint type="destinationlabel">
      <x>710</x>
-     <y>915</y>
+     <y>872</y>
     </hint>
    </hints>
   </connection>
@@ -831,7 +852,7 @@
     </hint>
     <hint type="destinationlabel">
      <x>714</x>
-     <y>962</y>
+     <y>872</y>
     </hint>
    </hints>
   </connection>
@@ -858,8 +879,8 @@
    <slot>slot_output_find_next()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>380</x>
-     <y>401</y>
+     <x>104</x>
+     <y>394</y>
     </hint>
     <hint type="destinationlabel">
      <x>729</x>
@@ -874,8 +895,8 @@
    <slot>slot_output_find_all()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>558</x>
-     <y>401</y>
+     <x>104</x>
+     <y>394</y>
     </hint>
     <hint type="destinationlabel">
      <x>729</x>
@@ -890,12 +911,12 @@
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>448</x>
-     <y>375</y>
+     <x>104</x>
+     <y>394</y>
     </hint>
     <hint type="destinationlabel">
-     <x>558</x>
-     <y>401</y>
+     <x>104</x>
+     <y>394</y>
     </hint>
    </hints>
   </connection>
@@ -906,8 +927,8 @@
    <slot>slot_output_find_all_click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>402</x>
-     <y>450</y>
+     <x>104</x>
+     <y>394</y>
     </hint>
     <hint type="destinationlabel">
      <x>727</x>
@@ -922,8 +943,8 @@
    <slot>slot_e_highlight_check()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>805</x>
-     <y>486</y>
+     <x>821</x>
+     <y>519</y>
     </hint>
     <hint type="destinationlabel">
      <x>729</x>
@@ -947,6 +968,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>e_find_into_view</sender>
+   <signal>clicked()</signal>
+   <receiver>MSql_win2</receiver>
+   <slot>slot_find_in_view_click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>871</x>
+     <y>487</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>732</x>
+     <y>495</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>slot_refresh_map()</slot>
@@ -962,5 +999,6 @@
   <slot>slot_output_find_all_click()</slot>
   <slot>slot_e_highlight_check()</slot>
   <slot>slot_clear_all_highlights()</slot>
+  <slot>slot_find_in_view_click()</slot>
  </slots>
 </ui>

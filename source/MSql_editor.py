@@ -683,6 +683,11 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         self.object_navigator_search_timer.setSingleShot(True)
         self.object_navigator_search_timer.timeout.connect(self.slot_oggetti_db_scelta)
 
+        ###
+        # var per gestire la calcolatrice
+        ###
+        self.win_calculator = None
+
     def dragEnterEvent(self, event):
         """
            Sovrascrivo la funzione nativa e intercetto l'evento drag che proviene dall'esterno dell'app (es. da esplora risorse si trascina in MSql un file)
@@ -899,6 +904,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # SQLite viewer
         elif p_slot.objectName() == 'actionSQLite_viewer':
             self.slot_sqlite_viewer()
+        # Calcolatrice
+        elif p_slot.objectName() == 'actionCalculator':
+            self.slot_calculator()
         # Modalità full screen (attiva/disattiva)
         elif p_slot.objectName() == 'actionFull_screen':
             if self.isFullScreen():
@@ -3170,6 +3178,22 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         self.o_file_system.setCurrentIndex(proxy_index)
         self.o_file_system.setColumnWidth(0, 250)
 
+    def slot_calculator(self):
+        """
+           Apre la calcolatrice di sistema
+        """        
+        from calculator import run_calculator
+
+        self.win_calculator = run_calculator()        
+        self.win_calculator.closed.connect(self.slot_calculator_close)
+        centra_window_figlia(self, self.win_calculator)
+
+    def slot_calculator_close(self):
+        """
+           Evento che si scatena quando la calcolatrice viene chiusa
+        """        
+        self.win_calculator = None
+        
 #  _     _______  _______ ____  
 # | |   | ____\ \/ / ____|  _ \ 
 # | |   |  _|  \  /|  _| | |_) |
@@ -3962,6 +3986,18 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             v_action.setDefaultWidget(v_zoom)        
             self.o_table_cont_menu.addAction(v_action)
 
+            # voce per copiare il valore nella calcolatrice (se è aperta)
+            if self.link_to_MSql_win1_class.win_calculator != None:                
+                icon3 = QIcon()
+                icon3.addPixmap(QPixmap("icons:calculator.png"), QIcon.Mode.Normal, QIcon.State.Off)        
+                v_zoom = QPushButton()
+                v_zoom.setText('Copy to calc')
+                v_zoom.setIcon(icon3)        
+                v_zoom.clicked.connect(self.slot_copy_to_calculator)
+                v_action = QWidgetAction(self.o_table_cont_menu)
+                v_action.setDefaultWidget(v_zoom)        
+                self.o_table_cont_menu.addAction(v_action)
+
             # visualizzo il menu alla posizione del cursore
             self.o_table_cont_menu.exec(event.globalPosition().toPoint())    
         # item non è di tipo testo...si presume sia un blob...cosa non certa...ma al momento non trovato modo per capirlo
@@ -4107,6 +4143,13 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         else:
             self.win_dialog_zoom_lineEdit.setPlainText(self.v_o_table_current_item.data(Qt.ItemDataRole.UserRole))
         self.win_dialog_zoom_item.show()
+
+    def slot_copy_to_calculator(self):
+        """
+           Copia il valore dell'item dentro la calcolatrice di MSql (se aperta)
+        """                        
+        self.link_to_MSql_win1_class.win_calculator.append_value(self.v_o_table_current_item.text())                    
+        self.o_table_cont_menu.close()
 
     def slot_save_snapshoot(self):
         """
@@ -5732,28 +5775,36 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # definizione della struttura per elenco dei risultati (valido solo per find all)       
         self.find_all_model = QStandardItemModel()        
         self.o_find_all_result.setModel(self.find_all_model)
+        # attivo la checkbox per la ricerca anche nella view (se aperta)
+        self.set_find_in_view_visible()        
 
     def slot_find_all(self):
         """
            Ricerca della stringa in tutto il testo
         """
         # pulisco elenco
-        self.find_all_model.clear()        
+        self.find_all_model.clear()     
+        
+        # individuo se lavorare sull'editor o sulla view
+        if self.e_find_into_view.isChecked() and self.view_is_visible():
+            v_editor = self.e_sql_view
+        else:
+            v_editor = self.e_sql   
         
         # creo la mappa delle procedure-function presenti nel testo per aggiungere il loro nome ai risultati
-        v_lista_def = estrai_procedure_function(self.e_sql.text().split('\n'))            
+        v_lista_def = estrai_procedure_function(v_editor.text().split('\n'))            
 
         # prelevo la stringa da ricercare
         v_string_to_search = self.e_find.text()
         # se inserito una stringa di ricerca...
         if v_string_to_search != '':                        
             # lancio la ricerca su tutto e senza effetti a video (da notare come findFirst è un metodo di QScintilla)...
-            v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, 0, 0, False, False, False)
+            v_found = v_editor.findFirst(v_string_to_search, False, False, False, False, True, 0, 0, False, False, False)
             # ciclo alla ricerca di tutte le ricorrenze            
             v_num = 1
             while v_found:
                 # ricavo la posizione in coordinate dove è stata trovata la stringa
-                v_start_line, v_start_pos, v_end_line, v_end_pos = self.e_sql.getSelection()
+                v_start_line, v_start_pos, v_end_line, v_end_pos = v_editor.getSelection()
                 # inizio a costruire la riga di risultato che riporta il numero della riga dove stringa trovata + il suo testo 
                 v_risultato = str(v_start_line + 1) + ' - '
                 
@@ -5774,21 +5825,21 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                             break
 
                 # per prendere la riga devo fare una selezione di tutta riga... (fino all'inizio della riga successiva visto che non conosco il fine riga...)
-                self.e_sql.setSelection(v_start_line, 0, v_start_line + 1, -1)
+                v_editor.setSelection(v_start_line, 0, v_start_line + 1, -1)
                 # aggiungo al numero di riga il testo completo della riga (vado ad eliminare spazi a sinistra e ritorni a capo)
-                v_risultato = v_risultato + self.e_sql.selectedText().lstrip()
+                v_risultato = v_risultato + v_editor.selectedText().lstrip()
                 v_risultato = v_risultato.replace('\n','')
                 # aggiungo il risultato all'elenco
                 self.find_all_model.appendRow(QStandardItem(v_risultato))        
                 # lancio la ricerca alla riga successiva
-                v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, v_start_line + 1, -1, False, False, False)                        
+                v_found = v_editor.findFirst(v_string_to_search, False, False, False, False, True, v_start_line + 1, -1, False, False, False)                        
                 # conto le ricorrenze
                 v_num += 1
             
             # se trovate più ricorrenze ... mi posiziono sulla prima rilanciando la ricerca dall'inizio...
             if v_num > 1:
                 # lancio la ricerca su tutto e senza effetti a video (da notare come findFirst è un metodo di QScintilla)...
-                v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, 0, 0, False, False, False)
+                v_found = v_editor.findFirst(v_string_to_search, False, False, False, False, True, 0, 0, False, False, False)
 
             # se richiesto di evidenziare il testo, richiamo specifica funzione che ricerca il testo e lo fissa con colore specificato 
             if self.e_highlight_check.isChecked():                                                
@@ -5854,6 +5905,12 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         """
            Partendo dalla selezione di find_all, si posiziona sulla specifica riga di testo dell'editor
         """
+        # individuo se lavorare sull'editor o sulla view
+        if self.e_find_into_view.isChecked() and self.view_is_visible():
+            v_editor = self.e_sql_view
+        else:
+            v_editor = self.e_sql   
+
         # prelevo la stringa da ricercare
         v_string_to_search = self.e_find.text()
         # prendo elemento dell'elenco selezionato
@@ -5864,23 +5921,29 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             v_goto_line = v_stringa[0:v_stringa.find('-')]
             if v_goto_line != '':
                 # mi posiziono alla riga richiesta sull'editor
-                self.e_sql.setCursorPosition(int(v_goto_line)-1,0)    
+                v_editor.setCursorPosition(int(v_goto_line)-1,0)    
                 # eseguo la ricerca in modo da evidenziare il contenuto            
-                v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, int(v_goto_line)-1, 0, True, False, False)
+                v_found = v_editor.findFirst(v_string_to_search, False, False, False, False, True, int(v_goto_line)-1, 0, True, False, False)
                                 
     def slot_find_next(self):
         """
            Ricerca la prossima ricorrenza verso il basso
-        """        
+        """     
+        # individuo se lavorare sull'editor o sulla view
+        if self.e_find_into_view.isChecked() and self.view_is_visible():
+            v_editor = self.e_sql_view
+        else:
+            v_editor = self.e_sql   
+
         v_string_to_search = self.e_find.text()
         # se inserito una stringa di ricerca...
         if v_string_to_search != '':                       
             # lancio la ricerca dicendo di posizionarsi sulla prossima ricorrenza 
-            v_found = self.e_sql.findFirst(v_string_to_search, False, False, False, False, True, -1, -1, True, False, False)
+            v_found = v_editor.findFirst(v_string_to_search, False, False, False, False, True, -1, -1, True, False, False)
             # se sono arrivato alla fine, chiedo se si desidera ripartire dall'inizio...da notare come viene poi richiamata questa stessa funzione!
             if not v_found:
                 if message_question_yes_no(QCoreApplication.translate('MSql_win2','Passed the end of file!')+chr(10)+QCoreApplication.translate('MSql_win2','Move to the beginnig?')) == 'Yes':                    
-                    self.e_sql.setCursorPosition(0,0)
+                    v_editor.setCursorPosition(0,0)
                     self.slot_find_next()
 
     def slot_find_e_replace(self):
@@ -6515,7 +6578,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
            Crea a fianco dell'editor principale, una view di sola lettura che replica il contenuto dell'editor principale   
            Se la funzione viene richiamata e la view è già presente, la toglie
         """
-        if hasattr(self, 'view_splitter'):
+        if self.view_is_visible():
             # tolgo la view
             self.view_splitter.deleteLater()
             del self.view_splitter
@@ -6535,7 +6598,39 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         self.e_sql_view.setText(self.e_sql.text())
         # modifico il rapporto di divisione tra editor e view   
         self.splitter_2.setStretchFactor(0,10)                
-        self.splitter_2.setStretchFactor(2,10)                
+        self.splitter_2.setStretchFactor(2,10)       
+        # attivo la checkbox per la ricerca anche nella view
+        self.set_find_in_view_visible()        
+
+    def set_find_in_view_visible(self):        
+        """ 
+           In base al fatto che la view sia aperta, nella sezione di ricerca testo, viene attivata la checkbox per la ricerca anche nella view
+        """        
+        self.label_find_into_view.setVisible(self.view_is_visible())
+        self.e_find_into_view.setVisible(self.view_is_visible())
+
+    def slot_find_in_view_click(self):
+        """
+           Evento richiamato quando viene attivata/disattivata la checkbox di ricerca anche nella view
+        """
+        if self.e_find_into_view.isChecked() and self.view_is_visible():
+            v_visible = False
+        else:       
+            v_visible = True
+        # sezione degli highlight che nel caso della ricerca nella view vengono disattivati perché altrimenti un po' un casino attivarli anche li
+        self.e_highlight_check.setVisible(v_visible)  
+        self.label_highlight.setVisible(v_visible)         
+        self.b_clear_all_highlights.setVisible(v_visible)        
+        self.e_highlight_color.setVisible(v_visible)        
+
+    def view_is_visible(self):
+        """
+           Restituisce True se la view è visibile, False altrimenti
+        """
+        if hasattr(self, 'view_splitter'):
+            return True
+        else:   
+            return False
         
     def bind_variable(self, p_function, p_variabile_nome=None, p_variabile_tipo=None, p_testo_sql=None):
         """

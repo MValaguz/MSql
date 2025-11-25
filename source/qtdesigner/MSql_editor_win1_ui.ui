@@ -202,6 +202,8 @@
     <addaction name="actionObjects_Navigator"/>
     <addaction name="actionObject_Viewer"/>
     <addaction name="actionFile_system"/>
+    <addaction name="separator"/>
+    <addaction name="actionCalculator"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -1796,6 +1798,15 @@
    </property>
    <property name="text">
     <string>Editor view</string>
+   </property>
+  </action>
+  <action name="actionCalculator">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/calculator.png</normaloff>:/icons/icons/calculator.png</iconset>
+   </property>
+   <property name="text">
+    <string>Calculator</string>
    </property>
   </action>
  </widget>

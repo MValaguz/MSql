@@ -725,6 +725,11 @@ class Ui_MSql_win1(object):
         icon89.addPixmap(QtGui.QPixmap("icons:split.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         self.actionEditor_view.setIcon(icon89)
         self.actionEditor_view.setObjectName("actionEditor_view")
+        self.actionCalculator = QtGui.QAction(parent=MSql_win1)
+        icon90 = QtGui.QIcon()
+        icon90.addPixmap(QtGui.QPixmap("icons:calculator.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        self.actionCalculator.setIcon(icon90)
+        self.actionCalculator.setObjectName("actionCalculator")
         self.menuFiles.addAction(self.actionNew)
         self.menuFiles.addAction(self.actionOpen)
         self.menuFiles.addSeparator()
@@ -819,6 +824,8 @@ class Ui_MSql_win1(object):
         self.menuTools.addAction(self.actionObjects_Navigator)
         self.menuTools.addAction(self.actionObject_Viewer)
         self.menuTools.addAction(self.actionFile_system)
+        self.menuTools.addSeparator()
+        self.menuTools.addAction(self.actionCalculator)
         self.menuView.addAction(self.actionZoom_In)
         self.menuView.addAction(self.actionZoom_Out)
         self.menuView.addAction(self.actionFull_screen)
@@ -1103,6 +1110,7 @@ class Ui_MSql_win1(object):
         self.actionText_functions.setShortcut(_translate("MSql_win1", "Ctrl+Alt+T"))
         self.actionFile_system.setText(_translate("MSql_win1", "File system"))
         self.actionEditor_view.setText(_translate("MSql_win1", "Editor view"))
+        self.actionCalculator.setText(_translate("MSql_win1", "Calculator"))
 from custom_widget import MyCustomTreeView
 
 
