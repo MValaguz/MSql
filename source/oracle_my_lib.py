@@ -1,9 +1,24 @@
 #  Creato da.....: Marco Valaguzza
 #  Piattaforma...: Python3.11
 #  Data..........: 09/02/2023
-#  Descrizione...: Scopo di questa classe è wrappare la libreria di connessione a Oracle, così da rendere disponibile ai programmi MGrep un oggetto comune
+#  Descrizione...: Funzione per inizializzare correttamente la libreria oracledb di Oracle
+#  Note..........: 
+#                  SISTEMA OPERATIVO WINDOWS
+#                  Nel caso di Windows si usano le librerie Oracle Client 64bit che a seconda dell'installazione
+#                  va indicata la pathname corretta.
+#                  
+#                  SISTEMA OPERATIVO LINUX
+#                  Nel caso di Linux invece si è usata la modalità "Thin" che non necessita di librerie esterne ma
+#                  necessita che lo user abbia determintate caratteristiche.
+#                  A QUESTO PUNTO, TRAMITE SYS E' STATO CREATO UN UTENTE CHE PERMETTA ALLA LIBRERIA ORACLE DI COLLEGARSI E VEDERE GLI OGGETTI SU CUI LAVORARE 
+#      
+#                  CREATE USER SMILE_PY IDENTIFIED BY SMILE_PY;
+#                  GRANT CONNECT, RESOURCE TO SMILE_PY;
+#                  GRANT SMILE_ROLE TO SMILE_PY;
+#                  ALTER USER SMILE_PY DEFAULT ROLE SMILE_ROLE;
+#                  GRANT CREATE SESSION TO SMILE_PY;
 
-#Importo la libreria oracledb versione dalla 8.3 in su
+# Importo la libreria oracledb versione dalla 8.3 in su
 import oracledb
 import os
 
@@ -11,8 +26,14 @@ def inizializzo_client():
    """
       Inizializzo il client di Oracle 
    """
-   #Reimposto la pathname! Attenzione al ; alla fine della pathname!!!!
-   os.environ["PATH"] = r"C:\oracle\Middleware\Oracle_Home\bin;" + os.environ["PATH"]
+   # In base al sistema operativo imposto il percorso della libreria Oracle Instant Client
+   if os.name == "posix":
+      # Percorso al tuo Oracle Instant Client su Linux      
+      return 'ok'      
+   else:
+      # Reimposto la pathname! Attenzione al ; alla fine della pathname!!!!      
+      os.environ["PATH"] = r"C:\oracle\Middleware\Oracle_Home\bin;" + os.environ["PATH"]
+   
    #Imposto il percorso per collegarmi alla libreria Oracle a 64bit (che supporta anche UTF-8)
    try:
       #oracledb.init_oracle_client(lib_dir=r'C:\oracle\Middleware\Oracle_Home\bin')
@@ -26,42 +47,20 @@ def inizializzo_client():
          print(err)
          print('------------------------------------------------------------------------------')
 
-class cursore():
-   """
-      Restituisce un cursore aperto su DB Oracle. Al momento dell'instanziazione passare utente, password e dsn.       
-   """
-   def __init__(self, 
-                 p_utente,
-                 p_password,
-                 p_dsn):
-      
-      self.utente = p_utente
-      self.password = p_password
-      self.dsn = p_dsn
-
-      #Imposto il percorso per collegarmi alla libreria Oracle a 64bit (che supporta anche UTF-8)
-      inizializzo_client()
-      
-      #Mi collego a Oracle e apro un cursore
-      try:
-         self.db = oracledb.connect(user=self.utente, password=self.password, dsn=self.dsn)        
-         self.cursor = self.db.cursor()             
-         self.connessione_ok = True
-      except:                  
-         self.connessione_ok = False
-
-   def execute(self, p_sql_instruction):
-      """
-         Esegue p_sql_instruction nel cursore presente nell'oggetto         
-      """
-      self.cursor.execute(p_sql_instruction)
-
 # ----------------------------------------
 # TEST APPLICAZIONE
 # ----------------------------------------
 if __name__ == "__main__":    
-   v_prova = cursore(p_utente='SMILE', p_password='SMILE', p_dsn='BACKUP_815')
-   if v_prova.connessione_ok:
-      print('Connessione effettuata con successo!')
+   inizializzo_client()
+   # TEST LINUX   
+   if os.name == "posix":
+      v_oracle_db = oracledb.connect(user='SMILE_PY', password='SMILE_PY', dsn='10.0.4.11:1521/SMIG')        # corrisponde a BACKUP_815
+   # TEST WINDOWS
    else:
-      print('Qualcosa è andato storto nella connessione a Oracle')
+      v_oracle_db = oracledb.connect(user='SMILE', password='SMILE', dsn='BACKUP_815')        
+   
+   v_oracle_cursor = v_oracle_db.cursor()    
+
+   v_oracle_cursor.execute("""SELECT * FROM TA_AZIEN""")                                
+   for rec in v_oracle_cursor:
+      print(rec[0])      
