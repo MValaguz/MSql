@@ -12,6 +12,7 @@
 import sys
 import os
 import json
+import subprocess
 #Librerie grafiche
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
@@ -428,7 +429,10 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         """
            Apre la cartella di lavoro di MSql 
         """
-        os.startfile(os.path.expanduser('~\\AppData\\Local\\MSql\\'))        
+        if os.name == "posix":
+            subprocess.Popen(["xdg-open", os.path.expanduser('~//.local//share//MSql//')])            
+        else:
+            os.startfile(os.path.expanduser('~\\AppData\\Local\\MSql\\'))        
     
     def slot_b_default_open_dir(self):
         """

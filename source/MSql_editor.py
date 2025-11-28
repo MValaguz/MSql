@@ -28,6 +28,7 @@
 # Librerie di base
 import sys 
 import os 
+import subprocess
 import datetime 
 import locale
 import re
@@ -97,9 +98,12 @@ Tipi_Oggetti_DB = { 'Tables':'TABLE',
 v_global_connection = oracledb
 # Indica se si è connessi al DB
 v_global_connesso = False
-# Directory di lavoro del programma (per sistema operativo Windows...)
-# Attenzione! Questa dir è possibile aprirla dalla gestione delle preferenze e in quel programma è riportata ancora la stessa dir
-v_global_work_dir = os.path.expanduser('~\\AppData\\Local\\MSql\\')
+# Directory di lavoro del programma (diversa in base al sistema operativo)
+# Attenzione! Questa dir è possibile aprirla dalla gestione delle preferenze e in quel programma è riportata ancora la stessa dir              
+if os.name == "posix":
+    v_global_work_dir = os.path.expanduser('~//.local//share//MSql//')
+else:
+    v_global_work_dir = os.path.expanduser('~\\AppData\\Local\\MSql\\')
 # Lista di parole aggiuntive al lexer che evidenzia le parole nell'editor
 v_global_my_lexer_keywords = []
 # Oggetto che carica le preferenze tramite l'apposita classe (notare che già a questa istruzione le preferenze vengono caricate!)
@@ -3127,7 +3131,10 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 self.smistamento_voci_menu(v_azione, v_titolo, v_contenuto_file, v_codifica_utf8)            
             # ... altrimenti apro un file che non è di testo con applicazione predefinita di windows
             else:
-                os.startfile(v_file_name)          
+                if os.name == "posix":
+                    subprocess.Popen(["xdg-open", v_file_name])    
+                else:
+                    os.startfile(v_file_name)          
 
     def slot_file_system_refresh(self):
         """
@@ -5650,7 +5657,10 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         
         # Apro direttamente il file            
         try:
-            os.startfile(v_global_work_dir + 'Export_data.csv')
+            if os.name == "posix":
+                subprocess.Popen(["xdg-open", v_global_work_dir + 'Export_data.csv'])    
+            else:
+                os.startfile(v_global_work_dir + 'Export_data.csv')
         except:
             message_error(QCoreApplication.translate('MSql_win2','Error in file creation!'))
       
