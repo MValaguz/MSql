@@ -21,22 +21,32 @@
 # Importo la libreria oracledb versione dalla 8.3 in su
 import oracledb
 import os
+# Classe per la gestione delle preferenze
+from preferences import preferences_class
+# Libreria delle utilità
+from utilita import return_global_work_dir
 
 def inizializzo_client():
    """
       Inizializzo il client di Oracle 
+      connection_mode: 0=Thin 1=Thick
+      oracleclient_path: percorso della libreria Oracle Client (se connection_mode=1) generalmente impostato con "C:/oracle/Middleware/Oracle_Home/bin"
    """
-   # In base al sistema operativo imposto il percorso della libreria Oracle Instant Client
-   if os.name == "posix":
-      # Percorso al tuo Oracle Instant Client su Linux      
-      return 'ok'      
-   else:
-      # Reimposto la pathname! Attenzione al ; alla fine della pathname!!!!      
-      os.environ["PATH"] = r"C:\oracle\Middleware\Oracle_Home\bin;" + os.environ["PATH"]
+   # Recupero la cartella di lavoro globale
+   v_global_work_dir = return_global_work_dir()
+   # Carico le preferenze globali (lo faccio qui dentro per evitare il passaggio dei parametri che sarebbe scomodo)
+   o_global_preferences = preferences_class(v_global_work_dir + 'MSql.ini', v_global_work_dir + 'MSql_connections.ini')
+
+   # Se connection mode è Thin=diretto esco senza fare nulla
+   if o_global_preferences.connection_mode == 0:
+      return 'ok'
    
-   #Imposto il percorso per collegarmi alla libreria Oracle a 64bit (che supporta anche UTF-8)
-   try:
-      #oracledb.init_oracle_client(lib_dir=r'C:\oracle\Middleware\Oracle_Home\bin')
+   # Connection mode Thick=con libreria Oracle Client --> quindi devo caricare la libreria prendendola da qualche parte e quindi   
+   # reimposto la pathname! Attenzione al ; alla fine della pathname!!!!      
+   os.environ["PATH"] = o_global_preferences.oracleclient_path + ";" + os.environ["PATH"]
+   
+   # Imposto il percorso per collegarmi alla libreria Oracle a 64bit (che supporta anche UTF-8)
+   try:      
       oracledb.init_oracle_client()
    except Exception as err:
       if str(err) == 'Oracle Client library has already been initialized':
@@ -50,13 +60,13 @@ def inizializzo_client():
 # ----------------------------------------
 # TEST APPLICAZIONE
 # ----------------------------------------
-if __name__ == "__main__":    
-   inizializzo_client()
+if __name__ == "__main__":       
    # TEST LINUX   
-   if os.name == "posix":
+   if os.name == "posix":      
       v_oracle_db = oracledb.connect(user='SMILE_PY', password='SMILE_PY', dsn='10.0.4.11:1521/SMIG')        # corrisponde a BACKUP_815
-   # TEST WINDOWS
+   # TEST WINDOWS (viene inizializzato il client con libreria Oracle Client)
    else:
+      inizializzo_client()
       v_oracle_db = oracledb.connect(user='SMILE', password='SMILE', dsn='BACKUP_815')        
    
    v_oracle_cursor = v_oracle_db.cursor()    

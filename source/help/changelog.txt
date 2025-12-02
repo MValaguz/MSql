@@ -2,6 +2,12 @@
 MSql Changelog!
 ---------------
 
+Versione del 02/12/2025
+OK! Inserito nelle preferenze di connessione, l'opzione "As schema" che permette di indicare uno schema di connessione per l'utente  
+    Ovviamente gestire questa cosa con cambio dello schema e caricamento dei dati
+OK! Nelle preferenze inserito la possibilità di collegarsi in modalità Thin o Thick dove per altro sia possibile indicare il nome 
+    della libreria Oracle da utilizzare; in questo modo si è resa più leggibile questa parte, soprattutto lato Linux
+
 Versione del 25/11/2025
 OK! Nuova voce nel menu "View" detta "Editor view" che apre lateralmente all'editor una vista non editabile ma desincronizzata rispetto all'editor; si permette in questo modo di poter visualizzare una parte di codice dell'editor  
     mentre si sta lavorando su un'altra. Su questa view è permessa solo operazione di "Find" di stringhe, agendo sull'apposita checkbox 
@@ -427,8 +433,6 @@ OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e part
 -------------
 MSql TO DO!!!
 -------------
-- Provare a usare Git direttamente da dentro VS-Code senza passare dalla versione desktop
-- Installare sulla macchina virtuale linux i driver per connettersi a Oracle
 - Anche il comment monoriga senza punto e virgola non funziona!
 - Segnalato da Diego....ho testo dove voglio sostituire i doppi apici con apice...fatto ricerca-modifica e faccio il trova e sostituisci ma singolo...va in ricorsione!
 - Va migliorata l'esecuzione di script che contengono comandi DDL perché ad esempio nell'esecuzione degli script Modula, nella creazione delle tabelle, si blocca nell'esecuzione completa e va usata quella passo-passo		

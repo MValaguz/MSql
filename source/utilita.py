@@ -12,6 +12,16 @@ from PyQt6.QtWidgets import *
 #Amplifico la pathname per ricercare le icone
 QDir.addSearchPath('icons', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'qtdesigner', 'icons'))
 
+def return_global_work_dir():
+    """
+       Restituisce la directory di lavoro globale a seconda del sistema operativo
+    """
+    # Attenzione! Questa dir è possibile aprirla dalla gestione delle preferenze e in quel programma è riportata ancora la stessa dir              
+    if os.name == "posix":
+        return os.path.expanduser('~//.local//share//MSql//')
+    else:
+        return os.path.expanduser('~\\AppData\\Local\\MSql\\')
+    
 def message_error(p_message):
     """
        Visualizza messaggio di errore usando interfaccia qt

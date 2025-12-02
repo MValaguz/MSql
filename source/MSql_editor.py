@@ -99,11 +99,7 @@ v_global_connection = oracledb
 # Indica se si è connessi al DB
 v_global_connesso = False
 # Directory di lavoro del programma (diversa in base al sistema operativo)
-# Attenzione! Questa dir è possibile aprirla dalla gestione delle preferenze e in quel programma è riportata ancora la stessa dir              
-if os.name == "posix":
-    v_global_work_dir = os.path.expanduser('~//.local//share//MSql//')
-else:
-    v_global_work_dir = os.path.expanduser('~\\AppData\\Local\\MSql\\')
+v_global_work_dir = return_global_work_dir()
 # Lista di parole aggiuntive al lexer che evidenzia le parole nell'editor
 v_global_my_lexer_keywords = []
 # Oggetto che carica le preferenze tramite l'apposita classe (notare che già a questa istruzione le preferenze vengono caricate!)
@@ -555,7 +551,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         self.e_user_name = ''
         self.e_user_proxy = ''
         self.e_password = ''
-        self.e_user_mode = 'Normal'        
+        self.e_user_mode = 'Normal'   
+        self.e_current_schema = ''      
+        self.current_schema = ''       
         for rec in o_global_preferences.elenco_server:                
                 try:
                     if rec[3] == '1':                                            
@@ -568,12 +566,12 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                         self.e_user_name = rec[1]
                         self.e_password = rec[2] 
                         self.e_user_proxy = rec[4]
+                        self.e_current_schema = rec[5]
                 except:
                     pass
 
         # creo il modello che conterrà elenco degli schemi
-        self.schema_model = QStringListModel()        
-        self.current_schema = ''        
+        self.schema_model = QStringListModel()                
 
         # se trovato server e user di default --> eseguo la connessione        
         if self.e_server_name != '' and self.e_user_name != '':                
@@ -1491,7 +1489,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # imposto var che indica la connessione a oracle
             v_global_connesso = True
             # apro un cursore finalizzato alla gestione degli oggettiDB
-            self.v_cursor_db_obj = v_global_connection.cursor()            
+            self.v_cursor_db_obj = v_global_connection.cursor()       
+            # imposto eventuale schema corrente
+            self.set_current_schema()     
         except:
             message_error(QCoreApplication.translate('MSql_win1','Error to oracle connection!'))    
             if self.e_user_proxy != '':
@@ -1506,9 +1506,13 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         self.l_connection.setText(QCoreApplication.translate('MSql_win1','Connection:') + ' ' + self.e_server_name + "/" + v_user_connect)     
         self.l_connection.setStyleSheet('background-color: ' + v_global_color + ';color: "' + v_global_background + '";')              
 
-        # imposto la proprietà di schema corrente con lo user
-        if self.e_user_proxy != '':
+        # lo schema corrente viene preso da eventuali preferenze di connessione e se non valorizzato...
+        if self.e_current_schema != '':
+            self.current_schema = self.e_current_schema
+        # prevale eventuale presenza del proxy
+        elif self.e_user_proxy != '':
             self.current_schema = self.e_user_proxy
+        # oppure lo schema corrente è l'user usato per la connessione
         else:
             self.current_schema = self.e_user_name
 
@@ -1521,7 +1525,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # carico elenco delle parole chiave per evidenziarle (in questo caso i nomi degli oggetti)
             v_select = """SELECT OBJECT_NAME
                           FROM   ALL_OBJECTS 
-                          WHERE  OWNER='""" + self.e_user_name + """' AND 
+                          WHERE  OWNER='""" + self.current_schema + """' AND 
                                  STATUS='VALID' AND
                                  OBJECT_TYPE IN ('SEQUENCE','PROCEDURE','PACKAGE','TABLE','VIEW','FUNCTION')"""                                                         
             v_risultati = v_cursor.execute(v_select)            
@@ -1572,6 +1576,24 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 # aggiorno la statusbar
                 obj_win2.aggiorna_statusbar()
         
+    def set_current_schema(self):
+        """
+           Se valorizzato, forza lo schema corrente
+        """
+        print('MSql CHANGE CURRENT SCHEMA TO:', self.current_schema)
+        # carico l'object viewer usando lo schema scelto
+        if self.current_schema != '':
+            # cambio lo schema corrente a livello di database
+            try:            
+                self.v_cursor_db_obj.execute("ALTER SESSION SET CURRENT_SCHEMA = " + self.current_schema)                    
+                return 'ok'
+            except oracledb.Error as e:                                                                
+                # emetto errore 
+                errorObj, = e.args                     
+                message_error(QCoreApplication.translate('MSql_win1',"Error:") + ' ' + errorObj.message)                   
+                return 'ko'
+        return 'ok'
+    
     def slot_disconnect(self):
         """
            Esegue disconnessione a Oracle
@@ -2346,21 +2368,18 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             Conferma del nuovo schema e caricamento dell'object navigator
         """
         # ricerco la posizione dell'indice selezionato e ne ricavo il contenuto 
-        v_index = self.win_dialog_select_schema.e_schema_list.selectedIndexes()[0]                    
-        self.current_schema = self.schema_model.data(v_index)
+        v_index = self.win_dialog_select_schema.e_schema_list.selectedIndexes()
+        if not v_index:
+            return 'ko'                            
+        self.current_schema = self.schema_model.data(v_index[0])
         
-        # carico l'object viewer usando lo schema scelto
-        if self.current_schema != '':
-            # cambio lo schema corrente a livello di database
-            try:            
-                self.v_cursor_db_obj.execute("ALTER SESSION SET CURRENT_SCHEMA = " + self.current_schema)                    
-            except oracledb.Error as e:                                                                
-                # emetto errore 
-                errorObj, = e.args                     
-                message_error(QCoreApplication.translate('MSql_win1',"Error:") + ' ' + errorObj.message)                   
-            # ricarico elenco degli oggetti
-            self.carica_oggetti_db_scelta()        
+        if self.set_current_schema() == 'ko':
+            message_error('Error to change schema!')
+            return 'ko'
         
+        # ricarico elenco degli oggetti
+        self.carica_oggetti_db_scelta()                
+                
         # chiudo la window
         self.dialog_select_schema.close()
     

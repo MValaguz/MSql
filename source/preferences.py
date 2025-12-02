@@ -20,9 +20,11 @@ from PyQt6.QtWidgets import *
 #Definizioni interfaccia
 from qtdesigner.preferences_ui import Ui_preferences_window
 #Librerie aggiuntive interne
-from utilita import message_info, message_question_yes_no, cripta_messaggio, decripta_messaggio
+from utilita import message_info, message_question_yes_no, cripta_messaggio, decripta_messaggio, return_global_work_dir
 #Amplifico la pathname per ricercare le icone
 QDir.addSearchPath('icons', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'qtdesigner', 'icons'))
+#Cartella di lavoro
+v_global_work_dir = return_global_work_dir()
 
 class preferences_class():
     """
@@ -138,6 +140,16 @@ class preferences_class():
                 self.author_name = v_json['author_name']                
             else:
                 self.author_name = ''
+            # tipo di connessione Oracle
+            if 'connection_mode' in v_json:
+                self.connection_mode = v_json['connection_mode']
+            else:
+                self.connection_mode = 0  # 0=Thin 1=Thick
+            # percorso di Oracle Client (se connection_mode=1)
+            if 'oracleclient_path' in v_json:
+                self.oracleclient_path = v_json['oracleclient_path']    
+            else:
+                self.oracleclient_path = ''
         # imposto valori di default senza presenza dello specifico file
         else:
             self.remember_window_pos = True
@@ -165,6 +177,8 @@ class preferences_class():
             self.highlight_color = 'Green' # Fare riferimento al file custom_widget, tabella colori contenuto in classe MyColorComboBox
             self.highlight_color_hex = '#43a047' # Fare riferimento al file custom_widget, tabella colori contenuto in classe MyColorComboBox
             self.author_name = ''
+            self.connection_mode = 0  # 0=Thin 1=Thick
+            self.oracleclient_path = ''
 
         # Viene aggiunta alla classe la proprietà editable che gestisce la modalità di editazione delle tabelle (un tempo era anche una preferenza a video che poi è stata eliminata)
         self.editable = False
@@ -176,7 +190,7 @@ class preferences_class():
             v_json = json.loads(v_dump)
             # elenco server è composto da Titolo, TNS e Colore, Flag per la connessione di default, Flag per evidenzia colore e richiesta conferme in creazione pkg (es. ('Server Prod (SMILE_815)','SMILE_815','#aaffff','0','0','0') )
             self.elenco_server = v_json['server']
-            # elenco users è composto da Titolo, User, Password, Flag per la connessione di default (es. ('USER_SMILE','SMILE','SMILE','1') )
+            # elenco users è composto da Titolo, User, Password, Flag per la connessione di default (es. ('USER_SMILE','SMILE','SMILE','1','') )
             self.elenco_user = v_json['users']            
         # ...se il file non esiste non carico nulla 
         else:            
@@ -226,12 +240,14 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         self.e_default_animated_gif.setText(self.preferences.animated_gif)
         self.e_highlight_color.setCurrentText(self.preferences.highlight_color)
         self.e_author_name.setText(self.preferences.author_name)
+        self.e_connection_mode.setCurrentIndex(self.preferences.connection_mode)
+        self.e_oracleclient_path.setText(self.preferences.oracleclient_path)
 
         ###
         # preparo elenco server        
         ###
         self.o_server.setColumnCount(7)
-        self.o_server.setHorizontalHeaderLabels(['Server title','TNS Name','Color','','AutoConnection','Emphasis','CREATE'+chr(10)+'confirm'])           
+        self.o_server.setHorizontalHeaderLabels(['Server title (*)','TNS Name (*)','Color','','AutoConnection','Emphasis','CREATE'+chr(10)+'confirm'])           
         v_rig = 1                
         for record in self.preferences.elenco_server:                                    
             self.o_server.setRowCount(v_rig) 
@@ -244,8 +260,8 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         ###
         # preparo elenco user        
         ###
-        self.o_users.setColumnCount(5)
-        self.o_users.setHorizontalHeaderLabels(['User title','User name','Password','AutoConnection','As Proxy'])   
+        self.o_users.setColumnCount(6)
+        self.o_users.setHorizontalHeaderLabels(['User title (*)','User name (*)','Password (*)','AutoConnection','As Proxy','As Schema'])   
         v_rig = 1                
         for record in self.preferences.elenco_user:                                    
             self.o_users.setRowCount(v_rig) 
@@ -257,6 +273,9 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
 
         # Carico anteprima gif animata
         self.preview_gif_animata()
+
+        # Attivo/disattivo la connection mode
+        self.slot_e_connection_mode()
 
     def preview_gif_animata(self):
         """
@@ -385,6 +404,11 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
             self.o_users.setItem(v_rig-1,4,QTableWidgetItem(record[4]))                               
         else:
             self.o_users.setItem(v_rig-1,4,QTableWidgetItem())                               
+        # Schema
+        if len(record) > 5:
+            self.o_users.setItem(v_rig-1,5,QTableWidgetItem(record[5]))                               
+        else:
+            self.o_users.setItem(v_rig-1,5,QTableWidgetItem())                               
     
     def slot_e_default_animated_gif(self):
         """
@@ -430,9 +454,9 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
            Apre la cartella di lavoro di MSql 
         """
         if os.name == "posix":
-            subprocess.Popen(["xdg-open", os.path.expanduser('~//.local//share//MSql//')])            
+            subprocess.Popen(["xdg-open", os.path.expanduser(v_global_work_dir)])            
         else:
-            os.startfile(os.path.expanduser('~\\AppData\\Local\\MSql\\'))        
+            os.startfile(os.path.expanduser(v_global_work_dir))        
     
     def slot_b_default_open_dir(self):
         """
@@ -488,6 +512,27 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
                 v_text += ', BOLD'
             self.e_default_font_result.setText(v_text)            
 
+    def slot_e_connection_mode(self):
+        """
+           Gestione della modalità di editazione delle tabelle
+        """
+        if self.e_connection_mode.currentIndex() == 0:
+           self.l_oracleclient_path.setVisible(False)
+           self.e_oracleclient_path.setVisible(False)
+           self.b_oracleclient_path.setVisible(False)
+        else:         
+           self.l_oracleclient_path.setVisible(True)
+           self.e_oracleclient_path.setVisible(True)
+           self.b_oracleclient_path.setVisible(True)
+    
+    def slot_b_oracleclient_path(self):
+        """
+           Scelta della dir di Oracle Client
+        """
+        dirName = QFileDialog.getExistingDirectory(self, "Choose Oracle Client directory")                  
+        if dirName != "":
+            self.e_oracleclient_path.setText( dirName )
+    
     def slot_b_server_add(self):
         """
            Crea una riga vuota dove poter inserire informazioni connessioni al server
@@ -628,7 +673,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
                 v_default = '1'
             else:
                 v_default = '0'
-            v_users.append( ( self.o_users.item(i,0).text(), self.o_users.item(i,1).text() , v_password.text(), v_default, self.o_users.item(i,4).text()) )            
+            v_users.append( ( self.o_users.item(i,0).text(), self.o_users.item(i,1).text() , v_password.text(), v_default, self.o_users.item(i,4).text(), self.o_users.item(i,5).text()) )            
 
         # se il tabsize è vuoto --> imposto 2
         if self.e_tab_size.text() == '':
@@ -658,7 +703,9 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
                  'animated_gif': self.e_default_animated_gif.text(),
                  'highlight_color': self.e_highlight_color.currentText(),
                  'highlight_color_hex': self.e_highlight_color.currentData().name(),
-                 'author_name': self.e_author_name.text()
+                 'author_name': self.e_author_name.text(),
+                 'connection_mode': self.e_connection_mode.currentIndex(),
+                 'oracleclient_path': self.e_oracleclient_path.text()
                 }
 
 		# scrittura nel file dell'oggetto json (notare come venga usata la funzione dump senza la s finale in quanto scrive byte)
@@ -681,6 +728,6 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
 # ----------------------------------------
 if __name__ == "__main__":    
     app = QApplication([])
-    application = win_preferences_class('MSql.ini','MSql_connections.ini')
+    application = win_preferences_class(v_global_work_dir+'/MSql.ini',v_global_work_dir+'/MSql_connections.ini')
     application.show()
     sys.exit(app.exec())        
