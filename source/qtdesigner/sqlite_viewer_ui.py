@@ -14,7 +14,7 @@ class Ui_sqlite_viewer_window(object):
         sqlite_viewer_window.setObjectName("sqlite_viewer_window")
         sqlite_viewer_window.resize(692, 491)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("icons:MSql.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon.addPixmap(QtGui.QPixmap("icons:MSql.gif"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         sqlite_viewer_window.setWindowIcon(icon)
         self.centralwidget = QtWidgets.QWidget(parent=sqlite_viewer_window)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)

@@ -19,7 +19,7 @@ class Ui_MSql_win2(object):
         sizePolicy.setHeightForWidth(MSql_win2.sizePolicy().hasHeightForWidth())
         MSql_win2.setSizePolicy(sizePolicy)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("icons:MSql.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon.addPixmap(QtGui.QPixmap("icons:MSql.gif"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         MSql_win2.setWindowIcon(icon)
         self.centralwidget = QtWidgets.QWidget(parent=MSql_win2)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)

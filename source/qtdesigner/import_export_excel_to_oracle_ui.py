@@ -14,7 +14,7 @@ class Ui_import_export_window(object):
         import_export_window.setObjectName("import_export_window")
         import_export_window.resize(304, 124)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("icons:MSql.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon.addPixmap(QtGui.QPixmap("icons:MSql.gif"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         import_export_window.setWindowIcon(icon)
         self.centralwidget = QtWidgets.QWidget(parent=import_export_window)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)

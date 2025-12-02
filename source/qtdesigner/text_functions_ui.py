@@ -14,7 +14,7 @@ class Ui_text_functions_window(object):
         text_functions_window.setObjectName("text_functions_window")
         text_functions_window.resize(896, 435)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("icons:MSql.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon.addPixmap(QtGui.QPixmap("icons:MSql.gif"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         text_functions_window.setWindowIcon(icon)
         self.gridLayout_2 = QtWidgets.QGridLayout(text_functions_window)
         self.gridLayout_2.setObjectName("gridLayout_2")

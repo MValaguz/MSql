@@ -14,7 +14,7 @@ class Ui_preferences_window(object):
         preferences_window.setObjectName("preferences_window")
         preferences_window.resize(631, 476)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("icons:MSql.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon.addPixmap(QtGui.QPixmap("icons:MSql.gif"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         preferences_window.setWindowIcon(icon)
         self.centralwidget = QtWidgets.QWidget(parent=preferences_window)
         self.centralwidget.setObjectName("centralwidget")

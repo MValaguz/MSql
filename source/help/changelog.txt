@@ -433,6 +433,9 @@ OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e part
 -------------
 MSql TO DO!!!
 -------------
+- Lato Linux; il popolamento del dizionario quando si è cambiato schema, non funziona con lo schema in cui si è collegati, perché prende sempre utente di connessione
+              l'icona di MSql esce bruttissima!
+							quando faccio il download di un blob non lo mette nella cartella "Scaricati" e questa cosa va resa platform free
 - Anche il comment monoriga senza punto e virgola non funziona!
 - Segnalato da Diego....ho testo dove voglio sostituire i doppi apici con apice...fatto ricerca-modifica e faccio il trova e sostituisci ma singolo...va in ricorsione!
 - Va migliorata l'esecuzione di script che contengono comandi DDL perché ad esempio nell'esecuzione degli script Modula, nella creazione delle tabelle, si blocca nell'esecuzione completa e va usata quella passo-passo		
