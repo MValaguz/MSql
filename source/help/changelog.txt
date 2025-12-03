@@ -2,6 +2,17 @@
 MSql Changelog!
 ---------------
 
+Versione del 04/12/2025
+OK! Modificata apertura del file di help e di changelog, in quanto lato Linux non funzionava
+
+Versione del 03/12/2025
+OK! Il dizionario di autocompletamento ora si basa sullo schema attivo in quel momento; 
+    è stato aggiunto un apposito item che visualizza in fase di esecuzione del caricamento 
+		del dizionario in quale schema vengono ricercati i dati
+OK! Modifica a tutte le window in modo venga presa un'icona più grande e quindi meglio usata in ambiente Linux
+OK! Per adeguamenti multipiattaforma, la directory di download dei dati non è più fissa ma varia 
+    a seconda della piattaforma Linux o Windows
+
 Versione del 02/12/2025
 OK! Inserito nelle preferenze di connessione, l'opzione "As schema" che permette di indicare uno schema di connessione per l'utente  
     Ovviamente gestire questa cosa con cambio dello schema e caricamento dei dati
@@ -433,9 +444,7 @@ OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e part
 -------------
 MSql TO DO!!!
 -------------
-- Lato Linux; il popolamento del dizionario quando si è cambiato schema, non funziona con lo schema in cui si è collegati, perché prende sempre utente di connessione
-              l'icona di MSql esce bruttissima!
-							quando faccio il download di un blob non lo mette nella cartella "Scaricati" e questa cosa va resa platform free
+- Sistemare la gestione del cambio titolo sulla window principale
 - Anche il comment monoriga senza punto e virgola non funziona!
 - Segnalato da Diego....ho testo dove voglio sostituire i doppi apici con apice...fatto ricerca-modifica e faccio il trova e sostituisci ma singolo...va in ricorsione!
 - Va migliorata l'esecuzione di script che contengono comandi DDL perché ad esempio nell'esecuzione degli script Modula, nella creazione delle tabelle, si blocca nell'esecuzione completa e va usata quella passo-passo		

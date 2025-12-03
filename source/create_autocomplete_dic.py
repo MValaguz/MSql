@@ -26,9 +26,10 @@ class create_autocomplete_dic_class(QMainWindow, Ui_create_autocomplete_dic_wind
         p_connesso          = flag che indica se connesso a Oracle
         p_oracle_cursor     = oggetto cursore a Oracle
         p_user_name         = nome utente di connessione
+        p_schema            = schema da analizzare
         p_file_name_dic     = nome del file da scrivere        
     """
-    def __init__(self, p_connesso, p_oracle_cursor, p_user_name, p_nome_file_dic):
+    def __init__(self, p_connesso, p_oracle_cursor, p_user_name, p_schema, p_nome_file_dic):
         
         # incapsulo la classe grafica da qtdesigner
         super(create_autocomplete_dic_class, self).__init__()        
@@ -39,6 +40,13 @@ class create_autocomplete_dic_class(QMainWindow, Ui_create_autocomplete_dic_wind
         self.oracle_cursor = p_oracle_cursor
         self.nome_file_dic = p_nome_file_dic
         self.user_name = p_user_name
+        # determino l'owner di cui analizzare gli oggetti (se specificato uno schema prendo quello, altrimenti l'utente di connessione)
+        if p_schema != '' :
+            self.owner = p_schema
+        else:
+            self.owner = p_user_name        
+        # riporto l'owner a video (evidenziandolo come schema)
+        self.e_schema.setText(self.owner)        
 
     def slot_b_create(self):
         """
@@ -62,10 +70,10 @@ class create_autocomplete_dic_class(QMainWindow, Ui_create_autocomplete_dic_wind
             v_select = "SELECT OWNER, OBJECT_NAME, OBJECT_TYPE FROM ALL_OBJECTS WHERE "
             # se richiesto di aggiungere anche oggetti APEX, siccome non so come effettivamente si chiama il proprietario, faccio una LIKE
             if self.e_analyze_3.isChecked():
-                v_select += "(OWNER='" + self.user_name + "' OR OWNER LIKE 'APEX%') AND "
+                v_select += "(OWNER='" + self.owner + "' OR OWNER LIKE 'APEX%') AND "
             # se non richiesto di aggiungere anche gli oggetti pubblici, mi limito ai soli oggetti dell'utente
             else:
-                v_select += "OWNER='" + self.user_name + "' AND "
+                v_select += "OWNER='" + self.owner + "' AND "
             v_select += "OBJECT_TYPE IN ('PACKAGE','PROCEDURE','FUNCTION') AND OBJECT_NAME != 'DBMS_NUMSYSTEM' ORDER BY OWNER, OBJECT_NAME"            
             print(v_select)
             self.oracle_cursor.execute(v_select)
@@ -138,7 +146,7 @@ class create_autocomplete_dic_class(QMainWindow, Ui_create_autocomplete_dic_wind
         # richiesto di analizzare tabelle e viste
         if self.e_analyze_2.isChecked():
             # elenco di tutti gli oggetti funzioni, procedure e package
-            self.oracle_cursor.execute("SELECT TABLE_NAME || '.' || COLUMN_NAME AS TESTO FROM ALL_TAB_COLUMNS WHERE OWNER='" + self.user_name + "' ORDER BY TABLE_NAME, COLUMN_ID")
+            self.oracle_cursor.execute("SELECT TABLE_NAME || '.' || COLUMN_NAME AS TESTO FROM ALL_TAB_COLUMNS WHERE OWNER='" + self.owner + "' ORDER BY TABLE_NAME, COLUMN_ID")
             v_elenco_campi = self.oracle_cursor.fetchall()
             # visualizzo barra di avanzamento e se richiesto interrompo
             v_counter += 1
@@ -156,6 +164,6 @@ class create_autocomplete_dic_class(QMainWindow, Ui_create_autocomplete_dic_wind
 # ----------------------------------------
 if __name__ == "__main__":    
     app = QApplication([])    
-    application = create_autocomplete_dic_class(False, None, None, 'MSql_autocompletion.ini') 
+    application = create_autocomplete_dic_class(False, None, None, None, 'MSql_autocompletion.ini') 
     application.show()
     sys.exit(app.exec())     

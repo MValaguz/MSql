@@ -20,6 +20,7 @@ oracledb                  3.3.0
 packaging                 25.0
 pefile                    2023.2.7
 pip                       25.2
+platformdirs              4.5.0
 psutil                    7.0.0
 pycparser                 2.22
 pyinstaller               6.15.0
@@ -35,4 +36,4 @@ pywin32-ctypes            0.2.3
 setuptools                80.9.0
 sql-formatter             0.6.2
 xlrd                      2.0.2
-xlsxwriter                3.2.5			
+xlsxwriter                3.2.5

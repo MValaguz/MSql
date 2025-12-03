@@ -47,6 +47,8 @@ from PyQt6.Qsci import *
 from PyQt6.QtNetwork import *
 # Libreria che permette di creare arte ascii grafica
 from art import text2art, FONT_NAMES
+# Libreria che permette di ottenere i nomi delle cartelle speciali di sistema
+from platformdirs import user_downloads_dir
 # Classe per la gestione delle preferenze
 from preferences import preferences_class
 # Definizione del solo tema dark
@@ -226,6 +228,8 @@ class classChangeLog(QWidget):
         v_nome_file = "help/changelog.txt"
         if getattr(sys, 'frozen', False): 
             v_nome_file = "_internal/" + v_nome_file               
+        else:
+            v_nome_file = os.getcwd() + '/' + v_nome_file
 
         # leggo il file di changelog
         try:            
@@ -854,12 +858,14 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # Riorganizzo le window in modalità tab
         elif p_slot.objectName() == 'actionTabbed':
             self.mdiArea.setViewMode(QMdiArea.ViewMode.TabbedView)            
-        # Apro file di help (help che è stato costruito tramite la libreria Sphinx!)
+        # Apro file di help 
         elif p_slot.objectName() == 'actionHelp':                          
             if getattr(sys, 'frozen', False): 
                 os.system("start _internal/help/MSql_help.odt")
+            elif os.name == "posix":
+                subprocess.Popen(["xdg-open", os.getcwd() + "/help/MSql_help.odt"])                    
             else:
-                os.system("start help/MSql_help.odt")
+                os.system("start " + os.getcwd() + "/help/MSql_help.odt")
         # Apro file di della cronologia delle modifiche
         elif p_slot.objectName() == 'actionChange_log':                                      
             self.o_changelog = classChangeLog(self)
@@ -2871,10 +2877,11 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         global v_global_connesso
         
         from create_autocomplete_dic import create_autocomplete_dic_class
-        
+                
         self.my_app = create_autocomplete_dic_class(v_global_connesso,
                                                     self.v_cursor_db_obj, 
                                                     self.e_user_name, 
+                                                    self.current_schema,
                                                     v_global_work_dir + 'MSql_autocompletion.ini')        
         centra_window_figlia(self, self.my_app)
         self.my_app.show()   
@@ -4122,7 +4129,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 for row in v_cursor:                  
                     for count, column in enumerate(row):                   
                         # stabilisco il nome del file di destinazione che andrà nella dir dei downloads con nome del file composto dal nome della tabella + i primi 20 caratteri della "chiave"
-                        v_file_download = os.path.join(os.path.expanduser("~"), "Downloads") + '\\' + v_nome_tabella.upper() + '_' + v_nome_file[0:20].replace('.','_')
+                        v_file_download = user_downloads_dir() + '\\' + v_nome_tabella.upper() + '_' + v_nome_file[0:20].replace('.','_')
                         # apro il file in scrittura
                         v_file_allegato = open(v_file_download,'wb')
                         # leggo e scrivo il blob
@@ -6861,7 +6868,7 @@ def slot_open_file_from_SIM(p_path):
 #  ___) || |/ ___ \|  _ < | |  
 # |____/ |_/_/   \_\_| \_\|_|  
 #
-if __name__ == "__main__":    
+if __name__ == "__main__":        
     # nome programma
     QCoreApplication.setApplicationName("MSql")    
     # se il programma è eseguito da pyinstaller, cambio la dir di riferimento passando a dove si trova l'eseguibile
