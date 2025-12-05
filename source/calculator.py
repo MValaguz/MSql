@@ -63,6 +63,7 @@ class Calculator(QWidget):
     def __init__(self):
         super().__init__()        
         self.build_ui()
+        self.display.installEventFilter(self)
     
     def build_ui(self):
         """
@@ -95,6 +96,23 @@ class Calculator(QWidget):
             btn.clicked.connect(self.button_clicked)
             grid.addWidget(btn, row, col)
             btn.setStyleSheet("font-size: 30px;")
+
+    def eventFilter(self, obj, event):
+        """
+            Intercetta l'evento di pressione del tasto Backspace
+            per cancellare l'ultimo carattere nel display.
+        """
+        if obj is self.display and event.type() == QEvent.Type.KeyPress:            
+            # Cancella ultimo carattere
+            if event.key() == Qt.Key.Key_Backspace:                
+                self.display.setText(self.display.text()[:-1])
+                return True  # -> evento gestito, fermati qui            
+            # Delete (Canc) → cancella tutto
+            elif event.key() == Qt.Key.Key_Delete:
+                self.display.setText("")
+                return True  # -> evento gestito, fermati qui            
+
+        return super().eventFilter(obj, event)
 
     def append_value(self, value):
         """
@@ -205,6 +223,7 @@ class Calculator(QWidget):
         key = event.key()
         txt = event.text()
 
+        # numeri
         if key in (
             Qt.Key.Key_0, Qt.Key.Key_1, Qt.Key.Key_2, Qt.Key.Key_3,
             Qt.Key.Key_4, Qt.Key.Key_5, Qt.Key.Key_6, Qt.Key.Key_7,
@@ -212,24 +231,34 @@ class Calculator(QWidget):
         ):
             self.display.setText(self.display.text() + txt)
 
+        # operatori
         elif key in (
             Qt.Key.Key_Plus, Qt.Key.Key_Minus,
             Qt.Key.Key_Slash, Qt.Key.Key_Asterisk
         ):
             self.display.setText(self.display.text() + txt)
 
+        # virgola
         elif key == Qt.Key.Key_Comma:
             self.display.setText(self.display.text() + ".")
 
+        # percentuale
         elif key == Qt.Key.Key_Percent:
             self.display.setText(self.display.text() + "%")
 
+        # cancella ultimo carattere
+        if key == Qt.Key.Key_Backspace:                
+            self.display.setText(self.display.text()[:-1])                
+
+        # delete (Canc) → cancella tutto
+        if key == Qt.Key.Key_Delete:
+            self.display.setText("")
+
+        # esegui "="
         elif key in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
             self.calculate()
 
-        elif key == Qt.Key.Key_Backspace:
-            self.display.setText(self.display.text()[:-1])
-
+        # ESC → pulisci
         elif key == Qt.Key.Key_Escape:
             self.display.setText("")
         

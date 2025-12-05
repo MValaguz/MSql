@@ -99,7 +99,7 @@ Tipi_Oggetti_DB = { 'Tables':'TABLE',
 # Oggetto connettore DB
 v_global_connection = oracledb
 # Indica se si è connessi al DB
-v_global_connesso = False
+v_global_connected = False
 # Directory di lavoro del programma (diversa in base al sistema operativo)
 v_global_work_dir = return_global_work_dir()
 # Lista di parole aggiuntive al lexer che evidenzia le parole nell'editor
@@ -228,6 +228,8 @@ class classChangeLog(QWidget):
         v_nome_file = "help/changelog.txt"
         if getattr(sys, 'frozen', False): 
             v_nome_file = "_internal/" + v_nome_file               
+        elif os.name == "posix":
+            v_nome_file = os.getcwd() + '/source/' + v_nome_file
         else:
             v_nome_file = os.getcwd() + '/' + v_nome_file
 
@@ -480,7 +482,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # Se richiesto il tema scuro forzo il colore scuro sull'area Mdi (non sono riuscito a farlo usando il tema!)             
         ###
         if o_global_preferences.dark_theme:
-            self.mdiArea.setBackground(QColor('#242424'))                                                            
+            self.mdiArea.setBackground(QColor('#242424'))      
+        # Sull'area MDI attivo evento di cambio titolo finestre figlie in modo da poterlo aggiornare nella window principale
+        self.mdiArea.subWindowActivated.connect(self.slot_mdiArea_subwindow_activated)                                                      
 
         ###
         # Aggiunta di windget alla statusbar con: flag editabilità, numero di caratteri, indicatore di overwrite, ecc..
@@ -493,6 +497,13 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         self.fs_button.setToolTip(QCoreApplication.translate('MSql_win1','Open file system dock'))        
         self.fs_button.clicked.connect(self.slot_mostra_file_system_dock)
         self.statusBar.addWidget(self.fs_button)  
+        # Bottone con icona per aprire la calcolatrice
+        self.calc_button = QPushButton()
+        self.calc_button.setIcon(QIcon("icons:calculator.png")) 
+        self.calc_button.setIconSize(QSize(8,8))
+        self.calc_button.setToolTip(QCoreApplication.translate('MSql_win1','Calculator'))        
+        self.calc_button.clicked.connect(self.slot_calculator)        
+        self.statusBar.addWidget(self.calc_button)  
         # Informazioni sul tempo di esecuzione dell'ultima istruzione
         self.l_exec_time = QLabel(QCoreApplication.translate('MSql_win1','Last execution time:'))
         self.l_exec_time.setFrameStyle(QFrame.Shape.NoFrame)        
@@ -511,7 +522,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         self.l_num_righe_e_char = QLabel()
         self.l_num_righe_e_char.setFrameStyle(QFrame.Shape.NoFrame)
         self.statusBar.addPermanentWidget(self.l_num_righe_e_char)                
-        self.l_num_righe_e_char.setText(QCoreApplication.translate('MSql_win1','Lines:') + ' 0 , ' + QCoreApplication.translate('MSql_win1','Length:') + ' 0')        
+        self.l_num_righe_e_char.setText(QCoreApplication.translate('MSql_win1','Lines:') + ' 0  ' + QCoreApplication.translate('MSql_win1','Length:') + ' 0')        
         # Stato attivazione inserito di testo o overwrite
         self.l_overwrite_enabled = QLabel("INS")
         self.l_overwrite_enabled.setFrameStyle(QFrame.Shape.NoFrame)
@@ -579,7 +590,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
 
         # se trovato server e user di default --> eseguo la connessione        
         if self.e_server_name != '' and self.e_user_name != '':                
-            self.slot_connetti()           
+            self.slot_connect()           
 
         ###
         # Definizione della struttura per gestione elenco oggetti DB (object navigator)       
@@ -762,18 +773,20 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             for rec in o_global_preferences.elenco_server:
                 if rec[0] == p_slot.text():                    
                     self.e_server_name = rec[1]                    
-            self.slot_connetti()               
+            self.slot_connect()               
         elif str(p_slot.data()) == 'MENU_USER':         
             for rec in o_global_preferences.elenco_user:
                 if rec[0] == p_slot.text():
                     self.e_user_name = rec[1]
                     self.e_password = rec[2]
                     self.e_user_proxy = rec[4]
-                    self.e_user_mode = 'Normal'                    
-            self.slot_connetti()            
+                    self.e_user_mode = 'Normal'      
+                    self.e_current_schema = rec[5]
+                    self.current_schema = rec[5]              
+            self.slot_connect()            
         # Connessione a un data base specifico richiedendo tutti i parametri singolarmente
         elif p_slot.objectName() == 'actionConnect':
-            self.richiesta_connessione_specifica()        
+            self.specific_connection()        
         # Disconnessione al database corrente
         elif p_slot.objectName() == 'actionDisconnect':
             self.slot_disconnect()        
@@ -863,7 +876,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             if getattr(sys, 'frozen', False): 
                 os.system("start _internal/help/MSql_help.odt")
             elif os.name == "posix":
-                subprocess.Popen(["xdg-open", os.getcwd() + "/help/MSql_help.odt"])                    
+                subprocess.Popen(["xdg-open", os.getcwd() + "/source/help/MSql_help.odt"])                    
             else:
                 os.system("start " + os.getcwd() + "/help/MSql_help.odt")
         # Apro file di della cronologia delle modifiche
@@ -1151,6 +1164,16 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             elif p_slot.objectName() == 'actionEditor_view':                
                 o_MSql_win2.slot_editor_view()            
 
+    def slot_mdiArea_subwindow_activated(self, subwindow):
+        """
+           Evento che si attiva quando viene selezionata una subwindow all'interno del mdi area
+           e che modifica il titolo della window principale
+        """        
+        if subwindow is None:
+            return ''
+        
+        self.setWindowTitle(subwindow.windowTitle())
+    
     def slot_editable(self):
         """
            Gestione della modifica dei risultati di una query
@@ -1340,7 +1363,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 v_chiudi_app = False
         # se tutte le window sono chiuse, controllo se ci sono ancora transazioni aperte e poi chiudo il programma
         if v_chiudi_app:            
-            self.controllo_transazioni_aperte()            
+            self.check_open_transactions()            
             self.salvo_posizione_window()
             # chiudo tutto (anche eventuali window di ricerca, ecc.)
             QApplication.closeAllWindows()
@@ -1381,16 +1404,16 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # salvo nel registro di sistema (regedit) la posizione delle dock
             self.settings.setValue("windowstate", self.saveState())                        
     
-    def controllo_transazioni_aperte(self):
+    def check_open_transactions(self):
         """
            Controllo se per la connessione corrente ci sono delle transazioni aperte 
            e richiesto all'utente se vuole salvarle
         """        
         global v_global_connection
-        global v_global_connesso
+        global v_global_connected
 
         # se c'è una connessione aperta al DB
-        if v_global_connesso:
+        if v_global_connected:
             # controllo se ci sono delle transazioni in sospeso
             v_cursore = v_global_connection.cursor()
             v_select = 'SELECT COUNT(*) CONTA FROM (SELECT DBMS_TRANSACTION.STEP_ID STEP_ID FROM DUAL) WHERE STEP_ID IS NOT NULL'
@@ -1411,11 +1434,11 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # chiusura del cursore            
             v_cursore.close()
 
-    def slot_connetti(self):
+    def slot_connect(self):
         """
            Esegue connessione a Oracle
         """
-        global v_global_connesso   
+        global v_global_connected   
         global v_global_connection
         global v_global_my_lexer_keywords
         global v_global_color
@@ -1467,11 +1490,11 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
 
         # se c'è una connessione aperta, controllo se ci sono transazioni aperte
         # verrà evetualmente richiesto se effettuare la commit
-        self.controllo_transazioni_aperte()
+        self.check_open_transactions()
             
         # scorro la lista-oggetti-editor...
         for obj_win2 in self.o_lst_window2:
-            if not obj_win2.v_editor_chiuso and v_global_connesso:        
+            if not obj_win2.v_editor_chiuso and v_global_connected:        
                 # ...e chiudo eventuale cursore attualmente presente
                 if obj_win2.v_cursor is not None:
                     obj_win2.v_cursor.close()
@@ -1479,7 +1502,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # apro connessione
         try:
             # se c'è già una connessione --> la chiudo
-            if v_global_connesso:
+            if v_global_connected:
                 v_global_connection.close()
             # inizializzo libreria oracle    
             oracle_my_lib.inizializzo_client()              
@@ -1493,16 +1516,19 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             else:
                 v_global_connection = oracledb.connect(user=v_user_connect, password=self.e_password, dsn=self.e_server_name)                        
             # imposto var che indica la connessione a oracle
-            v_global_connesso = True
+            v_global_connected = True
             # apro un cursore finalizzato alla gestione degli oggettiDB
             self.v_cursor_db_obj = v_global_connection.cursor()       
             # imposto eventuale schema corrente
             self.set_current_schema()     
-        except:
-            message_error(QCoreApplication.translate('MSql_win1','Error to oracle connection!'))    
+        except oracledb.DatabaseError as e:
+            error_obj, = e.args 
+            message_error(QCoreApplication.translate('MSql_win1','Error to oracle connection!')+'\n'+error_obj.message)    
             if self.e_user_proxy != '':
                 message_error(QCoreApplication.translate('MSql_win1','For via proxy connection remember to activate this using command')+chr(10)+'"ALTER USER proxy_user GRANT CONNECT THROUGH main_user;"'+chr(10)+QCoreApplication.translate('MSql_win1','using user SYS!'))    
-            v_global_connesso = False
+            v_global_connected = False        
+        except Exception as e:
+            message_error(QCoreApplication.translate('MSql_win1','Error to oracle connection!'))    
 
         # Se mi collego come SYSDBA coloro di rosso
         if self.e_user_mode == 'SYSDBA':
@@ -1525,7 +1551,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # se la connessione è andata a buon fine, richiedo elenco degli oggetti in modo da aggiornare il dizionario dell'editor con nuove parole chiave
         # in questa sezione viene caricata la lista v_global_my_lexer_keywords con tutti i nomi di tabelle, viste, procedure, ecc.
         # tale lista viene poi aggiornata quando viene aperto un nuovo editor o quando viene cambiata la connessione
-        if v_global_connesso:
+        if v_global_connected:
             v_global_my_lexer_keywords.clear()
             v_cursor = v_global_connection.cursor()            
             # carico elenco delle parole chiave per evidenziarle (in questo caso i nomi degli oggetti)
@@ -1560,7 +1586,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
              
         # scorro la lista-oggetti-editor...        
         for obj_win2 in self.o_lst_window2:
-            if not obj_win2.v_editor_chiuso and v_global_connesso:        
+            if not obj_win2.v_editor_chiuso and v_global_connected:        
                 # l'oggetto che contiene i risultati delle query viene pulito, in modo che se c'era qualcosa in canna da connessione precedente, non rimanga a video                                
                 obj_win2.o_table.verticalScrollBar().blockSignals(True)      
                 obj_win2.o_table.clearContents()
@@ -1585,10 +1611,10 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
     def set_current_schema(self):
         """
            Se valorizzato, forza lo schema corrente
-        """
-        print('MSql CHANGE CURRENT SCHEMA TO:', self.current_schema)
+        """        
         # carico l'object viewer usando lo schema scelto
         if self.current_schema != '':
+            print('CHANGE CURRENT SCHEMA TO: ' + self.current_schema)
             # cambio lo schema corrente a livello di database
             try:            
                 self.v_cursor_db_obj.execute("ALTER SESSION SET CURRENT_SCHEMA = " + self.current_schema)                    
@@ -1604,7 +1630,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         """
            Esegue disconnessione a Oracle
         """
-        global v_global_connesso   
+        global v_global_connected   
         global v_global_connection        
         global v_global_color
         global v_global_background        
@@ -1625,11 +1651,11 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
 
         # se c'è una connessione aperta, controllo se ci sono transazioni aperte
         # verrà evetualmente richiesto se effettuare la commit
-        self.controllo_transazioni_aperte()
+        self.check_open_transactions()
             
         # scorro la lista-oggetti-editor...
         for obj_win2 in self.o_lst_window2:
-            if not obj_win2.v_editor_chiuso and v_global_connesso:        
+            if not obj_win2.v_editor_chiuso and v_global_connected:        
                 # ...e chiudo eventuale cursore attualmente presente
                 if obj_win2.v_cursor is not None:
                     obj_win2.v_cursor.close()
@@ -1637,13 +1663,13 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # chiudo connessione
         try:
             # se c'è già una connessione --> la chiudo
-            if v_global_connesso:
+            if v_global_connected:
                 v_global_connection.close()            
         except:
             message_error(QCoreApplication.translate('MSql_win1','Error to oracle disconnection!'))                
         
         # imposto var che indica la connessione a oracle
-        v_global_connesso = False
+        v_global_connected = False
 
         # sulla statusbar, aggiorno la label della connessione        
         self.l_connection.setText("No connect to Oracle Database!")     
@@ -1667,10 +1693,10 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
            In base alla voce scelta, viene caricata la lista con elenco degli oggetti pertinenti
            Come owner viene usata la proprietà current_schema 
         """                        
-        global v_global_connesso
+        global v_global_connected
 
         # se non connesso --> esco
-        if not v_global_connesso:
+        if not v_global_connected:
             return 'ko'
         
         # imposto il titolo della window inserendo lo schema
@@ -2333,10 +2359,10 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         """
            Esegue il carico elenco schemi per il relativo form
         """        
-        global v_global_connesso
+        global v_global_connected
         
         # se non connesso --> esco
-        if not v_global_connesso:
+        if not v_global_connected:
             return 'ko'
 
         # associo il modello degli schemi, creato dalla init, all'oggetto di elenco presente nel form
@@ -2790,7 +2816,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 # notare come all'interno di questa gestione verranno usate le var di nome e tipo oggetto                
                 self.popup_menu_object(p_position,'CAMPO_TABELLA')                                
     
-    def richiesta_connessione_specifica(self):    
+    def specific_connection(self):    
         """
             Apre finestra per richiedere una connessione specifica
         """            
@@ -2805,7 +2831,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         self.win_dialog_connect.e_proxy.textEdited.connect(self.slot_e_proxy_to_upper) 
 
         # creo evento riferito al bottone di connessione
-        self.win_dialog_connect.b_connect.clicked.connect(self.richiesta_connessione_specifica_accept)                
+        self.win_dialog_connect.b_connect.clicked.connect(self.specific_connection_accept)                
         self.dialog_connect.show()        
 
     def slot_e_user_to_upper(self):
@@ -2820,10 +2846,12 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         """
         self.win_dialog_connect.e_proxy.setText(self.win_dialog_connect.e_proxy.text().upper())
 
-    def richiesta_connessione_specifica_accept(self):
+    def specific_connection_accept(self):
         """
            Eseguo connessione specifica
         """           
+        global v_global_connected
+
         # controllo che tutte le info siano state inserite
         if self.win_dialog_connect.e_user.displayText() == '' or self.win_dialog_connect.e_password.displayText() == '' or self.win_dialog_connect.e_tns.displayText() == '':
             message_error(QCoreApplication.translate('MSql_win1','Not all the requested data has been entered!'))            
@@ -2835,11 +2863,14 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         self.e_password = self.win_dialog_connect.e_password.text()
         self.e_server_name = self.win_dialog_connect.e_tns.displayText()
         self.e_user_mode = self.win_dialog_connect.e_mode.currentText()
+        self.current_schema = ''
+        self.e_current_schema = ''
 
-        self.slot_connetti()
+        self.slot_connect()
                 
-        # chiudo window di connessione
-        self.dialog_connect.close()
+        # chiudo window di connessione se tutto andato ok
+        if v_global_connected:
+            self.dialog_connect.close()
 
     def slot_preferences(self):
         """
@@ -2874,11 +2905,11 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
            Apre la window per la creazione del dizionario
         """
         global v_global_work_dir  
-        global v_global_connesso
+        global v_global_connected
         
         from create_autocomplete_dic import create_autocomplete_dic_class
                 
-        self.my_app = create_autocomplete_dic_class(v_global_connesso,
+        self.my_app = create_autocomplete_dic_class(v_global_connected,
                                                     self.v_cursor_db_obj, 
                                                     self.e_user_name, 
                                                     self.current_schema,
@@ -3027,10 +3058,10 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         """
            Apre la window per eseguire import dati da Oracle verso SQLite
         """        
-        global v_global_connesso, v_global_work_dir
+        global v_global_connected, v_global_work_dir
         from import_export_oracle_to_sqlite import import_export_class
         
-        if not v_global_connesso:
+        if not v_global_connected:
             message_error(QCoreApplication.translate('MSql_win1','No connection!'))
             return 'ko'
         
@@ -3054,10 +3085,10 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         """
            Apre la window per eseguire import dei dati da Excel a Oracle
         """        
-        global v_global_connesso
+        global v_global_connected
         from import_export_excel_to_oracle import import_export_class
         
-        if not v_global_connesso:
+        if not v_global_connected:
             message_error(QCoreApplication.translate('MSql_win1','No connection!'))
             return 'ko'
         
@@ -3070,10 +3101,10 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         """
            Apre la window per eseguire import dei dati da SQLite a Oracle
         """        
-        global v_global_connesso, v_global_work_dir
+        global v_global_connected, v_global_work_dir
         from import_export_sqlite_to_oracle import import_export_class
         
-        if not v_global_connesso:
+        if not v_global_connected:
             message_error(QCoreApplication.translate('MSql_win1','No connection!'))
             return 'ko'
         
@@ -3086,7 +3117,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         """
            Apre la window visualizzatore contenuto di un database-file SQLite
         """        
-        global v_global_connesso, v_global_work_dir
+        global v_global_connected, v_global_work_dir
         from sqlite_viewer import sqlite_viewer_class
                 
         self.o_sqlite_viewer = sqlite_viewer_class()        
@@ -3097,10 +3128,10 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         """
            Apre la window per esplorare i database link           
         """
-        global v_global_connesso, v_global_connection
+        global v_global_connected, v_global_connection
         from dblink_viewer import classDBLinkExplorer
 
-        if not v_global_connesso:
+        if not v_global_connected:
             message_error(QCoreApplication.translate('MSql_win1','No connection!'))
             return 'ko'
         
@@ -3621,7 +3652,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         self.v_editor_chiuso = False
 
         # se connessione aperta, collego un nuovo cursore
-        if v_global_connesso:
+        if v_global_connected:
             self.v_cursor = v_global_connection.cursor()
         else:
             self.v_cursor = None
@@ -3741,11 +3772,6 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             elif event.key() == Qt.Key.Key_Tab:                
                 self.e_sql.SendScintilla(QsciScintilla.SCI_AUTOCCOMPLETE)
                 return True
-
-        # intercetto il cambio di focus e cambio il titolo della window principale di MSql così che sulla barra di Windows risulti 
-        # il titolo dell'editor corrente
-        if event.type() == QEvent.Type.FocusIn and source is self.e_sql:
-            self.link_to_MSql_win1_class.setWindowTitle(titolo_window(self.objectName()))
 
         # individio la disattivazione della window e disattivo il drop sulla parte di editor in modo possa gestire 
         # i drop di un file che viene trascinato sull'app. Il drop del file viene gestito tramite il controllo dell'evento sulla window principale
@@ -4943,7 +4969,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 self.link_to_MSql_win1_class.e_password = v_parametri["e_password"]
                 self.link_to_MSql_win1_class.e_server_name = v_parametri["e_server_name"]
                 self.link_to_MSql_win1_class.e_user_mode = v_parametri["e_user_mode"]
-                self.link_to_MSql_win1_class.slot_connetti()
+                self.link_to_MSql_win1_class.slot_connect()
             # inizio select, insert, update, delete.... multiriga            
             elif v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','ALTER','WITH'):
                 v_istruzione = True
@@ -5066,7 +5092,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                         il risultato al di fuori di queste tre casistiche è imprevedibile!
                         Inoltre va tenuto conto che la libreria oracledb ha delle sue classi specifiche per la gestione dei vari aspetti
         """
-        global v_global_connesso
+        global v_global_connected
         global v_global_create_confirm
         global v_global_exec_time
         
@@ -5109,7 +5135,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             return 'ko'
 
         # solo se sono connesso al DB....
-        if v_global_connesso:                                    
+        if v_global_connected:                                    
             # imposto la var che conterrà il comando corrente
             self.v_plsql_corrente = p_plsql
             # var che indica se siamo in uno script di "CREATE"            
@@ -5279,13 +5305,13 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
            Esegue p_select (solo il parser con carico della prima serie di record)
                se p_corrente è True la var v_select_corrente verrà rimpiazzata
         """        
-        global v_global_connesso        
+        global v_global_connected        
         global o_global_preferences   
         global v_global_exec_time        
 
         self.v_flag_testo_corrente = p_corrente        
                 
-        if v_global_connesso:                                    
+        if v_global_connected:                                    
             # pulisco elenco            
             self.slot_clear('RES')            
             # pulisco la matrice che conterrà elenco delle celle modificate
@@ -5392,11 +5418,11 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             Se p_wait_window è True viene mostrata una finestra di attesa durante il caricamento (con la scritta "Rendering..").
             La funzione ritorna solo quando il caricamento è completato, restituendo 'ok' o 'ko'.
         """
-        global v_global_connesso
+        global v_global_connected
         global o_global_preferences
 
         # prerequisiti
-        if not (v_global_connesso and self.v_esecuzione_ok):
+        if not (v_global_connected and self.v_esecuzione_ok):
             return 'ko'
 
         v_ok = 'ok'          # valore di ritorno predefinito
@@ -5574,10 +5600,10 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         """
            Esegue la commit o la rollback
         """
-        global v_global_connesso
+        global v_global_connected
         global v_global_connection
 
-        if v_global_connesso:
+        if v_global_connected:
             if p_azione == 'Commit':
                 # eseguo la commit
                 v_global_connection.commit()
@@ -6781,7 +6807,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
            Aggiorna i dati della statusbar 
         """
         v_totale_righe = str(self.e_sql.lines())        
-        v_string_lines_and_length = QCoreApplication.translate('MSql_win1','Lines:') + ' ' + str(v_totale_righe) + ', ' + QCoreApplication.translate('MSql_win1','Length:') + ' ' + str(self.e_sql.length())
+        v_string_lines_and_length = QCoreApplication.translate('MSql_win1','Lines:') + ' ' + str(v_totale_righe) + ' ' + QCoreApplication.translate('MSql_win1','Length:') + ' ' + str(self.e_sql.length())
         self.link_to_MSql_win1_class.l_num_righe_e_char.setText(v_string_lines_and_length)        
 
         # reimposta larghezza del margine numeri di riga...
