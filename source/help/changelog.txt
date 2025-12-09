@@ -2,6 +2,14 @@
 MSql Changelog!
 ---------------
 
+Versione del 06/12/2025
+OK! Piccoli miglioramenti nel comando CTRL+INVIO quando le istruzioni hanno come separatore delle righe vuote
+OK! Nella statusbar, sezione relativa alle informazioni di connessione; se possibile viene riportato il titolo del server che l'utente ha dato nei preferiti (questo perché nel caso di collegamento in modalità Thin di solito viene indicato un indirizzo IP che poi è poco comprensibile; quindi meglio la sua descrizione)
+
+Versione del 05/12/2025
+OK! Nella statusbar a sinistra è stato aggiunto il bottone per richiamare la calcolatrice
+OK! Nella statusbar, sezione relativa alle informazioni di connessione; se possibile viene riportato il titolo del server che l'utente ha dato nei preferiti (questo perché nel caso di collegamento in modalità Thin di solito viene indicato un indirizzo IP che poi è poco comprensibile; quindi meglio la sua descrizione)
+
 Versione del 04/12/2025
 OK! Quando mi connetto con la modalità manuale e si verifica un errore di connessione, ora viene emessa la descrizione dell'errore che si è verificato e non viene chiusa la window
 OK! Correzione bug relativo alla gestione dello schema; capitava che anche passando da una connessione all'altra lo schema rimanesse sporco creando problemi di esecuzione dei comandi SQL
@@ -11,7 +19,7 @@ OK! Bugfix per la sincronizzazione del titolo in window principale con il file c
 Versione del 03/12/2025
 OK! Il dizionario di autocompletamento ora si basa sullo schema attivo in quel momento; 
     è stato aggiunto un apposito item che visualizza in fase di esecuzione del caricamento 
-		del dizionario in quale schema vengono ricercati i dati
+		del dizionario, in quale schema vengono ricercati i dati
 OK! Modifica a tutte le window in modo venga presa un'icona più grande e quindi meglio usata in ambiente Linux
 OK! Per adeguamenti multipiattaforma, la directory di download dei dati non è più fissa ma varia 
     a seconda della piattaforma Linux o Windows
@@ -445,23 +453,12 @@ OK! quando ricerco una stringa nell'object viewer con il tema scuro non capisco 
 OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e parte del comando
 
 -------------
-MSql TO DO!!!
+MSql TODO!!!
 -------------
 - Anche il comment monoriga senza punto e virgola non funziona!
 - Segnalato da Diego....ho testo dove voglio sostituire i doppi apici con apice...fatto ricerca-modifica e faccio il trova e sostituisci ma singolo...va in ricorsione!
 - Va migliorata l'esecuzione di script che contengono comandi DDL perché ad esempio nell'esecuzione degli script Modula, nella creazione delle tabelle, si blocca nell'esecuzione completa e va usata quella passo-passo		
-- capita che se faccio una select, poi una update/ delete o lancio script e poi eseguo la select, esca errore "Error to fetch data: DPY-1003: the executed statement does not return rows!!! Mi capitava con lo script del calcolo prelievi...lanciavo lo script e poi la select su tabella MW_SCOP1_TMP facendo F11
-  -- lanciare il calcolo
-	begin
-    MW_MAGAZZINI.PREPARA_PRELIEVO_ORDINI('SMI','B1');      ---> Esegue un calcolo di preparazione prelievo ordini produzione/vendita e buoni, compila tabella temporanea  
-    MW_MAGAZZINI.DISPONIBILE_PRELIEVO_ORDINI('SMI','B1');  ---> Attribuisce il valore disponibile per ogni ordine da prelevare
-  end;	
-	-- eseguire questa istruzione e poi premere F6 per andare a fine elenco...dovrebbe uscire errore reperimento record....da li dovrebbe partire errore interno a MSql
-	select DESCRIZIONE('MW_MLOCA','LOCAZ_CO','IDLOC_NU',NULL,NULL,TO_CHAR(POSOR_NU),NULL,NULL,NULL) from VA_MW_PREOP_TMP
-	questa istruzione se eseguita e poi faccio F6 per scorrere i record, esce proprio l'errore indicato
 - continuare con l'help 
-- se quando avvio MSql lo avvio massimizzato, escono tutti errori di QPainter, mentre se finestra non massimizzata nulla del genere...come mai? è un problema che avviene anche se minimizzo e poi riporto a normal...qualcosa proprio nel repaint degli oggetti
-  attenzione! mi sono accorto che questi errori escono anche con MGrep...e devo dire che in una versione precedente delle librerie Pyqt6 non uscivano questi errori!
 	
 ---------------------------------------------
 MSql Cosa è stato valutato e non realizzato!

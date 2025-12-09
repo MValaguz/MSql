@@ -489,21 +489,29 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         ###
         # Aggiunta di windget alla statusbar con: flag editabilità, numero di caratteri, indicatore di overwrite, ecc..
         # Da notare come l'allineamento a destra sia effettuato tramite un addPermanentWidget e a sinistra con il addWidget
-        ###                                        
+        ###
+        # --- Container per i bottoni ---
+        container = QWidget()
+        h = QHBoxLayout(container)
+        h.setContentsMargins(0, 0, 0, 0)   # Nessun margine
+        h.setSpacing(0)                    # Nessuno spazio tra i bottoni                                        
         # Bottone con icona per aprire la dock del file system
         self.fs_button = QPushButton()
         self.fs_button.setIcon(QIcon("icons:folder.png")) 
         self.fs_button.setIconSize(QSize(8,8))
         self.fs_button.setToolTip(QCoreApplication.translate('MSql_win1','Open file system dock'))        
-        self.fs_button.clicked.connect(self.slot_mostra_file_system_dock)
-        self.statusBar.addWidget(self.fs_button)  
+        self.fs_button.clicked.connect(self.slot_mostra_file_system_dock)        
         # Bottone con icona per aprire la calcolatrice
         self.calc_button = QPushButton()
         self.calc_button.setIcon(QIcon("icons:calculator.png")) 
         self.calc_button.setIconSize(QSize(8,8))
         self.calc_button.setToolTip(QCoreApplication.translate('MSql_win1','Calculator'))        
-        self.calc_button.clicked.connect(self.slot_calculator)        
-        self.statusBar.addWidget(self.calc_button)  
+        self.calc_button.clicked.connect(self.slot_calculator)                
+        # Aggiungo i bottoni al layout
+        h.addWidget(self.fs_button)
+        h.addWidget(self.calc_button)
+        # Aggiungo il container alla status bar
+        self.statusBar.addWidget(container)
         # Informazioni sul tempo di esecuzione dell'ultima istruzione
         self.l_exec_time = QLabel(QCoreApplication.translate('MSql_win1','Last execution time:'))
         self.l_exec_time.setFrameStyle(QFrame.Shape.NoFrame)        
@@ -1458,8 +1466,10 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
 
         # ricerco posizione nei preferiti e attivo la corrispondente voce di menu (elenco server)
         # notare come attraverso una triangolazione trovo quale voce attivare (usando quanto contenuto nelle preferenze)        
+        v_server_title = self.e_server_name
         for rec in o_global_preferences.elenco_server:
             if rec[1] == self.e_server_name:
+                v_server_title = rec[0]
                 for action in self.action_elenco_server:            
                     if action.text() == rec[0]:
                         action.setChecked(True)            
@@ -1534,8 +1544,8 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         if self.e_user_mode == 'SYSDBA':
             v_global_background = 'red'
 
-        # sulla statusbar, aggiorno la label della connessione        
-        self.l_connection.setText(QCoreApplication.translate('MSql_win1','Connection:') + ' ' + self.e_server_name + "/" + v_user_connect)     
+        # sulla statusbar, aggiorno la label della connessione (notare come se possibile venga mostrato il titolo dato dall'utente al server nella sezione preferiti)
+        self.l_connection.setText(QCoreApplication.translate('MSql_win1','Connected to:') + ' ' + v_server_title + "/" + v_user_connect)     
         self.l_connection.setStyleSheet('background-color: ' + v_global_color + ';color: "' + v_global_background + '";')              
 
         # lo schema corrente viene preso da eventuali preferenze di connessione e se non valorizzato...
