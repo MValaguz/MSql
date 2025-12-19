@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/export.png</file>
     <file>icons/calculator.png</file>
     <file>icons/split.png</file>
     <file>icons/functions.png</file>

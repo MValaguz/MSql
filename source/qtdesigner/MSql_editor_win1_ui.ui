@@ -157,14 +157,16 @@
     </property>
     <addaction name="actionGo_to_Top"/>
     <addaction name="actionGo_to_End"/>
-    <addaction name="actionExport_to_Excel"/>
+    <addaction name="separator"/>
+    <addaction name="actionExtract_sql_from_output"/>
     <addaction name="separator"/>
     <addaction name="actionAutoColumnResize"/>
     <addaction name="separator"/>
     <addaction name="actionClear_output"/>
     <addaction name="actionAuto_clear_output"/>
     <addaction name="separator"/>
-    <addaction name="actionExtract_sql_from_output"/>
+    <addaction name="actionExport_to_Excel"/>
+    <addaction name="actionExport_to_Insert_format"/>
     <addaction name="separator"/>
     <addaction name="actionFont_output_selector"/>
    </widget>
@@ -1807,6 +1809,15 @@
    </property>
    <property name="text">
     <string>Calculator</string>
+   </property>
+  </action>
+  <action name="actionExport_to_Insert_format">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/export.png</normaloff>:/icons/icons/export.png</iconset>
+   </property>
+   <property name="text">
+    <string>Export to Insert format</string>
    </property>
   </action>
  </widget>

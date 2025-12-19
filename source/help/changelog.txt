@@ -2,21 +2,27 @@
 MSql Changelog!
 ---------------
 
-Versione del 06/12/2025
+Version dated 19/12/2025
+OK! Aggiornamento di tutte le librerie
+
+Version dated 10/12/2025
+OK! Nel menu "Output" inserita nuova voce "Export to insert format" che prende la tabella in output e la trasforma in un file .txt con le istruzioni di insert; al termine dell'export, il file viene aperto tramite il programma di riferimento
+
+Version dated 06/12/2025
 OK! Piccoli miglioramenti nel comando CTRL+INVIO quando le istruzioni hanno come separatore delle righe vuote
 OK! Nella statusbar, sezione relativa alle informazioni di connessione; se possibile viene riportato il titolo del server che l'utente ha dato nei preferiti (questo perché nel caso di collegamento in modalità Thin di solito viene indicato un indirizzo IP che poi è poco comprensibile; quindi meglio la sua descrizione)
 
-Versione del 05/12/2025
+Version dated 05/12/2025
 OK! Nella statusbar a sinistra è stato aggiunto il bottone per richiamare la calcolatrice
 OK! Nella statusbar, sezione relativa alle informazioni di connessione; se possibile viene riportato il titolo del server che l'utente ha dato nei preferiti (questo perché nel caso di collegamento in modalità Thin di solito viene indicato un indirizzo IP che poi è poco comprensibile; quindi meglio la sua descrizione)
 
-Versione del 04/12/2025
+Version dated 04/12/2025
 OK! Quando mi connetto con la modalità manuale e si verifica un errore di connessione, ora viene emessa la descrizione dell'errore che si è verificato e non viene chiusa la window
 OK! Correzione bug relativo alla gestione dello schema; capitava che anche passando da una connessione all'altra lo schema rimanesse sporco creando problemi di esecuzione dei comandi SQL
 OK! Modificata apertura del file di help e di changelog, in quanto lato Linux non funzionava
 OK! Bugfix per la sincronizzazione del titolo in window principale con il file correntemente aperto
 
-Versione del 03/12/2025
+Version dated 03/12/2025
 OK! Il dizionario di autocompletamento ora si basa sullo schema attivo in quel momento; 
     è stato aggiunto un apposito item che visualizza in fase di esecuzione del caricamento 
 		del dizionario, in quale schema vengono ricercati i dati
@@ -24,28 +30,28 @@ OK! Modifica a tutte le window in modo venga presa un'icona più grande e quindi
 OK! Per adeguamenti multipiattaforma, la directory di download dei dati non è più fissa ma varia 
     a seconda della piattaforma Linux o Windows
 
-Versione del 02/12/2025
+Version dated 02/12/2025
 OK! Inserito nelle preferenze di connessione, l'opzione "As schema" che permette di indicare uno schema di connessione per l'utente  
     Ovviamente gestire questa cosa con cambio dello schema e caricamento dei dati
 OK! Nelle preferenze inserito la possibilità di collegarsi in modalità Thin o Thick dove per altro sia possibile indicare il nome 
     della libreria Oracle da utilizzare; in questo modo si è resa più leggibile questa parte, soprattutto lato Linux
 
-Versione del 25/11/2025
+Version dated 25/11/2025
 OK! Nuova voce nel menu "View" detta "Editor view" che apre lateralmente all'editor una vista non editabile ma desincronizzata rispetto all'editor; si permette in questo modo di poter visualizzare una parte di codice dell'editor  
     mentre si sta lavorando su un'altra. Su questa view è permessa solo operazione di "Find" di stringhe, agendo sull'apposita checkbox 
 OK! Nel menù "Tools" ora è presente la Calcolatrice; una volta attivata, può essere alimentata della celle dei risultati; premendo il tasto destro, compare la nuova voce "Copy to calc" che copia il valore della cella dentro la calcolatrice.		
 OK! Sono iniziati gli adattamenti per funzionare in ambiente Linux!!!!
 
-Versione del 06/11/2025
+Version dated 06/11/2025
 OK! Ora, nella ricerca stringa, se il testo è strutturato con procedure-function, nel risultato oltre al numero di riga 
     viene riportato anche il nome della procedura-function dove è stata trovata la stringa
 
-Versione del 31/10/2025
+Version dated 31/10/2025
 OK! se lancio un "drop table xxxxx" senza il ; finale, non funziona! 
 OK! nell'object navigator, nella lista di selezione tipologia oggetti, inserita anche la voce "Other" che in pratica comprende tutto ciò che non rientra negli altri tipi di oggetti;
     Vengono sostanzialmente visualizzati i JOB e i TYPE su cui è possibile, tramite tasto destro, importare nell'editor il rispettivo DDL.
     
-Versione del 30/10/2025
+Version dated 30/10/2025
 OK! nella sezione di file system inserito la ricerca per stringa (è possibile usare le regular expression)
 		+-------------------------------+-----------------------------------------------+-----------------------------------------------------------+
 		| Testo nel campo di ricerca    | Corrispondenza effettiva                      | Descrizione                                               |
@@ -63,18 +69,18 @@ OK! nella sezione di file system inserito la ricerca per stringa (è possibile u
 		| (?i)^readme(\.txt)?$          | README, readme.txt                            | "readme" o "readme.txt" (case-insensitive)                |
 		+-------------------------------+-----------------------------------------------+-----------------------------------------------------------+
 
-Versione del 27/10/2025
+Version dated 27/10/2025
 OK! Quando vengono letti dei blob la window di wait ormai si è chiusa ma non si capisce che sta caricando i dati....bisognerebbe provare a farla uscire ma senza il bottone di cancel
     Inserita una nuova Window con messaggio "Rendering" che viene visualizzata durante la fase di carico della prima pagina.
 
-Versione del 24/10/2025
+Version dated 24/10/2025
 OK! Quando si creava un trigger,  MSql non si accorgeva se c'erano errori al suo interno! 
     Inoltre una volta risolto questo problema, ci si è accorti che gli errori erano su numeri di riga 
 		diversi rispetto a quelli del sorgente. Il problema è stato individuato nel fatto che Oracle nei trigger
 		numera le istruzioni a partire dalla prima DECLARE; quindi viene creato un punto di offset che viene
 		riportato sia sulla lista errori che sul posizionamento.
 
-Versione del 15/10/2025
+Version dated 15/10/2025
 OK! segnalato da Diego...istruzione update zxxxx set campo='minuscolo' --> facendo ctrl+invio in realtà aggiorna in maiuscolo!
 OK! nella creazione di un trigger che conteneva errore non mi ha dato errore!
 OK! inserito bottone di refresh sulla dock file system e fatto in modo che all'avvio non venga aperta e quindi non venga nemmeno caricata...perché cmq ci mette del tempo!
@@ -85,10 +91,10 @@ OK! fare debug per il crash che avviene quando faccio la selezione rettangolare 
 		Questa modifica ha introdotto il fatto che facendo doppio click sulla parola, evidenzia tutte le corrispondenze nel testo e quando poi si fa click 
 		rimane l'evidenzia....ma basta fare di nuovo doppio click su una zona vuota e su altra parola che l'evidenzia si sposta...a questo punto lasciato così!
 
-Versione del 10/10/2025
+Version dated 10/10/2025
 OK! bug segnalato da Diego sempre su comando CTRL+INVIO
 
-Versione del 07/10/2025
+Version dated 07/10/2025
 OK! inserito il nuovo strumento per la gestione del file system; è richiamabile tramite il menu strumenti 
     oppure con l'icona che si trova in basso a sinistra che ha il simbolo di una cartella. All'apertura di
 		questo strumento se nelle preferenze è stata definita una cartella di apertura, viene presa quella, altrimenti
@@ -102,7 +108,7 @@ OK!  Il comando Ctrl+invio è ancora insoddisfacente...
      Attenzione! con Diego abbiamo visto istruzione begin dbms_output.put_line('ciao'); end; e non funziona nel senso che la interpreta come una select
 	   sarebbe sufficiente che venga cercata la parola begin...se la trova esegue come codice
 
-Versione del 01/10/2025
+Version dated 01/10/2025
 OK! Migliorato la gestione dell'autoinserimento (es. scrittura di parentesi aperta e l'editor inserisce parentesi chiusa) facendo in modo che il carattere di chiusura venga ignorato se già presente:
     es. select * from ta_azien where azien_co='SMI' --> alla prima digitazione di ' viene messo il secondo apice, ma una volta riempita la stringa posso scrivere un secondo apice per chiuderla senza dovermi spostare con il cursore
 OK! Marco ha caricato una tabella che contiene dei clob molto grandi TA_JSON_LOG e MSql va in tilt durante il caricamento!
@@ -110,25 +116,25 @@ OK! Marco ha caricato una tabella che contiene dei clob molto grandi TA_JSON_LOG
 		!!! DATA TRUNCATED !!! che indica all'utente che i dati sono troncati. Quando però si eseguirà lo zoom tramite tasto destro sulla cella, verrà caricato il contenuto completo. 
 		La window di zoom ora ha anche la possibilità di essere massimizzata ed è di sola lettura.
 
-Versione del 22/09/2025
+Version dated 22/09/2025
 OK! corretto problema sulla funzione replace all che in caso di stringa da sostituire che conteneva parte della stringa di ricerca, lo mandava in loop
 
-Versione del 15/09/2025
+Version dated 15/09/2025
 OK! su indicazione di Filippo, inserito interpretazione dell'istruzione WITH (Common Table Expression (CTE), utile per query modulari)  
 OK! inserito nel setup il font "Fira code"...una volta installato MSql è sufficiente sceglierlo tra i font disponibili
 
-Versione del 05/09/2025
+Version dated 05/09/2025
 OK! se MSql è già in esecuzione e faccio doppio click su un file del desktop, fare in modo di aprire il nuovo file nel MSql che è già aperto;
     usato il metodo SIM dove all'avvio MSql crea un "server" che di scambio dati con altra istanza di MSql
 
-Versione del 03/09/2025
+Version dated 03/09/2025
 OK! Nuove funzioni aggiunte in "Gestione funzioni manipolazione testo" per la gestione di colonne-matrici
 
-Versione del 02/09/2025
+Version dated 02/09/2025
 OK! Correzione problema segnalato da Diego su F12 e F11 in questi casi SMILE.TA_AZIEN.AZIEN_CO
 OK! Creata nel menu "Modifica" la nuova voce "Funzioni manipolazione testo" e iniziato a creare le prime funzioni di "Split" e di "Compress"
 
-Versione del 28/08/2025
+Version dated 28/08/2025
 OK! Creata nel menu "Modifica" la nuova voce "Commenta partendo da funzione" dove selezionando testo come quello qui sotto di esempio
   /* Procedura di supporto a caricamento elenco disegni lato Apex */
   PROCEDURE APEX_LOAD_UT_REPOR_DISEGNI(P_AZIEN_CO IN VARCHAR2,
@@ -139,22 +145,22 @@ OK! Creata nel menu "Modifica" la nuova voce "Commenta partendo da funzione" dov
 	crea un commento con i dati dell'autore, la data, la descrizione e i parametri di input-output
 OK! Per soddisfare la richiesta di cui sopra è stato creato dentro le preferenze di programma, il parametro "Autore"
 
-Versione del 27/08/2025
+Version dated 27/08/2025
 OK! Il colore dell'evidenziatore è selezionabile dalle preferenze, sezione "Editor"
 
-Versione del 26/08/2025
+Version dated 26/08/2025
 OK! Nella sezione di ricerca stringa è possibile indicare di evidenziare la ricerca e selezionare un colore; 
     la selezione rimane impostata e può essere "sommata" con altre evidenziazioni!
 OK! Nuova voce "highligth_selection" nel menu edit che permette di evidenziare il testo con un colore!
 
-Versione del 22/08/2025
+Version dated 22/08/2025
 OK! Inserita nuova voce per esplorare i link di database con rispettava form
 OK! Inserita nuova voce nel menu "View" per attivare o meno la modalità full-screen
 
-Versione del 21/08/2025
+Version dated 21/08/2025
 OK! Nuova voce nel menu editor per poter selezionare il font da usare nell'ascii art
 
-Versione del 20/08/2025
+Version dated 20/08/2025
 OK! Inserito nuovo menu di Import-Export che permette di:
     - Esportare dati da Oracle verso un db SQLite
 		- Esportare i dati da un db SQLite a un foglio Excel
@@ -163,34 +169,34 @@ OK! Inserito nuovo menu di Import-Export che permette di:
 		- Visualizzare il contenuto di un db SQLite
 OK! Inserita nuova voce nel menu "Edit" detta "Text to Ascii Art" che partendo da un testo selezionato lo trasforma in ascii art 
 
-Versione del 07/08/2025
+Version dated 07/08/2025
 OK! filtri su output...quando tolgo ultimo filtro non torna alla select di partenza
 
-Versione del 05/08/2025
+Version dated 05/08/2025
 OK! select * from dual; se faccio CTRL+INVIO alla fine della riga, non va! se ci fosse un ; alla sua sinistra...meglio spostare il cursore alla sua sinistra
 OK! corretto problema che quando mettevo dei bookmark....esempio uno all'inizio e uno verso le ultime righe...
     poi passando dal primo al secondo bookmark, tramite CTRL+B, appena mi spostavo con la scrollbar 
 		o con la rotella del mouse, "saltava" in posizione indefinita...questo problema era dovuto all'effetto ping-pong 
     che si scatenava sulle scrollbar dell'editor e della minimappa! Senza minimappa questo effetto non si creava.    
 
-Versione del 04/08/2025
+Version dated 04/08/2025
 OK! i file eseguibili sono stati firmati con un autocertificato....test per vedere se antivirus dà problemi
 OK! corretto problema su CTRL+INVIO segnalato da Filippo
 
-Versione del 01/08/2025
+Version dated 01/08/2025
 OK! al passaggio da una connessione di database all'altra, vengono ripulite le sezioni dell'object navigator e dell'object viewer
 
-Versione del 29/07/2025
+Version dated 29/07/2025
 OK! rivisto il tool che evidenzia le differenze tra due editor 
 
-Versione del 25/07/2025
+Version dated 25/07/2025
 OK! se faccio F11 su una riga vuota --> errore
 OK! se faccio script esce una riga finale vuota che invece dovrebbe riportare la scritta "script executed"?
 
-Versione del 11/07/2025
+Version dated 11/07/2025
 OK! In modalità di modifica dati di tabella; se il campo modificato è una data, lo script verrà creato inserendo la specifica istruzione di TO_DATE in base al formato data
 
-Versione del 08/07/2025
+Version dated 08/07/2025
 OK! Inserita nel menu popup dell'object navigator la voce "info" dove escono le info dell'oggetto come data di creazione, modifica, ecc.
 OK! Rivisto il funzionamento di CTRL+INVIO. In questa versione mi sono arreso all'idea di fare una cosa intelligente per capire dove iniziasse e finisse un'istruzione anche senza simboli di separazione....
     Quindi non ho fatto altro che ripredere la funzione che esegue il parser del codice; riceve in input tutto il testo e la posizione attuale del cursore
@@ -198,20 +204,20 @@ OK! Rivisto il funzionamento di CTRL+INVIO. In questa versione mi sono arreso al
 OK! Questione dell'antivirus dentro nell'immagine di setup (è forse bastato salvarla nel formato a 24bit?!)		
 OK! Se apro lo stesso pkg 2 volte da ddl, non si accorge che già aperto...dovrebbe comunque lasciarlo fare ma dando un altro nome tipo aggiungendo un altro !
 
-Versione del 30/06/2025
+Version dated 30/06/2025
 OK! capita che se lancio molti comandi di seguito, vengono eseguiti lentamente....è possibile velocizzare la cosa? rif. Filippo 
     tramite aiuto di CoPilot è stata riscritta la classe di OracleExecuter dove è stato eliminato un thread e tolta tutta la parte di wait che rallentava e creava problemi
 
-Versione del 27/06/2025
+Version dated 27/06/2025
 OK! nella sezione di output pl-sql inserito i numeri di riga come se fosse un editor
 OK! nella sezione di output pl-sql inserita la ricerca del testo come presente nell'editor
 
-Versione del 13/06/2025
+Version dated 13/06/2025
 OK! nelle preferenze, inserita la preview della gif animata scelta
 OK! nuova gif animata per esecuzione creata da Filippo!
 OK! sempre questione del backup automatico...parto da un Untitled1....che lascio backup....poi faccio salva con nome....a quel punto inizierà a fare il backup del nuovo lasciando il vecchio e poi andando in crash!
 
-Versione del 12/06/2025
+Version dated 12/06/2025
 OK! perfezionato il funzionamento dei file di backup nel seguente modo:
     l'editor, in base alle preferenze, attiva il timer che provvede al richiamo della procedura di salvataggio; quando viene eseguito il salvataggio, il file corrente viene salvato nella cartella backup.
 	  E' necessario che il file sia distinguibile, nel senso che si capisca da quale cartella proviene, e anche da quale istanza di MSql è stato aperto perché ci potrebbero essere più MSql in esecuzione in quel momento.
@@ -226,16 +232,16 @@ OK! perfezionato il funzionamento dei file di backup nel seguente modo:
 		Il file di backup, una volta aperto viene fisicamente cancellato.   
 OK! tolto dalle preferenze il "Rendi la sezione "Risultato" editabile"....non ha senso che si attivi automaticamente all'avvio! C'è chi l'aveva attivata e all'atto pratico creava confusione.
 
-Versione del 10/06/2025
-OK! viene controllata se esiste una nuova versione del setup in O:\Install\MSql_setup\ e in caso affermativo esce avviso all'avvio!
+Version dated 10/06/2025
+OK! viene controllata se esiste una nuova Version dated setup in O:\Install\MSql_setup\ e in caso affermativo esce avviso all'avvio!
 OK! creata nuova voce nel menu di help detta di "Changelog" dove si apre questo file!
 
-Versione del 09/06/2025
+Version dated 09/06/2025
 OK! opzione per animazione gif durante esecuzione comandi....dare possibilità di impostare un file....
 OK! Filippo ha segnalato problema esecuzione select con ctrl-invio e presente spazio dopo il ;
 OK! Filippo ha segnalato che nel menu popup dei risultati, con il tema chiaro, i bottoni risultano tutti appiccicati
 
-Versione del 28/05/2025
+Version dated 28/05/2025
 OK! A partire da questa versione si è passati alla gestione di oggetti custom in quanto molto più semplice agire sugli eventi
 OK! andrebbe migliorato il funzionamento del drag&drop tipo quando si prendono i campi dall'object viewer...sembra che qscintilla quando viene fatto il drop, prenda come posizione della riga testo il punto di ingresso dove era passato il mouse quando ha fatto l'hover dell'oggetto
     il problema è stato risolto tramite la customizzazione del widget qscintilla....
@@ -244,51 +250,51 @@ OK! quello dello shift-rotella andrebbe fatto anche nell'object viewer
 OK! quello dello shift-rotella andrebbe fatto anche nell'editor 
 OK! CTRL-invio per eseguire istruzione separata da /
 
-Versione del 21/05/2025
+Version dated 21/05/2025
 OK! problema di link di tabella come ad esempio SELECT * FROM CP_DIPEN@PROD	-- se faccio F12 sulla tabella @prod non funziona!
 OK! nelle liste quando si passa sopra con il mouse la label si colora di bianco e non si vede la scritta sotto...questo con il tema scuro
 
-Versione del 20/05/2025 
+Version dated 20/05/2025 
 OK! quando estraggo i commenti di una tabella (es. ma_class) hanno un ordine diverso rispetto a quello dei campi di tabella
 OK! partendo dalla sezione di risultato, permettere di fare il drag&drop della colonna, traducendolo in nome colonna (come fa sql-tools)...alla fine fatta nuova voce nel menu di popup
 OK! se in una riga ho dei tab, il numero di colonna sulla status bar non è corretto....i tab vanno moltiplicati!
 
-Versione del 29/04/2025
+Version dated 29/04/2025
 OK! Aggiungere la possibilità di creare nel dizionario anche gli oggetti Apex 
 OK! Aggiungere la possibilità di collegarsi tramite utente proxy
 
-Versione del 11/04/2025
+Version dated 11/04/2025
 OK! quando faccio CTRL-C sulla parte di output o di result, non funziona...devo sempre passare dal tasto destro...è una cosa che ora sarebbe bello risolvere
 OK! quando modifico un dato in una tabella e non esco con il tab....non prende il dato...potrebbe avere senso seguire la strada fatta per il CTRL+C dove viene ripreso l'item dove era il focus e si riesegue la compilazione della matrice con i dati modificati (ESATTO! Seguendo quanto fatto per la voce copia del menu, sono riuscito a risolvere il problema)
 
-Versione del 10/04/2025
+Version dated 10/04/2025
 OK! ms_utn se mi posiziono con il cursore a inizio e faccio F11 non prende il nome della tabella
 
-Versione del 07/04/2025
+Version dated 07/04/2025
 OK! !!!!!! ho lanciato elaborazione lunga (v. JOB_CONTROLLO_SCATOLE_KARDEX) e si è bloccata...anche se di fatto terminata....infatti se lanciata da ambiente di sviluppo non ha dato problemi anche tempo di esecuzione arrivato a circa 10 minuti
 
-Versione del 02/04/2025
+Version dated 02/04/2025
 OK! non funziona il go to top del testo e nemmeno il go to end
 OK! gestione multilingua
 
-Versione del 27/03/2025
+Version dated 27/03/2025
 OK! passaggio alla libreria oracledb
 OK! inserito nelle info del programma i ringraziamenti speciali...
 
-Versione del 26/03/2025
+Version dated 26/03/2025
 OK! segnalato da Filippo: quando cambio la connessione da menu connections la scritta UTF-8 sulla statusbar cambia colore in modo strano...non è correttamente sincronizzata
 OK! la funzione replace con find next non funziona bene!!! 
    per prima cosa dopo che si fa una replace, il programma deve far seguire una searchnext 
    quando è arrivato in fondo dire che arrivato in fondo; 
    inoltre sempre sulla replace dovrebbe dire che non ha trovato nulla...come fa sqltools ma anche notepad++
 
-Versione del 25/03/2025
+Version dated 25/03/2025
 OK! togliere la preferenza delle dir di default e correggere il problema per cui in apertura se non si sceglie un file dà errore
 OK! tornare alla lettura della tabella all_objects perché non sempre disponibile e quindi dà errori! (es. usando utente Kardex)
 OK! fare in modo che le preferenze relative alle connessioni siano messe in file apposito crittografate....perché se il programma diventasse di pubblico dominio non ha senso che siano fisse come oggi...lo stesso dicasi per le directory di riferimento
     il file elenco server può essere un file a parte che viene allegato insieme all'installazione (quindi viene gestito da inno-setup come file di preferenze aggiuntivo)  
 
-Versione del 24/03/2025
+Version dated 24/03/2025
 OK! implementare possibilità di cambiare lo schema sulla parte dell'object navigator 
 OK! su segnalazione di Filippo non funziona bene F12, F11, CTRL-K nella seguente situazione dove richiamo le funzioni a termine riga
 		ms_utn
@@ -296,18 +302,18 @@ OK! su segnalazione di Filippo non funziona bene F12, F11, CTRL-K nella seguente
 		select * from ta_azien 
 		where azien_co='SMI'
 
-Versione del 19/03/2025
+Version dated 19/03/2025
 OK! ho scritto smi.op_com...quando faccio f11, f12, ctrl-k dovrei capire che esiste l'owner e agire di conseguenza
  
-Versione del 17/03/2025
+Version dated 17/03/2025
 OK! il menu dei bookmark si disattiva quando apro un file! (sembra un problema non di programma ma pyqt6...a questo punto messe le voce tutte a primo livello)
   
-Versione del 10/03/2025
+Version dated 10/03/2025
 OK! Tolto DBMS_NUMBER dall'autocompletation (così quando si scrive dbms...il suggeritore dà subito db)
 OK! Corretto problema caricamento history
 OK! Velocizzata la consultazione dell'history limitando visualizzazione dell'istruzione ai primi 1000 caratteri....
 
-Versione del 27/02/2025
+Version dated 27/02/2025
 OK! migliorare la gestione dell'auto insert su apici; se metto apice vicino ad una parola allora non raddoppio mentre se metto apice e sotto c'è apice lascio solo lui; se sono a fine riga e metto apice non faccio nulla 
     in pratica si deve attivare solo se ci sono spazi sia a destra che a sinistra oppure se a destra c'è il vuoto (ritono a capo o fine del file) se invece c'è una parentesi, allora si attiva
     1° = scrivo apice e a destra e sinistra ci sono degli spazi --> ok doppio apice...attenzione! a destra potrebbe esserci il fine riga e quindi va considerato come spazio
@@ -315,33 +321,33 @@ OK! migliorare la gestione dell'auto insert su apici; se metto apice vicino ad u
 	3° = quando scrivo parentesi deve avere un comportamento specifico per le parentesi e anche inserimento apici tra parentesi deve avere comportamento specifico
 	OK! ATTENZIONE! Sono a fine riga e sotto ho altre righe....non funziona!!!!
 
-Versione del 24/02/2025
+Version dated 24/02/2025
 OK! quando eseguo lo script PLSQL IN ERRORE CON ERRATO POSIZIONAMENTO non si posiziona correttamente sulla riga e colonna dell'errore! C'è un problema dal passare dalla posizione carattere al numero di riga/colonna
 
-Versione del 21/02/2025
+Version dated 21/02/2025
 OK! è possibile evitare che con autocompletamento venga presa prima voce, premendo il tasto invio? Con la modifica l'accettazione dell'autocompletamento avviene solo tramite il tasto TAB mentre INVIO di fatto chiude autocompletamento
 OK! inserito nel menù "view" la voce che attiva/disattiva la identation guide
 
-Versione del 18/02/2025
+Version dated 18/02/2025
 OK! il problema dell'UTF-8 è stato rivisto in questo modo: eliminata la preferenza generale del tipo di codifica; quando si crea un nuovo file viene impostato automaticament in UTF-8; ogni file che viene aperto ha poi la sua codifica personale
     che viene evidenziata con l'apposita scritta sulla statusbar...
 OK! corretto problema delle path nelle apertura dei file da dialog piuttosto che da riga di comando; in pratica risultava / con un metodo e \ con l'altro
 OK! ancora problemi con utf-8 se carico pkg wms--> poi va in errore
 
-Versione del 17/02/2025
+Version dated 17/02/2025
 OK! rivedere la pulizia della sezione "Output" perché ci sono situazioni (es. comandi multipli) dove pulisce ad ogni comando e non dovrebbe farlo!
 OK! problema nell'aprire i files che sono nel formato UTF-8 (v. esempio salvato su desktop)...risolto con un avviso!
     dopo aver risolto il problema sopra, va risolto il fatto che se sono in modalità UTF-8 poi non devo lasciare aprire files che sono in altra modalità!	
 OK! rividere la gestione dei files recenti perché con il menu separato non mi piace...in pratica passare ad una soluzione simile a quella di Notepad++ che è più immediata
 
-Versione del 13/02/2025
+Version dated 13/02/2025
 OK! nello script "Pulizia degli OdT Kardex" quando viene effettuato l'output a video, alcune volte non va a capo! era un problema di gestione del dbms_output!
 OK! inserita preferenza che permette di stabilire con che frequenza va controllato se il dizionario è stato aggiornato
 
-Versione del 07/02/2025
+Version dated 07/02/2025
 OK! se lancio dei comandi e ci sono errori, non esegue la pulizia dell'output anche se attivata (segnalato da Marco)
   
-Versione del 05/02/2025
+Version dated 05/02/2025
 OK! segnalato da Filippo: nell'object navigator, se attivo elenco con descrizioni e poi seleziono tabella, non si attiva l'object viewer
 OK! rivedere la gestione dei doppi apici 
 OK! implementare il seguente strumento nell'editor; posso mettere un segnalibro e poi poter navigare tra i vari segnalibri...utile per spostarsi! Da aggiungere anche come voci di menu.
@@ -349,7 +355,7 @@ OK! implementare il seguente strumento nell'editor; posso mettere un segnalibro 
 OK! modificare il funzionamento della ricerca stringhe tramite CTRL-F
 OK! se faccio CTRL+INVIO e ho del testo selezionato, eseguo direttamente istruzione del testo selezionato; in questo modo uniformo il comportamento di chi normalmente usa questo comando....
 
-Versione del 30/01/2025
+Version dated 30/01/2025
 OK! il CTRL-Invio va fatto anche con CTRL-Enter  
 OK! inserire l'opzione "Disconnetti"
 OK! quando faccio CTRL-INVIO su istruzioni che non terminano con ; succede che non sempre riesce a selezionare ultima riga istruzione, anche se poi la esegue correttamente....
@@ -362,11 +368,11 @@ OK! nel package MW_KARDEX è stata dichiarata questa funzione
    dove ogni parametro con IN è separato da un TAB; quando poi passa l'analizzatore delle funzioni, non prende bene i parametri!
    Il problema è stato segnalato da Filippo
 
-Versione del 27/01/2025
+Version dated 27/01/2025
 OK! migliorato il funzionamento del completamento con apice e doppio apice; ricalca il funzionamento di Visual Studio
 OK! corretto problema nell'object viewer riguardo la lunghezza dei campi e gestione campi di tipo integer
 
-Versione del 24/01/2025
+Version dated 24/01/2025
 OK! quando sono nell'object viewer fare menu popup sul campo della tabella in modo che sia possibile eseguire le operazioni di modify e di drop del campo di tabella; deve poi solo scrivere la rispettiva istruzione di ALTER TABLE 
 OK! nelle preferenze, quando si crea nuova riga non funziona, sia lato server che lato user
 OK! Marco ha segnalato che quando si fa CTRL+K e si è con il cursore alla fine del nome di tabella e il nome è preceduto da degli spazi, sembra che non riesca a svolgere l'operazione.
@@ -374,30 +380,30 @@ OK! Marco ha segnalato che quando si fa CTRL+K e si è con il cursore alla fine 
 OK! corretto problema grafico sull'object viewer
 OK! errore in cambio di server; ho query dove ho fatto f6, poi cambio il server e da errore di fetch
 
-Versione del 23/01/2025
+Version dated 23/01/2025
 OK! nell'object navigator sarebbe bello che quando non scelto il tipo di oggetto, il tasto destro funzioni lo stesso in base al tipo di oggetto
 
-Versione del 22/01/2025
+Version dated 22/01/2025
 OK! modificato comportamento della execute one...se non trova istruzione chiusa da ; tenta di eseguire la select della "riga" ma in questo caso non evidenzia l'istruzione eseguita
 OK! ho un output, quando cambio server, va pulito solo il result
 
-Versione del 17/01/2025
+Version dated 17/01/2025
 OK! inserito in menu "View" la voce "Mini map" che visualizza e nasconde la mini mappa
 OK! completare il menu "Edit" inserendo anche gli altri shortcut (v. editor ExCo-7.6). Inserita anche la funzione di "Indent at cursor"
 
-Versione del 16/01/2025
+Version dated 16/01/2025
 OK! quanto faccio CTRL-K viene creata istruzione ma senza tener conto correttamente del cr-lf 
 OK! vedere se possibile inserire la modalità di esecuzione istruzione tramite il CTRL-INVIO dove viene eseguita solo l'istruzione dove è posizionato il cursore (in sqltools si chiama "Execute current")
 OK! mini mappa: se clicco sulla mini mappa l'editor si deve spostare in quella posizione!
 OK! modificare il comportamento del tasto F4; se arrivati a fine testo, deve ripartire da capo
 
-Versione del 10/01/2025
+Version dated 10/01/2025
 OK! quando seleziono del testo e inizio a scrivere un apice o parentesi o altro, non si comporta correttamente!
 
-Versione del 08/01/2025
+Version dated 08/01/2025
 OK! migliorare la gestione di quando si scrive apice e fa il doppio apice....se esiste già vicino un doppio apice non deve fare nulla....	
 
-Versione del 30/12/2024
+Version dated 30/12/2024
 OK! migliorato il meccanismo tale per cui premendo F11 o F12 sul nome di una tabella, si scatena la rispettiva operazione...ora prende il nome anche nel caso in cui il cursore sia al termine della parola o che il nome di tabella sia "annegato"
 OK! se scrivo il nome di una tabella e poi premo combinazione CTRL-K  il programma cerca la chiave primaria e ne scrive la select 
 OK! nuovo tasto funzione F4 che permette di spostarsi da un'istruzione di assegnazione all'altra; utile soprattutto dopo aver fatto un CTRL-K e passare da un campo all'altro per fare assegnazioni di valori

@@ -416,6 +416,15 @@ class MyFileExtensionFilterProxyModel(QSortFilterProxyModel):
 
         return True
 
+class CompactListDelegate(QStyledItemDelegate):
+    """
+       Dopo essere passati alla versione 6.10 delle librerie PyQt, l'altezza delle righe di alcuni oggetti non era più corretta
+       Tramite questa classe si forza l'altezza desiderata
+    """
+    def sizeHint(self, option, index):
+        size = super().sizeHint(option, index)
+        size.setHeight(18)   # ← imposta qui l’altezza desiderata
+        return size
 #
 #  __  __    _    ___ _   _  __        _____ _   _ ____   _____        __
 # |  \/  |  / \  |_ _| \ | | \ \      / /_ _| \ | |  _ \ / _ \ \      / /
@@ -439,7 +448,10 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # creo oggetto settings per salvare posizione della window e delle dock
         self.settings = QSettings("Marco Valaguzza", "MSql")
         # carico interfaccia
-        self.setupUi(self)        
+        self.setupUi(self) 
+        self.oggetti_db_elenco.setItemDelegate(CompactListDelegate())       
+        self.oggetti_db_tipo_ricerca.setItemDelegate(CompactListDelegate())
+        self.oggetti_db_scelta.setItemDelegate(CompactListDelegate())
         
         # attivo il drag&drop (viene gestito per quando da esplora risorse si trascina un file sull'app)
         self.setAcceptDrops(True)        
@@ -1140,6 +1152,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # Esporto in formato Excel
             elif p_slot.objectName() == 'actionExport_to_Excel':
                 o_MSql_win2.slot_export_to_excel_csv()
+            # Esporto in formato Insert di testo
+            elif p_slot.objectName() == 'actionExport_to_Insert_format':
+                o_MSql_win2.slot_export_to_insert_format()
             # Pulizia di tutto l'output
             elif p_slot.objectName() == 'actionClear_output':                 
                 o_MSql_win2.slot_clear('ALL')    
@@ -5726,6 +5741,73 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         except:
             message_error(QCoreApplication.translate('MSql_win2','Error in file creation!'))
       
+    def slot_export_to_insert_format(self):
+        """
+           Prende i dati presenti in tabella e li esporta in formato testo come se fossero dei comandi di insert sql           
+        """
+        global v_global_work_dir
+        global o_global_preferences
+
+        # carico tutti i dati del cursore 
+        self.slot_go_to_end()
+
+        # estraggo i dati dalla tableview (se errore la tabella è vuota e quindi esco)        
+        v_model = self.o_table.model()
+        if v_model == None:
+            return None        
+
+        # creo file fisso in directory di lavoro
+        v_txt_file = open(v_global_work_dir + 'Export_data.txt','w', newline='', encoding='utf-8')
+
+        # creazione della riga intestazioni
+        v_intestazioni = ''
+        v_1a_volta = True
+        for nome_colonna in self.nomi_intestazioni:                        
+            if v_1a_volta:
+                v_intestazioni += nome_colonna            
+                v_1a_volta = False
+            else:
+                v_intestazioni += ',' + nome_colonna            
+                        
+        # Creazione di tutta la tabella                
+        for row in range(v_model.rowCount()):            
+            v_riga = 'insert into TABLE_NAME(' + v_intestazioni + ') values('        
+            v_1a_volta = True
+            v_index = 0
+            for column in range(v_model.columnCount()):
+                v_index = v_model.index(row, column)                
+                v_campo = v_model.data(v_index)
+                # campo vuoto o blob --> metto null
+                if v_campo is None or v_campo == '' or self.tipi_intestazioni[column][1] == oracledb.BLOB or self.tipi_intestazioni[column][1] == oracledb.CLOB:
+                    v_campo = 'null'
+                # campo datatime --> lo formatto in base al formato definito dalle preferenze
+                elif self.tipi_intestazioni[column][1] == oracledb.DATETIME:
+                    v_campo = "to_date('" + v_campo + "','" + da_qt_a_formato_data_oracle(o_global_preferences.date_format) + "')"
+                # campo numerico --> lo lascio cosi com'è
+                elif self.tipi_intestazioni[column][1] in (oracledb.NUMBER, oracledb.DB_TYPE_LONG):
+                    v_campo = v_campo.replace(",", ".")
+                # tutti gli altri tipi di dati --> aggiungo gli apici
+                else:
+                    v_campo = "'" + v_campo.replace("'", "''") + "'"
+                # aggiungo il campo alla riga
+                if v_1a_volta:
+                    v_riga += v_campo
+                    v_1a_volta = False
+                else:
+                    v_riga += ',' + v_campo            
+            v_txt_file.write(v_riga+');\n')
+
+        v_txt_file.close()
+        
+        # Apro direttamente il file            
+        try:
+            if os.name == "posix":
+                subprocess.Popen(["xdg-open", v_global_work_dir + 'Export_data.txt'])    
+            else:
+                os.startfile(v_global_work_dir + 'Export_data.txt')
+        except:
+            message_error(QCoreApplication.translate('MSql_win2','Error in file creation!'))    
+    
     def closeEvent(self, e):
         """
            Intercetto l'evento di chiusura del form e controllo se devo chiedere di salvare o meno
