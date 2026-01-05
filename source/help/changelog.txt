@@ -2,6 +2,9 @@
 MSql Changelog!
 ---------------
 
+Version dated 05/01/2026
+OK! Introdotto il nuovo tool "Query designer" per creare graficamente le query
+
 Version dated 19/12/2025
 OK! Aggiornamento di tutte le librerie
 
@@ -464,7 +467,7 @@ MSql TODO!!!
 - Anche il comment monoriga senza punto e virgola non funziona!
 - Segnalato da Diego....ho testo dove voglio sostituire i doppi apici con apice...fatto ricerca-modifica e faccio il trova e sostituisci ma singolo...va in ricorsione!
 - Va migliorata l'esecuzione di script che contengono comandi DDL perché ad esempio nell'esecuzione degli script Modula, nella creazione delle tabelle, si blocca nell'esecuzione completa e va usata quella passo-passo		
-- continuare con l'help 
+- Continuare con l'help 
 	
 ---------------------------------------------
 MSql Cosa è stato valutato e non realizzato!

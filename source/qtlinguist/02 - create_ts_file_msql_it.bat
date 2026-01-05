@@ -22,6 +22,7 @@ pylupdate6 --verbose ^
   ..\oracle_my_lib.py ^
   ..\preferences.py ^
   ..\preferred_sql.py ^
+	..\query_designer.py ^
   ..\utilita.py ^
   ..\utilita_database.py ^
   ..\diff_viewer.py ^

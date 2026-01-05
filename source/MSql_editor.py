@@ -449,6 +449,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         self.settings = QSettings("Marco Valaguzza", "MSql")
         # carico interfaccia
         self.setupUi(self) 
+        # imposto altezza delle liste (con il passaggio a PyQt6.10 alcune liste avevano un'altezza errata)
         self.oggetti_db_elenco.setItemDelegate(CompactListDelegate())       
         self.oggetti_db_tipo_ricerca.setItemDelegate(CompactListDelegate())
         self.oggetti_db_scelta.setItemDelegate(CompactListDelegate())
@@ -945,6 +946,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # SQLite viewer
         elif p_slot.objectName() == 'actionSQLite_viewer':
             self.slot_sqlite_viewer()
+        # Query designer
+        elif p_slot.objectName() == 'actionQuery_Designer':
+            self.slot_query_designer()
         # Calcolatrice
         elif p_slot.objectName() == 'actionCalculator':
             self.slot_calculator()
@@ -3282,6 +3286,18 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
            Evento che si scatena quando la calcolatrice viene chiusa
         """        
         self.win_calculator = None
+
+    def slot_query_designer(self):
+        """
+           Apre il query designer
+        """   
+        global v_global_connection     
+        
+        from query_designer import QueryDesigner
+
+        self.win_query_designer = QueryDesigner(v_global_connection, self.current_schema)        
+        self.win_query_designer.show()        
+        centra_window_figlia(self, self.win_query_designer)
         
 #  _     _______  _______ ____  
 # | |   | ____\ \/ / ____|  _ \ 
@@ -3517,7 +3533,10 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         super(MSql_win2_class, self).__init__()        
         # includo tutte le componenti grafiche definite nel file ui
         self.setupUi(self)
-                
+        # imposto altezza delle liste (con il passaggio a PyQt6.10 alcune liste avevano un'altezza errata)
+        self.o_find_all_result.setItemDelegate(CompactListDelegate())       
+        self.o_map.setItemDelegate(CompactListDelegate())       
+                        
         # imposto il titolo della nuova window (da notare come il nome completo dal file-editor sia annegato nel nome dell'oggetto!)        
         self.setObjectName(p_titolo)
         self.setWindowTitle(titolo_window(self.objectName()))

@@ -205,6 +205,7 @@
     <addaction name="actionObject_Viewer"/>
     <addaction name="actionFile_system"/>
     <addaction name="separator"/>
+    <addaction name="actionQuery_Designer"/>
     <addaction name="actionCalculator"/>
    </widget>
    <widget class="QMenu" name="menuView">
@@ -1818,6 +1819,15 @@
    </property>
    <property name="text">
     <string>Export to Insert format</string>
+   </property>
+  </action>
+  <action name="actionQuery_Designer">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/designer.png</normaloff>:/icons/icons/designer.png</iconset>
+   </property>
+   <property name="text">
+    <string>Query Designer</string>
    </property>
   </action>
  </widget>
