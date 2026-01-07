@@ -29,7 +29,8 @@ class OracleMetadata:
         cur.execute("""
             SELECT table_name, comments
             FROM all_tab_comments
-            WHERE owner = :s
+            WHERE owner = :s 
+              AND table_name NOT IN (SELECT object_name FROM user_recyclebin)
             ORDER BY table_name
         """, s=self.schema)
         Freccia_Mouse(False)

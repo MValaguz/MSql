@@ -241,7 +241,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         self.e_highlight_color.setCurrentText(self.preferences.highlight_color)
         self.e_author_name.setText(self.preferences.author_name)
         self.e_connection_mode.setCurrentIndex(self.preferences.connection_mode)
-        self.e_oracleclient_path.setText(self.preferences.oracleclient_path)
+        self.e_oracleclient_path.setText(self.preferences.oracleclient_path)        
 
         ###
         # preparo elenco server        
@@ -705,7 +705,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
                  'highlight_color_hex': self.e_highlight_color.currentData().name(),
                  'author_name': self.e_author_name.text(),
                  'connection_mode': self.e_connection_mode.currentIndex(),
-                 'oracleclient_path': self.e_oracleclient_path.text()
+                 'oracleclient_path': self.e_oracleclient_path.text()                 
                 }
 
 		# scrittura nel file dell'oggetto json (notare come venga usata la funzione dump senza la s finale in quanto scrive byte)

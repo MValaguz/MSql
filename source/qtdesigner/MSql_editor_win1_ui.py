@@ -740,6 +740,11 @@ class Ui_MSql_win1(object):
         icon92.addPixmap(QtGui.QPixmap("icons:designer.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         self.actionQuery_Designer.setIcon(icon92)
         self.actionQuery_Designer.setObjectName("actionQuery_Designer")
+        self.actionGitHub_Organizer = QtGui.QAction(parent=MSql_win1)
+        icon93 = QtGui.QIcon()
+        icon93.addPixmap(QtGui.QPixmap("icons:github.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        self.actionGitHub_Organizer.setIcon(icon93)
+        self.actionGitHub_Organizer.setObjectName("actionGitHub_Organizer")
         self.menuFiles.addAction(self.actionNew)
         self.menuFiles.addAction(self.actionOpen)
         self.menuFiles.addSeparator()
@@ -838,6 +843,7 @@ class Ui_MSql_win1(object):
         self.menuTools.addAction(self.actionFile_system)
         self.menuTools.addSeparator()
         self.menuTools.addAction(self.actionQuery_Designer)
+        self.menuTools.addAction(self.actionGitHub_Organizer)
         self.menuTools.addAction(self.actionCalculator)
         self.menuView.addAction(self.actionZoom_In)
         self.menuView.addAction(self.actionZoom_Out)
@@ -1126,6 +1132,7 @@ class Ui_MSql_win1(object):
         self.actionCalculator.setText(_translate("MSql_win1", "Calculator"))
         self.actionExport_to_Insert_format.setText(_translate("MSql_win1", "Export to Insert format"))
         self.actionQuery_Designer.setText(_translate("MSql_win1", "Query Designer"))
+        self.actionGitHub_Organizer.setText(_translate("MSql_win1", "GitHub Organizer"))
 from custom_widget import MyCustomTreeView
 
 

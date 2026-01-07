@@ -24,8 +24,13 @@ Package                   Version
 ------------------------- ---------
 altgraph                  0.17.5
 art                       6.5
+certifi                   2026.1.4
 cffi                      2.0.0
+charset-normalizer        3.4.4
 cryptography              46.0.3
+gitdb                     4.0.12
+GitPython                 3.1.46
+idna                      3.11
 keyboard                  0.13.5
 oracledb                  3.4.1
 packaging                 25.0
@@ -34,8 +39,11 @@ pip                       25.3
 platformdirs              4.5.1
 psutil                    7.1.3
 pycparser                 2.23
+PyGithub                  2.8.1
 pyinstaller               6.17.0
 pyinstaller-hooks-contrib 2025.10
+PyJWT                     2.10.1
+PyNaCl                    1.6.2
 PyQt6                     6.10.1
 PyQt6-Charts              6.10.0
 PyQt6-Charts-Qt6          6.10.1
@@ -44,8 +52,11 @@ PyQt6-Qt6                 6.10.1
 PyQt6_sip                 13.10.3
 pyscard                   2.3.1
 pywin32-ctypes            0.2.3
+requests                  2.32.5
 setuptools                80.9.0
+smmap                     5.0.2
 sql-formatter             0.6.2
 typing_extensions         4.15.0
+urllib3                   2.6.2
 xlrd                      2.0.2
 xlsxwriter                3.2.9

@@ -3,6 +3,7 @@ MSql Changelog!
 ---------------
 
 Version dated 05/01/2026
+OK! Introdotto il nuovo tool "GitHub Organizer" per la gestione di download e upload repository di GitHub
 OK! Introdotto il nuovo tool "Query designer" per creare graficamente le query
 
 Version dated 19/12/2025

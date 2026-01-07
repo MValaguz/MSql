@@ -22,7 +22,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="o_tab_widget">
       <property name="currentIndex">
-       <number>3</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="general">
        <attribute name="title">
@@ -31,13 +31,26 @@
        <layout class="QGridLayout" name="gridLayout_5">
         <item row="0" column="0">
          <layout class="QGridLayout" name="gridLayout_4">
-          <item row="3" column="0">
-           <widget class="QLabel" name="label">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_25">
             <property name="text">
-             <string>Default Open Directory:</string>
+             <string>Author name:</string>
             </property>
             <property name="buddy">
-             <cstring>e_default_open_dir</cstring>
+             <cstring>e_author_name</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLineEdit" name="e_author_name"/>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Default Save Directory:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_default_save_dir</cstring>
             </property>
            </widget>
           </item>
@@ -51,10 +64,13 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_3">
+          <item row="3" column="0">
+           <widget class="QLabel" name="label">
             <property name="text">
-             <string>Language:</string>
+             <string>Default Open Directory:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_default_open_dir</cstring>
             </property>
            </widget>
           </item>
@@ -66,63 +82,16 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="2">
-           <widget class="QLineEdit" name="e_default_open_dir"/>
-          </item>
           <item row="4" column="2">
            <widget class="QLineEdit" name="e_default_save_dir"/>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>Default Save Directory:</string>
-            </property>
-            <property name="buddy">
-             <cstring>e_default_save_dir</cstring>
-            </property>
-           </widget>
           </item>
           <item row="9" column="2">
            <widget class="QCheckBox" name="e_open_new_editor"/>
           </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="label_21">
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_3">
             <property name="text">
-             <string>General zoom:</string>
-            </property>
-            <property name="buddy">
-             <cstring>e_general_zoom</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="4">
-           <spacer name="horizontalSpacer_3">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="9" column="0">
-           <widget class="QLabel" name="label_23">
-            <property name="text">
-             <string>Open new editor at open:</string>
-            </property>
-            <property name="buddy">
-             <cstring>e_open_new_editor</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="3">
-           <widget class="QPushButton" name="b_default_open_dir">
-            <property name="icon">
-             <iconset resource="resource.qrc">
-              <normaloff>:/icons/icons/folder.png</normaloff>:/icons/icons/folder.png</iconset>
+             <string>Language:</string>
             </property>
            </widget>
           </item>
@@ -136,6 +105,17 @@
             </property>
            </widget>
           </item>
+          <item row="3" column="3">
+           <widget class="QPushButton" name="b_default_open_dir">
+            <property name="icon">
+             <iconset resource="resource.qrc">
+              <normaloff>:/icons/icons/folder.png</normaloff>:/icons/icons/folder.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2">
+           <widget class="QLineEdit" name="e_default_open_dir"/>
+          </item>
           <item row="1" column="2">
            <widget class="QCheckBox" name="e_dark_theme">
             <property name="text">
@@ -143,22 +123,41 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="2">
-           <widget class="QComboBox" name="e_language">
-            <item>
-             <property name="text">
-              <string notr="true">English</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string notr="true">Italian</string>
-             </property>
-            </item>
+          <item row="9" column="0">
+           <widget class="QLabel" name="label_23">
+            <property name="text">
+             <string>Open new editor at open:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_open_new_editor</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_21">
+            <property name="text">
+             <string>General zoom:</string>
+            </property>
+            <property name="buddy">
+             <cstring>e_general_zoom</cstring>
+            </property>
            </widget>
           </item>
           <item row="6" column="2">
            <widget class="QCheckBox" name="e_remember_window_pos"/>
+          </item>
+          <item row="3" column="4">
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
           <item row="5" column="2">
            <widget class="QSpinBox" name="e_general_zoom">
@@ -176,18 +175,19 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_25">
-            <property name="text">
-             <string>Author name:</string>
-            </property>
-            <property name="buddy">
-             <cstring>e_author_name</cstring>
-            </property>
+          <item row="2" column="2">
+           <widget class="QComboBox" name="e_language">
+            <item>
+             <property name="text">
+              <string notr="true">English</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string notr="true">Italian</string>
+             </property>
+            </item>
            </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QLineEdit" name="e_author_name"/>
           </item>
          </layout>
         </item>
