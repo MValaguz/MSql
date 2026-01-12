@@ -22,7 +22,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="o_tab_widget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="general">
        <attribute name="title">
@@ -767,6 +767,27 @@
            </layout>
           </widget>
          </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="github">
+       <attribute name="title">
+        <string notr="true">GitHub</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_9">
+        <item row="0" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout_8">
+          <item>
+           <widget class="QLabel" name="label_27">
+            <property name="text">
+             <string>GitHub OAuth Apps CLIENT ID:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="e_github_client_id"/>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>

@@ -353,6 +353,20 @@ class Ui_preferences_window(object):
         self.verticalLayout_2.addWidget(self.o_users)
         self.gridLayout.addWidget(self.splitter, 2, 0, 1, 1)
         self.o_tab_widget.addTab(self.connections, "")
+        self.github = QtWidgets.QWidget()
+        self.github.setObjectName("github")
+        self.gridLayout_9 = QtWidgets.QGridLayout(self.github)
+        self.gridLayout_9.setObjectName("gridLayout_9")
+        self.horizontalLayout_8 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_8.setObjectName("horizontalLayout_8")
+        self.label_27 = QtWidgets.QLabel(parent=self.github)
+        self.label_27.setObjectName("label_27")
+        self.horizontalLayout_8.addWidget(self.label_27)
+        self.e_github_client_id = QtWidgets.QLineEdit(parent=self.github)
+        self.e_github_client_id.setObjectName("e_github_client_id")
+        self.horizontalLayout_8.addWidget(self.e_github_client_id)
+        self.gridLayout_9.addLayout(self.horizontalLayout_8, 0, 0, 1, 1)
+        self.o_tab_widget.addTab(self.github, "GitHub")
         self.gridLayout_3.addWidget(self.o_tab_widget, 0, 0, 1, 1)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
@@ -402,7 +416,7 @@ class Ui_preferences_window(object):
         self.label_14.setBuddy(self.o_users)
 
         self.retranslateUi(preferences_window)
-        self.o_tab_widget.setCurrentIndex(0)
+        self.o_tab_widget.setCurrentIndex(4)
         self.b_default_open_dir.clicked.connect(preferences_window.slot_b_default_open_dir) # type: ignore
         self.b_default_save_dir.clicked.connect(preferences_window.slot_b_default_save_dir) # type: ignore
         self.b_save.clicked.connect(preferences_window.slot_b_save) # type: ignore
@@ -511,6 +525,7 @@ class Ui_preferences_window(object):
         self.b_user_add.setToolTip(_translate("preferences_window", "Add user"))
         self.b_user_remove.setToolTip(_translate("preferences_window", "Remove selected user"))
         self.o_tab_widget.setTabText(self.o_tab_widget.indexOf(self.connections), _translate("preferences_window", "Connections"))
+        self.label_27.setText(_translate("preferences_window", "GitHub OAuth Apps CLIENT ID:"))
         self.b_restore.setText(_translate("preferences_window", "Restore default"))
         self.b_open_pref_dir.setText(_translate("preferences_window", "Open pref. dir"))
         self.b_save.setText(_translate("preferences_window", "Save"))

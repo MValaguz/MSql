@@ -3305,11 +3305,17 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
     def slot_github_organizer(self):
         """
            Apre il gestore repository GitHub
-        """           
+        """                   
         from github_organizer import GitHubWidget
+        global o_global_preferences
+
+        # controllo che sia stato impostato il client id nelle preferenze
+        if o_global_preferences.github_client_id == '':
+            message_error(QCoreApplication.translate('MSql_win1','GitHub Client ID not set in preferences!'))
+            return 'ko' 
 
         # apro organizer di github passando id applicazione
-        self.win_github_organizer = GitHubWidget('Ov23liLFxf8twrzppVYn')        
+        self.win_github_organizer = GitHubWidget(o_global_preferences.github_client_id)        
         self.win_github_organizer.show()        
         centra_window_figlia(self, self.win_github_organizer)
         

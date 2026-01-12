@@ -2,6 +2,10 @@
 MSql Changelog!
 ---------------
 
+Version dated 12/01/2026
+OK! A seguito rallentamenti nell'editor dovuti al fatto che il dizionario di autocompletamento si caricava anche di tutti i nomi di colonna delle tabelle,
+    inserita nuova opzione in "Crea dizionario autocompletamento" che permette di non aggiungere le colonne; opzione che di default non è fleggata
+
 Version dated 05/01/2026
 OK! Introdotto il nuovo tool "GitHub Organizer" per la gestione di download e upload repository di GitHub
 OK! Introdotto il nuovo tool "Query designer" per creare graficamente le query
@@ -465,6 +469,7 @@ OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e part
 -------------
 MSql TODO!!!
 -------------
+- Aggiungere una dock detta di oggetti preferiti che permette di inserire package, procedure e funzioni per una più facile consultazione...ma ha senso???
 - Anche il comment monoriga senza punto e virgola non funziona!
 - Segnalato da Diego....ho testo dove voglio sostituire i doppi apici con apice...fatto ricerca-modifica e faccio il trova e sostituisci ma singolo...va in ricorsione!
 - Va migliorata l'esecuzione di script che contengono comandi DDL perché ad esempio nell'esecuzione degli script Modula, nella creazione delle tabelle, si blocca nell'esecuzione completa e va usata quella passo-passo		

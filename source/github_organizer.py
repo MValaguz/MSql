@@ -350,6 +350,7 @@ class GitHubWidget(QWidget):
 # ============================================================
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    w = GitHubWidget("Ov23liLFxf8twrzppVYn")
+    # va passato id del client GitHub OAuth che però è nelle preferenza di MSql!!!!
+    w = GitHubWidget("")
     w.show()
     sys.exit(app.exec())

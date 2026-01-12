@@ -145,8 +145,12 @@ class create_autocomplete_dic_class(QMainWindow, Ui_create_autocomplete_dic_wind
 
         # richiesto di analizzare tabelle e viste
         if self.e_analyze_2.isChecked():
-            # elenco di tutti gli oggetti funzioni, procedure e package
-            self.oracle_cursor.execute("SELECT TABLE_NAME || '.' || COLUMN_NAME AS TESTO FROM ALL_TAB_COLUMNS WHERE OWNER='" + self.owner + "' ORDER BY TABLE_NAME, COLUMN_ID")
+            # elenco di tutte le tabelle/colonne
+            if self.e_columns.isChecked():
+                self.oracle_cursor.execute("SELECT TABLE_NAME || '.' || COLUMN_NAME AS TESTO FROM ALL_TAB_COLUMNS WHERE OWNER='" + self.owner + "' ORDER BY TABLE_NAME, COLUMN_ID")
+            # elenco delle sole viste e tabelle
+            else:
+                self.oracle_cursor.execute("SELECT OBJECT_NAME FROM ALL_OBJECTS WHERE OWNER = '" + self.owner + "' AND OBJECT_TYPE IN ('TABLE','VIEW') ORDER BY OBJECT_NAME")
             v_elenco_campi = self.oracle_cursor.fetchall()
             # visualizzo barra di avanzamento e se richiesto interrompo
             v_counter += 1

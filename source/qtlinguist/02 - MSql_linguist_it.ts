@@ -4,22 +4,22 @@
 <context>
     <name>GitFileListDialog</name>
     <message>
-        <location filename="../github_organizer.py" line="33"/>
+        <location filename="../github_organizer.py" line="37"/>
         <source>Modified files</source>
         <translation>File modificati</translation>
     </message>
     <message>
-        <location filename="../github_organizer.py" line="38"/>
+        <location filename="../github_organizer.py" line="42"/>
         <source>The following files will be included in the commit:</source>
         <translation>I seguenti file sono stati modificati e verranno inclusi nella commit:</translation>
     </message>
     <message>
-        <location filename="../github_organizer.py" line="48"/>
+        <location filename="../github_organizer.py" line="52"/>
         <source>Confirm commit</source>
         <translation>Conferma la commit</translation>
     </message>
     <message>
-        <location filename="../github_organizer.py" line="49"/>
+        <location filename="../github_organizer.py" line="53"/>
         <source>Cancel</source>
         <translation>Annulla</translation>
     </message>
@@ -27,133 +27,141 @@
 <context>
     <name>GitHubWidget</name>
     <message>
-        <location filename="../github_organizer.py" line="69"/>
-        <source>Invalid GitHub token</source>
-        <translation>Token GitHub non valido o assente</translation>
-    </message>
-    <message>
-        <location filename="../github_organizer.py" line="74"/>
+        <location filename="../github_organizer.py" line="127"/>
         <source>GitHub Organizer</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../github_organizer.py" line="90"/>
-        <source>GitHub repositories:</source>
-        <translation></translation>
+        <location filename="../github_organizer.py" line="145"/>
+        <source>Search repository...</source>
+        <translation>Ricerca repository...</translation>
     </message>
     <message>
-        <location filename="../github_organizer.py" line="98"/>
-        <source>Refresh list</source>
-        <translation>Aggiorna lista</translation>
+        <location filename="../github_organizer.py" line="153"/>
+        <source>Refresh</source>
+        <translation>Aggiorna</translation>
     </message>
     <message>
-        <location filename="../github_organizer.py" line="99"/>
+        <location filename="../github_organizer.py" line="154"/>
         <source>Download</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../github_organizer.py" line="100"/>
+        <location filename="../github_organizer.py" line="155"/>
         <source>Upload</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../github_organizer.py" line="132"/>
+        <location filename="../github_organizer.py" line="212"/>
+        <source>GitHub Login</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../github_organizer.py" line="254"/>
         <source>GitHub error</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../github_organizer.py" line="140"/>
-        <source>Warning</source>
-        <translation>Attenzione</translation>
+        <location filename="../github_organizer.py" line="282"/>
+        <source>Select folder</source>
+        <translation>Seleziona cartella</translation>
     </message>
     <message>
-        <location filename="../github_organizer.py" line="140"/>
-        <source>Select a repository</source>
-        <translation>Seleziona un repository</translation>
-    </message>
-    <message>
-        <location filename="../github_organizer.py" line="148"/>
-        <source>Select destination folder</source>
-        <translation>Seleziona una cartella di destinazione</translation>
-    </message>
-    <message>
-        <location filename="../github_organizer.py" line="224"/>
-        <location filename="../github_organizer.py" line="163"/>
-        <location filename="../github_organizer.py" line="159"/>
-        <source>OK</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../github_organizer.py" line="159"/>
-        <source>Repository cloned</source>
-        <translation>Il repository è stato clonato</translation>
-    </message>
-    <message>
-        <location filename="../github_organizer.py" line="163"/>
-        <source>Repository updated (pull)</source>
-        <translation>Repository aggiornato (pull)</translation>
-    </message>
-    <message>
-        <location filename="../github_organizer.py" line="226"/>
-        <location filename="../github_organizer.py" line="168"/>
+        <location filename="../github_organizer.py" line="337"/>
+        <location filename="../github_organizer.py" line="297"/>
         <source>Git error</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../github_organizer.py" line="182"/>
-        <source>Select local repository</source>
-        <translation>Seleziona la posizione cartella locale dove è il repository</translation>
+        <location filename="../github_organizer.py" line="310"/>
+        <source>Select repository</source>
+        <translation>Seleziona repository</translation>
     </message>
     <message>
-        <location filename="../github_organizer.py" line="194"/>
-        <location filename="../github_organizer.py" line="190"/>
+        <location filename="../github_organizer.py" line="317"/>
         <source>Error</source>
         <translation>Errore</translation>
     </message>
     <message>
-        <location filename="../github_organizer.py" line="190"/>
-        <source>The selected folder is not a Git repository</source>
-        <translation>La cartella selezionata non è un repository di tipo Git</translation>
+        <location filename="../github_organizer.py" line="317"/>
+        <source>Not a Git repository</source>
+        <translation>Questo non è un repository di tipo Git</translation>
     </message>
     <message>
-        <location filename="../github_organizer.py" line="194"/>
-        <source>Remote &apos;origin&apos; not found</source>
-        <translation>L&apos;origine remota non è stata trovata</translation>
-    </message>
-    <message>
-        <location filename="../github_organizer.py" line="200"/>
-        <source>Upload blocked</source>
-        <translation>Upload bloccato</translation>
-    </message>
-    <message>
-        <location filename="../github_organizer.py" line="201"/>
-        <source>The local repository does NOT match the selected one.</source>
-        <translation>Il repository locale NON corrisponde con quello che hai selezionato.</translation>
-    </message>
-    <message>
-        <location filename="../github_organizer.py" line="207"/>
+        <location filename="../github_organizer.py" line="322"/>
         <source>Info</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../github_organizer.py" line="207"/>
-        <source>No changes to upload</source>
-        <translation>Nessuna modifica da caricare</translation>
+        <location filename="../github_organizer.py" line="322"/>
+        <source>No changes</source>
+        <translation>Nessuna modifica rilevata</translation>
     </message>
     <message>
-        <location filename="../github_organizer.py" line="215"/>
-        <source>Commit message</source>
+        <location filename="../github_organizer.py" line="328"/>
+        <source>Commit</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../github_organizer.py" line="215"/>
+        <location filename="../github_organizer.py" line="328"/>
         <source>Commit message:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../github_organizer.py" line="224"/>
+        <source>Invalid GitHub token</source>
+        <translation type="vanished">Token GitHub non valido o assente</translation>
+    </message>
+    <message>
+        <source>Refresh list</source>
+        <translation type="vanished">Aggiorna lista</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation type="vanished">Attenzione</translation>
+    </message>
+    <message>
+        <source>Select a repository</source>
+        <translation type="vanished">Seleziona un repository</translation>
+    </message>
+    <message>
+        <source>Select destination folder</source>
+        <translation type="vanished">Seleziona una cartella di destinazione</translation>
+    </message>
+    <message>
+        <source>Repository cloned</source>
+        <translation type="vanished">Il repository è stato clonato</translation>
+    </message>
+    <message>
+        <source>Repository updated (pull)</source>
+        <translation type="vanished">Repository aggiornato (pull)</translation>
+    </message>
+    <message>
+        <source>Select local repository</source>
+        <translation type="vanished">Seleziona la posizione cartella locale dove è il repository</translation>
+    </message>
+    <message>
+        <source>The selected folder is not a Git repository</source>
+        <translation type="vanished">La cartella selezionata non è un repository di tipo Git</translation>
+    </message>
+    <message>
+        <source>Remote &apos;origin&apos; not found</source>
+        <translation type="vanished">L&apos;origine remota non è stata trovata</translation>
+    </message>
+    <message>
+        <source>Upload blocked</source>
+        <translation type="vanished">Upload bloccato</translation>
+    </message>
+    <message>
+        <source>The local repository does NOT match the selected one.</source>
+        <translation type="vanished">Il repository locale NON corrisponde con quello che hai selezionato.</translation>
+    </message>
+    <message>
+        <source>No changes to upload</source>
+        <translation type="vanished">Nessuna modifica da caricare</translation>
+    </message>
+    <message>
         <source>Upload completed</source>
-        <translation>Upload completato</translation>
+        <translation type="vanished">Upload completato</translation>
     </message>
 </context>
 <context>
@@ -1034,7 +1042,7 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6981"/>
+        <location filename="../MSql_editor.py" line="6986"/>
         <location filename="../MSql_editor.py" line="529"/>
         <source>Last execution time:</source>
         <translation>Tempo ultima esecuzione:</translation>
@@ -1045,13 +1053,13 @@
         <translation>Connesso a:</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6936"/>
+        <location filename="../MSql_editor.py" line="6941"/>
         <location filename="../MSql_editor.py" line="546"/>
         <source>Lines:</source>
         <translation>Righe:</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6936"/>
+        <location filename="../MSql_editor.py" line="6941"/>
         <location filename="../MSql_editor.py" line="546"/>
         <source>Length:</source>
         <translation>Caratteri:</translation>
@@ -1281,32 +1289,37 @@
         <translation>Nessuna connessione al database!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6421"/>
+        <location filename="../MSql_editor.py" line="3314"/>
+        <source>GitHub Client ID not set in preferences!</source>
+        <translation>Manca il Client ID nelle preferenze!</translation>
+    </message>
+    <message>
+        <location filename="../MSql_editor.py" line="6426"/>
         <source>Select the text that includes the declaration of a PL-SQL function-procedure to obtain a comment reporting: Author, Creation date, Description and input-output parameters</source>
         <translation>Selezionare il testo che comprende la dichiarazione di una funzione-procedura PL-SQL per ottenere un commento riportante: Autore, Data creazione, Descrizione e parametri input-output</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6480"/>
+        <location filename="../MSql_editor.py" line="6485"/>
         <source>No text selected!</source>
         <translation>Nessun testo selezionato!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6944"/>
+        <location filename="../MSql_editor.py" line="6949"/>
         <source>Overwrite</source>
         <translation>Sovrascrittura</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6946"/>
+        <location filename="../MSql_editor.py" line="6951"/>
         <source>Insert</source>
         <translation>Inserimento</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="7011"/>
+        <location filename="../MSql_editor.py" line="7016"/>
         <source>OPEN_FROM_SIM</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="7118"/>
+        <location filename="../MSql_editor.py" line="7123"/>
         <source>A new version of MSql Editor is aviable! Please go to O:\Install\MSql_setup and install it! Once installed, don&apos;t forget to check the changelog to see what&apos;s new!</source>
         <translation>E&apos; disponibile una nuova versione di MSql! Vai in O:\Install\MSql_setup e procedi con l&apos;installazione. Una volta avviato MSql, non dimenticarti di leggere gli aggiornamenti dal menu di Aiuto!</translation>
     </message>
@@ -1461,108 +1474,108 @@
         <translation>Sostituisci tutto</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="4203"/>
-        <location filename="../MSql_editor.py" line="4192"/>
+        <location filename="../MSql_editor.py" line="4208"/>
+        <location filename="../MSql_editor.py" line="4197"/>
         <source>Error blob fetching using the statement:</source>
         <translation>Errore nel recuperare il campo di tipo blob usanto l&apos;istruzione:</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="4212"/>
+        <location filename="../MSql_editor.py" line="4217"/>
         <source>You must select a blob cell!</source>
         <translation>Devi selezionare una cella con un dato di tipo blob!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="4227"/>
+        <location filename="../MSql_editor.py" line="4232"/>
         <source>Blob downloaded in Downloads directory of your PC!</source>
         <translation>Il blob è stato scaricato nella cartella Downloads del tuo PC!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="4506"/>
+        <location filename="../MSql_editor.py" line="4511"/>
         <source>No PK found!</source>
         <translation>Non trovato la PK!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="4577"/>
+        <location filename="../MSql_editor.py" line="4582"/>
         <source>No FK found!</source>
         <translation>Non trovata la FK!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="4939"/>
+        <location filename="../MSql_editor.py" line="4944"/>
         <source>No instruction!</source>
         <translation>Nessuna istruzione!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="5102"/>
+        <location filename="../MSql_editor.py" line="5107"/>
         <source>No statement found!</source>
         <translation>Nessun blocco istruzioni trovato!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="5193"/>
+        <location filename="../MSql_editor.py" line="5198"/>
         <source>No script!</source>
         <translation>Nessuno script!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="5208"/>
+        <location filename="../MSql_editor.py" line="5213"/>
         <source>Are you sure to confirm this command?</source>
         <translation>Sei sicuro di confermare questo comando?</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="5501"/>
+        <location filename="../MSql_editor.py" line="5506"/>
         <source>Error to fetch data:</source>
         <translation>Errore nel recuperare i dati:</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="5843"/>
-        <location filename="../MSql_editor.py" line="5776"/>
+        <location filename="../MSql_editor.py" line="5848"/>
+        <location filename="../MSql_editor.py" line="5781"/>
         <source>Error in file creation!</source>
         <translation>Errore durante la creazione del file!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="5893"/>
+        <location filename="../MSql_editor.py" line="5898"/>
         <source>The document</source>
         <translation>Il documento</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="5893"/>
+        <location filename="../MSql_editor.py" line="5898"/>
         <source>was modified.</source>
         <translation>è stato modificato.</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="5893"/>
+        <location filename="../MSql_editor.py" line="5898"/>
         <source>Do you want to save changes?</source>
         <translation>Vuoi salvare le modifiche?</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6193"/>
-        <location filename="../MSql_editor.py" line="6164"/>
-        <location filename="../MSql_editor.py" line="6133"/>
+        <location filename="../MSql_editor.py" line="6198"/>
+        <location filename="../MSql_editor.py" line="6169"/>
+        <location filename="../MSql_editor.py" line="6138"/>
         <source>Passed the end of file!</source>
         <translation>Arrivati alla fine del file!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6193"/>
-        <location filename="../MSql_editor.py" line="6164"/>
-        <location filename="../MSql_editor.py" line="6133"/>
+        <location filename="../MSql_editor.py" line="6198"/>
+        <location filename="../MSql_editor.py" line="6169"/>
+        <location filename="../MSql_editor.py" line="6138"/>
         <source>Move to the beginnig?</source>
         <translation>Vuoi andare all&apos;inizio del file?</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6244"/>
+        <location filename="../MSql_editor.py" line="6249"/>
         <source>Insert a valid number!</source>
         <translation>Inserisci un numero valido!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6345"/>
+        <location filename="../MSql_editor.py" line="6350"/>
         <source>Please select a text with SQL statement!</source>
         <translation>Seleziona un testo che contiene un&apos;istruzione di SQL valida!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6676"/>
+        <location filename="../MSql_editor.py" line="6681"/>
         <source>End of file! Move to beginning!</source>
         <translation>Fine del file! La ricerca riparte dall&apos;inizio!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6840"/>
+        <location filename="../MSql_editor.py" line="6845"/>
         <source>Unrecognized type</source>
         <translation>Tipo non riconosciuto</translation>
     </message>
@@ -1671,7 +1684,7 @@
 <context>
     <name>crate_autocomplete</name>
     <message>
-        <location filename="../create_autocomplete_dic.py" line="160"/>
+        <location filename="../create_autocomplete_dic.py" line="164"/>
         <source>The autocompletion dictionary has been created! Restart MSql to see the changes ;-)</source>
         <translation>Il dizionario di autocompletamento è stato creato! Riavvia MSql per applicare i cambiamenti ;-)</translation>
     </message>
@@ -1710,6 +1723,11 @@
         <location filename="../qtdesigner/create_autocomplete_dic_ui.ui" line="0"/>
         <source>Analyze tables and views</source>
         <translation>Analizza tabelle e viste</translation>
+    </message>
+    <message>
+        <location filename="../qtdesigner/create_autocomplete_dic_ui.ui" line="0"/>
+        <source>Add table and views columns</source>
+        <translation>Includi  anche i nomi di colonna</translation>
     </message>
     <message>
         <location filename="../qtdesigner/create_autocomplete_dic_ui.ui" line="0"/>
@@ -2097,6 +2115,11 @@
     </message>
     <message>
         <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
+        <source>Default Save Directory:</source>
+        <translation>Cartella di default per il salvataggio:</translation>
+    </message>
+    <message>
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Remember window position:</source>
         <translation>Ricorda la posizione della window:</translation>
     </message>
@@ -2104,11 +2127,6 @@
         <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Default Open Directory:</source>
         <translation>Cartella di default di apertura files:</translation>
-    </message>
-    <message>
-        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
-        <source>Default Save Directory:</source>
-        <translation>Cartella di default per il salvataggio:</translation>
     </message>
     <message>
         <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
@@ -2122,18 +2140,13 @@
     </message>
     <message>
         <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
-        <source>General zoom:</source>
-        <translation>Zoom generale applicazione:</translation>
-    </message>
-    <message>
-        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Open new editor at open:</source>
         <translation>Apri un nuovo editor all&apos;avvio:</translation>
     </message>
     <message>
         <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
-        <source>GitHub token:</source>
-        <translation></translation>
+        <source>General zoom:</source>
+        <translation>Zoom generale applicazione:</translation>
     </message>
     <message>
         <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
@@ -2329,6 +2342,11 @@
         <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Remove selected user</source>
         <translation>Rimuovi utente selezionato</translation>
+    </message>
+    <message>
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
+        <source>GitHub OAuth Apps CLIENT ID:</source>
+        <translation></translation>
     </message>
     <message>
         <location filename="../qtdesigner/preferences_ui.ui" line="0"/>

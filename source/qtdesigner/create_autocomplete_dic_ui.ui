@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>341</width>
-    <height>169</height>
+    <width>353</width>
+    <height>176</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -47,51 +47,52 @@
         <property name="title">
          <string>Objects selector:</string>
         </property>
-        <widget class="QWidget" name="">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>23</y>
-           <width>235</width>
-           <height>65</height>
-          </rect>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_2">
-          <item>
-           <widget class="QCheckBox" name="e_analyze_1">
-            <property name="text">
-             <string>Analyze function, procedures and packages</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="e_analyze_2">
-            <property name="text">
-             <string>Analyze tables and views</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="e_analyze_3">
-            <property name="toolTip">
-             <string/>
-            </property>
-            <property name="text">
-             <string>Analyze Apex objects</string>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="e_analyze_1">
+           <property name="text">
+            <string>Analyze function, procedures and packages</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <widget class="QCheckBox" name="e_analyze_2">
+             <property name="text">
+              <string>Analyze tables and views</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="e_columns">
+             <property name="text">
+              <string>Add table and views columns</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="2" column="0">
+          <widget class="QCheckBox" name="e_analyze_3">
+           <property name="toolTip">
+            <string/>
+           </property>
+           <property name="text">
+            <string>Analyze Apex objects</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>
