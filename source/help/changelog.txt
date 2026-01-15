@@ -500,4 +500,4 @@ KO! -chatgpt; si è valutato di inserire chat con chatgpt o copilot ma è emerso
      questa possibilità e poi valutare cosa si può fare sia a livello di chat che a livello che selezione del codice e poi lo do in pasto a chatgpt per un controllo-modifica
 	 Per fare queste prove meglio creare un ambiente virtuale Python in quanto le libreria openai "sporcano" i package
 KO! -implementare il ctag https://qscintilla.com/#ctags/ctags_intro o molto più semplicemente l'hotspot che potrebbe permettere di creare dei link alle procedure/funzioni dentro se presenti nell'editor aperto....
-KO! - Valutaro di creare l'help con lo strumento di qt ma abbandonato perché di fatto troppo complicato da scrivere....al momento fatto documento .odt
+KO! -Valutaro di creare l'help con lo strumento di qt ma abbandonato perché di fatto troppo complicato da scrivere....al momento fatto documento .odt
