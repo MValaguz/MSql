@@ -1530,6 +1530,16 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 # ...e chiudo eventuale cursore attualmente presente
                 if obj_win2.v_cursor is not None:
                     obj_win2.v_cursor.close()
+
+        # lo schema corrente viene preso da eventuali preferenze di connessione e se non valorizzato...
+        if self.e_current_schema != '':
+            self.current_schema = self.e_current_schema
+        # prevale eventuale presenza del proxy
+        elif self.e_user_proxy != '':
+            self.current_schema = self.e_user_proxy
+        # oppure lo schema corrente è l'user usato per la connessione
+        else:
+            self.current_schema = self.e_user_name
                                     
         # apro connessione
         try:
@@ -1569,16 +1579,6 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # sulla statusbar, aggiorno la label della connessione (notare come se possibile venga mostrato il titolo dato dall'utente al server nella sezione preferiti)
         self.l_connection.setText(QCoreApplication.translate('MSql_win1','Connected to:') + ' ' + v_server_title + "/" + v_user_connect)     
         self.l_connection.setStyleSheet('background-color: ' + v_global_color + ';color: "' + v_global_background + '";')              
-
-        # lo schema corrente viene preso da eventuali preferenze di connessione e se non valorizzato...
-        if self.e_current_schema != '':
-            self.current_schema = self.e_current_schema
-        # prevale eventuale presenza del proxy
-        elif self.e_user_proxy != '':
-            self.current_schema = self.e_user_proxy
-        # oppure lo schema corrente è l'user usato per la connessione
-        else:
-            self.current_schema = self.e_user_name
 
         # se la connessione è andata a buon fine, richiedo elenco degli oggetti in modo da aggiornare il dizionario dell'editor con nuove parole chiave
         # in questa sezione viene caricata la lista v_global_my_lexer_keywords con tutti i nomi di tabelle, viste, procedure, ecc.
@@ -5033,6 +5033,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 self.link_to_MSql_win1_class.e_password = v_parametri["e_password"]
                 self.link_to_MSql_win1_class.e_server_name = v_parametri["e_server_name"]
                 self.link_to_MSql_win1_class.e_user_mode = v_parametri["e_user_mode"]
+                self.link_to_MSql_win1_class.e_current_schema = v_parametri["e_user_name"]
                 self.link_to_MSql_win1_class.slot_connect()
             # inizio select, insert, update, delete.... multiriga            
             elif v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','ALTER','WITH'):

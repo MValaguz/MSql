@@ -2,6 +2,9 @@
 MSql Changelog!
 ---------------
 
+Version dated 19/01/2026
+OK! Correzione problema che dopo un'istruzione CONNECT lo schema rimaneva "fermo" al precedente, creando errori del tipo "Privilegi insufficienti"
+
 Version dated 12/01/2026
 OK! A seguito rallentamenti nell'editor dovuti al fatto che il dizionario di autocompletamento si caricava anche di tutti i nomi di colonna delle tabelle,
     inserita nuova opzione in "Crea dizionario autocompletamento" che permette di non aggiungere le colonne; opzione che di default non è fleggata
