@@ -480,7 +480,7 @@ def table_exists_sqlite(p_cursor,
     else:
         return False       
 
-def write_sql_history(p_db_name, p_testo, p_time_in_seconds):
+def write_sql_history(p_db_name, p_testo, p_time_in_seconds, p_tipo='SQL'):
     """
        Usata per scrivere dentro un db SQLite tabella HISTORY, l'istruzione l'sql
        Il parametro p_tipo, indica il tipo (istruzione sql, comandi ddl, codice pl-sql)
@@ -497,20 +497,24 @@ def write_sql_history(p_db_name, p_testo, p_time_in_seconds):
                                        EXEC_TIME  REAL
                               )""")             
         try:
-            v_curs.execute("""INSERT INTO SQL_HISTORY(TIPO,ORARIO,ISTRUZIONE,EXEC_TIME) VALUES(?,?,?,?)""", ('SQL', datetime.datetime.now(), p_testo, p_time_in_seconds) )
+            v_curs.execute("""INSERT INTO SQL_HISTORY(TIPO,ORARIO,ISTRUZIONE,EXEC_TIME) VALUES(?,?,?,?)""", (p_tipo, datetime.datetime.now(), p_testo, p_time_in_seconds) )
             v_conn.commit()
         except sqlite3.OperationalError:
             message_error(QCoreApplication.translate('utilita_database','Error while writing in history log!') + chr(10) + QCoreApplication.translate('utilita_database','Probably the file MSql.db is locked!'))        
                 
         v_conn.close()    
     
-def purge_sql_history(p_db_name):
+def purge_sql_history(p_db_name, p_date_start, p_date_end):
     """
        Elimina la tabella history
     """
     v_conn = sqlite3.connect(database=p_db_name)
-    v_curs = v_conn.cursor()
-    v_curs.execute('DROP TABLE IF EXISTS SQL_HISTORY')        
+    v_curs = v_conn.cursor()    
+    # elimino i record compresi tra le due date
+    v_curs.execute("DELETE FROM SQL_HISTORY WHERE strftime('%Y/%m/%d',ORARIO) BETWEEN ? AND ?", (p_date_start, p_date_end))        
+    v_conn.commit()
+    # eseguo il vacuum per recuperare spazio disco
+    v_conn.execute("VACUUM;")
     v_conn.close()
 
 def write_files_history(p_db_name, p_file_name, p_pos_y, p_pos_x):

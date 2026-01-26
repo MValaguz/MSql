@@ -2968,8 +2968,8 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
 
         try:
             # visualizzo la finestra di ricerca
-            self.dialog_history.show()            
-            self.dialog_history.activateWindow()             
+            self.win_history.show()            
+            self.win_history.activateWindow()             
         except:
             # inizializzo le strutture grafiche e visualizzo la dialog 
             self.win_history = history_class(v_global_work_dir+'MSql.db')        
@@ -2984,7 +2984,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         """       
         # prendo indice dalla tabella (in pratica la cella che contiene l'id della riga dell'history)
         try:
-            index = self.win_history.o_lst1.selectedIndexes()[3]           
+            index = self.win_history.o_lst1.selectedIndexes()[4]           
         except:
             message_error(QCoreApplication.translate('MSql_win1','Select a row!'))
             return 'ko'
@@ -2997,7 +2997,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             if o_MSql_win2.setting_eol == 'W' and '\r\n' not in v_risultato:
                 v_risultato = v_risultato.replace('\n', '\r\n')                                    
 
-            o_MSql_win2.e_sql.insert(v_risultato)        
+            o_MSql_win2.e_sql.append(v_risultato)        
 
     def slot_preferred_sql(self):
         """
@@ -3527,7 +3527,6 @@ class My_MSql_Lexer(QsciLexerSQL):
            E' stato molto difficile trovare questa cosa!!!
         """
         return ['.']
-
 
 #
 #  _____ ____ ___ _____ ___  ____  
@@ -5264,9 +5263,9 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             if self.v_oracle_executer.get_status() == 'END_JOB_OK':                   
                 # calcolo tempo esecuzione e aggiorno a video            
                 v_global_exec_time = (datetime.datetime.now() - v_start_time).total_seconds()
-                self.aggiorna_statusbar()
-                # aggiungo l'istruzione all'history                            
-                write_sql_history(v_global_work_dir+'MSql.db',self.v_plsql_corrente,v_global_exec_time)                   
+                self.aggiorna_statusbar()                
+                # aggiungo l'istruzione all'history (nel campo tipo ci metto il nome server e il nome utente)                                  
+                write_sql_history(v_global_work_dir+'MSql.db',self.v_plsql_corrente,v_global_exec_time,self.link_to_MSql_win1_class.e_server_name + '-' + self.link_to_MSql_win1_class.e_user_name)                    
                 # conto record
                 v_tot_record = self.v_cursor.rowcount
                 self.v_esecuzione_ok = True            
@@ -5428,8 +5427,8 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 # calcolo tempo esecuzione e aggiorno a video            
                 v_global_exec_time = (datetime.datetime.now() - v_start_time).total_seconds()
                 self.aggiorna_statusbar()
-                # aggiungo l'istruzione all'history            
-                write_sql_history(v_global_work_dir+'MSql.db',self.v_select_corrente,v_global_exec_time)                   
+                # aggiungo l'istruzione all'history (nel campo tipo ci metto il nome server e il nome utente)                  
+                write_sql_history(v_global_work_dir+'MSql.db',self.v_select_corrente,v_global_exec_time,self.link_to_MSql_win1_class.e_server_name + '-' + self.link_to_MSql_win1_class.e_user_name)                   
                 # comando eseguito correttamente --> imposto flag
                 self.v_esecuzione_ok = True
                 # prendo il cursore!

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>735</width>
+    <width>829</width>
     <height>776</height>
    </rect>
   </property>
@@ -43,7 +43,7 @@
     <item row="1" column="0">
      <widget class="QPushButton" name="b_purge">
       <property name="text">
-       <string>Delete history</string>
+       <string>Purge history</string>
       </property>
       <property name="icon">
        <iconset resource="resource.qrc">
@@ -65,14 +65,43 @@
     <item row="0" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QLabel" name="l_label6">
+       <widget class="QLabel" name="label">
         <property name="text">
-         <string>Text to find</string>
+         <string>Date to search:</string>
+        </property>
+        <property name="buddy">
+         <cstring>e_where_cond_time</cstring>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="e_where_cond"/>
+       <widget class="QLineEdit" name="e_where_cond_time"/>
+      </item>
+      <item>
+       <widget class="QLabel" name="l_label6">
+        <property name="text">
+         <string>Instruction to search:</string>
+        </property>
+        <property name="buddy">
+         <cstring>e_where_cond_instruction</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="e_where_cond_instruction"/>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Connection to search:</string>
+        </property>
+        <property name="buddy">
+         <cstring>e_where_cond_connection</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="e_where_cond_connection"/>
       </item>
       <item>
        <widget class="QPushButton" name="b_start">
@@ -91,7 +120,9 @@
   </widget>
  </widget>
  <tabstops>
-  <tabstop>e_where_cond</tabstop>
+  <tabstop>e_where_cond_time</tabstop>
+  <tabstop>e_where_cond_instruction</tabstop>
+  <tabstop>e_where_cond_connection</tabstop>
   <tabstop>b_start</tabstop>
   <tabstop>b_purge</tabstop>
   <tabstop>o_lst1</tabstop>
@@ -108,8 +139,8 @@
    <slot>slot_start()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>679</x>
-     <y>50</y>
+     <x>724</x>
+     <y>33</y>
     </hint>
     <hint type="destinationlabel">
      <x>432</x>
@@ -124,8 +155,8 @@
    <slot>slot_purge()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>552</x>
-     <y>98</y>
+     <x>561</x>
+     <y>64</y>
     </hint>
     <hint type="destinationlabel">
      <x>632</x>

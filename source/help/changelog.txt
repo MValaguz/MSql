@@ -2,6 +2,12 @@
 MSql Changelog!
 ---------------
 
+Version dated 23/01/2026
+OK! Migliorie alla sezione "Cronologia"!
+    Oltre a data-ora, all'istruzione e al tempo di esecuzione, viene anche memorizzata una stringa riportante il nome del server e il nome utente che ha eseguito l'operazione. 
+		Sono stati migliorati i filtri di ricerca nello storico.
+		E' stato migliorato il sistema di pulizia del db SQLite sottostante in modo che si possa agire pulendo la cronologia tramite range di date.
+
 Version dated 19/01/2026
 OK! Correzione problema che dopo un'istruzione CONNECT lo schema rimaneva "fermo" al precedente, creando errori del tipo "Privilegi insufficienti"
 
@@ -472,7 +478,6 @@ OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e part
 -------------
 MSql TODO!!!
 -------------
-- Aggiungere una dock detta di oggetti preferiti che permette di inserire package, procedure e funzioni per una più facile consultazione...ma ha senso???
 - Anche il comment monoriga senza punto e virgola non funziona!
 - Segnalato da Diego....ho testo dove voglio sostituire i doppi apici con apice...fatto ricerca-modifica e faccio il trova e sostituisci ma singolo...va in ricorsione!
 - Va migliorata l'esecuzione di script che contengono comandi DDL perché ad esempio nell'esecuzione degli script Modula, nella creazione delle tabelle, si blocca nell'esecuzione completa e va usata quella passo-passo		

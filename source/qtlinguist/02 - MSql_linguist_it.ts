@@ -1190,23 +1190,23 @@
         <translation>Sono presenti dei dati non salvati per la sessione corrente! Vuoi eseguire la commit prima di chiudere la sessione?</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1563"/>
-        <location filename="../MSql_editor.py" line="1558"/>
+        <location filename="../MSql_editor.py" line="1573"/>
+        <location filename="../MSql_editor.py" line="1568"/>
         <source>Error to oracle connection!</source>
         <translation>Errore di connessione a Oracle!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1560"/>
+        <location filename="../MSql_editor.py" line="1570"/>
         <source>For via proxy connection remember to activate this using command</source>
         <translation>Ricordarsi che per una connessione via proxy è necessario fare abilitazione con il comando</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1560"/>
+        <location filename="../MSql_editor.py" line="1570"/>
         <source>using user SYS!</source>
         <translation>usando utente SYS!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1570"/>
+        <location filename="../MSql_editor.py" line="1580"/>
         <source>Connected to:</source>
         <translation>Connesso a:</translation>
     </message>
@@ -1474,33 +1474,33 @@
         <translation>Sostituisci tutto</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="4208"/>
-        <location filename="../MSql_editor.py" line="4197"/>
+        <location filename="../MSql_editor.py" line="4207"/>
+        <location filename="../MSql_editor.py" line="4196"/>
         <source>Error blob fetching using the statement:</source>
         <translation>Errore nel recuperare il campo di tipo blob usanto l&apos;istruzione:</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="4217"/>
+        <location filename="../MSql_editor.py" line="4216"/>
         <source>You must select a blob cell!</source>
         <translation>Devi selezionare una cella con un dato di tipo blob!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="4232"/>
+        <location filename="../MSql_editor.py" line="4231"/>
         <source>Blob downloaded in Downloads directory of your PC!</source>
         <translation>Il blob è stato scaricato nella cartella Downloads del tuo PC!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="4511"/>
+        <location filename="../MSql_editor.py" line="4510"/>
         <source>No PK found!</source>
         <translation>Non trovato la PK!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="4582"/>
+        <location filename="../MSql_editor.py" line="4581"/>
         <source>No FK found!</source>
         <translation>Non trovata la FK!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="4944"/>
+        <location filename="../MSql_editor.py" line="4943"/>
         <source>No instruction!</source>
         <translation>Nessuna istruzione!</translation>
     </message>
@@ -1785,19 +1785,22 @@
 <context>
     <name>history</name>
     <message>
-        <location filename="../history.py" line="46"/>
+        <location filename="../history.py" line="86"/>
         <source>Error to open database</source>
         <translation>Errore nell&apos;aprire il database</translation>
     </message>
     <message>
-        <location filename="../history.py" line="86"/>
-        <source>Are you sure you want to delete your history?</source>
-        <translation>Sei sicuro di voler cancellare tutta la cronologia?</translation>
+        <location filename="../history.py" line="158"/>
+        <source>History purged!</source>
+        <translation>La cronologia è stata pulita e ottimizzata!</translation>
     </message>
     <message>
-        <location filename="../history.py" line="88"/>
+        <source>Are you sure you want to delete your history?</source>
+        <translation type="vanished">Sei sicuro di voler cancellare tutta la cronologia?</translation>
+    </message>
+    <message>
         <source>History deleted!</source>
-        <translation>Cronologia cancellata!</translation>
+        <translation type="vanished">Cronologia cancellata!</translation>
     </message>
 </context>
 <context>
@@ -1809,8 +1812,8 @@
     </message>
     <message>
         <location filename="../qtdesigner/history_ui.ui" line="0"/>
-        <source>Delete history</source>
-        <translation>Cancella cronologia</translation>
+        <source>Purge history</source>
+        <translation>Pulizia della cronologia</translation>
     </message>
     <message>
         <location filename="../qtdesigner/history_ui.ui" line="0"/>
@@ -1819,13 +1822,31 @@
     </message>
     <message>
         <location filename="../qtdesigner/history_ui.ui" line="0"/>
-        <source>Text to find</source>
-        <translation>Cerca nel testo</translation>
+        <source>Date to search:</source>
+        <translation>Data da ricercare:</translation>
+    </message>
+    <message>
+        <location filename="../qtdesigner/history_ui.ui" line="0"/>
+        <source>Instruction to search:</source>
+        <translation>Istruzione da ricercare:</translation>
+    </message>
+    <message>
+        <location filename="../qtdesigner/history_ui.ui" line="0"/>
+        <source>Connection to search:</source>
+        <translation>Info connessione da ricercare:</translation>
     </message>
     <message>
         <location filename="../qtdesigner/history_ui.ui" line="0"/>
         <source>Search</source>
         <translation>Ricerca</translation>
+    </message>
+    <message>
+        <source>Delete history</source>
+        <translation type="vanished">Cancella cronologia</translation>
+    </message>
+    <message>
+        <source>Text to find</source>
+        <translation type="vanished">Cerca nel testo</translation>
     </message>
 </context>
 <context>
@@ -2722,13 +2743,13 @@
         <translation>Errore nello scrivere la cronologia delle istruzioni SQL!</translation>
     </message>
     <message>
-        <location filename="../utilita_database.py" line="547"/>
+        <location filename="../utilita_database.py" line="551"/>
         <location filename="../utilita_database.py" line="503"/>
         <source>Probably the file MSql.db is locked!</source>
         <translation>Probabilmente il file MSql.db è bloccato!</translation>
     </message>
     <message>
-        <location filename="../utilita_database.py" line="547"/>
+        <location filename="../utilita_database.py" line="551"/>
         <source>Error while writing in file history log!</source>
         <translation>Errore nello scrivere la cronologia delle istruzioni SQL!</translation>
     </message>

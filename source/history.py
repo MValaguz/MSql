@@ -16,6 +16,46 @@ from utilita_database import purge_sql_history
 #Amplifico la pathname per ricercare le icone
 QDir.addSearchPath('icons', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'qtdesigner', 'icons'))
 
+class PurgeDateDialog(QDialog):
+    """
+       Visualizza una finestra di dialogo per selezionare un intervallo di date per la cancellazione della cronologia.
+    """
+    def __init__(self, min_date: QDate, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Purge history")
+        self.setModal(True)
+
+        layout = QVBoxLayout(self)
+
+        # --- Date ---
+        form = QFormLayout()
+
+        self.d_start = QDateEdit()
+        self.d_start.setCalendarPopup(True)
+        self.d_start.setDate(min_date)
+
+        self.d_end = QDateEdit()
+        self.d_end.setCalendarPopup(True)
+        self.d_end.setDate(QDate.currentDate())
+
+        form.addRow("Start date:", self.d_start)
+        form.addRow("End date:", self.d_end)
+
+        layout.addLayout(form)
+
+        # --- Buttons ---
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok |
+            QDialogButtonBox.StandardButton.Cancel
+        )
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+
+        layout.addWidget(buttons)
+
+    def get_dates(self):
+        return self.d_start.date(), self.d_end.date()
+    
 class history_class(QMainWindow, Ui_history_window):
     """
         Permette di visualizzare il contenuto della tabella history che contiene tutte le istruzioni di MSql
@@ -33,7 +73,7 @@ class history_class(QMainWindow, Ui_history_window):
         self.slot_start()
 
         # imposto il focus sul campo di ricerca
-        self.e_where_cond.setFocus()
+        self.e_where_cond_instruction.setFocus()
 
     def slot_start(self):
         """
@@ -46,25 +86,34 @@ class history_class(QMainWindow, Ui_history_window):
             message_error(QCoreApplication.translate('history','Error to open database'))
             return 'ko'
      
-        # controllo se indicata la where
-        if self.e_where_cond.text() != '':
-            v_where = " where strftime('%d/%m/%Y %H:%S',ORARIO) || UPPER(ISTRUZIONE) || ROUND(EXEC_TIME,2) like '%" + self.e_where_cond.text().upper() + "%'"
-        else:
-            v_where = ''
+        # controllo se indicata la where        
+        v_where = ''
+        if self.e_where_cond_time.text() != '':
+            v_where = " strftime('%d/%m/%Y %H:%M',ORARIO) like '%" + self.e_where_cond_time.text().upper() + "%'"
+        if self.e_where_cond_instruction.text() != '':
+            if v_where != '':
+                v_where = v_where + " AND "
+            v_where = v_where + " UPPER(ISTRUZIONE) like '%" + self.e_where_cond_instruction.text().upper() + "%'"
+        if self.e_where_cond_connection.text() != '':
+            if v_where != '':
+                v_where = v_where + " AND "
+            v_where = v_where + " UPPER(TIPO) like '%" + self.e_where_cond_connection.text().upper() + "%'"        
+        if v_where != '':
+            v_where = ' WHERE ' + v_where
 
-        # creo un modello di dati su query (per questioni di velocità dall'istruzione vengono prese solo i primi 1000 caratteri)
+        # creo un modello di dati su query (per questioni di velocità dall'istruzione vengono prese solo i primi 1000 caratteri)        
         v_modello = QSqlQueryModel()
-        v_modello.setQuery("select strftime('%d/%m/%Y %H:%S',ORARIO) TIME, UPPER(SUBSTR(ISTRUZIONE,1,1000)) 'INSTRUCTION (Only first 1000 char)', ROUND(EXEC_TIME,2) 'SEC.TIME', ID from SQL_HISTORY " + v_where + " order by ORARIO desc"        )        
+        v_modello.setQuery("select strftime('%d/%m/%Y %H:%M',ORARIO) TIME, UPPER(SUBSTR(ISTRUZIONE,1,1000)) 'INSTRUCTION (Only first 1000 char)', ROUND(EXEC_TIME,2) 'SEC.TIME', TIPO AS CONNECTION, ID from SQL_HISTORY " + v_where + " order by ORARIO desc"        )        
 
         # imposto l'oggetto di visualizzazione con il modello 
         self.o_lst1.setModel(v_modello)
-        # larghezza delle colonne automatica
-        #self.o_lst1.resizeColumnsToContents()        
+        # larghezza delle colonne automatica        
         # larghezza delle colonne fissa
         self.o_lst1.setColumnWidth(0, 120)
         self.o_lst1.setColumnWidth(1, 440)        
         self.o_lst1.setColumnWidth(2, 70)                        
-        self.o_lst1.setColumnWidth(3, 0)                                
+        self.o_lst1.setColumnWidth(3, 150)                                
+        self.o_lst1.setColumnWidth(4, 0)                                
         # intestazioni automatiche in base alla query
         v_horizontal_header = self.o_lst1.horizontalHeader()
         v_horizontal_header.setDefaultAlignment(Qt.AlignmentFlag.AlignLeft)
@@ -81,12 +130,35 @@ class history_class(QMainWindow, Ui_history_window):
 
     def slot_purge(self):
         """
-           elimino la tabella che contiene l'history
-        """
-        if message_question_yes_no(QCoreApplication.translate('history','Are you sure you want to delete your history?')) == 'Yes':
-            purge_sql_history(self.nome_db)
-            message_info(QCoreApplication.translate('history','History deleted!'))
-            self.slot_start()
+            Pulizia della tabella da data a data
+        """            
+        # Ricavo la data minima presente nella tabella
+        query = QSqlQuery()
+        query.exec("SELECT MIN(date(ORARIO)) FROM SQL_HISTORY")
+
+        min_date = QDate.currentDate().addYears(-10)
+        if query.next() and query.value(0):
+            min_date = QDate.fromString(query.value(0), "yyyy-MM-dd")
+
+        # Visualizzo la finestra di dialogo per la selezione delle date
+        dlg = PurgeDateDialog(min_date, self)
+        if dlg.exec() != QDialog.DialogCode.Accepted:
+            return
+        d_start, d_end = dlg.get_dates()
+
+        # Conferma dell'operazione
+        if message_question_yes_no(QCoreApplication.translate('history',f"Delete history from {d_start.toString('dd/MM/yyyy')} " f"to {d_end.toString('dd/MM/yyyy')}?")) != 'Yes':
+            return
+
+        # Eseguo la pulizia della tabella (prima però chiudo il db)
+        self.v_sqlite_conn.close()        
+        purge_sql_history(self.nome_db, d_start.toString("yyyy-MM-dd"), d_end.toString("yyyy-MM-dd"))        
+
+        # Avviso l'utente
+        message_info(QCoreApplication.translate('history', 'History purged!'))
+        
+        # ricarico la tabella a video
+        self.slot_start()
 
     def return_instruction(self, p_id):
         """
