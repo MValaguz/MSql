@@ -478,6 +478,8 @@ OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e part
 -------------
 MSql TODO!!!
 -------------
+- Problema select di blob....SELECT FILES_NU, EXTEN_CO, files_fi FROM TA_FILES where files_nu=4611968
+  non ha senso caricare a video blob troppo grandi....basta far uscire icona di non immagine. Invece quando poi si fa il download allora va eseguito algoritmo nuovo che scarica un pezzo per volta...prendere per test un file maggiore di 2,5 gb
 - Anche il comment monoriga senza punto e virgola non funziona!
 - Segnalato da Diego....ho testo dove voglio sostituire i doppi apici con apice...fatto ricerca-modifica e faccio il trova e sostituisci ma singolo...va in ricorsione!
 - Va migliorata l'esecuzione di script che contengono comandi DDL perché ad esempio nell'esecuzione degli script Modula, nella creazione delle tabelle, si blocca nell'esecuzione completa e va usata quella passo-passo		

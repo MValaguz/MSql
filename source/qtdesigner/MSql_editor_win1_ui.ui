@@ -206,7 +206,6 @@
     <addaction name="actionFile_system"/>
     <addaction name="separator"/>
     <addaction name="actionQuery_Designer"/>
-    <addaction name="actionGitHub_Organizer"/>
     <addaction name="actionCalculator"/>
    </widget>
    <widget class="QMenu" name="menuView">
@@ -1829,15 +1828,6 @@
    </property>
    <property name="text">
     <string>Query Designer</string>
-   </property>
-  </action>
-  <action name="actionGitHub_Organizer">
-   <property name="icon">
-    <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/github.png</normaloff>:/icons/icons/github.png</iconset>
-   </property>
-   <property name="text">
-    <string>GitHub Organizer</string>
    </property>
   </action>
  </widget>

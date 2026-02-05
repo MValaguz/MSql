@@ -949,9 +949,6 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # Query designer
         elif p_slot.objectName() == 'actionQuery_Designer':
             self.slot_query_designer()
-        # GitHub Organizer
-        elif p_slot.objectName() == 'actionGitHub_Organizer':
-            self.slot_github_organizer()
         # Calcolatrice
         elif p_slot.objectName() == 'actionCalculator':
             self.slot_calculator()
@@ -3301,23 +3298,6 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         self.win_query_designer = QueryDesigner(v_global_connection, self.current_schema)        
         self.win_query_designer.show()        
         centra_window_figlia(self, self.win_query_designer)
-
-    def slot_github_organizer(self):
-        """
-           Apre il gestore repository GitHub
-        """                   
-        from github_organizer import GitHubWidget
-        global o_global_preferences
-
-        # controllo che sia stato impostato il client id nelle preferenze
-        if o_global_preferences.github_client_id == '':
-            message_error(QCoreApplication.translate('MSql_win1','GitHub Client ID not set in preferences!'))
-            return 'ko' 
-
-        # apro organizer di github passando id applicazione
-        self.win_github_organizer = GitHubWidget(o_global_preferences.github_client_id)        
-        self.win_github_organizer.show()        
-        centra_window_figlia(self, self.win_github_organizer)
         
 #  _     _______  _______ ____  
 # | |   | ____\ \/ / ____|  _ \ 
