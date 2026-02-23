@@ -150,11 +150,6 @@ class preferences_class():
                 self.oracleclient_path = v_json['oracleclient_path']    
             else:
                 self.oracleclient_path = ''
-            # GitHub Client ID
-            if 'github_client_id' in v_json:
-                self.github_client_id = v_json['github_client_id']    
-            else:
-                self.github_client_id = ''
         # imposto valori di default senza presenza dello specifico file
         else:
             self.remember_window_pos = True
@@ -183,8 +178,7 @@ class preferences_class():
             self.highlight_color_hex = '#43a047' # Fare riferimento al file custom_widget, tabella colori contenuto in classe MyColorComboBox
             self.author_name = ''
             self.connection_mode = 0  # 0=Thin 1=Thick
-            self.oracleclient_path = ''
-            self.github_client_id = ''
+            self.oracleclient_path = ''            
 
         # Viene aggiunta alla classe la proprietà editable che gestisce la modalità di editazione delle tabelle (un tempo era anche una preferenza a video che poi è stata eliminata)
         self.editable = False
@@ -247,8 +241,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         self.e_highlight_color.setCurrentText(self.preferences.highlight_color)
         self.e_author_name.setText(self.preferences.author_name)
         self.e_connection_mode.setCurrentIndex(self.preferences.connection_mode)
-        self.e_oracleclient_path.setText(self.preferences.oracleclient_path)        
-        self.e_github_client_id.setText(self.preferences.github_client_id)
+        self.e_oracleclient_path.setText(self.preferences.oracleclient_path)                
 
         ###
         # preparo elenco server        
@@ -712,8 +705,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
                  'highlight_color_hex': self.e_highlight_color.currentData().name(),
                  'author_name': self.e_author_name.text(),
                  'connection_mode': self.e_connection_mode.currentIndex(),
-                 'oracleclient_path': self.e_oracleclient_path.text(),
-                 'github_client_id': self.e_github_client_id.text()               
+                 'oracleclient_path': self.e_oracleclient_path.text()                 
                 }
 
 		# scrittura nel file dell'oggetto json (notare come venga usata la funzione dump senza la s finale in quanto scrive byte)

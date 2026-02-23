@@ -910,7 +910,6 @@ class Ui_MSql_win1(object):
         self.toolBar.addAction(self.actionHistory)
         self.toolBar.addAction(self.actionCreate_autocompletation_dictionary)
         self.toolBar.addAction(self.actionPreferences)
-        self.toolBar.addAction(self.actionProgram_info)
 
         self.retranslateUi(MSql_win1)
         self.oggetti_db_scelta.currentTextChanged['QString'].connect(MSql_win1.slot_oggetti_db_scelta) # type: ignore

@@ -70,6 +70,7 @@ from avanzamento import avanzamento_infinito_class
 # Utilità varie
 from utilita import *
 from utilita_database import *
+import utilita_database
 from utilita_testo import *
 # Libreria che permette, selezionata un'istruzione sql nell'editor di indentarla automaticamente
 from sql_formatter.core import format_sql
@@ -4198,17 +4199,17 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 for row in v_cursor:                  
                     for count, column in enumerate(row):                   
                         # stabilisco il nome del file di destinazione che andrà nella dir dei downloads con nome del file composto dal nome della tabella + i primi 20 caratteri della "chiave"
-                        v_file_download = user_downloads_dir() + '\\' + v_nome_tabella.upper() + '_' + v_nome_file[0:20].replace('.','_')
-                        # apro il file in scrittura
-                        v_file_allegato = open(v_file_download,'wb')
-                        # leggo e scrivo il blob
-                        v_file_allegato.write(column.read())
-                        # chiudo il file
-                        v_file_allegato.close()                                                            
-                        # sostituisce la freccia del mouse con icona "clessidra"
-                        Freccia_Mouse(False)
-                        # messaggio di fine
-                        message_info(QCoreApplication.translate('MSql_win2','Blob downloaded in Downloads directory of your PC!'))
+                        v_file_download = user_downloads_dir() + '\\' + v_nome_tabella.upper() + '_' + v_nome_file[0:20].replace('.','_')                        
+                        # rispetto al vecchio metodo, viene richiamata la funzione che ricevendo in ingresso il blob e il nome del file, lo spezza in blocchi e lo scarica
+                        # se infatti il blob superava i 2,5gb la procedura tradizionale andava in errore
+                        if utilita_database.download_blob(column, v_file_download) == 'ok':
+                            # sostituisce la freccia del mouse con icona "clessidra"
+                            Freccia_Mouse(False)
+                            # messaggio di fine
+                            message_info(QCoreApplication.translate('MSql_win2','Blob downloaded in Downloads directory of your PC!'))
+                        else:
+                            Freccia_Mouse(False)
+                            message_error(QCoreApplication.translate('MSql_win2','Error downloading blob!'))
             
         # chiudo il cursore
         v_cursor.close()
@@ -4967,6 +4968,9 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # riga vuota (ma esterna a plsql)
             elif v_riga == '':            
                 self.v_offset_numero_di_riga += 1
+            # passaggio ad altra istruzione con slash (ma esterna a plsql)
+            elif v_riga.lstrip().rstrip() == '/':            
+                pass
             # se siamo all'interno di un commento multiplo, controllo se abbiamo raggiunto la fine (se è un'istruzione non faccio pulizia dei commenti)
             elif v_commento_multi and v_riga.find('*/') == -1 and v_istruzione_str == '':
                 self.v_offset_numero_di_riga += 1
@@ -5031,7 +5035,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 # chiamo la procedura che si occupa di aggiornare la lista delle bind, passando il nome della var e il suo tipo
                 # e ne visualizzo il contenuto
                 self.bind_variable(p_function='ADD', p_variabile_nome=v_split[1].upper(), p_variabile_tipo=v_split[2].upper())
-            else:
+            else:                
                 message_error(QCoreApplication.translate('MSql_win2','Unknown command type:' + ' ' + v_riga_raw + '.....'))
                 return 'ko'                
 
@@ -5139,7 +5143,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         global v_global_connected
         global v_global_create_confirm
         global v_global_exec_time
-        
+
         # Eccezione! il ritorno a capo finale viene tolto se ultima istruzione non è una end e stessa cosa per il punto e virgola
         if p_plsql.splitlines()[-1].upper().find('END') == -1:
             if p_plsql[-1] == '\r' or p_plsql[-1] == '\n':            
@@ -5173,6 +5177,8 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # restituisco la lista delle righe di dbms_output (elimino ultimo ritorno a capo)
             return v_dbms_ret.removesuffix('\n')
 
+        #############################################
+        
         # verifico che mi sia stato passato del testo
         if p_plsql == '':
             message_error(QCoreApplication.translate('MSql_win2','No script!'))
@@ -5523,8 +5529,12 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                         elif self.tipi_intestazioni[x][1] == oracledb.DB_TYPE_RAW:
                             self.o_table.setItem(self.v_pos_y, x, QTableWidgetItem(field.hex().upper()))
                         elif self.tipi_intestazioni[x][1] == oracledb.BLOB:
-                            qimg = QImage.fromData(field.read())
-                            pixmap = QPixmap.fromImage(qimg) if qimg.depth() > 0 else QPixmap("icons:no_image.png")
+                            # se il blob è più piccolo di 10MB, lo carico come immagine, altrimenti metto icona "no image" (per evitare di appesantire troppo l'applicazione)
+                            if field.size() < (10485760):  # 10MB
+                                qimg = QImage.fromData(field.read())
+                                pixmap = QPixmap.fromImage(qimg) if qimg.depth() > 0 else QPixmap("icons:no_image.png")                                
+                            else:
+                                pixmap = QPixmap("icons:no_image.png")                                
                             label = QLabel()
                             label.setPixmap(pixmap)
                             if o_global_preferences.dark_theme:

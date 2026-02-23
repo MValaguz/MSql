@@ -2,6 +2,18 @@
 MSql Changelog!
 ---------------
 
+Version dated 23/02/2026
+OK! Problema select di blob....SELECT FILES_NU, EXTEN_CO, files_fi FROM TA_FILES where files_nu=4611968
+    non aveva senso caricare a video blob troppo grandi (spesso non visualizzabili) quindi viene prima fatta una scrematura solo per file sotto i 10mb; se ci sono immagini sopra i 10mb non verranno visualizzate!
+OK! Quando faccio il download di blob di grandi dimensioni come ad esempio SELECT FILES_NU, FILES_FI FROM TA_FILES WHERE FILES_NU=4493720, va in errore perché supera i 2,5gb; a questo punto è stata rivista la funzione di scarico
+    in modo spezzi il download in blocchi e non ci siano problemi. 
+
+OK! Questa sequenza di istruzioni non veniva eseguita in blocco (passava la prima istruzione ma poi bloccava le successive)
+		COMMENT ON TABLE VA_ANART_MODULA IS 'Vista su anagrafica articoli che restituisce elenco articoli da esportare a Modula';
+		/
+		COMMENT ON COLUMN VA_ANART_MODULA.AZIEN_CO IS 'Azienda';
+		COMMENT ON COLUMN VA_ANART_MODULA.ARTIC_CO IS 'Articolo';		
+
 Version dated 23/01/2026
 OK! Migliorie alla sezione "Cronologia"!
     Oltre a data-ora, all'istruzione e al tempo di esecuzione, viene anche memorizzata una stringa riportante il nome del server e il nome utente che ha eseguito l'operazione. 
@@ -478,11 +490,9 @@ OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e part
 -------------
 MSql TODO!!!
 -------------
-- Problema select di blob....SELECT FILES_NU, EXTEN_CO, files_fi FROM TA_FILES where files_nu=4611968
-  non ha senso caricare a video blob troppo grandi....basta far uscire icona di non immagine. Invece quando poi si fa il download allora va eseguito algoritmo nuovo che scarica un pezzo per volta...prendere per test un file maggiore di 2,5 gb
+- Inserire la possibilità di collegarsi a oracle-cloud
 - Anche il comment monoriga senza punto e virgola non funziona!
 - Segnalato da Diego....ho testo dove voglio sostituire i doppi apici con apice...fatto ricerca-modifica e faccio il trova e sostituisci ma singolo...va in ricorsione!
-- Va migliorata l'esecuzione di script che contengono comandi DDL perché ad esempio nell'esecuzione degli script Modula, nella creazione delle tabelle, si blocca nell'esecuzione completa e va usata quella passo-passo		
 - Continuare con l'help 
 	
 ---------------------------------------------

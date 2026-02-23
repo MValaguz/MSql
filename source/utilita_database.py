@@ -574,6 +574,30 @@ def read_files_history(p_db_name, p_file_name):
     
     return v_pos_y, v_pos_x
 
+def download_blob(p_field, p_file_name):
+    """
+       Dato un campo di tipo blob dentro p_field, lo salva in un file. Il nome del file è dato da p_file_name
+    """
+    # lettura di segmenti da 8mb
+    CHUNK_SIZE = 8 * 1024 * 1024     
+    with open(p_file_name, "wb") as f:
+        # Caso 1: Oracle LOB
+        if hasattr(p_field, "read"):
+            offset = 1  # IMPORTANTISSIMO: Oracle LOB parte da 1
+            while True:
+                chunk = p_field.read(offset, CHUNK_SIZE)
+                if not chunk:
+                    break
+                f.write(chunk)
+                offset += len(chunk)
+        # Caso 2: già bytes (driver / configurazioni diverse)
+        else:
+            for i in range(0, len(p_field), CHUNK_SIZE):
+                f.write(p_field[i:i + CHUNK_SIZE])
+
+    # restituisco nome file
+    return 'ok'
+
 #test per la funzione di estrazione ddl tabella
 if __name__ == "__main__":
     #

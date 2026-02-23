@@ -721,7 +721,6 @@
    <addaction name="actionHistory"/>
    <addaction name="actionCreate_autocompletation_dictionary"/>
    <addaction name="actionPreferences"/>
-   <addaction name="actionProgram_info"/>
   </widget>
   <widget class="QDockWidget" name="dockWidget_3">
    <property name="windowTitle">
