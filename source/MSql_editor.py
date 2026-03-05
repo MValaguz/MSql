@@ -5626,7 +5626,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             return 'ko'
 
         # creo una barra di avanzamento infinita
-        v_progress = avanzamento_infinito_class("sql_editor.gif")
+        v_progress = avanzamento_infinito_class("MSql.gif")
 
         # carico tutte le pagine fino ad arrivare in fondo (siccome vengono caricati 100 record per pagina....)
         v_counter = 0         

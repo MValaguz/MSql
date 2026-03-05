@@ -63,7 +63,7 @@ class Ui_Test(object):
         TestWindow.resize(800, 600)
 
         # creo una barra di avanzamento infinita
-        v_progress = avanzamento_infinito_class("sql_editor.gif")
+        v_progress = avanzamento_infinito_class("MSql.gif")
 
         # carico tutte le pagine fino ad arrivare in fondo (siccome vengono caricati 100 record per pagina....)
         v_counter = 0 

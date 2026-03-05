@@ -57,7 +57,7 @@ class create_autocomplete_dic_class(QMainWindow, Ui_create_autocomplete_dic_wind
             return 'ko'
         
         # creo una barra di avanzamento infinita
-        v_progress = avanzamento_infinito_class("sql_editor.gif")            
+        v_progress = avanzamento_infinito_class("MSql.gif")            
         v_counter = 0
         # apro il file di testo che conterrà il risultato con tutti i nomi delle funzioni, procedure e package, ecc
         v_file = open(self.nome_file_dic,'w')        

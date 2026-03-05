@@ -7,7 +7,6 @@ OK! Problema select di blob....SELECT FILES_NU, EXTEN_CO, files_fi FROM TA_FILES
     non aveva senso caricare a video blob troppo grandi (spesso non visualizzabili) quindi viene prima fatta una scrematura solo per file sotto i 10mb; se ci sono immagini sopra i 10mb non verranno visualizzate!
 OK! Quando faccio il download di blob di grandi dimensioni come ad esempio SELECT FILES_NU, FILES_FI FROM TA_FILES WHERE FILES_NU=4493720, va in errore perché supera i 2,5gb; a questo punto è stata rivista la funzione di scarico
     in modo spezzi il download in blocchi e non ci siano problemi. 
-
 OK! Questa sequenza di istruzioni non veniva eseguita in blocco (passava la prima istruzione ma poi bloccava le successive)
 		COMMENT ON TABLE VA_ANART_MODULA IS 'Vista su anagrafica articoli che restituisce elenco articoli da esportare a Modula';
 		/
@@ -490,6 +489,7 @@ OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e part
 -------------
 MSql TODO!!!
 -------------
+- Nella procedura di creazione del dizionario, centrale la finestra di avanzamento con la window sottostante...
 - Inserire la possibilità di collegarsi a oracle-cloud
 - Anche il comment monoriga senza punto e virgola non funziona!
 - Segnalato da Diego....ho testo dove voglio sostituire i doppi apici con apice...fatto ricerca-modifica e faccio il trova e sostituisci ma singolo...va in ricorsione!

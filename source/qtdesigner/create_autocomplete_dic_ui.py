@@ -13,7 +13,7 @@ class Ui_create_autocomplete_dic_window(object):
     def setupUi(self, create_autocomplete_dic_window):
         create_autocomplete_dic_window.setObjectName("create_autocomplete_dic_window")
         create_autocomplete_dic_window.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
-        create_autocomplete_dic_window.resize(353, 176)
+        create_autocomplete_dic_window.resize(556, 192)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap("icons:MSql.gif"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         create_autocomplete_dic_window.setWindowIcon(icon)

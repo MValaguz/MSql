@@ -203,8 +203,8 @@
     <addaction name="separator"/>
     <addaction name="actionObjects_Navigator"/>
     <addaction name="actionObject_Viewer"/>
-    <addaction name="actionFile_system"/>
     <addaction name="separator"/>
+    <addaction name="actionFile_system"/>
     <addaction name="actionQuery_Designer"/>
     <addaction name="actionCalculator"/>
    </widget>
