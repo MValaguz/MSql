@@ -26,6 +26,7 @@
 #                  dentro le definizioni di interfaccia di qtdesigner.
 
 # Librerie di base
+import glob
 import sys 
 import os 
 import subprocess
@@ -133,6 +134,25 @@ def nome_file_backup(p_nome_file):
     p_nome_file = v_global_work_dir + 'backup\\' + 'PID-'+ str(os.getpid()) + 'PID-' + p_nome_file
 
     return p_nome_file
+
+def prossimo_export_file(v_directory, v_nome_base, v_estensione='csv'):
+    """
+       Genera un percorso file unico. Se il file esiste, aggiunge un progressivo (es. _1, _2).
+    """
+    # Rimuove il punto dall'estensione se presente, per gestirlo uniformemente
+    v_estensione = v_estensione.lstrip('.')
+    
+    # Costruisce il percorso iniziale: /cartella/Export_data.csv
+    v_percorso_completo = os.path.join(v_directory, f"{v_nome_base}.{v_estensione}")
+    
+    v_contatore = 1
+    # Ciclo finché non trova un nome di file non ancora esistente
+    while os.path.exists(v_percorso_completo):
+        v_nuovo_nome = f"{v_nome_base}_{v_contatore}.{v_estensione}"
+        v_percorso_completo = os.path.join(v_directory, v_nuovo_nome)
+        v_contatore += 1
+        
+    return v_percorso_completo
 
 def salvataggio_editor(p_save_as, p_nome, p_testo, p_codifica_utf8):
     """
@@ -3678,6 +3698,8 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         self.o_table.cellChanged.connect(self.slot_o_table_item_modificato)                
         # attivo il filtro di eventi sull'oggetto dei risultati, in modo da visualizzare il menu contestuale sulle celle
         self.o_table.viewport().installEventFilter(self)           
+        # imposto il carattere di separazione per la copia multipla delle celle in base alle preferenze generali
+        self.o_table.set_carattere_di_separazione(o_global_preferences.csv_separator)
         # slot per controllare quando cambia il testo digitato dall'utente
         self.e_sql.textChanged.connect(self.slot_e_sql_modificato)    
         self.e_sql.cursorPositionChanged.connect(self.aggiorna_statusbar)                    
@@ -3928,16 +3950,6 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         if event.type() == QEvent.Type.FocusIn:                  
             # aggiorno i dati della statusbar
             self.aggiorna_statusbar()
-
-        # individuo movimento della rotella del mouse sulla parte dei risultati e se combinata con il tasto shift allora effettuo lo scroll orizzontale destra-sinistra
-        if event.type() == QEvent.Type.Wheel and source.parent() is self.o_table:
-            wheel_event: QWheelEvent = event
-            if wheel_event.modifiers() == Qt.KeyboardModifier.ShiftModifier:                
-                if self.o_table.columnCount() > 0:
-                    delta = wheel_event.angleDelta().y()                
-                    step = delta // self.o_table.columnCount()
-                    self.o_table.horizontalScrollBar().setValue(self.o_table.horizontalScrollBar().value() - step)                
-                    return True  
                                             
         # fine senza alcuna elaborazione e quindi si procede con esecuzione dei segnali nativi del framework       
         return False
@@ -4219,7 +4231,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             Copia il valore dell'item dentro la clipboard
         """
         #print('Table Item:', v_item.row(), v_item.column())
-        #print('Table Item:', v_item.text())
+        #print('Table Item:', v_item.text())        
         QGuiApplication.clipboard().setText(self.v_o_table_current_item.text())            
         self.o_table_cont_menu.close()
     
@@ -5019,7 +5031,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 self.link_to_MSql_win1_class.e_current_schema = v_parametri["e_user_name"]
                 self.link_to_MSql_win1_class.slot_connect()
             # inizio select, insert, update, delete.... multiriga            
-            elif v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','ALTER','WITH'):
+            elif v_riga.split()[0].upper() in ('SELECT','INSERT','UPDATE','DELETE','ALTER','COMMENT','WITH'):
                 v_istruzione = True
                 v_istruzione_str = v_riga
             # riga di codice pl-sql (da notare come lo script verrà composto con v_riga_raw)             
@@ -5726,8 +5738,9 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         if v_model == None:
             return None        
 
-        # creo file fisso in directory di lavoro
-        v_csv_file = open(v_global_work_dir + 'Export_data.csv','w', newline='', encoding='utf-8')
+        # creo file fisso in directory di lavoro                
+        v_path_finale = prossimo_export_file(os.path.join(v_global_work_dir,'export'), 'Export_data', 'csv')
+        v_csv_file = open(v_path_finale, 'w', newline='', encoding='utf-8')
 
         # creazione della riga intestazioni
         v_intestazioni = ''
@@ -5764,9 +5777,9 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # Apro direttamente il file            
         try:
             if os.name == "posix":
-                subprocess.Popen(["xdg-open", v_global_work_dir + 'Export_data.csv'])    
+                subprocess.Popen(["xdg-open", v_path_finale])    
             else:
-                os.startfile(v_global_work_dir + 'Export_data.csv')
+                os.startfile(v_path_finale)
         except:
             message_error(QCoreApplication.translate('MSql_win2','Error in file creation!'))
       
@@ -5785,8 +5798,9 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         if v_model == None:
             return None        
 
-        # creo file fisso in directory di lavoro
-        v_txt_file = open(v_global_work_dir + 'Export_data.txt','w', newline='', encoding='utf-8')
+        # creo file fisso in directory di lavoro                
+        v_path_finale = prossimo_export_file(os.path.join(v_global_work_dir,'export'), 'Export_data', 'txt')
+        v_txt_file = open(v_path_finale, 'w', newline='', encoding='utf-8')
 
         # creazione della riga intestazioni
         v_intestazioni = ''
@@ -5831,9 +5845,9 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # Apro direttamente il file            
         try:
             if os.name == "posix":
-                subprocess.Popen(["xdg-open", v_global_work_dir + 'Export_data.txt'])    
+                subprocess.Popen(["xdg-open", v_path_finale])    
             else:
-                os.startfile(v_global_work_dir + 'Export_data.txt')
+                os.startfile(v_path_finale)
         except:
             message_error(QCoreApplication.translate('MSql_win2','Error in file creation!'))    
     
@@ -7043,6 +7057,17 @@ if __name__ == "__main__":
     if not os.path.isdir(v_global_work_dir):
         os.makedirs(v_global_work_dir)
 
+    # controllo se esiste dir di export dei dati; se non esiste la creo, altrimenti elimino i file di export
+    if not os.path.isdir(os.path.join(v_global_work_dir,'export')):
+        os.makedirs(os.path.join(v_global_work_dir,'export'))
+    else:
+        v_pattern = os.path.join(os.path.join(v_global_work_dir,'export'), 'Export_data*')
+        for v_file_da_eliminare in glob.glob(v_pattern):
+            try:
+                os.remove(v_file_da_eliminare)
+            except:
+                pass
+
     # sovrascrive l'hook delle eccezioni; in pratica se avverrà un errore imprevisto, 
     # uscirà messaggio a video e il programma non andrà in crash...
     sys.excepthook = excepthook
@@ -7109,8 +7134,12 @@ if __name__ == "__main__":
         try:        
             v_build_timestamp = time.strftime("%Y-%m-%d",time.localtime(os.path.getmtime(sys.executable)))                        
             v_setup_timestamp = time.strftime("%Y-%m-%d",time.localtime(os.path.getmtime("O:/Install/MSql_setup/MSql_setup.exe")))                
-            if v_build_timestamp < v_setup_timestamp:
-                message_info(QCoreApplication.translate('MSql_win1',"A new version of MSql Editor is aviable! Please go to O:\\Install\\MSql_setup and install it! Once installed, don't forget to check the changelog to see what's new!"))
+            if v_build_timestamp < v_setup_timestamp:            
+                if message_question_yes_no(QCoreApplication.translate('MSql_win1',"A new version of MSql Editor is aviable!\nDo you want to install it?")) == 'Yes':                               
+                    # Il flag /FORCECLOSEAPPLICATIONS aiuta Inno Setup a chiudere l'app se necessario                
+                    subprocess.Popen(['O:\\Install\\MSql_setup\\MSql_setup.exe','/FORCECLOSEAPPLICATIONS'])    
+                    # Chiudi l'applicazione corrente immediatamente
+                    sys.exit(0)
         except:
             pass
             

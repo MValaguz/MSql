@@ -247,7 +247,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         # preparo elenco server        
         ###
         self.o_server.setColumnCount(7)
-        self.o_server.setHorizontalHeaderLabels(['Server title (*)','TNS Name (*)','Color','','AutoConnection','Emphasis','CREATE'+chr(10)+'confirm'])           
+        self.o_server.setHorizontalHeaderLabels(['Server title (*)','TNS Name (*)','Color','','AutoConnection'+chr(10)+'at startup','Emphasis','CREATE'+chr(10)+'confirm'])           
         v_rig = 1                
         for record in self.preferences.elenco_server:                                    
             self.o_server.setRowCount(v_rig) 
@@ -261,7 +261,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         # preparo elenco user        
         ###
         self.o_users.setColumnCount(6)
-        self.o_users.setHorizontalHeaderLabels(['User title (*)','User name (*)','Password (*)','AutoConnection','As Proxy','As Schema'])   
+        self.o_users.setHorizontalHeaderLabels(['User title (*)','User name (*)','Password (*)','AutoConnection'+chr(10)+'at startup','As Proxy','As Schema'])   
         v_rig = 1                
         for record in self.preferences.elenco_user:                                    
             self.o_users.setRowCount(v_rig) 

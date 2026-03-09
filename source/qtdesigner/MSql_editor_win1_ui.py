@@ -441,6 +441,7 @@ class Ui_MSql_win1(object):
         icon45 = QtGui.QIcon()
         icon45.addPixmap(QtGui.QPixmap("icons:copy.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         self.actionCopy.setIcon(icon45)
+        self.actionCopy.setShortcutContext(QtCore.Qt.ShortcutContext.WidgetShortcut)
         self.actionCopy.setObjectName("actionCopy")
         self.actionPaste = QtGui.QAction(parent=MSql_win1)
         icon46 = QtGui.QIcon()

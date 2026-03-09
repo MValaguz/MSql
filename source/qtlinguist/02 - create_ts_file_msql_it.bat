@@ -26,7 +26,6 @@ pylupdate6 --verbose ^
   ..\utilita.py ^
   ..\utilita_database.py ^
   ..\diff_viewer.py ^
-	..\github_organizer.py ^
 	..\dblink_viewer.py ^
   ..\sqlite_viewer.py ^
 	..\copy_from_oracle_to_sqlite.py ^

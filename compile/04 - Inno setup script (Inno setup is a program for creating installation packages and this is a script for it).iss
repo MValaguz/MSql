@@ -26,6 +26,10 @@ WizardStyle=modern
 ; Attiva la pagina d'inizio con immagine di presentazione. Questa parte è stata commentata perché ESET Point antivirus si bloccava su questa immagine! 
 DisableWelcomePage=no
 WizardImageFile=C:\Users\mvalaguz\Documents\GitHub\MSql\source\qtdesigner\icons\MSql.bmp
+; Attivo chiusura di MSql in caso sia già attivo (quando avverte che c'è una nuova versione del programma)
+AppMutex={{9534D800-EDB2-4684-8BDA-C1960311A665}
+CloseApplications=force
+RestartApplications=yes
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"

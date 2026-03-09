@@ -2,6 +2,14 @@
 MSql Changelog!
 ---------------
 
+Version dated 09/03/2026
+OK! In caso di nuova versione di MSql, attivata installazione automatica
+OK! Sulla parte di output inserità possibilità di selezione multipla delle celle; facendo poi ctrl-c viene fatta la copia nella clipboard tenendo conto del limitatore di colonna impostato nelle preferenze. E' possibile inoltre fare la selezione tenenedo premuto il tasto ctrl pezzo per pezzo e in questo caso il ctrl-c però produrrà un risultato verticale
+OK! Export dei file in formato csv o in formato INSERT; corretto bug per cui se non si chiudeva l'export corrente, il successivo non funzionava; ora viene creata una cartella "export" che contiene tutti gli export separati e che viene pulita al riavvio
+
+Version dated 05/03/2026
+OK! Corretto problema per cui le istruazioni COMMENT monoriga senza il ; a fine, non venivano eseguite
+
 Version dated 23/02/2026
 OK! Problema select di blob....SELECT FILES_NU, EXTEN_CO, files_fi FROM TA_FILES where files_nu=4611968
     non aveva senso caricare a video blob troppo grandi (spesso non visualizzabili) quindi viene prima fatta una scrematura solo per file sotto i 10mb; se ci sono immagini sopra i 10mb non verranno visualizzate!
@@ -489,10 +497,7 @@ OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e part
 -------------
 MSql TODO!!!
 -------------
-- Nella procedura di creazione del dizionario, centrale la finestra di avanzamento con la window sottostante...
 - Inserire la possibilità di collegarsi a oracle-cloud
-- Anche il comment monoriga senza punto e virgola non funziona!
-- Segnalato da Diego....ho testo dove voglio sostituire i doppi apici con apice...fatto ricerca-modifica e faccio il trova e sostituisci ma singolo...va in ricorsione!
 - Continuare con l'help 
 	
 ---------------------------------------------
@@ -507,7 +512,6 @@ KO! pensare ad una dock da mettere nella sezione dei risultati che permetta di:
 		- pensare ad altre funzionalità
 		Ho tentato le modifiche ma al momento non è possibile inserire in un blocco una toolbar nativa....ho provato con un layout specifico usando i toolbutton ma il risultato non mi ha soddisfatto si in termini grafici che in termini di scrittura del codice
 
-KO! -valutare integrazione con oracle cloud OCI....ho valutato ma poi non sono riuscito a creare un account gratuito lato OCI oracle....quindi lasciato perdere....
 KO! -pensare di gestire i dati di un db MySQL...ho provato ad installare e connettermi come MySQL ma veramente sarebbe troppo arduo tenere in piedi anche quella gestione
 KO! -il comando execute non è stato considerato! ok! ho deciso di non considerarlo...al momento	
 KO! -gestione split-view: in pratica posso avere due editor verticali....guardando il comportamento di Notepad++ qui crea un'altra mdiarea secondaria e li ci sposta le window 

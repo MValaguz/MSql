@@ -186,13 +186,93 @@ class MyCustomQsciScintilla(QsciScintilla):
 class MyCustomTreeView(QTreeView):
     """
        Possibilità di fare lo scroll orizzontale usando tasto SHIFT+Rotella del mouse
-    """
+    """    
     def wheelEvent(self, event: QWheelEvent):    
         if event.modifiers() == Qt.KeyboardModifier.ShiftModifier:  # Se Shift è premuto
             scroll_amount = event.angleDelta().y()  # Recupera il valore della rotella
             self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() - scroll_amount)
         else:
             super().wheelEvent(event)  # Mantieni il comportamento normale
+
+###
+# Questa classe personalizza il widget delle tabelle in modo da gestire la combinazione CTRL+C per copiare i dati selezionati nella tabella dei risultati
+# Inoltre fa in modo che se l'utente fa scroll con la rotella del mouse e tiene premuto il tasto SHIFT allora effettua lo scroll orizzontale
+# Inoltre se utente seleziona una colonna intera cliccando sull'header, allora blocca la selezione totale della colonna ma permette quella delle celle; in 
+# questo modo la selezione della colonna attiva il menu popup
+###
+class MyCustomTableWidget(QTableWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.carattere_di_separazione = '|'
+    """
+       Imposta il carattere di separazione da usare quando si copia negli appunti i dati selezionati nella tabella dei risultati
+    """
+    def set_carattere_di_separazione(self, p_carattere):
+        self.carattere_di_separazione = p_carattere
+    """
+       Gestione movimento della rotella del mouse sulla parte dei risultati e se combinata con il tasto shift allora effettuo lo scroll orizzontale destra-sinistra
+    """
+    def wheelEvent(self, event: QWheelEvent):
+        if event.type() == QEvent.Type.Wheel:
+            wheel_event: QWheelEvent = event
+            if wheel_event.modifiers() == Qt.KeyboardModifier.ShiftModifier:                
+                if self.columnCount() > 0:
+                    delta = wheel_event.angleDelta().y()                
+                    step = delta // self.columnCount()
+                    self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() - step)                                    
+                    event.accept()  # Indica che l'evento è stato gestito
+                    return
+        super().wheelEvent(event)    
+    """
+       Gestione del ctrl+c per copiare i dati selezionati nella tabella dei risultati
+    """
+    def keyPressEvent(self, event: QKeyEvent):
+        # Rileva CTRL + C
+        if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_C:
+            ranges = self.selectedRanges()
+            if not ranges:
+                return
+
+            all_copied_rows = []
+            
+            # Iteriamo su ogni blocco selezionato (se ce n'è più di uno)
+            for r in ranges:
+                for row in range(r.topRow(), r.bottomRow() + 1):
+                    col_data = []
+                    for col in range(r.leftColumn(), r.rightColumn() + 1):
+                        item = self.item(row, col)
+                        # Pulizia del testo e rimozione del carattere pipe per evitare conflitti
+                        text = item.text().replace('\n', ' ').replace(self.carattere_di_separazione, ' ') if item else ""
+                        col_data.append(text.strip())
+                    
+                    line = f" {self.carattere_di_separazione} ".join(col_data)
+                    # Evitiamo duplicati se i range si sovrappongono (opzionale)
+                    all_copied_rows.append(line)
+            
+            # Unisce tutto con INVIO
+            full_text = "\n".join(all_copied_rows)
+            QApplication.clipboard().setText(full_text)
+            event.accept()
+        else:
+            super().keyPressEvent(event)
+
+    """
+        Se il click avviene nell'area dell'header (tramite coordinate o controllo focus)
+        ma vogliamo gestire il comportamento standard delle celle, lasciamo il super()
+    """
+    def mousePressEvent(self, event: QMouseEvent):       
+        super().mousePressEvent(event)    
+    """
+       Se l'evento è scatenato dall'header (tipicamente non ha un 'event' o 
+       ha flag specifici), possiamo istruire la tabella a ignorare la selezione 
+       totale della colonna ma permettere quella delle celle.
+    """ 
+    def selectionCommand(self, index, event=None):        
+        # Se vuoi bloccare SOLO la selezione cliccando sulle intestazioni:
+        if event is None and index.isValid():
+            return QItemSelectionModel.SelectionFlag.NoUpdate
+        
+        return super().selectionCommand(index, event)
 
 ###
 # Questa classe personalizza il widget QPlainTextEdit aggiungendo a sinistra la barra con i numeri di riga
