@@ -1,6 +1,15 @@
+-------------
+MSql TODO!!!
+-------------
+- Inserire la possibilità di collegarsi a oracle-cloud
+- Continuare con l'help 
+
 ---------------
 MSql Changelog!
 ---------------
+
+Versione dated 10/03/2026
+OK! Nella calcolatrice non prendeva la pressione del punto lato tastierino numerico
 
 Version dated 09/03/2026
 OK! In caso di nuova versione di MSql, attivata installazione automatica
@@ -493,12 +502,6 @@ OK! quando digito una parentesi aperta, un apice o un doppio apice, automaticame
 OK! nuova preferenza di "CREATE confirm" per i server. Se impostata a true, quando si lanciano dei comandi di CREATE viene chiesta una conferma
 OK! quando ricerco una stringa nell'object viewer con il tema scuro non capisco le righe che sono state evidenziate (es. mw_magazzini, ricerca la parola "genera")
 OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e parte del comando
-
--------------
-MSql TODO!!!
--------------
-- Inserire la possibilità di collegarsi a oracle-cloud
-- Continuare con l'help 
 	
 ---------------------------------------------
 MSql Cosa è stato valutato e non realizzato!

@@ -238,8 +238,8 @@ class Calculator(QWidget):
         ):
             self.display.setText(self.display.text() + txt)
 
-        # virgola
-        elif key == Qt.Key.Key_Comma:
+        # virgola o punto
+        elif key == Qt.Key.Key_Comma or key == Qt.Key.Key_Period:
             self.display.setText(self.display.text() + ".")
 
         # percentuale
