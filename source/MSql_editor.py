@@ -4443,7 +4443,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # imposto owner sempre come nome utente
             v_owner = self.link_to_MSql_win1_class.e_user_name               
 
-        print('CTRL_K-Key of --> ' + v_owner + '.' + v_oggetto2 + ',' + v_oggetto)
+        print(f"CTRL_K-Key of --> {v_owner}.{v_oggetto} ,{v_oggetto2}")
         # sostituisce la freccia del mouse con icona "clessidra"
         Freccia_Mouse(True)
         # richiamo la procedura di oracle che mi restituisce la ddl dell'oggetto (apro un cursore locale a questa funzione)
@@ -4451,13 +4451,13 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
 
         # si è richiesto di fare la chiave di una sola tabella...
         if v_oggetto != '' and v_oggetto2 == '':            
-            try:
+            try:                
                 v_temp_cursor.execute("""SELECT ALL_TAB_COLUMNS.COLUMN_NAME, ALL_TAB_COLUMNS.DATA_TYPE
                                          FROM   ALL_CONSTRAINTS,
                                                 ALL_CONS_COLUMNS,
                                                 ALL_TAB_COLUMNS																					
-                                         WHERE  ALL_CONSTRAINTS.OWNER           = '""" + v_owner + """'
-                                           AND  ALL_CONSTRAINTS.TABLE_NAME      = '""" + v_oggetto + """'
+                                         WHERE  ALL_CONSTRAINTS.OWNER           = :v_owner 
+                                           AND  ALL_CONSTRAINTS.TABLE_NAME      = :v_oggetto 
                                            AND  ALL_CONSTRAINTS.CONSTRAINT_TYPE = 'P'
                                            AND  ALL_CONSTRAINTS.OWNER           = ALL_CONS_COLUMNS.OWNER
                                            AND  ALL_CONSTRAINTS.CONSTRAINT_NAME = ALL_CONS_COLUMNS.CONSTRAINT_NAME
@@ -4465,7 +4465,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                                            AND  ALL_CONS_COLUMNS.OWNER          = ALL_TAB_COLUMNS.OWNER
                                            AND  ALL_CONS_COLUMNS.TABLE_NAME     = ALL_TAB_COLUMNS.TABLE_NAME
                                            AND  ALL_CONS_COLUMNS.COLUMN_NAME    = ALL_TAB_COLUMNS.COLUMN_NAME
-                                        ORDER BY ALL_CONS_COLUMNS.POSITION""")
+                                        ORDER BY ALL_CONS_COLUMNS.POSITION""",(v_owner, v_oggetto))                                        
             except:
                 return 'ko'
             # prendo il risultato e inizio a costruire una nuova select con tutti i campi che compongono la chiave primaria

@@ -1,6 +1,7 @@
 -------------
 MSql TODO!!!
 -------------
+- Vedere se possibile velocizzare il ctrl-k 
 - Inserire la possibilità di collegarsi a oracle-cloud
 - Continuare con l'help 
 
@@ -13,7 +14,7 @@ OK! Nella calcolatrice non prendeva la pressione del punto lato tastierino numer
 
 Version dated 09/03/2026
 OK! In caso di nuova versione di MSql, attivata installazione automatica
-OK! Sulla parte di output inserità possibilità di selezione multipla delle celle; facendo poi ctrl-c viene fatta la copia nella clipboard tenendo conto del limitatore di colonna impostato nelle preferenze. E' possibile inoltre fare la selezione tenenedo premuto il tasto ctrl pezzo per pezzo e in questo caso il ctrl-c però produrrà un risultato verticale
+OK! Sulla parte di output inserita possibilità di selezione multipla delle celle; facendo poi ctrl-c viene fatta la copia nella clipboard tenendo conto del limitatore di colonna impostato nelle preferenze. E' possibile inoltre fare la selezione tenenedo premuto il tasto ctrl pezzo per pezzo e in questo caso il ctrl-c però produrrà un risultato verticale
 OK! Export dei file in formato csv o in formato INSERT; corretto bug per cui se non si chiudeva l'export corrente, il successivo non funzionava; ora viene creata una cartella "export" che contiene tutti gli export separati e che viene pulita al riavvio
 
 Version dated 05/03/2026
