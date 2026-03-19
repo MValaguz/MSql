@@ -24,7 +24,7 @@ class avanzamento_infinito_class(QProgressDialog):
         QProgressDialog.__init__(self, None)        
         self.setMinimumDuration(0)        
         self.setWindowModality(Qt.WindowModality.WindowModal)
-        self.setWindowTitle("Wait...")    
+        self.setWindowTitle("MSql...wait")    
         self.setMinimumWidth(400)            
         # icona del titolo
         self.icon = QIcon()

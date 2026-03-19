@@ -1,13 +1,17 @@
 -------------
 MSql TODO!!!
 -------------
-- Vedere se possibile velocizzare il ctrl-k 
 - Inserire la possibilità di collegarsi a oracle-cloud
 - Continuare con l'help 
 
 ---------------
 MSql Changelog!
 ---------------
+Versione dated 20/03/2026
+OK! Quando faccio tasto destro su una tabella nell'object navigator, inserire anche la voce che crea la select e la esegue!
+
+Versione dated 17/03/2026
+OK! Ottimizzazione della minimappa attraverso una nuova strategia di sincronizzazione che ha permesso di aumentare la velocità dell'editor stesso!
 
 Versione dated 10/03/2026
 OK! Nella calcolatrice non prendeva la pressione del punto lato tastierino numerico
@@ -507,6 +511,8 @@ OK! sistemare messaggio Are you sure? mettendo anche la parte di conferma e part
 ---------------------------------------------
 MSql Cosa è stato valutato e non realizzato!
 ---------------------------------------------
+KO! Vedere se possibile velocizzare il ctrl-k (fatto tentativi ma Oracle risponde lentamente)
+
 KO! pensare ad una dock da mettere nella sezione dei risultati che permetta di:
 		- esportare i dati (indicare eventuale file)
 		- fine elenco
@@ -517,15 +523,20 @@ KO! pensare ad una dock da mettere nella sezione dei risultati che permetta di:
 		Ho tentato le modifiche ma al momento non è possibile inserire in un blocco una toolbar nativa....ho provato con un layout specifico usando i toolbutton ma il risultato non mi ha soddisfatto si in termini grafici che in termini di scrittura del codice
 
 KO! -pensare di gestire i dati di un db MySQL...ho provato ad installare e connettermi come MySQL ma veramente sarebbe troppo arduo tenere in piedi anche quella gestione
+
 KO! -il comando execute non è stato considerato! ok! ho deciso di non considerarlo...al momento	
+
 KO! -gestione split-view: in pratica posso avere due editor verticali....guardando il comportamento di Notepad++ qui crea un'altra mdiarea secondaria e li ci sposta le window 
      Alla fine non sono riuscito a venirne a capo...ho provato creando due mdiArea che si passano le window...ma non sono riuscito a farla funzionare come si deve.
      Poi ho provato a creare uno splitter direttamente nella mdiarea ma per fare questo sembra che la base di partenza debba sempre essere una qmdiwindow e quindi significa che devo creare una window superiore che ingloba due 
      window sottostanti divise dallo splitter...ma esce una schifezza
 	 Alla fine ho scoperto che è una funzionalità che andrebbe attivata dentro qscintilla...solo che si chiama multi views ma che però sembra non essere disponibile nel porting di python cosi come altre funzionalità come:
 	   - differenza di testo			
+
 KO! -chatgpt; si è valutato di inserire chat con chatgpt o copilot ma è emerso che il nostro firewall blocca tutte le chiamate e quindi diventa un po' un casino fare sta cosa....ma sarebbe bello indicare a Gigi di aprirmi
      questa possibilità e poi valutare cosa si può fare sia a livello di chat che a livello che selezione del codice e poi lo do in pasto a chatgpt per un controllo-modifica
 	 Per fare queste prove meglio creare un ambiente virtuale Python in quanto le libreria openai "sporcano" i package
+
 KO! -implementare il ctag https://qscintilla.com/#ctags/ctags_intro o molto più semplicemente l'hotspot che potrebbe permettere di creare dei link alle procedure/funzioni dentro se presenti nell'editor aperto....
+
 KO! -Valutaro di creare l'help con lo strumento di qt ma abbandonato perché di fatto troppo complicato da scrivere....al momento fatto documento .odt

@@ -1989,6 +1989,14 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             v_azione_info = QAction('Info')
             v_azione_info.triggered.connect(self.slot_popup_menu_info)
             v_menu.addAction(v_azione_info)
+
+        # in caso di tabelle e viste, aggiungo le azioni per svolgere la SELECT
+        if v_tipo_obj in ('TABLE','VIEW'):
+            v_menu.addSeparator()            
+            v_azione_select_top = QAction('Select rows')
+            v_azione_select_top.triggered.connect(self.slot_popup_menu_select_rows)
+            v_menu.addAction(v_azione_select_top)
+        
         # visualizzo il menu sopra la riga selezionata (della lista oggetti)
         if self.v_popup_menu_zone == 'LISTA_OGGETTI':
             v_menu.exec(self.oggetti_db_elenco.viewport().mapToGlobal(p_position))    
@@ -2227,7 +2235,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         """
            Visualizza la window con le informazioni dell'oggetto
         """        
-        from object_info_ui import Ui_object_info_window
+        from qtdesigner.object_info_ui import Ui_object_info_window
         
         self.win_object_info = QDialog()
         self.ui_object_info = Ui_object_info_window()
@@ -2266,6 +2274,12 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # mostro la window
         self.win_object_info.show()                        
 
+    def slot_popup_menu_select_rows(self):
+        """
+           Crea il comando di SELECT della tabella-vista
+        """                
+        self.oggetti_db_elenco_esegui_voce_menu('SELECT_ROWS')
+    
     def oggetti_db_elenco_esegui_voce_menu(self, p_function):
         """
            Crea il comando dell'oggetto selezionato e lo inserisce nell'editor (es. alter table...)                     
@@ -2355,9 +2369,24 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             else:
                 message_error(QCoreApplication.translate('MSql_win1','Invalid field!'))
                 return 'ko'
+
+        # operazione di SELECT sulla tabella-vista
+        if v_nome_obj != '' and v_tipo_obj != '' and p_function in ('SELECT_ROWS'):                
+            if v_tipo_obj in ('TABLE','VIEW'):
+                    v_num_linee_attuali = o_MSql_win2.e_sql.lines()
+                    v_comando += "SELECT * FROM "+v_nome_obj+";"            
+            else:
+                message_error(QCoreApplication.translate('MSql_win1','Invalid object!'))
+                return 'ko'
             
         # inserisco il comando nell'editor corrente
         o_MSql_win2.e_sql.append(v_comando)            
+
+        # se richiesta operazione di SELECT sulla tabella-vista, seleziono il comando appena inserito e richiamo l'esecuzione come se fosse F5
+        if v_nome_obj != '' and v_tipo_obj != '' and p_function in ('SELECT_ROWS'):               
+            o_MSql_win2.e_sql.setSelection(v_num_linee_attuali, 0, v_num_linee_attuali, len(v_comando))
+            o_MSql_win2.e_sql.setFocus()
+            o_MSql_win2.slot_esegui()
         
     def slot_oggetti_db_click(self, p_index):
         """
@@ -3436,14 +3465,15 @@ class My_MSql_Lexer(QsciLexerSQL):
             
         # imposto il font dell'editor in base alle preferenze 
         if o_global_preferences.font_editor != '':
-            v_split = o_global_preferences.font_editor.split(',')            
-            if not p_mini_map:
-                v_font = QFont(str(v_split[0]),int(v_split[1]))
-            else:
-                v_font = QFont(str(v_split[0]),3)
+            v_split = o_global_preferences.font_editor.split(',')                        
+            v_font = QFont(str(v_split[0]),int(v_split[1]))            
             if len(v_split) > 2 and v_split[2] == ' BOLD':
                 v_font.setBold(True)
-            self.setFont(v_font)    
+            self.setFont(v_font)   
+
+        # se siamo sulla minimappa allora imposto uno zoom 
+        if p_mini_map:  
+            self.p_editor.zoomTo(-10)
         
         # se è stato scelto il tema colori scuro --> reimposto i colori della sezione qscintilla
         # non sono riuscito a trovare altre strade per fare questa cosa
@@ -3671,14 +3701,16 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         v_cur_y, v_cur_x = 0,0
         if p_contenuto_file is not None:        
             # imposto editor con quello ricevuto in ingresso
-            self.e_sql.setText(p_contenuto_file)            
-            self.e_sql_mini_map.setText(p_contenuto_file)            
+            self.e_sql.setText(p_contenuto_file)                        
             # chiedo allo storico di darmi eventuale posizione di dove si trovava il cursore ultima volta
             if o_global_preferences.remember_text_pos:
                 v_cur_y, v_cur_x = read_files_history(v_global_work_dir+'MSql.db', p_titolo)            
                 
         # mi posiziono sulla prima riga (la posizione X viene al momento forzata a zero!)
         self.e_sql.setCursorPosition(v_cur_y,0)
+
+        # lego il documento principale con la minimappa in modo che quest'ultima sia sempre sincronizzata con l'editor e mi posiziono alla stessa posizione del cursore dell'editor
+        self.e_sql_mini_map.setDocument(self.e_sql.document())
         self.e_sql_mini_map.setCursorPosition(v_cur_y,0)
         self.v_mini_map_visible = True
 
@@ -3732,9 +3764,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             self.autosave_snapshoot_timer = QTimer(self)
             self.autosave_snapshoot_timer.timeout.connect(self.slot_save_snapshoot)
             self.autosave_snapshoot_timer.start(o_global_preferences.autosave_snapshoot_interval*1000) 
-
-        # attivo slot sul cambiamento di testo (es. digitazione di testo)
-        self.e_sql.textChanged.connect(self.slot_mini_map_copy_text)
+        
         # attivo slot che dal margine, segna i segnalibri
         self.e_sql.setMarginSensitivity(1, True)
         self.e_sql.marginClicked.connect(self.slot_add_bookmark)
@@ -3764,33 +3794,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             self.e_sql.setFocus()
             # riattivo i segnali sulla mini mappa
             self.e_sql_mini_map.blockSignals(False)                        
-    
-    def slot_mini_map_copy_text(self): 
-        """
-           Copia il testo dell'editor nella mini mappa
-           Notare come vengono bloccati gli eventi perché altrimenti si creano riposizionamenti indesiderati!
-        """         
-        if self.v_mini_map_visible:
-            # blocco i segnali sugli oggetti
-            self.e_sql.blockSignals(True)                        
-            self.e_sql_mini_map.blockSignals(True)      
-            self.e_sql.verticalScrollBar().blockSignals(True)                        
-            self.e_sql_mini_map.verticalScrollBar().blockSignals(True)      
             
-            # sincronizzo il testo tra l'editor e la mini mappa e posiziono il cursore correttamente sulla mini mappa
-            self.e_sql_mini_map.setText(self.e_sql.text()) 
-            v_line, v_pos = self.e_sql.getCursorPosition()
-            self.e_sql_mini_map.setCursorPosition(v_line, 0)                        
-            
-            # sincronizzo la posizione delle scrollbar tra editor e mini mappa
-            self.e_sql_mini_map.verticalScrollBar().setValue( self.e_sql.verticalScrollBar().value() )
-            
-            # riattivo i segnali sulle scrollbar
-            self.e_sql.blockSignals(False)                        
-            self.e_sql_mini_map.blockSignals(False)          
-            self.e_sql.verticalScrollBar().blockSignals(False)                        
-            self.e_sql_mini_map.verticalScrollBar().blockSignals(False)      
-        
     def slot_mini_map_sync_scrollbars(self, value): 
         """
            Quando si agisce sulla scrollbar dell'editor o della mini mappa, sposta il testo.           

@@ -98,7 +98,7 @@ class SendCommandToOracle(QDialog):
                  parent_geometry, anim_gif=''):
         super().__init__()
         self.setModal(True)
-        self.setWindowTitle("…please wait…")
+        self.setWindowTitle("MSql")
         self.resize(200, 80)
 
         # inizializzo status & error
