@@ -260,8 +260,8 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         ###
         # preparo elenco user        
         ###
-        self.o_users.setColumnCount(6)
-        self.o_users.setHorizontalHeaderLabels(['User title (*)','User name (*)','Password (*)','AutoConnection'+chr(10)+'at startup','As Proxy','As Schema'])   
+        self.o_users.setColumnCount(7)
+        self.o_users.setHorizontalHeaderLabels(['User title (*)','User name (*)','Password (*)','AutoConnection'+chr(10)+'at startup','As Proxy','As Schema','Mode'])   
         v_rig = 1                
         for record in self.preferences.elenco_user:                                    
             self.o_users.setRowCount(v_rig) 
@@ -409,7 +409,15 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
             self.o_users.setItem(v_rig-1,5,QTableWidgetItem(record[5]))                               
         else:
             self.o_users.setItem(v_rig-1,5,QTableWidgetItem())                               
-    
+        # Mode (normal, SYSDBA, SYSOPER)
+        e_mode = QComboBox()        
+        e_mode.addItems(["Normal", "SYSDBA", "SYSOPER"])        
+        self.o_users.setCellWidget(v_rig-1,6,e_mode)                               
+        if len(record) > 6:
+            e_mode.setCurrentText(record[6])    
+        else:
+            e_mode.setCurrentText('Normal')    
+
     def slot_e_default_animated_gif(self):
         """
            Aggiorna la preview della gif animata
@@ -553,7 +561,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         """
         v_rig = self.o_users.rowCount()+1
         self.o_users.setRowCount(v_rig)
-        self.carico_riga_user(v_rig, ['','','',0])
+        self.carico_riga_user(v_rig, ['','','',0,'','','Normal'])
 
     def slot_b_user_remove(self):
         """
@@ -663,7 +671,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         for i in range(0,self.o_users.rowCount()):
             # controllo il campo della password che è annegato in un widget
             v_password = self.o_users.cellWidget(i,2)            
-            # controllo la checkbox del default (da notare come la checkbox è annegata in un oggetto di layout 
+            # controllo la checkbox di autoconnection: da notare come la checkbox è annegata in un oggetto di layout 
             # e quindi prima prendo l'oggetto che c'è annegato nella cella della tabella, poi in quell'oggetto
             # prendo tutti gli oggetti di tipo checkbox e poi prendo il primo checkbox (che è anche l'unico)
             # e da li prendo il suo stato!
@@ -673,7 +681,10 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
                 v_default = '1'
             else:
                 v_default = '0'
-            v_users.append( ( self.o_users.item(i,0).text(), self.o_users.item(i,1).text() , v_password.text(), v_default, self.o_users.item(i,4).text(), self.o_users.item(i,5).text()) )            
+            # dalla cella 6 prendo la combo box per prendere la modalità di connessione (normal, sysdba, sysoper)
+            v_widget = self.o_users.cellWidget(i,6)            
+            v_e_mode = v_widget.currentText()            
+            v_users.append( ( self.o_users.item(i,0).text(), self.o_users.item(i,1).text() , v_password.text(), v_default, self.o_users.item(i,4).text(), self.o_users.item(i,5).text(), v_e_mode ) )            
 
         # se il tabsize è vuoto --> imposto 2
         if self.e_tab_size.text() == '':

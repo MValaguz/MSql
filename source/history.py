@@ -6,6 +6,7 @@
 #Librerie sistema
 import os
 import sys
+import sqlite3
 #Librerie grafiche
 from PyQt6.QtWidgets import *
 from PyQt6.QtSql import *
@@ -83,7 +84,7 @@ class history_class(QMainWindow, Ui_history_window):
         self.v_sqlite_conn = QSqlDatabase.addDatabase("QSQLITE")
         self.v_sqlite_conn.setDatabaseName(self.nome_db)
         if not self.v_sqlite_conn.open():
-            message_error(QCoreApplication.translate('history','Error to open database'))
+            message_error(QCoreApplication.translate('history','Error to open history database'))
             return 'ko'
      
         # controllo se indicata la where        
@@ -125,7 +126,7 @@ class history_class(QMainWindow, Ui_history_window):
     def closeEvent(self, event):
         """
            chiusura della connessione al db sqlite
-        """                
+        """                        
         self.v_sqlite_conn.close()        
 
     def slot_purge(self):
@@ -164,18 +165,18 @@ class history_class(QMainWindow, Ui_history_window):
         """
            dato un ID di riga, restituisce la rispettiva istruzione SQL
         """
-        query = QSqlQuery()
-        # Esecuzione della query per leggere il contenuto desiderato
-        query.prepare("SELECT ISTRUZIONE from SQL_HISTORY WHERE ID = :id")
-        query.bindValue(":id", p_id)
-
-        if query.exec():
-            while query.next():                
-                # restituisco il valore della colonna
-                return query.value(0)                  
+        # Apre la connessione usando il nome db in self.nome_db
+        conn = sqlite3.connect(self.nome_db)
+        cursor = conn.cursor()
         
-        # altrimenti esco senza nulla        
-        return ''
+        # Esegue la query con bind variable (usando il segnaposto '?' per SQLite)
+        query = "SELECT ISTRUZIONE FROM SQL_HISTORY WHERE ID = ?"
+        cursor.execute(query, (p_id,))
+        
+        # Recupera il risultato
+        riga = cursor.fetchone()
+        risultato = riga[0] if riga else None
+        return risultato                  
     
 # ----------------------------------------
 # TEST APPLICAZIONE

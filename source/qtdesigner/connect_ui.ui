@@ -90,6 +90,11 @@
        <string>SYSDBA</string>
       </property>
      </item>
+     <item>
+      <property name="text">
+       <string>SYSOPER</string>
+      </property>
+     </item>
     </widget>
    </item>
    <item row="6" column="2">

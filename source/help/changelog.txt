@@ -2,11 +2,24 @@
 MSql TODO!!!
 -------------
 - Inserire la possibilità di collegarsi a oracle-cloud
+- Ancora persiste il problema che esce messaggio errore "dpy...." dopo che compilo pkg che va in errore, e poi lancio delle select
 - Continuare con l'help 
 
 ---------------
 MSql Changelog!
 ---------------
+
+Versione dated 27/03/2026
+OK! Bug segnalato da Diego per cui se si disattivava la minimappa, poi spariva il contenuto dell'editor
+
+Versione dated 25/03/2026
+OK! Risolto problema in gestione cronologia; dopo aver preso una riga e copiata in editor, le successive volte non le prendeva più
+OK! Nelle preferenze/connessioni, a livello di utente è possibile specifica il tipo di utente; Normal, SYSDBA, SYSOPER
+    Nella connessione manuale, inserita l'opzione SYSOPER	
+
+Versione dated 23/03/2026
+OK! Portato a 20 il numero della lista ultimi file aperti
+
 Versione dated 20/03/2026
 OK! Quando faccio tasto destro su una tabella nell'object navigator, inserire anche la voce che crea la select e la esegue!
 

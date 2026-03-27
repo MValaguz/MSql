@@ -821,10 +821,10 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 if rec[0] == p_slot.text():
                     self.e_user_name = rec[1]
                     self.e_password = rec[2]
-                    self.e_user_proxy = rec[4]
-                    self.e_user_mode = 'Normal'      
+                    self.e_user_proxy = rec[4]                    
                     self.e_current_schema = rec[5]
                     self.current_schema = rec[5]              
+                    self.e_user_mode = rec[6]              
             self.slot_connect()            
         # Connessione a un data base specifico richiedendo tutti i parametri singolarmente
         elif p_slot.objectName() == 'actionConnect':
@@ -1310,7 +1310,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # scorro array al contrario (così tengo il più recente in cima alla lista) e ricarico il menu a video            
             v_conta_righe = 0
             for v_index in range(len(self.elenco_file_recenti),0,-1):                
-                if v_conta_righe < 10:                    
+                if v_conta_righe < 20:                    
                     v_action = QAction(self)
                     v_action.setText(self.elenco_file_recenti[v_index-1])
                     v_action.setData('FILE_RECENTI')                    
@@ -1573,6 +1573,8 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # connessione al DB (eventualmente come dba)            
             if self.e_user_mode == 'SYSDBA':               
                 v_global_connection = oracledb.connect(user=v_user_connect, password=self.e_password, dsn=self.e_server_name, mode=oracledb.SYSDBA)                        
+            elif self.e_user_mode == 'SYSOPER':               
+                v_global_connection = oracledb.connect(user=v_user_connect, password=self.e_password, dsn=self.e_server_name, mode=oracledb.SYSOPER)                        
             else:
                 v_global_connection = oracledb.connect(user=v_user_connect, password=self.e_password, dsn=self.e_server_name)                        
             # imposto var che indica la connessione a oracle
@@ -1593,6 +1595,8 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # Se mi collego come SYSDBA coloro di rosso
         if self.e_user_mode == 'SYSDBA':
             v_global_background = 'red'
+        elif self.e_user_mode == 'SYSOPER':
+            v_global_background = 'orange'
 
         # sulla statusbar, aggiorno la label della connessione (notare come se possibile venga mostrato il titolo dato dall'utente al server nella sezione preferiti)
         self.l_connection.setText(QCoreApplication.translate('MSql_win1','Connected to:') + ' ' + v_server_title + "/" + v_user_connect)     
@@ -3029,6 +3033,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         """
            Prende la riga selezionata nell'history e la porta dentro l'editor corrente
         """       
+        print('slot_history_insert_in_editor')
         # prendo indice dalla tabella (in pratica la cella che contiene l'id della riga dell'history)
         try:
             index = self.win_history.o_lst1.selectedIndexes()[4]           
@@ -3817,12 +3822,10 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
            Attiva o disattiva la mini mappa
         """
         if self.v_mini_map_visible:
-            self.v_mini_map_visible = False
-            self.e_sql_mini_map.setText('')
+            self.v_mini_map_visible = False            
             self.e_sql_mini_map.setVisible(False)
         else:
-            self.v_mini_map_visible = True
-            self.e_sql_mini_map.setText(self.e_sql.text())
+            self.v_mini_map_visible = True            
             self.e_sql_mini_map.setVisible(True)
 
     def eventFilter(self, source, event):
