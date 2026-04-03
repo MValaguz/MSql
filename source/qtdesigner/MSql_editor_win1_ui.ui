@@ -167,6 +167,7 @@
     <addaction name="separator"/>
     <addaction name="actionExport_to_Excel"/>
     <addaction name="actionExport_to_Insert_format"/>
+    <addaction name="actionExport_to_JSON_format"/>
     <addaction name="separator"/>
     <addaction name="actionFont_output_selector"/>
    </widget>
@@ -1830,6 +1831,15 @@
    </property>
    <property name="text">
     <string>Query Designer</string>
+   </property>
+  </action>
+  <action name="actionExport_to_JSON_format">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/json.png</normaloff>:/icons/icons/json.png</iconset>
+   </property>
+   <property name="text">
+    <string>Export to JSON format</string>
    </property>
   </action>
  </widget>

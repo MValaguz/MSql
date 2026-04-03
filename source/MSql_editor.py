@@ -36,6 +36,7 @@ import re
 import traceback
 import time
 import psutil
+import json
 # Librerie di data base Oracle
 import oracledb, oracle_my_lib, oracle_executer
 # Librerie grafiche QT
@@ -1180,6 +1181,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # Esporto in formato Insert di testo
             elif p_slot.objectName() == 'actionExport_to_Insert_format':
                 o_MSql_win2.slot_export_to_insert_format()
+            # Esporto in formato JSON
+            elif p_slot.objectName() == 'actionExport_to_JSON_format':
+                o_MSql_win2.slot_export_to_json_format()
             # Pulizia di tutto l'output
             elif p_slot.objectName() == 'actionClear_output':                 
                 o_MSql_win2.slot_clear('ALL')    
@@ -2822,11 +2826,13 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             else:
                 v_risultato = ''
             v_spazi = 0
-            # leggo l'oggetto che contiene procedure-funzioni alla ricerca dell'elemento che ha selezionato l'utente
-            for ele in self.oggetti_db_lista_proc_func:                                
+            # leggo l'oggetto che contiene procedure-funzioni alla ricerca dell'elemento che ha selezionato l'utente            
+            for ele in self.oggetti_db_lista_proc_func:                                                
                 # se trovo l'elemento selezionato....inizio a caricarlo nella stringa di risultato
                 if ele.nome_definizione == self.v_nome_foglia:                                        
                     v_risultato += ele.nome_definizione 
+                    if ele.tipo_definizione == 'FUNCTION':
+                        v_risultato = 'V_RESULT := ' + v_risultato
                     v_1a_volta = True
                     # scorro tutti i parametri e li carico (per i parametri successivi al primo, cerco di fare indentazione)
                     for par in ele.lista_parametri:
@@ -5865,6 +5871,70 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 os.startfile(v_path_finale)
         except:
             message_error(QCoreApplication.translate('MSql_win2','Error in file creation!'))    
+    
+    def slot_export_to_json_format(self):
+        """
+           Esporta i dati presenti nella tableview in formato JSON.
+           Ogni riga diventerà un oggetto JSON con le chiavi corrispondenti alle intestazioni.
+        """
+        global v_global_work_dir
+
+        # Carico tutti i dati (mantenendo la tua logica)
+        self.slot_go_to_end()
+
+        # Estraggo il modello dalla tableview
+        v_model = self.o_table.model()
+        if v_model is None:
+            return None        
+
+        # Genero il percorso del file (cambiando l'estensione in 'json')
+        v_path_finale = prossimo_export_file(os.path.join(v_global_work_dir, 'export'), 'Export_data', 'json')
+        
+        # Lista che conterrà tutte le righe come dizionari
+        v_dati_finali = []
+        
+        # Iterazione sulle righe del modello
+        for row in range(v_model.rowCount()):
+            v_riga_dict = {}
+            for column in range(v_model.columnCount()):
+                # Recupero il nome della colonna dalle tue intestazioni salvate
+                v_nome_colonna = self.nomi_intestazioni[column]
+                
+                v_index = v_model.index(row, column)                
+                v_campo = v_model.data(v_index)
+                
+                # Normalizzazione: nel JSON 'None' diventa correttamente 'null'
+                # Se preferisci la stringa vuota come nel tuo CSV, tieni la riga sotto:
+                if v_campo is None:
+                    v_campo = ""
+                    
+                # Popolo il dizionario della riga: { "NOME_COLONNA": "VALORE" }
+                v_riga_dict[v_nome_colonna] = v_campo
+                
+            v_dati_finali.append(v_riga_dict)
+
+        # Scrittura del file JSON
+        try:
+            with open(v_path_finale, 'w', encoding='utf-8') as v_json_file:
+                # indent=4 rende il file leggibile (formattato), altrimenti sarebbe tutto su una riga
+                json.dump(v_dati_finali, v_json_file, indent=4, ensure_ascii=False)                
+            # Apre direttamente la cartella contenente il file
+            try:
+                v_folder = os.path.dirname(v_path_finale)
+                if os.name == "nt":  # Windows
+                    # Apre l'explorer e seleziona il file specifico
+                    subprocess.run(['explorer', '/select,', os.path.normpath(v_path_finale)])
+                elif os.name == "posix":  # Linux
+                    # Prova ad aprire la cartella specifica
+                    subprocess.Popen(["xdg-open", v_folder])
+                else:
+                    # Fallback generico per altri sistemi
+                    os.startfile(v_folder)
+            except Exception as e:
+                message_error(QCoreApplication.translate('MSql_win2','Error to open folder!') + f" {str(e)}")                
+        except Exception as e:
+            # Uso la tua funzione di errore
+            message_error(QCoreApplication.translate('MSql_win2','Error in file creation!') + f" {str(e)}")
     
     def closeEvent(self, e):
         """

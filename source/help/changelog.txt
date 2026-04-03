@@ -11,10 +11,12 @@ MSql TODO!!!
 MSql Changelog!
 ---------------
 
-Versione dated 02/04/2026
+Versione dated 03/04/2026
+OK! Quando dall'object viewer si fa insert di una function nell'editor, viene anteposto al nome di funzione la scritta "V_RESULT :=" così da far capire che è una function
+OK! Nel menu "Output" inserito export dei dati anche in formato JSON; siccome solitamente non esiste un'app di default per apertura, quando viene fatto export si apre la cartella dove creato il file
 OK! Finalmente terminata la prima versione dell'help di MSql :-)
-OK! Modificata modialità di import istruzioni da "Cronologia" e da "Preferiti"
-OK! Ho importato una tabella e ha creato un file di testo con ritorno a capo LF; quando però inizio a scriverci e fare invio, ci mette CR+LF. 
+OK! Modificata modalità di import istruzioni da "Cronologia" e da "Preferiti"; ora prima di inserire il testo nella posizione del cursore, ci mette un ritorno a capo
+OK! Ho importato una tabella e ha creato un file di testo con ritorno a capo LF; quando però inizio a scriverci e fare invio, ci mette CR+LF
 
 Versione dated 27/03/2026
 OK! Bug segnalato da Diego per cui se si disattivava la minimappa, poi spariva il contenuto dell'editor

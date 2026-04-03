@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/json.png</file>
     <file>icons/github.png</file>
     <file>icons/upload.png</file>
     <file>icons/designer.png</file>
