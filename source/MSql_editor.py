@@ -3032,8 +3032,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
     def slot_history_insert_in_editor(self):
         """
            Prende la riga selezionata nell'history e la porta dentro l'editor corrente
-        """       
-        print('slot_history_insert_in_editor')
+        """               
         # prendo indice dalla tabella (in pratica la cella che contiene l'id della riga dell'history)
         try:
             index = self.win_history.o_lst1.selectedIndexes()[4]           
@@ -3043,13 +3042,17 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # ricerco il valore dell'istruzione corrispondente e lo carico nell'editor
         o_MSql_win2 = self.oggetto_win2_attivo()
         if o_MSql_win2 != None:
-            v_risultato = self.win_history.return_instruction(self.win_history.o_lst1.model().data(index))                        
-            # il testo che prendo dall'history ha formato eol Linux, e se necessario
-            # va convertito in Windows (a seconda dell'impostazione dell'editor di destinazione)
-            if o_MSql_win2.setting_eol == 'W' and '\r\n' not in v_risultato:
-                v_risultato = v_risultato.replace('\n', '\r\n')                                    
+            v_risultato = self.win_history.return_instruction(self.win_history.o_lst1.model().data(index))                                    
+            # il testo finale deve corrispondere come eol a quello dell'editor
+            if o_MSql_win2.setting_eol == 'W':
+                v_enter = '\r\n'
+                if '\r\n' not in v_risultato:
+                    v_risultato = v_risultato.replace('\n', '\r\n')                                    
+            else:
+                v_enter = '\n'                
+                v_risultato = v_risultato.replace('\r\n', '\n')                                    
 
-            o_MSql_win2.e_sql.append(v_risultato)        
+            o_MSql_win2.e_sql.insert(v_enter + v_risultato)        
 
     def slot_preferred_sql(self):
         """
@@ -3080,11 +3083,16 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         o_MSql_win2 = self.oggetto_win2_attivo()
         if o_MSql_win2 != None and index != -1:            
             v_risultato = self.win_preferred_sql.o_tabella.item(index,2).text()            
-            # converto l'eol se editor è in modalità Unix
-            if o_MSql_win2.setting_eol == 'U':
-                v_risultato = v_risultato.replace('\r\n','\n')                                    
-
-            o_MSql_win2.e_sql.insert(v_risultato)        
+            # il testo finale deve corrispondere come eol a quello dell'editor
+            if o_MSql_win2.setting_eol == 'W':
+                v_enter = '\r\n'
+                if '\r\n' not in v_risultato:
+                    v_risultato = v_risultato.replace('\n', '\r\n')                                    
+            else:
+                v_enter = '\n'                
+                v_risultato = v_risultato.replace('\r\n', '\n')                   
+            
+            o_MSql_win2.e_sql.insert(v_enter + v_risultato)        
 
     def slot_compare_last_two_text_editor(self):        
         """
@@ -3637,31 +3645,10 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         self.v_lexer_mini_map = My_MSql_Lexer(self.e_sql_mini_map, True)                
         self.e_sql_mini_map.setLexer(self.v_lexer_mini_map)
                 
-        # imposto il ritorno a capo in formato Windows (CR-LF) o Unix (LF)
-        # Attenzione! Nel caso di nuovo file il formato è Windows, mentre se viene aperto un file, va analizzata la prima riga
-        #             e ricercato che formato ha....quello sarà poi il formato da utilizzare!
-        #             Questo è stato fatto per rendere l'editor più flessibile
-        #             Ho poi scoperto che ci sono in giro file misti tra (CR-LF) e (LF) e quindi limitato l'analisi ai primi 1000 caratteri....
-        if p_contenuto_file is not None:
-            if p_contenuto_file[0:1000].find('\r\n') != -1:                
-                self.setting_eol = 'W'
-            else:                
-                self.setting_eol = 'U'
-        else:
-            self.setting_eol = 'W'
-
-        # controllo quale formato di eol ha il file e imposto tale opzione in Scintilla 
-        if self.setting_eol == 'W':
-            self.e_sql.setEolMode(QsciScintilla.EolMode.EolWindows)                
-        else:
-            self.e_sql.setEolMode(QsciScintilla.EolMode.EolUnix)                
-        # aggiorno la statusbar con l'impostazione di eol
-        self.aggiorna_statusbar()
-
         # visualizzo o meno il carattere di end of line in base alla preferenza
         self.set_show_end_of_line()      
         # imposto la var della indentation guide
-        self.v_indentation_guide = o_global_preferences.indentation_guide  
+        self.v_indentation_guide = o_global_preferences.indentation_guide          
 
         ###
         # DICHIARAZIONE VAR GENERALI
@@ -3781,6 +3768,26 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # variabile per controllare il loop sulle scrollbar tra editor e minimappa
         self.v_scrollbar_loop = False        
 
+        # imposto il ritorno a capo in formato Windows (CR-LF) o Unix (LF)
+        # Attenzione! Nel caso di nuovo file il formato è Windows, mentre se viene aperto un file, va analizzata la prima riga
+        #             e ricercato che formato ha....quello sarà poi il formato da utilizzare!
+        #             Questo è stato fatto per rendere l'editor più flessibile
+        #             Ho poi scoperto che ci sono in giro file misti tra (CR-LF) e (LF) e quindi limitato l'analisi ai primi 1000 caratteri....
+        if p_contenuto_file is not None:
+            if p_contenuto_file[0:1000].find('\r\n') != -1:                
+                self.setting_eol = 'W'
+            else:                
+                self.setting_eol = 'U'
+        else:
+            self.setting_eol = 'W'        
+        # controllo quale formato di eol ha il file e imposto tale opzione in Scintilla         
+        if self.setting_eol == 'W':
+            self.e_sql.setEolMode(QsciScintilla.EolMode.EolWindows)                            
+        else:
+            self.e_sql.setEolMode(QsciScintilla.EolMode.EolUnix)                
+        # aggiorno la statusbar 
+        self.aggiorna_statusbar()        
+
     def slot_mini_map_click(self):
         """
            Quando viene cliccato il testo sulla mini mappa riposiziona il cursore sull'editor
@@ -3846,12 +3853,12 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 self.e_sql.SendScintilla(QsciScintilla.SCI_AUTOCCOMPLETE)
                 return True
 
-        # individio la disattivazione della window e disattivo il drop sulla parte di editor in modo possa gestire 
+        # individuo la disattivazione della window e disattivo il drop sulla parte di editor in modo possa gestire 
         # i drop di un file che viene trascinato sull'app. Il drop del file viene gestito tramite il controllo dell'evento sulla window principale
         if event.type() == QEvent.Type.WindowDeactivate:
             self.e_sql.setAcceptDrops(False)                     
 
-        # individio l'attivazione della window e riattivo la gestione del drop sulla parte di editor in modo possa gestire         
+        # individuo l'attivazione della window e riattivo la gestione del drop sulla parte di editor in modo possa gestire         
         if event.type() == QEvent.Type.WindowActivate:
             self.e_sql.setAcceptDrops(True)                     
         
@@ -5312,11 +5319,12 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 # quindi...se lo script era di "CREATE"...controllo se in compilazione ci sono stati errori...
                 # attenzione! per certi tipi di oggetto (es. trigger) il numero di riga a cui viene segnalato l'errore è a contare dalla riga di DECLARE!
                 if v_create:
+                    v_other_offset = 0
                     if v_tipo_script == 'TRIGGER':
-                        # ricerco a che riga si trova la prima DECLARE e questo è un ulteriore offset da sommare alla riga di errore
+                        # ricerco a che riga si trova la prima DECLARE e questo è un ulteriore offset da sommare alla riga di errore                        
                         v_other_offset = search_first_string_in_text(p_plsql, r'\bDECLARE\b')
-                    else:
-                        v_other_offset = 0
+                    if v_other_offset is None:
+                        v_other_offset = 0                        
                     print(f"CREAZIONE DELLO SCRIPT --> Tipo: {v_tipo_script} Nome: {v_nome_script} Riga offset: {self.v_offset_numero_di_riga} Altra riga offset: {v_other_offset}")                                        
                     # con questa select dico a Oracle di darmi eventuali errori presenti su un oggetto                 
                     self.v_cursor.execute("SELECT LINE,POSITION,TEXT FROM USER_ERRORS WHERE NAME = '" + v_nome_script + "' and TYPE = '" + v_tipo_script + "'")

@@ -1,13 +1,20 @@
 -------------
 MSql TODO!!!
 -------------
+- Se apro nell'object viewer SM_SMYIOT_PKG, nella prima funzione non riesce a ricavare la var p_user_handle, anche in GET_MATRICOLE_DA_VERIFICARE
+  Se interrogo nell'object viewer una funzione sarebbe bello capire tipologia del parametro (input-output)
 - Inserire la possibilità di collegarsi a oracle-cloud
 - Ancora persiste il problema che esce messaggio errore "dpy...." dopo che compilo pkg che va in errore, e poi lancio delle select
-- Continuare con l'help 
+- Lato linux creare lo script per pacchettizzare tutto il programma
 
 ---------------
 MSql Changelog!
 ---------------
+
+Versione dated 02/04/2026
+OK! Finalmente terminata la prima versione dell'help di MSql :-)
+OK! Modificata modialità di import istruzioni da "Cronologia" e da "Preferiti"
+OK! Ho importato una tabella e ha creato un file di testo con ritorno a capo LF; quando però inizio a scriverci e fare invio, ci mette CR+LF. 
 
 Versione dated 27/03/2026
 OK! Bug segnalato da Diego per cui se si disattivava la minimappa, poi spariva il contenuto dell'editor
