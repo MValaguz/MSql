@@ -165,6 +165,7 @@
     <addaction name="actionClear_output"/>
     <addaction name="actionAuto_clear_output"/>
     <addaction name="separator"/>
+    <addaction name="actionExport_to_CSV"/>
     <addaction name="actionExport_to_Excel"/>
     <addaction name="actionExport_to_Insert_format"/>
     <addaction name="actionExport_to_JSON_format"/>
@@ -713,7 +714,7 @@
    <addaction name="actionTile"/>
    <addaction name="separator"/>
    <addaction name="actionAutoColumnResize"/>
-   <addaction name="actionExport_to_Excel"/>
+   <addaction name="actionExport_to_CSV"/>
    <addaction name="separator"/>
    <addaction name="actionClear_output"/>
    <addaction name="actionMake_table_editable"/>
@@ -913,13 +914,13 @@
     <string>F6</string>
    </property>
   </action>
-  <action name="actionExport_to_Excel">
+  <action name="actionExport_to_CSV">
    <property name="icon">
     <iconset resource="resource.qrc">
      <normaloff>:/icons/icons/csv.png</normaloff>:/icons/icons/csv.png</iconset>
    </property>
    <property name="text">
-    <string>Export to Excel-CSV</string>
+    <string>Export to CSV</string>
    </property>
   </action>
   <action name="actionAutoColumnResize">
@@ -1840,6 +1841,15 @@
    </property>
    <property name="text">
     <string>Export to JSON format</string>
+   </property>
+  </action>
+  <action name="actionExport_to_Excel">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/excel.png</normaloff>:/icons/icons/excel.png</iconset>
+   </property>
+   <property name="text">
+    <string>Export to Excel</string>
    </property>
   </action>
  </widget>

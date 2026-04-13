@@ -1,6 +1,7 @@
 -------------
 MSql TODO!!!
 -------------
+- Il concetto di posizionamento nell'editor con calcolo lunghezza carattere da 2byte lato Scintilla, va provato a fare anche per quando c'è errore nel comando SQL o PL-SQL che deve adottare lo stesso meccanismo usato per CTRL+Invio
 - Se apro nell'object viewer SM_SMYIOT_PKG, nella prima funzione non riesce a ricavare la var p_user_handle, anche in GET_MATRICOLE_DA_VERIFICARE
   Se interrogo nell'object viewer una funzione sarebbe bello capire tipologia del parametro (input-output)
 - Inserire la possibilità di collegarsi a oracle-cloud
@@ -11,31 +12,47 @@ MSql TODO!!!
 MSql Changelog!
 ---------------
 
-Versione dated 03/04/2026
+Version dated 13/04/2026
+OK! Marco T. ha indicato nuovo caso per malfunzionamento di CTRL+Invio; l'istruzione indicata aveva al suo interno il carattere nascosto '\xa0' e anche caratteri accentati.
+    Dopo diversi test scoperto che i caratteri accentati come ad esempio "è" in python hanno una dimensione diversa rispetto a Scintilla!
+    A questo punto fatto in modo che i puntatori di selezione di inizio e fine istruzione siano convertiti da Python a Scintilla e inoltre fatto in modo che l'istruzione trovata venga ripulita 
+		anche dal carattere finale "punto e virgola" che era un altro problema dato dall'istruzione indicata da Marco T.
+OK! Si è decisa la seguente impostazione: quando nell'editor si digita il carattere tab, viene tradotto come spazi in base a quanto definito nelle preferenze; questo meccanismo è meglio perché in caso di passaggio dati tra editor diversi dove ci sono tab con grandezze diverse, funziona meglio.
+OK! Marco T. tramite F10 ha messo in modifica una tabella che contiene un campo note. Ha modificato questo campo che però contiene degli apici; quando poi tradotto in istruzione di modifica, non ha messo i doppi apici
+OK! Nella status bar, inserito nuovo indicatore della posizione cursore relativa
+
+Version dated 08/04/2026
+OK! Nuova funzione per esportare i dati in formato Excel nativo: viene creato e aperto un file di Excel dove le intestazioni sono in grassetto, 
+    dove vengono impostati i filtri automatici e dove la larghezza delle colonne è calcolata in automatico
+
+Version dated 07/04/2026
+OK! Sono in selezione rettangolare; inizio a scrivere e ok scrive in verticale; quando però digito apici e parentesi la selezione si interrompe. Fatto in modo che se selezione rettangolare attiva, allora rimane disattivato il completamento automatico su apici e parentesi.
+
+Version dated 04/04/2026
 OK! Quando dall'object viewer si fa insert di una function nell'editor, viene anteposto al nome di funzione la scritta "V_RESULT :=" così da far capire che è una function
 OK! Nel menu "Output" inserito export dei dati anche in formato JSON; siccome solitamente non esiste un'app di default per apertura, quando viene fatto export si apre la cartella dove creato il file
 OK! Finalmente terminata la prima versione dell'help di MSql :-)
 OK! Modificata modalità di import istruzioni da "Cronologia" e da "Preferiti"; ora prima di inserire il testo nella posizione del cursore, ci mette un ritorno a capo
 OK! Ho importato una tabella e ha creato un file di testo con ritorno a capo LF; quando però inizio a scriverci e fare invio, ci mette CR+LF
 
-Versione dated 27/03/2026
+Version dated 27/03/2026
 OK! Bug segnalato da Diego per cui se si disattivava la minimappa, poi spariva il contenuto dell'editor
 
-Versione dated 25/03/2026
+Version dated 25/03/2026
 OK! Risolto problema in gestione cronologia; dopo aver preso una riga e copiata in editor, le successive volte non le prendeva più
 OK! Nelle preferenze/connessioni, a livello di utente è possibile specifica il tipo di utente; Normal, SYSDBA, SYSOPER
     Nella connessione manuale, inserita l'opzione SYSOPER	
 
-Versione dated 23/03/2026
+Version dated 23/03/2026
 OK! Portato a 20 il numero della lista ultimi file aperti
 
-Versione dated 20/03/2026
+Version dated 20/03/2026
 OK! Quando faccio tasto destro su una tabella nell'object navigator, inserire anche la voce che crea la select e la esegue!
 
-Versione dated 17/03/2026
+Version dated 17/03/2026
 OK! Ottimizzazione della minimappa attraverso una nuova strategia di sincronizzazione che ha permesso di aumentare la velocità dell'editor stesso!
 
-Versione dated 10/03/2026
+Version dated 10/03/2026
 OK! Nella calcolatrice non prendeva la pressione del punto lato tastierino numerico
 
 Version dated 09/03/2026

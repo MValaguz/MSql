@@ -740,14 +740,14 @@ def extract_section_under_cursor(text: str, cursor_pos: int):
 # TEST DELLA FUNZIONE CHE PARTENDO DA CODICE PL-SQL, RESTITUISCE UN OGGETTO CHE CONTIENE TUTTE LE DEFINIZIONI TROVATE
 ######################################################################################################################
 if __name__ == "__main__":       
-    v_file = open('c:/OP_ORDINI_PROD_WMS.msql','r', newline='').read()   
-    v_lista_def = estrai_procedure_function(v_file.split(chr(10)))
-    # emetto a video il contenuto di tutto quello che ho trovato nel testo
-    v_write = open('c:/output.txt','w', newline='')
-    for ele in v_lista_def:
-            v_write.write(f"{ele.nome_definizione} {ele.tipo_definizione} {ele.numero_riga_testo}\r\n")
-            for par in ele.lista_parametri:
-                v_write.write('   ' + par + '\r\n')    
+    # v_file = open('c:/OP_ORDINI_PROD_WMS.msql','r', newline='').read()   
+    # v_lista_def = estrai_procedure_function(v_file.split(chr(10)))
+    # # emetto a video il contenuto di tutto quello che ho trovato nel testo
+    # v_write = open('c:/output.txt','w', newline='')
+    # for ele in v_lista_def:
+    #         v_write.write(f"{ele.nome_definizione} {ele.tipo_definizione} {ele.numero_riga_testo}\r\n")
+    #         for par in ele.lista_parametri:
+    #             v_write.write('   ' + par + '\r\n')    
     #scrivi_lista_in_output(['ciao\n','marco\r\n'])
     
     # test funzione che restituisce owner e object    
@@ -772,109 +772,12 @@ if __name__ == "__main__":
     # v_lista = search_string_in_text(v_testo, 'stringa')
     # print(v_lista)
 
-    # test della funzione che restituisce istruzione sql che sta sotto il cursore
-    # v_testo = """select * 
-    # from   ta_azien
-    # where  azien_co='SMI'
-    # /
-    # SELECT * 
-    # FROM CP_DIPEN 
-    # WHERE AZIEN_CO='SMI' AND 
-    #       DIPEN_CO='00035'
-    # /
-    # SELECT * 
-    # FROM CP_DIPEN 
-    # WHERE AZIEN_CO='TEC' AND 
-    #       DIPEN_CO='00035'
-    # union
-    # SELECT * 
-    # FROM CP_DIPEN 
-    # WHERE AZIEN_CO='SMI' AND 
-    #       DIPEN_CO='00035'
-    # /			
-    # declare
-    #   v_ok varchar2(100);
-    # begin
-    #   v_ok := 'ciao';
-    # 	dbms_output.put_line(v_ok);
-    # end;			
-    # /
-    # SELECT *
-    # FROM   MW_PRELI_TMP
-    # WHERE  TIPOR_DO = 'O'
-    #    AND ESERC_CO = '2025'
-    #    AND DEPOS_CO = 'B1'
-    #    AND TORDI_CO = 'ORPI'
-    #    AND ORDIN_NU = 10
-    #    AND ARTIC_CO IS NOT NULL
-    #    /* LA QTA MANCANTE VIENE NETTIFICATA CON LA QTA DI LISTA */
-    #    AND QTAMA_NU - QTALI_NU = 0
-    #    AND (SELECT DIVPR_CO
-    #      FROM   MA_PRAGE
-    #      WHERE  MA_PRAGE.AZIEN_CO = MW_PRELI_TMP.AZIEN_CO
-    #         AND MA_PRAGE.ARTIC_CO = MW_PRELI_TMP.ARTIC_CO) IS NOT NULL
-    #    AND RIFOP_CO IS NOT NULL
-    # ORDER BY DATAP_DA, PRIOR_NU
-    # /
-    # """
-    #     print('-'*100)
-    #     #v_istruzione, v_tipo, v_riga_inizio, v_riga_fine = extract_sql_under_cursor(v_testo, 20)    
-    #     #print(f"{v_istruzione} {v_tipo},{v_riga_inizio},{v_riga_fine}")
-    #     v_istruzione, v_riga_inizio, v_riga_fine = extract_sql_under_cursor(v_testo, 20)    
-    #     print(f"{v_istruzione} ,{v_riga_inizio},{v_riga_fine}")
-    #     #print(v_testo[v_riga_inizio:v_riga_fine],)   
-
-#     v_testo = """    select * 
-#     from   ta_azien
-#     where  azien_co='SMI'
-#     /
-#     SELECT * 
-#     FROM CP_DIPEN 
-#     WHERE AZIEN_CO='SMI' AND 
-#           DIPEN_CO='00035'
-#     /
-#     SELECT * 
-#     FROM CP_DIPEN 
-#     WHERE AZIEN_CO='TEC' AND 
-#           DIPEN_CO='00035'
-#     union
-#     SELECT * 
-#     FROM CP_DIPEN 
-#     WHERE AZIEN_CO='SMI' AND 
-#           DIPEN_CO='00035'
-#     /			
-#     declare
-#       v_ok varchar2(100);
-#     begin
-#       v_ok := 'ciao';
-#     	dbms_output.put_line(v_ok);
-#     end;			
-#     /
-#     SELECT *
-#     FROM   MW_PRELI_TMP
-#     WHERE  TIPOR_DO = 'O'
-#        AND ESERC_CO = '2025'
-#        AND DEPOS_CO = 'B1'
-#        AND TORDI_CO = 'ORPI'
-#        AND ORDIN_NU = 10
-#        AND ARTIC_CO IS NOT NULL
-#        /* LA QTA MANCANTE VIENE NETTIFICATA CON LA QTA DI LISTA */
-#        AND QTAMA_NU - QTALI_NU = 0
-#        AND (SELECT DIVPR_CO
-#          FROM   MA_PRAGE
-#          WHERE  MA_PRAGE.AZIEN_CO = MW_PRELI_TMP.AZIEN_CO
-#             AND MA_PRAGE.ARTIC_CO = MW_PRELI_TMP.ARTIC_CO) IS NOT NULL
-#        AND RIFOP_CO IS NOT NULL
-#     ORDER BY DATAP_DA, PRIOR_NU
-# /		
-
-# select * from ta_azien
-
-# select * from ma_depos
-# """
-#     v_start, v_end = extract_section_under_cursor(v_testo, 20)
-#     print(v_testo[v_start:v_end])
-#     v_start, v_end = extract_section_under_cursor(v_testo, 400)
-#     print(v_testo[v_start:v_end])
-#     v_start, v_end = extract_section_under_cursor(v_testo, 1100)
-#     print(v_testo[v_start:v_end])
+    # lettura del file dove presente problema di CTRL+INVIO 
+    v_testo = v_file = open('C:/Users/mvalaguz/Desktop/Test per CTRL INVIO Estrazione_richiesta_41304.sql','r', encoding='utf-8',newline='').read()
+    print('-'*100)
+    print(repr(v_testo))
+    print('-'*100)
+    v_start, v_end = extract_section_under_cursor(v_testo, 1100)    
+    print(f"v_start: {v_start}, v_end: {v_end}")
+    print('-'*100)
+    print(v_testo[v_start:v_end])

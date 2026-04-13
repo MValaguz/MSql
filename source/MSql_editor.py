@@ -78,6 +78,8 @@ from utilita_testo import *
 from sql_formatter.core import format_sql
 # Visualizzatore delle differenze tra due testi
 from diff_viewer import classDiffViewer
+# Libreria per export in excel
+from xlsxwriter.workbook import Workbook
 
 # Tipi oggetti di database
 Tipi_Oggetti_DB = { 'Tables':'TABLE',                    
@@ -560,7 +562,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         self.l_cursor_pos = QLabel()
         self.l_cursor_pos.setFrameStyle(QFrame.Shape.NoFrame)
         self.statusBar.addPermanentWidget(self.l_cursor_pos)                
-        self.l_cursor_pos.setText("Ln: 1  Col: 1")
+        self.l_cursor_pos.setText("Ln: 1  Col: 1 Pos: 1")
         # Numero totale di righe di testo
         self.l_num_righe_e_char = QLabel()
         self.l_num_righe_e_char.setFrameStyle(QFrame.Shape.NoFrame)
@@ -1175,9 +1177,12 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # Carico il risultato sql fino all'ultima riga
             elif p_slot.objectName() == 'actionGo_to_End':
                 o_MSql_win2.slot_go_to_end()        
+            # Esporto in formato CSV
+            elif p_slot.objectName() == 'actionExport_to_CSV':
+                o_MSql_win2.slot_export_to_csv()
             # Esporto in formato Excel
             elif p_slot.objectName() == 'actionExport_to_Excel':
-                o_MSql_win2.slot_export_to_excel_csv()
+                o_MSql_win2.slot_export_to_excel()
             # Esporto in formato Insert di testo
             elif p_slot.objectName() == 'actionExport_to_Insert_format':
                 o_MSql_win2.slot_export_to_insert_format()
@@ -1387,10 +1392,12 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                     v_file = open(v_filename,'r',encoding='utf-8',newline='')
                 # apertura usando ansi (il newline come parametro è molto importante per la gestione corretta degli end of line)                                        
                 else:                    
-                    v_file = open(v_filename,'r',newline='')
+                    v_file = open(v_filename,'r',newline='')                                
                 # aggiungo il nome del file ai file recenti                
-                self.aggiorna_elenco_file_recenti(v_filename)
-                # restituisco il nome e il contenuto del file                
+                self.aggiorna_elenco_file_recenti(v_filename)                
+                # restituisco il nome e il contenuto del file
+                # se il file contiente il carattere \xa0 (spazio non separabile) lo sostituisco con spazio normale                
+                #return v_filename, v_file.read().replace('\xa0', ' '), v_file_is_uft_8
                 return v_filename, v_file.read(), v_file_is_uft_8
             except Exception as err:
                 message_error(QCoreApplication.translate('Open','Error to opened the file:') + ' ' + str(err))
@@ -3405,6 +3412,8 @@ class My_MSql_Lexer(QsciLexerSQL):
         
             # tabulatore (in base alle preferenze...di base 2 caratteri)
             self.p_editor.setTabWidth(int(o_global_preferences.tab_size))   
+            # dal 2026/04/10 deciso che quando si scrive tab, viene sostituito con gli spazi
+            self.p_editor.setIndentationsUseTabs(False)
         
             # evidenzia l'intera riga dove posizionato il cursore (grigio scuro e cursore bianco se il tema è dark)
             self.p_editor.setCaretLineVisible(True)
@@ -3875,30 +3884,32 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
 
         # individuo la pressione di un tasto sull'editor
         if event.type() == QEvent.Type.KeyPress and source is self.e_sql:
-            # premuta parentesi aperta....inserisco parentesi chiusa
-            if event.key() == Qt.Key.Key_ParenLeft:
-                self.auto_insert('(')                
-            # premuta parentesi chiusa....valuto se passare al prossimo carattere
-            if event.key() == Qt.Key.Key_ParenRight:
-                self.auto_insert(')')                
-            # premuta parentesi aperta....inserisco parentesi chiusa
-            if event.key() == Qt.Key.Key_BracketLeft:
-                self.auto_insert('[')                
-            # premuta parentesi chiusa....valuto se passare al prossimo carattere
-            if event.key() == Qt.Key.Key_BracketRight:
-                self.auto_insert(']')                
-            # premuta parentesi aperta....inserisco parentesi chiusa
-            if event.key() == Qt.Key.Key_BraceLeft:
-                self.auto_insert('{')                
-            # premuta parentesi chiusa....valuto se passare al prossimo carattere
-            if event.key() == Qt.Key.Key_BraceRight:
-                self.auto_insert('}')                
-            # premuto doppio apice...inserisco altro doppio apice
-            elif event.key() == Qt.Key.Key_QuoteDbl:
-                self.auto_insert('"')                
-            # premuto apice...inserisco altro apice
-            elif event.key() == Qt.Key.Key_Apostrophe:
-                self.auto_insert("'")                
+            # il completamento per apici, parentesi, viene svolto solo se non siamo in selezione rettangolare            
+            if self.e_sql.SendScintilla(self.e_sql.SCI_GETSELECTIONS) <= 1:
+                # premuta parentesi aperta....inserisco parentesi chiusa
+                if event.key() == Qt.Key.Key_ParenLeft:
+                    self.auto_insert('(')                
+                # premuta parentesi chiusa....valuto se passare al prossimo carattere
+                if event.key() == Qt.Key.Key_ParenRight:
+                    self.auto_insert(')')                
+                # premuta parentesi aperta....inserisco parentesi chiusa
+                if event.key() == Qt.Key.Key_BracketLeft:
+                    self.auto_insert('[')                
+                # premuta parentesi chiusa....valuto se passare al prossimo carattere
+                if event.key() == Qt.Key.Key_BracketRight:
+                    self.auto_insert(']')                
+                # premuta parentesi aperta....inserisco parentesi chiusa
+                if event.key() == Qt.Key.Key_BraceLeft:
+                    self.auto_insert('{')                
+                # premuta parentesi chiusa....valuto se passare al prossimo carattere
+                if event.key() == Qt.Key.Key_BraceRight:
+                    self.auto_insert('}')                
+                # premuto doppio apice...inserisco altro doppio apice
+                elif event.key() == Qt.Key.Key_QuoteDbl:
+                    self.auto_insert('"')                
+                # premuto apice...inserisco altro apice
+                elif event.key() == Qt.Key.Key_Apostrophe:
+                    self.auto_insert("'")                
             # premuta combinazione CTRL+B passa da un segnalibro all'altro
             if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_B:                                
                 self.slot_ctrl_b()
@@ -5086,7 +5097,40 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
            L'utente ha premuto CTRL+Invio: viene ricercata l'istruzione dove il cursore di testo è attualmente posizionato
            e viene inviata all'esecutore. Se l'utente ha selezionato del testo, viene eseguito il testo selezionato; questo
            per mantenere un comportamento coerente con l'esecuzione tramite F5.
-        """
+        """        
+        def get_byte_pos(char_pos):
+            """
+               Funzione per convertire l'indice carattere in indice byte UTF-8
+            """
+            if self.setting_utf8:
+                # Prende la sottostringa fino alla posizione desiderata e conta i byte
+                return len(self.e_sql.text()[:char_pos].encode('utf-8'))
+            else:
+                return char_pos
+
+        def pulisco_da_punto_e_virgola(p_stringa):
+            """
+               Funzione interna per pulire una stringa da eventuali punti e virgola finali
+            """
+            p_stringa = p_stringa.rstrip()
+            if p_stringa.endswith(';'):
+                posizione = p_stringa.rindex(';')
+                p_stringa = p_stringa[0:posizione]
+            return p_stringa
+
+        def eseguo_v_istruzione():
+            """
+               In base al contenuto dell'istruzione, capisco se è un puro script pl-sql oppure una select, insert, update, delete.... e lo eseguo di conseguenza
+            """
+            nonlocal v_istruzione
+            #print('-'*100)
+            #print(v_istruzione)
+            if v_istruzione.upper().startswith(('DECLARE','BEGIN','CREATE','REPLACE','FUNCTION','PROCEDURE')):
+                self.esegui_plsql(v_istruzione, False)        
+            else:          
+                v_istruzione = pulisco_da_punto_e_virgola(v_istruzione)      
+                self.esegui_istruzione(v_istruzione, False)
+
         # se indicato dalla preferenza, prima di partire ad eseguire, pulisco l'output
         if o_global_preferences.auto_clear_output:
             self.slot_clear('OUT')
@@ -5094,8 +5138,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # controllo se utente ha selezionato del testo specifico che vuole eseguire
         v_istruzione = self.e_sql.selectedText()                
         if v_istruzione is not None and v_istruzione != '':            
-            # eseguo l'istruzione selezionata                          
-            self.esegui_istruzione(v_istruzione, False)        
+            eseguo_v_istruzione()
         # ... altrimenti....
         else:
             # imposto var generali
@@ -5103,21 +5146,16 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # prendo posizione attuale del cursore (relativa!)
             v_pos_relativa_cursore = self.e_sql.SendScintilla(self.e_sql.SCI_GETCURRENTPOS)
             # richiamo funzione interna per estrazione dell'istruzione sql o pl-sql 
-            #v_istruzione, v_tipo_istruzione, v_start_pos, v_end_pos = extract_sql_under_cursor(self.e_sql.text(), v_pos_relativa_cursore + 1)                                        
-            #v_istruzione, v_start_pos, v_end_pos = extract_sql_under_cursor(self.e_sql.text(), v_pos_relativa_cursore)                                        
             v_start_pos, v_end_pos = extract_section_under_cursor(self.e_sql.text(), v_pos_relativa_cursore)
             v_istruzione = self.e_sql.text()[v_start_pos:v_end_pos]
             # l'istruzione viene ripulita anche dai commenti iniziali
             v_istruzione = pulisci_commenti_inizio_riga(v_istruzione)
             # se trovata istruzione
             if v_istruzione != '' and v_end_pos > 0:                
-                # per capire se puro codice pl-sql controllo inizio (stessa stringa che viene controllata nella funzione slot_esegui)
-                if v_istruzione.upper().startswith(('DECLARE','BEGIN','CREATE','REPLACE','FUNCTION','PROCEDURE')):
-                    self.esegui_plsql(v_istruzione, False)        
-                else:                
-                    self.esegui_istruzione(v_istruzione, False)
-                # seleziono il testo per evidenziare l'istruzione che è stata eseguita                                                                                            
-                self.e_sql.SendScintilla(self.e_sql.SCI_SETSELECTION, v_start_pos, v_end_pos)        
+                # esguo l'istruzione
+                eseguo_v_istruzione()
+                # seleziono il testo per evidenziare l'istruzione che è stata eseguita (notare la conversione da indice carattere a indice byte per compatibilità con Scintilla)                                                                                            
+                self.e_sql.SendScintilla(self.e_sql.SCI_SETSELECTION, get_byte_pos(v_start_pos), get_byte_pos(v_end_pos))        
             else:
                 # altrimenti errore
                 message_error(QCoreApplication.translate('MSql_win2','No statement found!'))
@@ -5131,8 +5169,8 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         v_ok = ''              
         # esecuzione normale...
         if not p_explain:    
-            # se trovo select eseguo select
-            if p_istruzione[0:6].upper() == 'SELECT' or p_istruzione[0:4].upper() == 'WITH':                
+            # se trovo select eseguo select            
+            if p_istruzione[0:6].upper() == 'SELECT' or p_istruzione[0:4].upper() == 'WITH':                                
                 v_ok = self.esegui_select(p_istruzione, True)
             # ..altrimenti esegue come script
             else:                 
@@ -5738,15 +5776,13 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             if self.tipi_intestazioni[yx[1]][1] == oracledb.DATETIME:                                     
                 v_valore_cella = "TO_DATE('" + v_valore_cella + "','" + da_qt_a_formato_data_oracle(o_global_preferences.date_format) + "')"            
             else:
-                v_valore_cella = "'" + v_valore_cella + "'"
+                v_valore_cella = "'" + v_valore_cella.replace("'", "''") + "'"
             v_update = "UPDATE " + v_table_name + " SET " + self.nomi_intestazioni[yx[1]] + "=" + v_valore_cella + " WHERE ROWID = '" + v_rowid + "'"
             self.e_sql.append(chr(10) + v_update + ';')                
 
-    def slot_export_to_excel_csv(self):
+    def slot_export_to_csv(self):
         """
-           Prende i dati presenti in tabella e li esporta in excel....viene usato il formato csv anche se in un primo momento
-           era stato predisposto per scrivere in modo nativo excel....ma non avendo (al momento) la possibilità di capire differenza
-           tra colonne numeriche e carattere, sono tornato al csv
+           Prende i dati presenti in tabella e li esporta in csv
         """
         global v_global_work_dir
         global o_global_preferences
@@ -5803,7 +5839,68 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 os.startfile(v_path_finale)
         except:
             message_error(QCoreApplication.translate('MSql_win2','Error in file creation!'))
-      
+
+    def slot_export_to_excel(self):
+        """
+           Prende i dati presenti in tabella e li esporta in excel
+        """
+        global v_global_work_dir        
+        
+        # carico tutti i dati del cursore 
+        self.slot_go_to_end()
+
+        # estraggo i dati dalla tableview (se errore la tabella è vuota e quindi esco)        
+        v_model = self.o_table.model()
+        if v_model == None:
+            return None        
+
+        # creo file fisso in directory di lavoro                
+        v_path_finale = prossimo_export_file(os.path.join(v_global_work_dir,'export'), 'Export_data', 'xlsx')
+
+        # apertura del file excel
+        workbook = Workbook(v_path_finale)
+        worksheet = workbook.add_worksheet()
+        
+        # creazione della riga intestazioni. La lista max_len serve per tenere lunghezza massima di ogni colonna
+        v_intestazioni = ''        
+        tot_colonne = 0
+        list_max_len = []
+        for nome_colonna in self.nomi_intestazioni:                        
+            worksheet.write(0, tot_colonne, nome_colonna, workbook.add_format({'bold': True}))
+            tot_colonne += 1
+            list_max_len.append(len(nome_colonna))
+
+        # Creazione di tutta la tabella                        
+        for riga in range(v_model.rowCount()):                        
+            for colonna in range(v_model.columnCount()):
+                v_index = v_model.index(riga, colonna)                
+                v_campo = v_model.data(v_index)                                
+                worksheet.write(riga+1, colonna, v_campo)                
+                v_campo_len = len(str(v_campo))
+                if v_campo_len > list_max_len[colonna]:
+                    list_max_len[colonna] = v_campo_len
+
+        # Trova la stringa più lunga nella colonna
+        # Aggiungi un piccolo margine (+2) per evitare che il testo tocchi i bordi        
+        print(list_max_len)
+        for col_idx in range(tot_colonne):
+            worksheet.set_column(col_idx, col_idx, list_max_len[col_idx] + 2)
+
+        # imposta i filtri automatici su tutte le colonne
+        worksheet.autofilter(0, 0, 1, tot_colonne-1)
+                        
+        # chiusura del file e del db
+        workbook.close()
+        
+        # Apro direttamente il file            
+        try:
+            if os.name == "posix":
+                subprocess.Popen(["xdg-open", v_path_finale])    
+            else:
+                os.startfile(v_path_finale)
+        except:
+            message_error(QCoreApplication.translate('MSql_win2','Error in file creation!'))
+
     def slot_export_to_insert_format(self):
         """
            Prende i dati presenti in tabella e li esporta in formato testo come se fossero dei comandi di insert sql           
@@ -7063,7 +7160,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 v_visual_col += v_tab_larghezza
             else:
                 v_visual_col += 1
-        self.link_to_MSql_win1_class.l_cursor_pos.setText("Ln: " + str(v_y+1) + "  Col: " + str(v_visual_col))
+        self.link_to_MSql_win1_class.l_cursor_pos.setText("Ln: " + str(v_y+1) + "  Col: " + str(v_visual_col) + "  Pos: " + str(self.e_sql.SendScintilla(self.e_sql.SCI_GETCURRENTPOS)+1))
 
         # tempo di esecuzione ultima istruzione                
         v_total_seconds = datetime.timedelta(seconds=v_global_exec_time).total_seconds()
