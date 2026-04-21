@@ -4345,33 +4345,16 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
     def slot_f11(self):
         """
            Premendo F11 viene estratto dalla posizione del cursore dell'editor, il nome dell'oggetto
-           e da li viene eseguita una query
-
-           Note: Ho provato a vedere se esiste possibilità di chiedere a qscintilla se mi può dare la parola su cui il cursore è posizionato
-                 ma no trovato. Quindi fatto una cosa semiinterna creando una funzione in package utilita
+           e da li viene eseguita una query. Per semplicità viene usata la funzione per f12 dicendo di restituire solo il nome dell'oggetto
         """
-        # ricavo numero riga e posizione del cursore
-        v_num_line, v_num_pos = self.e_sql.getCursorPosition()                
-        # estraggo l'intera riga dove è posizionato il cursore
-        self.e_sql.setSelection(v_num_line, 0, v_num_line+1, -1)
-        v_line = self.e_sql.selectedText()
-        # riposiziono il cursore allo stato originario
-        self.e_sql.setSelection(v_num_line, v_num_pos, v_num_line, v_num_pos)
-        # utilizzando la posizione del cursore sulla riga, estraggo il nome dell'oggetto che sta sotto il cursore (es. TA_AZIEN oppure SMILE.TA_AZIEN)        
-        v_owner, v_oggetto = extract_object_name_from_cursor_pos(v_line.upper(), v_num_pos-1)                                
-        if v_oggetto != '':
-            # se owner non trovato allora uso lo schema corrente
-            if v_owner is None:                
-                v_owner = self.link_to_MSql_win1_class.current_schema                              
-            # pulisco il nome dell'oggetto da eventuali caratteri speciali come ritorno a capo, tab e spazi
-            v_oggetto = v_oggetto.rstrip().lstrip()                            
+        v_nome_oggetto = self.slot_f12(p_f11=True)
+        if v_nome_oggetto != 'ko':
             # messaggio di debug
-            print('F11-Quick query on --> ' + v_owner + '.' + v_oggetto)      
-            # tento di eseguire la query dell'oggetto selezionato (dovrebbe essere una tabella)
-            v_select = 'SELECT * FROM ' + v_owner + '.' + v_oggetto
-            self.esegui_select(v_select, True)
+            print('F11-Quick query on --> ' + v_nome_oggetto)      
+            # tento di eseguire la query dell'oggetto selezionato (dovrebbe essere una tabella)            
+            self.esegui_select('SELECT * FROM ' + v_nome_oggetto, True)
         
-    def slot_f12(self):
+    def slot_f12(self, p_f11=False):
         """
            Premendo F12 viene estratto dalla posizione del cursore dell'editor, il nome dell'oggetto
            e da li viene aperto l'object viewer
@@ -4403,7 +4386,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 v_oggetto = v_oggetto[:v_oggetto.find('@')]                
             else:
                 v_link = ''
-            # estraggo 
+            # 1° tentativo --> estraggo usando l'owner indicato
             try:
                 v_temp_cursor.execute("""SELECT OBJECT_NAME, OBJECT_TYPE FROM ALL_OBJECTS"""+v_link+""" WHERE OWNER = '""" + v_owner + """' AND OBJECT_NAME = '""" + v_oggetto + """' AND OBJECT_TYPE IN ('TABLE','VIEW','PACKAGE','PROCEDURE','FUNCTION')""")
             except:
@@ -4415,9 +4398,34 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 v_nome_oggetto = v_record[0]
                 v_tipo_oggetto = v_record[1]                                   
                 # carico l'object viewer passando come parametro iniziale il puntatore all'oggetto main
-                MSql_win1_class.carica_object_viewer(self.link_to_MSql_win1_class, v_owner, v_tipo_oggetto, v_nome_oggetto, v_link)                                        
+                if p_f11:
+                    return v_owner+'.'+v_nome_oggetto
+                else:
+                    MSql_win1_class.carica_object_viewer(self.link_to_MSql_win1_class, v_owner, v_tipo_oggetto, v_nome_oggetto, v_link)                                        
             else:
-                print('Not found ' + v_oggetto)
+                print('F12-Call Object viewer not found with owner ' + v_owner + ' repeat searching without owner...')            
+                # 2° tentativo --> estraggo senza usare l'owner, alla prima ricorrenza
+                try:
+                    v_temp_cursor.execute("""SELECT OBJECT_NAME, OBJECT_TYPE, OWNER FROM ALL_OBJECTS"""+v_link+""" WHERE ROWNUM=1 AND OBJECT_NAME = '""" + v_oggetto + """' AND OBJECT_TYPE IN ('TABLE','VIEW','PACKAGE','PROCEDURE','FUNCTION')""")
+                except:
+                    return 'ko'
+                # prendo il risultato
+                v_record = v_temp_cursor.fetchone()
+                # se il risultato è presente ottengo nome e tipo dell'oggetto che dovrò passare all'object viewer
+                if v_record != None:                    
+                    v_nome_oggetto = v_record[0]
+                    v_tipo_oggetto = v_record[1]                                   
+                    v_owner = v_record[2]
+                    # carico l'object viewer passando come parametro iniziale il puntatore all'oggetto main e anche l'owner che ho trovato
+                    if p_f11:
+                        return v_owner+'.'+v_nome_oggetto
+                    else:
+                        MSql_win1_class.carica_object_viewer(self.link_to_MSql_win1_class, v_owner, v_tipo_oggetto, v_nome_oggetto, v_link)                                        
+                else:
+                    print('Not found ' + v_oggetto)
+                    return 'ko'
+        else:
+            return 'ko'
     
     def slot_ctrl_k(self):
         """

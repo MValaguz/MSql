@@ -1,7 +1,7 @@
 -------------
 MSql TODO!!!
 -------------
-- Il concetto di posizionamento nell'editor con calcolo lunghezza carattere da 2byte lato Scintilla, va provato a fare anche per quando c'è errore nel comando SQL o PL-SQL che deve adottare lo stesso meccanismo usato per CTRL+Invio
+- Il concetto di posizionamento nell'editor con calcolo lunghezza carattere da 2byte lato Scintilla va provato a fare anche per quando c'è errore nel comando SQL o PL-SQL che deve adottare lo stesso meccanismo usato per CTRL+Invio
 - Se apro nell'object viewer SM_SMYIOT_PKG, nella prima funzione non riesce a ricavare la var p_user_handle, anche in GET_MATRICOLE_DA_VERIFICARE
   Se interrogo nell'object viewer una funzione sarebbe bello capire tipologia del parametro (input-output)
 - Inserire la possibilità di collegarsi a oracle-cloud
@@ -11,6 +11,13 @@ MSql TODO!!!
 ---------------
 MSql Changelog!
 ---------------
+
+Version dated 20/04/2026
+OK! Segnalazioni di Diego:
+	   Ti segnalo due "problemi" molto minori in Msql, nell'utilizzo dei tasti f11 e f12 per eseguire la select di una tabella e caricarla nell'object viewr.
+	   Questa scorciatoia non funziona in due casi:
+	   Se la tabella è scritta nell'editor tra apici, ad esempio ce l'ho nella funzione descrizione('ML_DOMIN',..);
+	   Se la tabella (o vista nel mio esempio) non è nello schema Smile ma ci abbiamo accesso perchè PUBLIC ha il grant (es. vista SMY_USERS).
 
 Version dated 13/04/2026
 OK! Marco T. ha indicato nuovo caso per malfunzionamento di CTRL+Invio; l'istruzione indicata aveva al suo interno il carattere nascosto '\xa0' e anche caratteri accentati.

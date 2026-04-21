@@ -32,7 +32,7 @@ def extract_object_name_from_cursor_pos(p_string, p_pos):
        Es. p_string = SELECT * FROM SMI.OP_COM
            p_pos = 20
            restituisce SMI e OP_COM       
-       Corretto questo caso dove restituica TA_AZIEN.AZIEN_CO quando invece deve restituire TA_AZIEN
+       Corretto questo caso dove restituiva TA_AZIEN.AZIEN_CO quando invece deve restituire TA_AZIEN
        In pratica se punto si trova a destra della posizione indicata, non viene restituita la doppia stringa
        p_string = SELECT * FROM TA_AZIEN.AZIEN_CO 
        Corretto anche il caso SMILE.TA_AZIEN.AZIEN_CO
@@ -67,17 +67,18 @@ def extract_word_from_cursor_pos(p_string, p_pos, p_period=True):
            p_pos = 10
            restituisce TUTTI       
        Se passato il parametro p_period a False, il carattere punto non verrà considerato come separatore e ad esempio la stringa SMI.OP_COM verrà considerata come unica parola
+       Dal 17/04/2026 inserito ' come segno di separazione della parola per gestire casi come: descrizione('ML_DOMIN',..)
     """                
     # è stato richiesto di considerare "." come separatore di parola
     if p_period:
-        v_check1_chars = ('',' ','=',':','.','(',')',';',',',chr(9))
-        v_check2_chars = (' ','=',':','.','(',')',';',',',chr(9))
-        v_check3_chars = (' ','=',':','\n','\r','.','(',')',';',',',chr(9))
+        v_check1_chars = ('',' ','=',':','.','(',')',';',',',"'",chr(9))
+        v_check2_chars = (' ','=',':','.','(',')',';',',',"'",chr(9))
+        v_check3_chars = (' ','=',':','\n','\r','.','(',')',';',',',"'",chr(9))
     # ... altrimenti di non considerarlo
     else:
-        v_check1_chars = ('',' ','=',':','(',')',';',',',chr(9))
-        v_check2_chars = (' ','=',':','(',')',';',',',chr(9))
-        v_check3_chars = (' ','=',':','\n','\r','(',')',';',',',chr(9))
+        v_check1_chars = ('',' ','=',':','(',')',';',',',"'",chr(9))
+        v_check2_chars = (' ','=',':','(',')',';',',',"'",chr(9))
+        v_check3_chars = (' ','=',':','\n','\r','(',')',';',',',"'",chr(9))
     
     # se posizione cursore è oltre la stringa...esco        
     if p_pos > len(p_string):
