@@ -1,6 +1,7 @@
 -------------
 MSql TODO!!!
 -------------
+
 - Il concetto di posizionamento nell'editor con calcolo lunghezza carattere da 2byte lato Scintilla va provato a fare anche per quando c'è errore nel comando SQL o PL-SQL che deve adottare lo stesso meccanismo usato per CTRL+Invio
 - Se apro nell'object viewer SM_SMYIOT_PKG, nella prima funzione non riesce a ricavare la var p_user_handle, anche in GET_MATRICOLE_DA_VERIFICARE
   Se interrogo nell'object viewer una funzione sarebbe bello capire tipologia del parametro (input-output)
@@ -11,6 +12,9 @@ MSql TODO!!!
 ---------------
 MSql Changelog!
 ---------------
+
+Version dated 14/05/2026
+OK! Segnlato da Pietro; nella calcolatrice le operazioni con risultati periodici è meglio che vengano troncate; quindi impostato risultati non oltre le 10 cifre decimali.
 
 Version dated 20/04/2026
 OK! Segnalazioni di Diego:

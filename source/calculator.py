@@ -187,7 +187,8 @@ class Calculator(QWidget):
 
         try:
             result = SafeEval.eval_expr(expr)
-            self.display.setText(str(result).replace(".", ","))
+            # arrotonda a 10 decimali e converte punto → virgola per l'italiano
+            self.display.setText(f"{result:.10f}".rstrip('0').rstrip('.').replace(".", ","))
         except:
             self.display.setText("Errore")
     
