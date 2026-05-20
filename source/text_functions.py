@@ -35,7 +35,7 @@ class class_text_functions(QDialog, Ui_text_functions_window):
         self.splitter_2.setStretchFactor(1,10)                
         
         # Carico elenco delle funzioni        
-        self.e_list_functions.addItems(['Split','Compress','Align Columns','Matrix decorator'])
+        self.e_list_functions.addItems(['Split','Compress','Align Columns','Matrix decorator','Line decorator'])
 
         # Imposto la funzione di default
         self.e_list_functions.setCurrentRow(0)                                
@@ -84,6 +84,12 @@ class class_text_functions(QDialog, Ui_text_functions_window):
             self.e_parameter2.setPlaceholderText(QCoreApplication.translate('text_functions','effect: char decorator'))            
             self.e_parameter3.setPlaceholderText(QCoreApplication.translate('text_functions','effect: char to add at end of line'))
             self.e_parameter4.setPlaceholderText("")
+        elif p_index.data() == 'Line decorator':            
+            self.e_description.setText(QCoreApplication.translate('text_functions','Add the specified decorator to each line of the selected text.'))
+            self.e_parameter1.setPlaceholderText(QCoreApplication.translate('text_functions','effect: line char decorator'))
+            self.e_parameter2.setPlaceholderText("")
+            self.e_parameter3.setPlaceholderText("")
+            self.e_parameter4.setPlaceholderText("")
 
     def slot_b_start_clicked(self):
         """
@@ -97,6 +103,8 @@ class class_text_functions(QDialog, Ui_text_functions_window):
             self.e_output_text.setText(self.allinea_colonne(self.e_input_text.toPlainText(), self.e_parameter1.text(), self.e_parameter2.text(), self.e_parameter3.text(), self.e_parameter4.text()))
         elif self.e_list_functions.currentIndex().data() == 'Matrix decorator':
             self.e_output_text.setText(self.decora_matrice(self.e_input_text.toPlainText(), self.e_parameter1.text(), self.e_parameter2.text(), self.e_parameter3.text()))
+        elif self.e_list_functions.currentIndex().data() == 'Line decorator':
+            self.e_output_text.setText(self.decora_righe(self.e_input_text.toPlainText(), self.e_parameter1.text()))
 
     def splitta_il_testo(self, p_testo, p_parameter1, p_parameter2):
         """
@@ -226,6 +234,17 @@ class class_text_functions(QDialog, Ui_text_functions_window):
             matrice_decorata.append(riga_decorata)
 
         return '\n'.join(matrice_decorata)
+    
+    def decora_righe(self, p_testo, p_decoratore):
+        """
+        Funzione per decorare le righe di un testo.
+
+        - p_testo: stringa multilinea che rappresenta il testo
+        - p_decoratore: carattere da mettere attorno a ogni riga (es. ;)
+        """
+        righe = p_testo.strip().split('\n')
+        righe_decorate = [f"{riga}{p_decoratore}" for riga in righe]
+        return '\n'.join(righe_decorate)
 
 # ----------------------------------------
 # TEST APPLICAZIONE

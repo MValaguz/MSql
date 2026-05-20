@@ -157,7 +157,7 @@ def prossimo_export_file(v_directory, v_nome_base, v_estensione='csv'):
         
     return v_percorso_completo
 
-def salvataggio_editor(p_save_as, p_nome, p_testo, p_codifica_utf8):
+def salvataggio_editor(p_save_as, p_nome, p_testo, p_codifica_utf8, p_timestamp_ultima_modifica=None):
     """
         Salvataggio di p_testo dentro il file p_nome        
         Se p_save_as è True oppure il titolo dell'editor inizia con "!" --> viene richiesto di salvarlo come nuovo file
@@ -196,11 +196,21 @@ def salvataggio_editor(p_save_as, p_nome, p_testo, p_codifica_utf8):
 
     # procedo con il salvataggio
     try:
-        if p_codifica_utf8:
-            # scrittura usando utf-8 (il newline come parametro è molto importante per la gestione corretta degli end of line)                                                            
+        # controllo se il file è stato modificato da un altro programma
+        try:
+            v_timestamp_ultima_modifica = os.path.getmtime(p_nome)
+        except:
+            v_timestamp_ultima_modifica = None
+        if p_timestamp_ultima_modifica is not None and v_timestamp_ultima_modifica is not None and p_timestamp_ultima_modifica != v_timestamp_ultima_modifica:
+            if message_warning_yes_no(QCoreApplication.translate('Save','The file has been modified by another program since it was opened. Do you want to overwrite it?')) == 'Yes':
+                pass
+            else:
+                return 'ko', None
+        # scrittura usando utf-8 (il newline come parametro è molto importante per la gestione corretta degli end of line)                                                            
+        if p_codifica_utf8:            
             v_file = open(p_nome,'w',encoding='utf-8', newline='')
-        else:
-            # scrittura usando ansi (il newline come parametro è molto importante per la gestione corretta degli end of line)                                        
+        # scrittura usando ansi (il newline come parametro è molto importante per la gestione corretta degli end of line)                                        
+        else:            
             v_file = open(p_nome,'w', newline='')
         v_file.write(p_testo)
         v_file.close()            
@@ -987,7 +997,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         if o_MSql_win2 is not None:
             # Salvataggio del file
             if p_slot.objectName() == 'actionSave':
-                v_ok, v_nome_file = salvataggio_editor(False, o_MSql_win2.objectName(), o_MSql_win2.e_sql.text(), o_MSql_win2.setting_utf8)
+                v_ok, v_nome_file = salvataggio_editor(False, o_MSql_win2.objectName(), o_MSql_win2.e_sql.text(), o_MSql_win2.setting_utf8, o_MSql_win2.v_timestamp_ultima_modifica)
                 if v_ok == 'ok':
                     o_MSql_win2.v_testo_modificato = False
                     o_MSql_win2.setObjectName(v_nome_file)
@@ -996,7 +1006,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                     self.window_attiva.setObjectName(v_nome_file) # notare come il nome della window va forzato anche sulla window attiva
             # Salvataggio del file come... (semplicemente non gli passo il titolo)
             elif p_slot.objectName() == 'actionSave_as':
-                v_ok, v_nome_file = salvataggio_editor(True, o_MSql_win2.objectName(), o_MSql_win2.e_sql.text(), o_MSql_win2.setting_utf8)
+                v_ok, v_nome_file = salvataggio_editor(True, o_MSql_win2.objectName(), o_MSql_win2.e_sql.text(), o_MSql_win2.setting_utf8, o_MSql_win2.v_timestamp_ultima_modifica)
                 if v_ok == 'ok':                    
                     o_MSql_win2.v_testo_modificato = False                    
                     o_MSql_win2.setObjectName(v_nome_file)                    
@@ -3618,6 +3628,11 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # imposto il titolo della nuova window (da notare come il nome completo dal file-editor sia annegato nel nome dell'oggetto!)        
         self.setObjectName(p_titolo)
         self.setWindowTitle(titolo_window(self.objectName()))
+        # memorizzo il timestamp di ultima modifica del file (se è stato passato un contenuto di file) in modo da poterlo confrontare in caso di salvataggio
+        try:
+            self.v_timestamp_ultima_modifica = os.path.getmtime(p_titolo)
+        except:
+            self.v_timestamp_ultima_modifica = None
 
         # i widget della mappa, del find stringa e del replace stringa, li nascondo
         self.dockMapWidget.hide()
@@ -6096,14 +6111,14 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # utente chiede di salvare
         elif v_scelta == 'Yes':            
             if self.objectName() == "":                
-                v_ok, v_nome_file = salvataggio_editor(True, self.objectName(), self.e_sql.text(), self.setting_utf8)
+                v_ok, v_nome_file = salvataggio_editor(True, self.objectName(), self.e_sql.text(), self.setting_utf8, self.v_timestamp_ultima_modifica)
                 if v_ok != 'ok':
                     return 'Cancel'
                 else:
                     self.v_testo_modificato = False
                     return 'Yes'
             else:                      
-                v_ok, v_nome_file = salvataggio_editor(False, self.objectName(), self.e_sql.text(), self.setting_utf8)                          
+                v_ok, v_nome_file = salvataggio_editor(False, self.objectName(), self.e_sql.text(), self.setting_utf8, self.v_timestamp_ultima_modifica)                          
                 if v_ok != 'ok':
                     return 'Cancel'
                 else:

@@ -13,8 +13,12 @@ MSql TODO!!!
 MSql Changelog!
 ---------------
 
+Version dated 20/05/2026
+OK! Inserito controllo sul salvataggio del file per verificare se il file è stato modificato da altro programma mentre era in modifica da MSql
+OK! Nuova funzione di testo "Line decorator" che permette di aggiungere alla fine di ogni riga un decoratore come ad esempio in carattere di ;
+
 Version dated 14/05/2026
-OK! Segnlato da Pietro; nella calcolatrice le operazioni con risultati periodici è meglio che vengano troncate; quindi impostato risultati non oltre le 10 cifre decimali.
+OK! Segnalato da Pietro; nella calcolatrice le operazioni con risultati periodici è meglio che vengano troncate; quindi impostato risultati non oltre le 10 cifre decimali.
 
 Version dated 20/04/2026
 OK! Segnalazioni di Diego:
