@@ -229,33 +229,37 @@ class MyCustomTableWidget(QTableWidget):
     def keyPressEvent(self, event: QKeyEvent):
         # Rileva CTRL + C
         if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_C:
-            ranges = self.selectedRanges()
-            if not ranges:
-                return
-
-            all_copied_rows = []
-            
-            # Iteriamo su ogni blocco selezionato (se ce n'è più di uno)
-            for r in ranges:
-                for row in range(r.topRow(), r.bottomRow() + 1):
-                    col_data = []
-                    for col in range(r.leftColumn(), r.rightColumn() + 1):
-                        item = self.item(row, col)
-                        # Pulizia del testo e rimozione del carattere pipe per evitare conflitti
-                        text = item.text().replace('\n', ' ').replace(self.carattere_di_separazione, ' ') if item else ""
-                        col_data.append(text.strip())
-                    
-                    line = f" {self.carattere_di_separazione} ".join(col_data)
-                    # Evitiamo duplicati se i range si sovrappongono (opzionale)
-                    all_copied_rows.append(line)
-            
-            # Unisce tutto con INVIO
-            full_text = "\n".join(all_copied_rows)
-            QApplication.clipboard().setText(full_text)
+            self.copia_selezione_in_clipboard()
             event.accept()
         else:
             super().keyPressEvent(event)
+    """
+        Copia i dati selezionati nella tabella dei risultati negli appunti usando il carattere di separazione specificato        
+    """
+    def copia_selezione_in_clipboard(self):
+        ranges = self.selectedRanges()
+        if not ranges:
+            return
 
+        all_copied_rows = []
+        
+        # Iteriamo su ogni blocco selezionato (se ce n'è più di uno)
+        for r in ranges:
+            for row in range(r.topRow(), r.bottomRow() + 1):
+                col_data = []
+                for col in range(r.leftColumn(), r.rightColumn() + 1):
+                    item = self.item(row, col)
+                    # Pulizia del testo e rimozione del carattere pipe per evitare conflitti
+                    text = item.text().replace('\n', ' ').replace(self.carattere_di_separazione, ' ') if item else ""
+                    col_data.append(text.strip())
+                
+                line = f" {self.carattere_di_separazione} ".join(col_data)
+                # Evitiamo duplicati se i range si sovrappongono (opzionale)
+                all_copied_rows.append(line)
+        
+        # Unisce tutto con INVIO
+        full_text = "\n".join(all_copied_rows)
+        QApplication.clipboard().setText(full_text)        
     """
         Se il click avviene nell'area dell'header (tramite coordinate o controllo focus)
         ma vogliamo gestire il comportamento standard delle celle, lasciamo il super()

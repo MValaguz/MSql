@@ -161,6 +161,7 @@ def salvataggio_editor(p_save_as, p_nome, p_testo, p_codifica_utf8, p_timestamp_
     """
         Salvataggio di p_testo dentro il file p_nome        
         Se p_save_as è True oppure il titolo dell'editor inizia con "!" --> viene richiesto di salvarlo come nuovo file
+        Viene restituita la nuova data di ultima modifica del file
     """
     global o_global_preferences
 
@@ -187,7 +188,7 @@ def salvataggio_editor(p_save_as, p_nome, p_testo, p_codifica_utf8, p_timestamp_
         p_nome = QFileDialog.getSaveFileName(None, "Save a SQL file",v_file_save_as,"MSql files (*.msql);;SQL files (*.sql *.pls *.plb *.trg);;All files (*.*)") [0]                                  
         if not p_nome:
             message_error(QCoreApplication.translate('Save','Error saving'))
-            return 'ko'
+            return 'ko', None, None
         # se nel nome del file non è presente un suffisso --> imposto .msql            
         if p_nome.find('.') == -1:
             p_nome += '.msql'
@@ -219,8 +220,13 @@ def salvataggio_editor(p_save_as, p_nome, p_testo, p_codifica_utf8, p_timestamp_
         if os.path.exists(v_nome_file_backup):
             os.remove(v_nome_file_backup)		
             print('Remove old backup --> ' + v_nome_file_backup)
+        # ricavo la data di ultima modifica del file e la restituisco (serve per il controllo di modifiche da parte di altri programmi)
+        try:
+            v_timestamp_ultima_modifica = os.path.getmtime(p_nome)
+        except:
+            v_timestamp_ultima_modifica = None
         # esco con tutto ok
-        return 'ok', p_nome
+        return 'ok', p_nome, v_timestamp_ultima_modifica
     except Exception as err:
         # esco con errore
         message_error(QCoreApplication.translate('Save','Error to write the file:') + ' ' + str(err))
@@ -997,7 +1003,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         if o_MSql_win2 is not None:
             # Salvataggio del file
             if p_slot.objectName() == 'actionSave':
-                v_ok, v_nome_file = salvataggio_editor(False, o_MSql_win2.objectName(), o_MSql_win2.e_sql.text(), o_MSql_win2.setting_utf8, o_MSql_win2.v_timestamp_ultima_modifica)
+                v_ok, v_nome_file, o_MSql_win2.v_timestamp_ultima_modifica = salvataggio_editor(False, o_MSql_win2.objectName(), o_MSql_win2.e_sql.text(), o_MSql_win2.setting_utf8, o_MSql_win2.v_timestamp_ultima_modifica)
                 if v_ok == 'ok':
                     o_MSql_win2.v_testo_modificato = False
                     o_MSql_win2.setObjectName(v_nome_file)
@@ -1006,7 +1012,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                     self.window_attiva.setObjectName(v_nome_file) # notare come il nome della window va forzato anche sulla window attiva
             # Salvataggio del file come... (semplicemente non gli passo il titolo)
             elif p_slot.objectName() == 'actionSave_as':
-                v_ok, v_nome_file = salvataggio_editor(True, o_MSql_win2.objectName(), o_MSql_win2.e_sql.text(), o_MSql_win2.setting_utf8, o_MSql_win2.v_timestamp_ultima_modifica)
+                v_ok, v_nome_file, o_MSql_win2.v_timestamp_ultima_modifica = salvataggio_editor(True, o_MSql_win2.objectName(), o_MSql_win2.e_sql.text(), o_MSql_win2.setting_utf8, o_MSql_win2.v_timestamp_ultima_modifica)
                 if v_ok == 'ok':                    
                     o_MSql_win2.v_testo_modificato = False                    
                     o_MSql_win2.setObjectName(v_nome_file)                    
@@ -1115,7 +1121,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                     clipboard = QApplication.clipboard()
                     clipboard.setText(focused_widget.textCursor().selectedText().replace('\u2029','\n'))                                                        
                 # Se il widget è la tabella dei risultati copio valore nella clipboard (ma solo se item è di testo)
-                elif isinstance(focused_widget, QTableWidget):                    
+                elif isinstance(focused_widget, QTableWidget):                                        
                     v_item = focused_widget.currentItem()
                     if isinstance(v_item, QTableWidgetItem):                    
                         clipboard = QApplication.clipboard()
@@ -4125,7 +4131,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # creazione del menu popup
             self.o_table_cont_menu = QMenu(self)            
             
-            # voce per copia valore
+            # voce per copia valore singolo item o multiplo (se sono state selezionate più celle)
             icon1 = QIcon()
             icon1.addPixmap(QPixmap("icons:copy.png"), QIcon.Mode.Normal, QIcon.State.Off)        
             v_copia = QPushButton()
@@ -4158,6 +4164,17 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 v_action = QWidgetAction(self.o_table_cont_menu)
                 v_action.setDefaultWidget(v_zoom)        
                 self.o_table_cont_menu.addAction(v_action)
+                        
+            # voce per copia valore singolo item o multiplo ma traducedolo in una IN sql
+            icon4 = QIcon()
+            icon4.addPixmap(QPixmap("icons:copy.png"), QIcon.Mode.Normal, QIcon.State.Off)        
+            v_copia_in = QPushButton()
+            v_copia_in.setText('SQL IN list')
+            v_copia_in.setIcon(icon4)                    
+            v_copia_in.clicked.connect(self.o_table_copia_as_in_list)
+            v_action = QWidgetAction(self.o_table_cont_menu)
+            v_action.setDefaultWidget(v_copia_in)        
+            self.o_table_cont_menu.addAction(v_action)
 
             # visualizzo il menu alla posizione del cursore
             self.o_table_cont_menu.exec(event.globalPosition().toPoint())    
@@ -4275,12 +4292,66 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
     def o_table_copia_valore(self):
         """
             Copia il valore dell'item dentro la clipboard
-        """
-        #print('Table Item:', v_item.row(), v_item.column())
-        #print('Table Item:', v_item.text())        
-        QGuiApplication.clipboard().setText(self.v_o_table_current_item.text())            
+        """        
+        self.o_table.copia_selezione_in_clipboard()
         self.o_table_cont_menu.close()
     
+    def o_table_copia_as_in_list(self):
+        """
+            Copia il valore dell'item dentro la clipboard formattato come lista per IN sql
+        """
+        ranges = self.o_table.selectedRanges()
+        if not ranges:
+            return
+
+        v_nomi =[]
+        v_tipi = []
+        v_matrice = []
+        v_1a_volta = True
+
+        # lettura del dati selezionati e creazione degli array con le intestazioni, i tipi di dato e i valori
+        for r in ranges:
+            for row in range(r.topRow(), r.bottomRow() + 1):
+                col_data = []
+                for col in range(r.leftColumn(), r.rightColumn() + 1):                                        
+                    if v_1a_volta:
+                        v_nomi.append(self.nomi_intestazioni[col])                                        
+                        v_tipi.append(self.tipi_intestazioni[col][1])
+                    item = self.o_table.item(row, col)
+                    text = item.text().replace('\n', ' ') if item else ""
+                    col_data.append(text.strip())
+                    
+                v_1a_volta = False                
+                v_matrice.append(col_data)
+
+        # preparazione del risultato con le intestazioni        
+        v_risultato = '\n(' + ','.join(v_nomi) + ') \nIN\n(\n'
+        
+        # aggiunta dei valori formattati in base al tipo di dato (stringa o numero) e creazione della stringa finale da copiare negli appunti
+        for r_idx, r in enumerate(v_matrice):
+            v_risultato += '('
+            for c_idx, c in enumerate(r):
+                if c == '':
+                    v_risultato += 'NULL,'
+                elif v_tipi[c_idx] in (oracledb.NUMBER, oracledb.DB_TYPE_LONG):
+                    v_risultato += c + ','
+                elif v_tipi[c_idx] == oracledb.DATETIME:
+                    v_risultato += "TO_DATE('" + c + "', 'DD/MM/YYYY HH24:MI:SS'),"
+                else:
+                    v_risultato += "'" + c.replace("'", "''") + "',"
+                    
+            # Rimuove l'ultima virgola degli elementi interni e chiude la parentesi
+            v_risultato = v_risultato[:-1] + ')'
+            
+            # Aggiunge la virgola di separazione tra le righe SOLO se NON è l'ultima riga
+            if r_idx < len(v_matrice) - 1:
+                v_risultato += ',\n'
+        v_risultato += '\n)'
+
+        # copio il risultato nell'editor alla posizione del cursore e chiudo il menu popup
+        self.e_sql.insert(v_risultato)                                     
+        self.o_table_cont_menu.close()
+
     def o_table_zoom_item(self):
         """
             Apre la window e visualizza il contenuto del dato di partenza
@@ -4298,7 +4369,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         self.win_dialog_zoom_lineEdit.setReadOnly(True)
         self.win_dialog_zoom_item_gl.addWidget(self.win_dialog_zoom_lineEdit, 0, 0, 1, 1)
         # siccome mi posso trovare di fronte ad un clob di grandi dimensioni...nella parte di caricamento ho caricato il clob completo dentro
-        # la parte data dell'item e una preview nella parte per il video, quindi quando sono nello zoom, se prensente la parte data, prendo quella    
+        # la parte data dell'item e una preview nella parte per il video, quindi quando sono nello zoom, se presente la parte data, prendo quella    
         if self.v_o_table_current_item.data(Qt.ItemDataRole.UserRole) == None:
             self.win_dialog_zoom_lineEdit.setPlainText(self.v_o_table_current_item.text())
         else:
@@ -6111,14 +6182,14 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # utente chiede di salvare
         elif v_scelta == 'Yes':            
             if self.objectName() == "":                
-                v_ok, v_nome_file = salvataggio_editor(True, self.objectName(), self.e_sql.text(), self.setting_utf8, self.v_timestamp_ultima_modifica)
+                v_ok, v_nome_file, self.v_timestamp_ultima_modifica = salvataggio_editor(True, self.objectName(), self.e_sql.text(), self.setting_utf8, self.v_timestamp_ultima_modifica)
                 if v_ok != 'ok':
                     return 'Cancel'
                 else:
                     self.v_testo_modificato = False
                     return 'Yes'
             else:                      
-                v_ok, v_nome_file = salvataggio_editor(False, self.objectName(), self.e_sql.text(), self.setting_utf8, self.v_timestamp_ultima_modifica)                          
+                v_ok, v_nome_file, self.v_timestamp_ultima_modifica = salvataggio_editor(False, self.objectName(), self.e_sql.text(), self.setting_utf8, self.v_timestamp_ultima_modifica)                          
                 if v_ok != 'ok':
                     return 'Cancel'
                 else:
