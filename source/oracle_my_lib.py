@@ -9,14 +9,16 @@
 #                  
 #                  SISTEMA OPERATIVO LINUX
 #                  Nel caso di Linux invece si è usata la modalità "Thin" che non necessita di librerie esterne ma
-#                  necessita che lo user abbia determintate caratteristiche.
-#                  A QUESTO PUNTO, TRAMITE SYS E' STATO CREATO UN UTENTE CHE PERMETTA ALLA LIBRERIA ORACLE DI COLLEGARSI E VEDERE GLI OGGETTI SU CUI LAVORARE 
+#                  necessita che lo user abbia determintate caratteristiche sul verificatore della password.
+#                  
+#                  Per fare un test avevo fatto quanto segue per non cambiare la password dell'utente SMILE
+#                    A QUESTO PUNTO, TRAMITE SYS E' STATO CREATO UN UTENTE CHE PERMETTA ALLA LIBRERIA ORACLE DI COLLEGARSI E VEDERE GLI OGGETTI SU CUI LAVORARE 
 #      
-#                  CREATE USER SMILE_PY IDENTIFIED BY SMILE_PY;
-#                  GRANT CONNECT, RESOURCE TO SMILE_PY;
-#                  GRANT SMILE_ROLE TO SMILE_PY;
-#                  ALTER USER SMILE_PY DEFAULT ROLE SMILE_ROLE;
-#                  GRANT CREATE SESSION TO SMILE_PY;
+#                    CREATE USER SMILE_PY IDENTIFIED BY SMILE_PY;
+#                    GRANT CONNECT, RESOURCE TO SMILE_PY;
+#                    GRANT SMILE_ROLE TO SMILE_PY;
+#                    ALTER USER SMILE_PY DEFAULT ROLE SMILE_ROLE;
+#                    GRANT CREATE SESSION TO SMILE_PY;
 
 # Importo la libreria oracledb versione dalla 8.3 in su
 import oracledb

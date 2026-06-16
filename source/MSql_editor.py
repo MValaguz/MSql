@@ -37,6 +37,8 @@ import traceback
 import time
 import psutil
 import json
+# Usata per aprire link esterni
+import webbrowser
 # Librerie di data base Oracle
 import oracledb, oracle_my_lib, oracle_executer
 # Librerie grafiche QT
@@ -940,6 +942,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 subprocess.Popen(["xdg-open", os.getcwd() + "/source/help/MSql_help.odt"])                    
             else:
                 os.system("start " + os.getcwd() + "/help/MSql_help.odt")
+        # Apro il progetto su GitHub
+        elif p_slot.objectName() == 'actionGo_to_GitHub_project':                          
+            webbrowser.open("https://github.com/MValaguz/MSql")
         # Apro file di della cronologia delle modifiche
         elif p_slot.objectName() == 'actionChange_log':                                      
             self.o_changelog = classChangeLog(self)

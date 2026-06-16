@@ -189,6 +189,7 @@
     <addaction name="actionHelp"/>
     <addaction name="actionChange_log"/>
     <addaction name="actionProgram_info"/>
+    <addaction name="actionGo_to_GitHub_project"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -1850,6 +1851,15 @@
    </property>
    <property name="text">
     <string>Export to Excel</string>
+   </property>
+  </action>
+  <action name="actionGo_to_GitHub_project">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/github.png</normaloff>:/icons/icons/github.png</iconset>
+   </property>
+   <property name="text">
+    <string>Go to GitHub project</string>
    </property>
   </action>
  </widget>
