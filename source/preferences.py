@@ -52,6 +52,11 @@ class preferences_class():
                 self.dark_theme = True
             else:
                 self.dark_theme = False
+            # nome tema colori chiaro
+            if 'clear_theme' in v_json:
+                self.clear_theme = v_json['clear_theme']
+            else:
+                self.clear_theme = ''
             # directory apertura e salvataggio
             self.open_dir = v_json['open_dir']
             self.save_dir = v_json['save_dir']
@@ -155,6 +160,7 @@ class preferences_class():
             self.remember_window_pos = True
             self.remember_text_pos = True
             self.dark_theme = False
+            self.clear_theme = ''
             self.general_zoom = 100
             self.open_dir = ''
             self.save_dir = ''            
@@ -214,6 +220,9 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         # forzo il posizionamento sul primo tab
         self.o_tab_widget.setCurrentIndex(0)
         
+        # carico elenco degli stili Clear in base al sistema operativo
+        self.e_clear_theme.addItems(QStyleFactory.keys())
+        
         # creo l'oggetto preferenze che automaticamente carica il file o le preferenze di default
         self.preferences = preferences_class(self.nome_file_preferences, self.nome_file_connections)        
         # le preferenze caricate vengono riportate a video
@@ -242,6 +251,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         self.e_author_name.setText(self.preferences.author_name)
         self.e_connection_mode.setCurrentIndex(self.preferences.connection_mode)
         self.e_oracleclient_path.setText(self.preferences.oracleclient_path)                
+        self.e_clear_theme.setCurrentText(self.preferences.clear_theme)
 
         ###
         # preparo elenco server        
@@ -716,7 +726,8 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
                  'highlight_color_hex': self.e_highlight_color.currentData().name(),
                  'author_name': self.e_author_name.text(),
                  'connection_mode': self.e_connection_mode.currentIndex(),
-                 'oracleclient_path': self.e_oracleclient_path.text()                 
+                 'oracleclient_path': self.e_oracleclient_path.text(),
+                 'clear_theme': self.e_clear_theme.currentText()                
                 }
 
 		# scrittura nel file dell'oggetto json (notare come venga usata la funzione dump senza la s finale in quanto scrive byte)

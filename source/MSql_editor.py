@@ -576,6 +576,11 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         self.l_connection.setFrameStyle(QFrame.Shape.NoFrame)
         self.l_connection.setStyleSheet('color: black;')
         self.statusBar.addWidget(self.l_connection)                                        
+        # Informazioni su eventuale workspace attivo
+        self.l_workspace = QLabel()
+        self.l_workspace.setFrameStyle(QFrame.Shape.NoFrame)
+        self.l_workspace.setStyleSheet('font-weight: bold; color: orange;')
+        self.statusBar.addWidget(self.l_workspace)                                        
         # Coordinate cursore dell'editor di testo
         self.l_cursor_pos = QLabel()
         self.l_cursor_pos.setFrameStyle(QFrame.Shape.NoFrame)
@@ -605,10 +610,11 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         self.statusBar.addPermanentWidget(self.l_tabella_editabile)      
 
         ###
-        # Var per la gestione dei files recenti
+        # Var per la gestione dei files recenti e workspace
         ###
         self.elenco_file_recenti = []            
         self.elenco_file_recenti_action = []
+        self.current_workspace = ''
 
         ###
         # Var per la gestione degli editor
@@ -831,8 +837,14 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # Carico l'oggetto di classe MSql_win2_class attivo in questo momento         
         o_MSql_win2 = self.oggetto_win2_attivo()
         
+        ###
+        # Queste voci di menu non hanno bisogno di un oggetto editor attivo, quindi le gestisco subito
+        ###
+        # Apertura del Workspace
+        if p_slot.objectName() == 'actionOpen_Workspace':
+            self.slot_open_workspace()
         # Cambio di connessione
-        if str(p_slot.data()) == 'MENU_SERVER':
+        elif str(p_slot.data()) == 'MENU_SERVER':
             for rec in o_global_preferences.elenco_server:
                 if rec[0] == p_slot.text():                    
                     self.e_server_name = rec[1]                    
@@ -1004,7 +1016,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             else:
                 self.showFullScreen()
                 
+        ###
         # Queste voci di menu che agiscono sull'oggetto editor, sono valide solo se l'oggetto è attivo
+        ###
         if o_MSql_win2 is not None:
             # Salvataggio del file
             if p_slot.objectName() == 'actionSave':
@@ -1024,12 +1038,18 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                     o_MSql_win2.setWindowTitle(titolo_window(v_nome_file))
                     self.aggiorna_elenco_file_recenti(v_nome_file)                    
                     self.window_attiva.setObjectName(v_nome_file) # notare come il nome della window va forzato anche sulla window attiva
+            # Salvataggio di tutti i file aperti
+            elif p_slot.objectName() == 'actionSave_all':     
+                self.slot_save_all()                           
             # Chiusura dell'editor
             elif p_slot.objectName() == 'actionClose':
                 self.mdiArea.closeActiveSubWindow()
             # Chiusura di tutti gli editor aperti 
             elif p_slot.objectName() == 'actionClose_all':
                 self.mdiArea.closeAllSubWindows()
+            # Salvataggio del Workspace
+            elif p_slot.objectName() == 'actionSave_Workspace':
+                self.slot_save_workspace()
             # Visualizza il carattere di end of line, ritorno a capo
             elif p_slot.objectName() == 'actionShow_end_of_line':
                 # riporto la preferenza di menu dentro l'oggetto delle preferenze 
@@ -1241,6 +1261,77 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # Creo una view laterale per l'editor attivo    
             elif p_slot.objectName() == 'actionEditor_view':                
                 o_MSql_win2.slot_editor_view()            
+
+    def slot_save_all(self):
+        """ 
+           salvataggio di tutti i file aperti (quelli che hanno il testo modificato)
+        """
+        # scorro la lista-oggetti-editor e salvo tutti quelli che non sono chiusi e che hanno il testo modificato (v_testo_modificato = True)
+        for i in range(0,len(self.o_lst_window2)):
+            if not self.o_lst_window2[i].v_editor_chiuso:
+                if self.o_lst_window2[i].v_testo_modificato:                            
+                    v_ok, v_nome_file, self.o_lst_window2[i].v_timestamp_ultima_modifica = salvataggio_editor(False, self.o_lst_window2[i].objectName(), self.o_lst_window2[i].e_sql.text(), self.o_lst_window2[i].setting_utf8, self.o_lst_window2[i].v_timestamp_ultima_modifica)
+                    if v_ok == 'ok':
+                        self.o_lst_window2[i].v_testo_modificato = False
+                        self.o_lst_window2[i].setObjectName(v_nome_file)
+                        self.o_lst_window2[i].setWindowTitle(titolo_window(v_nome_file))
+                        self.aggiorna_elenco_file_recenti(v_nome_file)       
+
+    def slot_save_workspace(self):
+        """ 
+           Salvataggio del workspace (elenco dei file aperti)
+        """
+        # se al momento non è aperto un workspace, chiedo all'utente di indicare il nome del file da salvare tramite la dialog box di salvataggio file
+        if self.current_workspace == '':
+            v_nome_file = QFileDialog.getSaveFileName(self, QCoreApplication.translate('MSql_win1','Save Workspace'), '', QCoreApplication.translate('MSql_win1','Workspace file (*.mws)'))[0]
+            if v_nome_file == '':
+                return None
+            self.current_workspace = v_nome_file
+        
+        # apro il file scelto e inserisco il nome di tutti i file aperti (solo quelli che non sono chiusi) e lo salvo
+        with open(self.current_workspace,'w') as file:
+            for i in range(0,len(self.o_lst_window2)):
+                if not self.o_lst_window2[i].v_editor_chiuso:
+                    file.write(self.o_lst_window2[i].objectName() + '\n')           
+
+        # eseguo il salvataggio di tutti i file aperti
+        self.slot_save_all() 
+
+        # imposto la specifica label della statusbar con il nome del workspace aperto
+        self.l_workspace.setText(QCoreApplication.translate('MSql_win1','Workspace: ') + self.current_workspace)
+        
+        # messaggio di fine
+        message_info(QCoreApplication.translate('MSql_win1','Workspace saved!'))
+
+    def slot_open_workspace(self):     
+        """
+           Apertura di un workspace 
+        """
+        # posso aprire un workspace solo se non ci sono editor aperti        
+        for i in range(0,len(self.o_lst_window2)):
+                if not self.o_lst_window2[i].v_editor_chiuso:
+                    message_info(QCoreApplication.translate('MSql_win1','Please close all the open editors before opening a workspace!'))
+                    return None
+        # posso aprire un workspace solo se non è già aperto un workspace        
+        if self.current_workspace != '':
+            message_info(QCoreApplication.translate('MSql_win1','A workspace is already open!'))
+            return None        
+        # dialog per aprire un workspace
+        v_nome_file = QFileDialog.getOpenFileName(self, QCoreApplication.translate('MSql_win1','Open Workspace'), '', QCoreApplication.translate('MSql_win1','Workspace file (*.mws)'))[0]
+        if v_nome_file != '':
+            self.current_workspace = v_nome_file
+            # apro il file e scorro tutti i nomi dei file da aprire     
+            with open(self.current_workspace,'r') as file:
+                for v_nome_file in file:                                        
+                    v_nome_file = v_nome_file.rstrip('\n')
+                    # il file viene aperto solo se esiste; viene creata un'azione fittizia e simulata apertura tramite Open da menu
+                    if os.path.isfile(v_nome_file):                            
+                        v_titolo, v_contenuto_file, v_codifica_utf8 = self.openfile(v_nome_file)        
+                        v_azione = QAction()
+                        v_azione.setText('Open_db_obj')            
+                        self.smistamento_voci_menu(v_azione, v_titolo, v_contenuto_file, v_codifica_utf8)        
+            # imposto la specifica label della statusbar con il nome del workspace aperto
+            self.l_workspace.setText(QCoreApplication.translate('MSql_win1','Workspace: ') + self.current_workspace)
 
     def slot_mdiArea_subwindow_activated(self, subwindow):
         """
@@ -7379,9 +7470,12 @@ if __name__ == "__main__":
     
     # se è stato scelto di avere il tema dei colori scuro, lo carico
     # Attenzione! La parte principale del tema colori rispetta il meccanismo di QT library
-    #             Mentre per la parte di QScintilla ho dovuto fare le impostazioni manuali (v. definizione del lexer)
+    #             Mentre per la parte di QScintilla ho dovuto fare le impostazioni manuali (v. definizione del lexer)    
     if o_global_preferences.dark_theme:        
-        app.setStyleSheet(dark_theme_definition())                    
+        app.setStyleSheet(dark_theme_definition())                   
+    # se invece si opta per il tema chiaro, viene preso quanto scelto tra i temi presenti in pyqt6 che cambiano in base al sistema operativo
+    elif o_global_preferences.clear_theme != '':        
+        app.setStyle(o_global_preferences.clear_theme)
             
     # carico eventuali traduzioni se la lingua è diversa rispetto all'inglese        
     # se il programma è eseguito da pyinstaller, cambio la dir di riferimento passando a dove si trova l'eseguibile

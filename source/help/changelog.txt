@@ -2,7 +2,7 @@
 MSql TODO!!!
 -------------
 
-- Provato a passare alla nuova versione di Oracledb 4.0.1 che però non funziona con i driver installati sul PC! Tornato indietro alla versione 3!
+- Provato a passare alla nuova versione di Oracledb 4.0.1 che però non funziona con i driver installati sul PC..perché si deve avere almeno Oracle 19! Tornato indietro alla versione 3!
 - Il concetto di posizionamento nell'editor con calcolo lunghezza carattere da 2byte lato Scintilla va provato a fare anche per quando c'è errore nel comando SQL o PL-SQL che deve adottare lo stesso meccanismo usato per CTRL+Invio
 - Se apro nell'object viewer SM_SMYIOT_PKG, nella prima funzione non riesce a ricavare la var p_user_handle, anche in GET_MATRICOLE_DA_VERIFICARE
   Se interrogo nell'object viewer una funzione sarebbe bello capire tipologia del parametro (input-output)
@@ -13,6 +13,15 @@ MSql TODO!!!
 ---------------
 MSql Changelog!
 ---------------
+
+Version dated 17/06/2026
+OK! Su indicazione di Alek che usa il tema chiaro; inserito nuova preferenza che permette di selezionare tra i temi chiari disponibili a sistema operativo. Il tema scuro rimane comunque quello forzato con apposito QSS di PyQt.
+OK! Introdotta la voce di menu "Save all"; il salvataggio di un file viene eseguito solo se risulta modificato.
+OK! Su proposta di Alek creata la gestione dei Workspace. Rilasciata la prima versione delle funzionalità di "Save workspace" e "Open workspace".
+
+Version dated 16/06/2026
+OK! Condividere con Alek le info riguardanti la connessione Thin in modo da capire se metodo che possiamo usare in alternativa a quello OCI..magari così anche i passaggi ad altre versione delle librerie sono più facili.
+    Ok fatto. Putroppo non è possibile aggiornare il parser delle password di Oracle in quanto se lo facessimo smetterebbe di funzionare ICOM!
 
 Version dated 28/05/2026
 OK! Marco T. ha chiesto se possibile fare comando che partendo dalla tabella dei risultati, selezionando una serie di celle, tasto destro comando "SQL IN list" che crea nell'editor l'istruzione in con tutte le colonne e le celle interessate dalla selezione

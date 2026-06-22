@@ -73,9 +73,13 @@
     <addaction name="separator"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_as"/>
+    <addaction name="actionSave_all"/>
     <addaction name="separator"/>
     <addaction name="actionClose"/>
     <addaction name="actionClose_all"/>
+    <addaction name="separator"/>
+    <addaction name="actionSave_Workspace"/>
+    <addaction name="actionOpen_Workspace"/>
     <addaction name="separator"/>
     <addaction name="actionPreferences"/>
     <addaction name="separator"/>
@@ -1860,6 +1864,21 @@
    </property>
    <property name="text">
     <string>Go to GitHub project</string>
+   </property>
+  </action>
+  <action name="actionSave_all">
+   <property name="text">
+    <string>Save all</string>
+   </property>
+  </action>
+  <action name="actionOpen_Workspace">
+   <property name="text">
+    <string>Open workspace</string>
+   </property>
+  </action>
+  <action name="actionSave_Workspace">
+   <property name="text">
+    <string>Save workspace</string>
    </property>
   </action>
  </widget>
