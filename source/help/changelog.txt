@@ -6,13 +6,15 @@ MSql TODO!!!
 - Il concetto di posizionamento nell'editor con calcolo lunghezza carattere da 2byte lato Scintilla va provato a fare anche per quando c'è errore nel comando SQL o PL-SQL che deve adottare lo stesso meccanismo usato per CTRL+Invio
 - Se apro nell'object viewer SM_SMYIOT_PKG, nella prima funzione non riesce a ricavare la var p_user_handle, anche in GET_MATRICOLE_DA_VERIFICARE
   Se interrogo nell'object viewer una funzione sarebbe bello capire tipologia del parametro (input-output)
-- Inserire la possibilità di collegarsi a oracle-cloud
 - Ancora persiste il problema che esce messaggio errore "dpy...." dopo che compilo pkg che va in errore, e poi lancio delle select
 - Lato linux creare lo script per pacchettizzare tutto il programma
 
 ---------------
 MSql Changelog!
 ---------------
+
+Version dated 24/06/2026
+OK! Aggiornare help per la gestione del Workspace
 
 Version dated 17/06/2026
 OK! Su indicazione di Alek che usa il tema chiaro; inserito nuova preferenza che permette di selezionare tra i temi chiari disponibili a sistema operativo. Il tema scuro rimane comunque quello forzato con apposito QSS di PyQt.

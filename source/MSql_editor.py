@@ -843,6 +843,9 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # Apertura del Workspace
         if p_slot.objectName() == 'actionOpen_Workspace':
             self.slot_open_workspace()
+        # Elimino la lista dei file recenti 
+        elif p_slot.objectName() == 'actionClear_recent_file_list':
+            self.slot_clear_recent_file_list()
         # Cambio di connessione
         elif str(p_slot.data()) == 'MENU_SERVER':
             for rec in o_global_preferences.elenco_server:
@@ -1377,6 +1380,22 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             if not obj_win2.v_editor_chiuso:
                 obj_win2.set_show_end_of_line()
 
+    def slot_clear_recent_file_list(self):
+        """
+           Pulizia del menu dei file recenti e dello specifico file
+        """
+        if message_question_yes_no(QCoreApplication.translate('MSql_win1','Are you sure you want to clear your recent files history?')) == 'Yes':
+            if os.path.isfile(v_global_work_dir + 'MSql_recent_files.ini'):
+                os.remove(v_global_work_dir + 'MSql_recent_files.ini')
+                # Cicla su tutte le azioni attualmente presenti nel menu
+                for v_action in self.menuFiles.actions():
+                    # Verifica se l'azione ha il data tag corretto
+                    if v_action.data() == 'FILE_RECENTI':
+                        # Rimuove l'azione dal menu
+                        self.menuFiles.removeAction(v_action)
+                        # Opzionale: elimina l'oggetto per liberare memoria
+                        v_action.deleteLater()
+    
     def aggiorna_elenco_file_recenti(self, p_elemento):
         """
            Carica elenco dei file recenti all'interno dell'apposito menu

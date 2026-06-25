@@ -760,6 +760,11 @@ class Ui_MSql_win1(object):
         self.actionOpen_Workspace.setObjectName("actionOpen_Workspace")
         self.actionSave_Workspace = QtGui.QAction(parent=MSql_win1)
         self.actionSave_Workspace.setObjectName("actionSave_Workspace")
+        self.actionClear_recent_file_list = QtGui.QAction(parent=MSql_win1)
+        icon95 = QtGui.QIcon()
+        icon95.addPixmap(QtGui.QPixmap("icons:clear.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        self.actionClear_recent_file_list.setIcon(icon95)
+        self.actionClear_recent_file_list.setObjectName("actionClear_recent_file_list")
         self.menuFiles.addAction(self.actionNew)
         self.menuFiles.addAction(self.actionOpen)
         self.menuFiles.addSeparator()
@@ -774,6 +779,8 @@ class Ui_MSql_win1(object):
         self.menuFiles.addAction(self.actionOpen_Workspace)
         self.menuFiles.addSeparator()
         self.menuFiles.addAction(self.actionPreferences)
+        self.menuFiles.addSeparator()
+        self.menuFiles.addAction(self.actionClear_recent_file_list)
         self.menuFiles.addSeparator()
         self.menuFiles.addAction(self.actionExit)
         self.menuServer.addAction(self.actionConnect)
@@ -1158,6 +1165,7 @@ class Ui_MSql_win1(object):
         self.actionSave_all.setText(_translate("MSql_win1", "Save all"))
         self.actionOpen_Workspace.setText(_translate("MSql_win1", "Open workspace"))
         self.actionSave_Workspace.setText(_translate("MSql_win1", "Save workspace"))
+        self.actionClear_recent_file_list.setText(_translate("MSql_win1", "Clear recent file list"))
 from custom_widget import MyCustomTreeView
 
 
