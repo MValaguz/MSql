@@ -155,6 +155,12 @@ class preferences_class():
                 self.oracleclient_path = v_json['oracleclient_path']    
             else:
                 self.oracleclient_path = ''
+            # attivazione della mappa di procedure/funzioni dentro l'editor
+            if "show_map_proc_func" in v_json:
+                self.show_map_proc_func = v_json['show_map_proc_func']
+            else:
+                self.show_map_proc_func = True
+
         # imposto valori di default senza presenza dello specifico file
         else:
             self.remember_window_pos = True
@@ -184,7 +190,8 @@ class preferences_class():
             self.highlight_color_hex = '#43a047' # Fare riferimento al file custom_widget, tabella colori contenuto in classe MyColorComboBox
             self.author_name = ''
             self.connection_mode = 0  # 0=Thin 1=Thick
-            self.oracleclient_path = ''            
+            self.oracleclient_path = ''    
+            self.show_map_proc_func = True        
 
         # Viene aggiunta alla classe la proprietà editable che gestisce la modalità di editazione delle tabelle (un tempo era anche una preferenza a video che poi è stata eliminata)
         self.editable = False
@@ -252,6 +259,7 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         self.e_connection_mode.setCurrentIndex(self.preferences.connection_mode)
         self.e_oracleclient_path.setText(self.preferences.oracleclient_path)                
         self.e_clear_theme.setCurrentText(self.preferences.clear_theme)
+        self.e_default_map_proc_func.setChecked(self.preferences.show_map_proc_func)
 
         ###
         # preparo elenco server        
@@ -637,6 +645,12 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         else:
             v_open_new_editor = 0
 
+        # il default per attivare la mappa di procedure/funzioni dentro l'editor
+        if self.e_default_map_proc_func.isChecked():
+            v_show_map_proc_func = 1
+        else:
+            v_show_map_proc_func = 0
+
         ###
         # elenco dei server
         ###
@@ -727,7 +741,8 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
                  'author_name': self.e_author_name.text(),
                  'connection_mode': self.e_connection_mode.currentIndex(),
                  'oracleclient_path': self.e_oracleclient_path.text(),
-                 'clear_theme': self.e_clear_theme.currentText()                
+                 'clear_theme': self.e_clear_theme.currentText(),
+                 'show_map_proc_func': v_show_map_proc_func               
                 }
 
 		# scrittura nel file dell'oggetto json (notare come venga usata la funzione dump senza la s finale in quanto scrive byte)

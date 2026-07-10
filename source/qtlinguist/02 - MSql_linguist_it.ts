@@ -188,7 +188,7 @@
         <translation>&amp;Importa-Esporta</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1899"/>
+        <location filename="../MSql_editor.py" line="1896"/>
         <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Objects Navigator</source>
@@ -735,11 +735,6 @@
     </message>
     <message>
         <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
-        <source>Mini map</source>
-        <translation>Mini mappa</translation>
-    </message>
-    <message>
-        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Line cut</source>
         <translation>Elimina la riga</translation>
     </message>
@@ -1015,7 +1010,7 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="7381"/>
+        <location filename="../MSql_editor.py" line="7354"/>
         <location filename="../MSql_editor.py" line="571"/>
         <source>Last execution time:</source>
         <translation>Tempo ultima esecuzione:</translation>
@@ -1026,19 +1021,19 @@
         <translation>Connesso a:</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="7336"/>
+        <location filename="../MSql_editor.py" line="7309"/>
         <location filename="../MSql_editor.py" line="593"/>
         <source>Lines:</source>
         <translation>Righe:</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="7336"/>
+        <location filename="../MSql_editor.py" line="7309"/>
         <location filename="../MSql_editor.py" line="593"/>
         <source>Length:</source>
         <translation>Caratteri:</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1361"/>
+        <location filename="../MSql_editor.py" line="1358"/>
         <location filename="../MSql_editor.py" line="607"/>
         <source>Editable table: Disabled</source>
         <translation>Risultato editabile: Disattivato</translation>
@@ -1080,261 +1075,265 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1082"/>
+        <location filename="../MSql_editor.py" line="1079"/>
         <source>There are 2 ways to switch to rectangular selection mode</source>
         <translation>Ci sono due strade per passare alla selezione rettangolare</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1082"/>
+        <location filename="../MSql_editor.py" line="1079"/>
         <source>1. (Keyboard and mouse) Hold down ALT while left clicking, then dragging</source>
         <translation>1. (Tastiera e mouse) Premi il tasto ALT mentre tieni premuto il tasto sinistro del mouse e svolgi la selezione</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1082"/>
+        <location filename="../MSql_editor.py" line="1079"/>
         <source>2. (Keyboard only) Hold down ALT+Shift while using the arrow keys</source>
         <translation>2 (Solo tastiera) Premi il tasto ALT+Maiuscolo e usa i tasti freccia</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1085"/>
+        <location filename="../MSql_editor.py" line="1082"/>
         <source>To extract the primary key, position yourself on a table name and press CTRL+K. Otherwise, to join two tables, write the two tables separated by commas, select the text and press CTRL+K.</source>
         <translation>Per estrarre la chiave primaria, posizionati sul nome della tabella nell&apos;editor, premi la combinazione CTRL+K. Oppure, nel caso di due tabelle separata da virgola, selezionale e premi la combinazione CTRL+K.</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1088"/>
+        <location filename="../MSql_editor.py" line="1085"/>
         <source>To search next = press F4</source>
         <translation>Per ricercare il prossimo = premi F4</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1090"/>
+        <location filename="../MSql_editor.py" line="1087"/>
         <source>Click on the left margins of the editor and the bookmark will be highlighted with a green circle.</source>
         <translation>Cliccando sul margine di sinistra dell&apos;editor verrà inserito un pallino verde che indica l&apos;attivazione del segnalibro sulla riga.</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1092"/>
+        <location filename="../MSql_editor.py" line="1089"/>
         <source>Click on the left margins of the editor, select a bookmark, and hold down the CTRL key.</source>
         <translation>Seleziona il pallino verde sul margine di sinistra che identifica il segnalibro che vuoi cancellare, tenendo premuto il tasto CTRL.</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1094"/>
+        <location filename="../MSql_editor.py" line="1091"/>
         <source>With CTRL+B you can jump from one bookmark to another! When you reach the end, the search starts again from the beginning of the text.</source>
         <translation>Con la combinazione CTRL+B puoi passare da un segnalibro all&apos;altro. Arrivato alla, fine il programma ritorna automaticamente all&apos;inizio del testo.</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1197"/>
+        <location filename="../MSql_editor.py" line="1194"/>
         <source>Script stopped for error!</source>
         <translation>Lo script si è interroto per un errore!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1200"/>
+        <location filename="../MSql_editor.py" line="1197"/>
         <source>Position yourself on the instruction you want to execute and press CTRL+Enter</source>
         <translation>Posizionati sull&apos;istruzioni che vuoi eseguire e premi la combinazione CTRL+Invio</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1205"/>
+        <location filename="../MSql_editor.py" line="1202"/>
         <source>Error to analyze query!</source>
         <translation>Si è verificato un errore nell&apos;analizzare la query!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1214"/>
+        <location filename="../MSql_editor.py" line="1211"/>
         <source>Position yourself in the text-editor on the object and press F12</source>
         <translation>Posizionati con il cursore sul nome di un oggetto dell&apos;editor e premi il tasto F12</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1217"/>
+        <location filename="../MSql_editor.py" line="1214"/>
         <source>Position yourself in the text-editor on the table and press F11</source>
         <translation>Posizionati con il cursore sul nome di una tabella e premi il tasto F11 per eseguire la query</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1289"/>
+        <location filename="../MSql_editor.py" line="1286"/>
         <source>Save Workspace</source>
         <translation>Salva spazio di lavoro</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1323"/>
-        <location filename="../MSql_editor.py" line="1289"/>
+        <location filename="../MSql_editor.py" line="1320"/>
+        <location filename="../MSql_editor.py" line="1286"/>
         <source>Workspace file (*.mws)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1337"/>
-        <location filename="../MSql_editor.py" line="1304"/>
+        <location filename="../MSql_editor.py" line="1334"/>
+        <location filename="../MSql_editor.py" line="1301"/>
         <source>Workspace: </source>
         <translation>Spazio di lavoro: </translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1307"/>
+        <location filename="../MSql_editor.py" line="1304"/>
         <source>Workspace saved!</source>
         <translation>Spazio di lavoro salvato!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1316"/>
+        <location filename="../MSql_editor.py" line="1313"/>
         <source>Please close all the open editors before opening a workspace!</source>
         <translation>Devi chiudere tutti gli editor aperti prima di aprire un spazio di lavoro!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1320"/>
+        <location filename="../MSql_editor.py" line="1317"/>
         <source>A workspace is already open!</source>
         <translation>Uno spazio di lavoro risulta già aperto!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1323"/>
+        <location filename="../MSql_editor.py" line="1320"/>
         <source>Open Workspace</source>
         <translation>Apri spazio di lavoro</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1357"/>
+        <location filename="../MSql_editor.py" line="1354"/>
         <source>Editable table: Enabled</source>
         <translation>Risultato editabile: Attivato</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1387"/>
+        <location filename="../MSql_editor.py" line="1384"/>
         <source>Are you sure you want to clear your recent files history?</source>
         <translation>Sei sicuro di pulire la lista dei file recenti?</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="2611"/>
-        <location filename="../MSql_editor.py" line="2027"/>
-        <location filename="../MSql_editor.py" line="1821"/>
-        <location filename="../MSql_editor.py" line="1615"/>
+        <location filename="../MSql_editor.py" line="2608"/>
+        <location filename="../MSql_editor.py" line="2024"/>
+        <location filename="../MSql_editor.py" line="1818"/>
+        <location filename="../MSql_editor.py" line="1612"/>
         <source>Error:</source>
         <translation>Errore:</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1622"/>
+        <location filename="../MSql_editor.py" line="1619"/>
         <source>MSql detected that the current session has an open transaction. Do you want to perform commit before closing the session?</source>
         <translation>Sono presenti dei dati non salvati per la sessione corrente! Vuoi eseguire la commit prima di chiudere la sessione?</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1735"/>
-        <location filename="../MSql_editor.py" line="1730"/>
+        <location filename="../MSql_editor.py" line="1732"/>
+        <location filename="../MSql_editor.py" line="1727"/>
         <source>Error to oracle connection!</source>
         <translation>Errore di connessione a Oracle!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1732"/>
+        <location filename="../MSql_editor.py" line="1729"/>
         <source>For via proxy connection remember to activate this using command</source>
         <translation>Ricordarsi che per una connessione via proxy è necessario fare abilitazione con il comando</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1732"/>
+        <location filename="../MSql_editor.py" line="1729"/>
         <source>using user SYS!</source>
         <translation>usando utente SYS!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1744"/>
+        <location filename="../MSql_editor.py" line="1741"/>
         <source>Connected to:</source>
         <translation>Connesso a:</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1865"/>
+        <location filename="../MSql_editor.py" line="1862"/>
         <source>Error to oracle disconnection!</source>
         <translation>Errore di disconnessione da Oracle!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="2085"/>
+        <location filename="../MSql_editor.py" line="2082"/>
         <source>Error to create popupmenu!</source>
         <translation>Errore nella creazione del popup menu!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="2525"/>
-        <location filename="../MSql_editor.py" line="2500"/>
-        <location filename="../MSql_editor.py" line="2481"/>
-        <location filename="../MSql_editor.py" line="2306"/>
-        <location filename="../MSql_editor.py" line="2302"/>
+        <location filename="../MSql_editor.py" line="2522"/>
+        <location filename="../MSql_editor.py" line="2497"/>
+        <location filename="../MSql_editor.py" line="2478"/>
+        <location filename="../MSql_editor.py" line="2303"/>
+        <location filename="../MSql_editor.py" line="2299"/>
         <source>Invalid object!</source>
         <translation>Oggetto invalido!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="2320"/>
+        <location filename="../MSql_editor.py" line="2317"/>
         <source>Error to retrive metadata information!</source>
         <translation>Errore restituito durante la richiesta dei &quot;metadata information&quot;!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="2418"/>
+        <location filename="../MSql_editor.py" line="2415"/>
         <source>No valid object!</source>
         <translation>Oggetto non valido!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="2448"/>
+        <location filename="../MSql_editor.py" line="2445"/>
         <source>Open a editor!</source>
         <translation>Prima apri un editor!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="2497"/>
-        <location filename="../MSql_editor.py" line="2476"/>
-        <location filename="../MSql_editor.py" line="2468"/>
+        <location filename="../MSql_editor.py" line="2494"/>
+        <location filename="../MSql_editor.py" line="2473"/>
+        <location filename="../MSql_editor.py" line="2465"/>
         <source>Error to retrive referenced table name!</source>
         <translation>Errore nel recupero del nome della tabella referenziata!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="2516"/>
+        <location filename="../MSql_editor.py" line="2513"/>
         <source>Invalid field!</source>
         <translation>Campo non valido!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="3025"/>
+        <location filename="../MSql_editor.py" line="3022"/>
         <source>Error during decode object type!</source>
         <translation>Errore durante la decodifica del tipo di oggetto!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="3084"/>
+        <location filename="../MSql_editor.py" line="3081"/>
         <source>Not all the requested data has been entered!</source>
         <translation>Non tutti i dati richiesti sono stati inseriti!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="3184"/>
+        <location filename="../MSql_editor.py" line="3181"/>
         <source>Select a row!</source>
         <translation>Seleziona una riga!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="3250"/>
+        <location filename="../MSql_editor.py" line="3247"/>
         <source>For compare you must have two editor open or more!</source>
         <translation>Per eseguire il confronto è necessario avere almeno due editor aperti!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="3289"/>
+        <location filename="../MSql_editor.py" line="3286"/>
         <source>Editor Compare</source>
         <translation>Comparatore delle differenze</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="3371"/>
-        <location filename="../MSql_editor.py" line="3344"/>
-        <location filename="../MSql_editor.py" line="3328"/>
-        <location filename="../MSql_editor.py" line="3301"/>
+        <location filename="../MSql_editor.py" line="3368"/>
+        <location filename="../MSql_editor.py" line="3341"/>
+        <location filename="../MSql_editor.py" line="3325"/>
+        <location filename="../MSql_editor.py" line="3298"/>
         <source>No connection!</source>
         <translation>Nessuna connessione al database!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6821"/>
+        <location filename="../MSql_editor.py" line="6797"/>
         <source>Select the text that includes the declaration of a PL-SQL function-procedure to obtain a comment reporting: Author, Creation date, Description and input-output parameters</source>
         <translation>Selezionare il testo che comprende la dichiarazione di una funzione-procedura PL-SQL per ottenere un commento riportante: Autore, Data creazione, Descrizione e parametri input-output</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6880"/>
+        <location filename="../MSql_editor.py" line="6856"/>
         <source>No text selected!</source>
         <translation>Nessun testo selezionato!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="7344"/>
+        <location filename="../MSql_editor.py" line="7317"/>
         <source>Overwrite</source>
         <translation>Sovrascrittura</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="7346"/>
+        <location filename="../MSql_editor.py" line="7319"/>
         <source>Insert</source>
         <translation>Inserimento</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="7411"/>
+        <location filename="../MSql_editor.py" line="7384"/>
         <source>OPEN_FROM_SIM</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="7532"/>
+        <location filename="../MSql_editor.py" line="7505"/>
         <source>A new version of MSql Editor is aviable!
 Do you want to install it?</source>
         <translation>E&apos; disponibile una nuova versione di MSql!
 Vuoi installarla?</translation>
+    </message>
+    <message>
+        <source>Mini map</source>
+        <translation type="vanished">Mini mappa</translation>
     </message>
     <message>
         <source>Export to Excel-CSV</source>
@@ -1499,120 +1498,120 @@ Vuoi installarla?</translation>
         <translation>Sostituisci tutto</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="4378"/>
-        <location filename="../MSql_editor.py" line="4367"/>
+        <location filename="../MSql_editor.py" line="4310"/>
+        <location filename="../MSql_editor.py" line="4299"/>
         <source>Error blob fetching using the statement:</source>
         <translation>Errore nel recuperare il campo di tipo blob usanto l&apos;istruzione:</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="4387"/>
+        <location filename="../MSql_editor.py" line="4319"/>
         <source>You must select a blob cell!</source>
         <translation>Devi selezionare una cella con un dato di tipo blob!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="4399"/>
+        <location filename="../MSql_editor.py" line="4331"/>
         <source>Blob downloaded in Downloads directory of your PC!</source>
         <translation>Il blob è stato scaricato nella cartella Downloads del tuo PC!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="4402"/>
+        <location filename="../MSql_editor.py" line="4334"/>
         <source>Error downloading blob!</source>
         <translation>Errore durante il download del blob!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="4743"/>
+        <location filename="../MSql_editor.py" line="4675"/>
         <source>No PK found!</source>
         <translation>Non trovato la PK!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="4814"/>
+        <location filename="../MSql_editor.py" line="4746"/>
         <source>No FK found!</source>
         <translation>Non trovata la FK!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="5176"/>
+        <location filename="../MSql_editor.py" line="5108"/>
         <source>No instruction!</source>
         <translation>Nessuna istruzione!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="5370"/>
+        <location filename="../MSql_editor.py" line="5302"/>
         <source>No statement found!</source>
         <translation>Nessun blocco istruzioni trovato!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="5463"/>
+        <location filename="../MSql_editor.py" line="5395"/>
         <source>No script!</source>
         <translation>Nessuno script!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="5478"/>
+        <location filename="../MSql_editor.py" line="5410"/>
         <source>Are you sure to confirm this command?</source>
         <translation>Sei sicuro di confermare questo comando?</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="5772"/>
+        <location filename="../MSql_editor.py" line="5704"/>
         <source>Error to fetch data:</source>
         <translation>Errore nel recuperare i dati:</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6243"/>
-        <location filename="../MSql_editor.py" line="6179"/>
-        <location filename="../MSql_editor.py" line="6111"/>
-        <location filename="../MSql_editor.py" line="6050"/>
+        <location filename="../MSql_editor.py" line="6218"/>
+        <location filename="../MSql_editor.py" line="6154"/>
+        <location filename="../MSql_editor.py" line="6086"/>
+        <location filename="../MSql_editor.py" line="5982"/>
         <source>Error in file creation!</source>
         <translation>Errore durante la creazione del file!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6240"/>
+        <location filename="../MSql_editor.py" line="6215"/>
         <source>Error to open folder!</source>
         <translation>Errore nell&apos;aprire la cartella!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6293"/>
+        <location filename="../MSql_editor.py" line="6268"/>
         <source>The document</source>
         <translation>Il documento</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6293"/>
+        <location filename="../MSql_editor.py" line="6268"/>
         <source>was modified.</source>
         <translation>è stato modificato.</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6293"/>
+        <location filename="../MSql_editor.py" line="6268"/>
         <source>Do you want to save changes?</source>
         <translation>Vuoi salvare le modifiche?</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6593"/>
-        <location filename="../MSql_editor.py" line="6564"/>
-        <location filename="../MSql_editor.py" line="6533"/>
+        <location filename="../MSql_editor.py" line="6568"/>
+        <location filename="../MSql_editor.py" line="6539"/>
+        <location filename="../MSql_editor.py" line="6508"/>
         <source>Passed the end of file!</source>
         <translation>Arrivati alla fine del file!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6593"/>
-        <location filename="../MSql_editor.py" line="6564"/>
-        <location filename="../MSql_editor.py" line="6533"/>
+        <location filename="../MSql_editor.py" line="6568"/>
+        <location filename="../MSql_editor.py" line="6539"/>
+        <location filename="../MSql_editor.py" line="6508"/>
         <source>Move to the beginnig?</source>
         <translation>Vuoi andare all&apos;inizio del file?</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6644"/>
+        <location filename="../MSql_editor.py" line="6619"/>
         <source>Insert a valid number!</source>
         <translation>Inserisci un numero valido!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="6745"/>
+        <location filename="../MSql_editor.py" line="6721"/>
         <source>Please select a text with SQL statement!</source>
         <translation>Seleziona un testo che contiene un&apos;istruzione di SQL valida!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="7076"/>
+        <location filename="../MSql_editor.py" line="7049"/>
         <source>End of file! Move to beginning!</source>
         <translation>Fine del file! La ricerca riparte dall&apos;inizio!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="7240"/>
+        <location filename="../MSql_editor.py" line="7213"/>
         <source>Unrecognized type</source>
         <translation>Tipo non riconosciuto</translation>
     </message>
@@ -1628,12 +1627,12 @@ Vuoi installarla?</translation>
 <context>
     <name>Open</name>
     <message>
-        <location filename="../MSql_editor.py" line="1515"/>
+        <location filename="../MSql_editor.py" line="1512"/>
         <source>This file is already open!</source>
         <translation>Questo file è già aperto!</translation>
     </message>
     <message>
-        <location filename="../MSql_editor.py" line="1534"/>
+        <location filename="../MSql_editor.py" line="1531"/>
         <source>Error to opened the file:</source>
         <translation>Errore nell&apos;aprire il file:</translation>
     </message>
@@ -1641,22 +1640,22 @@ Vuoi installarla?</translation>
 <context>
     <name>Preferences</name>
     <message>
-        <location filename="../preferences.py" line="455"/>
+        <location filename="../preferences.py" line="463"/>
         <source>Do you want to restore default preferences?</source>
         <translation>Vuoi ripristinare le preferenze di fabbrica?</translation>
     </message>
     <message>
-        <location filename="../preferences.py" line="460"/>
+        <location filename="../preferences.py" line="468"/>
         <source>Do you want to delete connections preferences too?</source>
         <translation>Vuoi rispristinare anche le preferenze riferite ai server agli utenti a quelle di fabbrica?</translation>
     </message>
     <message>
-        <location filename="../preferences.py" line="466"/>
+        <location filename="../preferences.py" line="474"/>
         <source>Preferences restored! Restart MSql to see the changes ;-)</source>
         <translation>Preferenze ripristinate. Riavvia MSql perché le modifiche abbiano effetto ;-)</translation>
     </message>
     <message>
-        <location filename="../preferences.py" line="746"/>
+        <location filename="../preferences.py" line="761"/>
         <source>Preferences saved! Restart MSql to see the changes ;-)</source>
         <translation>Le preferenze sono state salvate. Riavvia MSql perché le modifiche abbiano effetto ;-)</translation>
     </message>
@@ -2223,21 +2222,11 @@ Vuoi installarla?</translation>
     <message>
         <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>or Clear theme:</source>
-        <translation>oppure tema chiaro di sistema</translation>
+        <translation>oppure tema chiaro di sistema:</translation>
     </message>
     <message>
         <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Editor</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set 0 if you don&apos;t want refresh&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Imposta 0 se non vuoi fare aggiornamento&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
-        <source>9</source>
         <translation></translation>
     </message>
     <message>
@@ -2252,6 +2241,16 @@ Vuoi installarla?</translation>
     </message>
     <message>
         <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set 0 if you don&apos;t want refresh&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Imposta 0 se non vuoi fare aggiornamento&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
+        <source>9</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Indent guides are vertical dotted lines that indicate the indent level of text in the edit window </source>
         <translation>Le guide di rientro sono linee tratteggiate verticali che indicano il livello di rientro del testo nella finestra di modifica </translation>
     </message>
@@ -2259,11 +2258,6 @@ Vuoi installarla?</translation>
         <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Autocompletation:</source>
         <translation>Attiva autocompletamento:</translation>
-    </message>
-    <message>
-        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
-        <source>Remember text position:</source>
-        <translation>Ricorda la posizione del cursore dentro l&apos;editor:</translation>
     </message>
     <message>
         <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
@@ -2277,8 +2271,8 @@ Vuoi installarla?</translation>
     </message>
     <message>
         <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Autosave snapshoot (0 for never):&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Salva automaticamente il testo in cartella backup (0 per mai):&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <source>Remember text position:</source>
+        <translation>Ricorda la posizione del cursore dentro l&apos;editor:</translation>
     </message>
     <message>
         <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
@@ -2292,13 +2286,23 @@ Vuoi installarla?</translation>
     </message>
     <message>
         <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
-        <source>Refresh dictionary (0 for never):</source>
-        <translation>Ricorda di aggiornare il dizionario di autocompletamento (0 per mai):</translation>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Autosave snapshoot (0 for never):&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Salva automaticamente il testo in cartella backup (0 per mai):&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Highlight color:</source>
         <translation>Colore evidenziatore:</translation>
+    </message>
+    <message>
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
+        <source>Refresh dictionary (0 for never):</source>
+        <translation>Ricorda di aggiornare il dizionario di autocompletamento (0 per mai):</translation>
+    </message>
+    <message>
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
+        <source>Show map procedures/function:</source>
+        <translation>Mostra la mappa procedure/funzioni:</translation>
     </message>
     <message>
         <location filename="../qtdesigner/preferences_ui.ui" line="0"/>

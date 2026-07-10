@@ -1074,9 +1074,6 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             elif p_slot.objectName() == 'actionMaps_procedure_function':
                 v_global_main_geometry = self.frameGeometry()
                 o_MSql_win2.slot_map()
-            # Mini mappa attiva/disattiva
-            elif p_slot.objectName() == 'actionMini_map':                
-                o_MSql_win2.slot_mini_map_visible()
             # Selezione del testo rettangolare
             elif p_slot.objectName() == 'actionRect_selection':                
                 message_info(QCoreApplication.translate('MSql_win1','There are 2 ways to switch to rectangular selection mode') + chr(10) + chr(10) + QCoreApplication.translate('MSql_win1','1. (Keyboard and mouse) Hold down ALT while left clicking, then dragging') + chr(10) + chr(10) + QCoreApplication.translate('MSql_win1','2. (Keyboard only) Hold down ALT+Shift while using the arrow keys'))                                
@@ -3520,107 +3517,89 @@ class My_MSql_Lexer(QsciLexerSQL):
         Si basa sulla lista v_global_my_lexer_keywords che viene caricata quando ci si connette al DB
         In base al valore di index è possibile settare parole chiave di una determinata categoria
         1=parole primarie, 2=parole secondarie, 3=commenti, 4=classi, ecc.. usato 8 (boh!) 
-
-        Il parametro p_mini_map, se passato a True indica che il lexer è quello della mini mappa
     """
-    def __init__(self, p_editor, p_mini_map):        
+    def __init__(self, p_editor):        
         super(My_MSql_Lexer, self).__init__()  
 
         # salvo il puntatore all'editor all'interno del lexer
         self.p_editor = p_editor      
 
-        # editor normale...
-        if not p_mini_map:
-            # attivo le righe verticali che segnano le indentazioni (questa è anche una voce nel menu view)
-            self.p_editor.setIndentationGuides(o_global_preferences.indentation_guide)                            
-        
-            # attivo i margini con + e - 
-            self.p_editor.setFolding(p_editor.FoldStyle.BoxedTreeFoldStyle, 2) 
-        
-            # indentazione
-            self.p_editor.setIndentationWidth(int(o_global_preferences.tab_size))
-            self.p_editor.setAutoIndent(True)
-        
-            # tabulatore (in base alle preferenze...di base 2 caratteri)
-            self.p_editor.setTabWidth(int(o_global_preferences.tab_size))   
-            # dal 2026/04/10 deciso che quando si scrive tab, viene sostituito con gli spazi
-            self.p_editor.setIndentationsUseTabs(False)
-        
-            # evidenzia l'intera riga dove posizionato il cursore (grigio scuro e cursore bianco se il tema è dark)
-            self.p_editor.setCaretLineVisible(True)
-            if o_global_preferences.dark_theme:
-                self.p_editor.setCaretLineBackgroundColor(QColor("#4a5157"))
-                self.p_editor.setCaretForegroundColor(QColor("white"))
-            else:
-                self.p_editor.setCaretLineBackgroundColor(QColor("#FFFF99"))        
-                self.p_editor.setCaretForegroundColor(QColor("black"))        
-        
-            # imposto i numeri di riga
-            self.p_editor.setMarginType(0, QsciScintilla.MarginType.NumberMargin)        
-            self.p_editor.setMarginsFont(QFont("Courier New",9))                                               
-            self.p_editor.setMarginLineNumbers(0, True)
-            self.p_editor.setMarginWidth(0, "00000")  # 5 cifre max
-        
-            # attivo il matching sulle parentesi con uno specifico colore
-            self.p_editor.setBraceMatching(QsciScintilla.BraceMatch.SloppyBraceMatch)            
-            self.p_editor.setMatchedBraceBackgroundColor(QColor("#80ff9900"))
-        
-            # attivo il multiediting (cioè la possibilità, una volta fatta una selezione verticale, di fare un edit multiplo)        
-            self.p_editor.SendScintilla(self.p_editor.SCI_SETADDITIONALSELECTIONTYPING, 1)        
-            v_offset = self.p_editor.positionFromLineIndex(0, 7) 
-            self.p_editor.SendScintilla(self.p_editor.SCI_SETSELECTION, v_offset, v_offset)        
-            v_offset = self.p_editor.positionFromLineIndex(1, 5)
-            self.p_editor.SendScintilla(self.p_editor.SCI_ADDSELECTION, v_offset, v_offset)
-            v_offset = self.p_editor.positionFromLineIndex(2, 5)
-            self.p_editor.SendScintilla(self.p_editor.SCI_ADDSELECTION, v_offset, v_offset)    
-
-            # attivo autocompletamento durante la digitazione 
-            # (comprende sia le parole del documento corrente che quelle aggiunte da un elenco specifico)
-            # attenzione! Da quanto ho capito, il fatto di avere attivo il lexer con linguaggio specifico (sql) questo prevale
-            # sul funzionamento di alcuni aspetti dell'autocompletamento....quindi ad un certo punto mi sono arreso con quello che
-            # sono riuscito a fare
-            self.v_api_lexer = QsciAPIs(self)            
-            # aggiungo tutti i termini di autocompletamento (si trovano all'interno di una tabella che viene generata a comando)
-            self.p_editor.setAutoCompletionSource(QsciScintilla.AutoCompletionSource.AcsAll)                
-            self.carica_dizionario_per_autocompletamento()                
-            # indico dopo quanti caratteri che sono stati digitati dall'utente, si deve attivare l'autocompletamento
-            # se è stato richiesto di disattivarlo alzo la soglia in modo che di fatto risulta disattivato
-            if o_global_preferences.autocompletation:
-                self.p_editor.setAutoCompletionThreshold(3)  
-            else:
-                self.p_editor.setAutoCompletionThreshold(1000)  
-            # attivo autocompletamento sia per la parte del contenuto del documento che per la parte di parole chiave specifiche
-            self.p_editor.autoCompleteFromAll()                        
-
-            # attivo il folding (+ e - sul margine sinistro)
-            self.setFoldCompact(False)
-            self.setFoldComments(True)
-            self.setFoldAtElse(True)     
-
-            # attivo i segnalibri dentro il margine tra i numeri di riga e il folding (scalo la dimensione dell'icona a 16px)                    
-            # riferirsi eventualmente alla documentazione https://qscintilla.com/#margins/margin_basics/symbol_margin
-            self.p_editor.markerDefine(QImage("icons:green_dot.png").scaled(QSize(16, 16)), 0)  
-            
-            # imposto gli elementi che servono all'interno dell'editor per attivare la funzione
-            # tale per cui quando utente fa doppio click su una parola, vengono evidenziate tutte 
-            # le parole uguali presenti nel testo!         
-            #self.p_editor.MouseButtonDblClick.connect(self.cambio_di_selezione_testo)        
-            #self.selection_lock = False
-            #self.SELECTION_INDICATOR = 4    
-        # se siamo in apertura della mini mappa...
+        # attivo le righe verticali che segnano le indentazioni (questa è anche una voce nel menu view)
+        self.p_editor.setIndentationGuides(o_global_preferences.indentation_guide)                            
+    
+        # attivo i margini con + e - 
+        self.p_editor.setFolding(p_editor.FoldStyle.BoxedTreeFoldStyle, 2) 
+    
+        # indentazione
+        self.p_editor.setIndentationWidth(int(o_global_preferences.tab_size))
+        self.p_editor.setAutoIndent(True)
+    
+        # tabulatore (in base alle preferenze...di base 2 caratteri)
+        self.p_editor.setTabWidth(int(o_global_preferences.tab_size))   
+        # dal 2026/04/10 deciso che quando si scrive tab, viene sostituito con gli spazi
+        self.p_editor.setIndentationsUseTabs(False)
+    
+        # evidenzia l'intera riga dove posizionato il cursore (grigio scuro e cursore bianco se il tema è dark)
+        self.p_editor.setCaretLineVisible(True)
+        if o_global_preferences.dark_theme:
+            self.p_editor.setCaretLineBackgroundColor(QColor("#4a5157"))
+            self.p_editor.setCaretForegroundColor(QColor("white"))
         else:
-            # nascondo il margine del folding e numeri di riga
-            self.p_editor.setMarginWidth(1, 0)
-            # imposto a sola lettura
-            self.p_editor.setReadOnly(True)
-            # disattivo la possibilità di selezionare del testo
-            self.p_editor.SendScintilla(QsciScintilla.SCI_SETSEL, -1, -1)
-            # disattivo la scrollbar orizzontale inferiore
-            self.p_editor.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-            # imposto no wrapmode che significa non fare andare a capo le righe di testo in modo automatico
-            self.p_editor.setWrapMode(QsciScintilla.WrapMode.WrapNone)
-            # tabulatore (in base alle preferenze...di base 2 caratteri)
-            self.p_editor.setTabWidth(int(o_global_preferences.tab_size))   
+            self.p_editor.setCaretLineBackgroundColor(QColor("#FFFF99"))        
+            self.p_editor.setCaretForegroundColor(QColor("black"))        
+    
+        # imposto i numeri di riga
+        self.p_editor.setMarginType(0, QsciScintilla.MarginType.NumberMargin)        
+        self.p_editor.setMarginsFont(QFont("Courier New",9))                                               
+        self.p_editor.setMarginLineNumbers(0, True)
+        self.p_editor.setMarginWidth(0, "00000")  # 5 cifre max
+    
+        # attivo il matching sulle parentesi con uno specifico colore
+        self.p_editor.setBraceMatching(QsciScintilla.BraceMatch.SloppyBraceMatch)            
+        self.p_editor.setMatchedBraceBackgroundColor(QColor("#80ff9900"))
+    
+        # attivo il multiediting (cioè la possibilità, una volta fatta una selezione verticale, di fare un edit multiplo)        
+        self.p_editor.SendScintilla(self.p_editor.SCI_SETADDITIONALSELECTIONTYPING, 1)        
+        v_offset = self.p_editor.positionFromLineIndex(0, 7) 
+        self.p_editor.SendScintilla(self.p_editor.SCI_SETSELECTION, v_offset, v_offset)        
+        v_offset = self.p_editor.positionFromLineIndex(1, 5)
+        self.p_editor.SendScintilla(self.p_editor.SCI_ADDSELECTION, v_offset, v_offset)
+        v_offset = self.p_editor.positionFromLineIndex(2, 5)
+        self.p_editor.SendScintilla(self.p_editor.SCI_ADDSELECTION, v_offset, v_offset)    
+
+        # attivo autocompletamento durante la digitazione 
+        # (comprende sia le parole del documento corrente che quelle aggiunte da un elenco specifico)
+        # attenzione! Da quanto ho capito, il fatto di avere attivo il lexer con linguaggio specifico (sql) questo prevale
+        # sul funzionamento di alcuni aspetti dell'autocompletamento....quindi ad un certo punto mi sono arreso con quello che
+        # sono riuscito a fare
+        self.v_api_lexer = QsciAPIs(self)            
+        # aggiungo tutti i termini di autocompletamento (si trovano all'interno di una tabella che viene generata a comando)
+        self.p_editor.setAutoCompletionSource(QsciScintilla.AutoCompletionSource.AcsAll)                
+        self.carica_dizionario_per_autocompletamento()                
+        # indico dopo quanti caratteri che sono stati digitati dall'utente, si deve attivare l'autocompletamento
+        # se è stato richiesto di disattivarlo alzo la soglia in modo che di fatto risulta disattivato
+        if o_global_preferences.autocompletation:
+            self.p_editor.setAutoCompletionThreshold(3)  
+        else:
+            self.p_editor.setAutoCompletionThreshold(1000)  
+        # attivo autocompletamento sia per la parte del contenuto del documento che per la parte di parole chiave specifiche
+        self.p_editor.autoCompleteFromAll()                        
+
+        # attivo il folding (+ e - sul margine sinistro)
+        self.setFoldCompact(False)
+        self.setFoldComments(True)
+        self.setFoldAtElse(True)     
+
+        # attivo i segnalibri dentro il margine tra i numeri di riga e il folding (scalo la dimensione dell'icona a 16px)                    
+        # riferirsi eventualmente alla documentazione https://qscintilla.com/#margins/margin_basics/symbol_margin
+        self.p_editor.markerDefine(QImage("icons:green_dot.png").scaled(QSize(16, 16)), 0)  
+        
+        # imposto gli elementi che servono all'interno dell'editor per attivare la funzione
+        # tale per cui quando utente fa doppio click su una parola, vengono evidenziate tutte 
+        # le parole uguali presenti nel testo!         
+        #self.p_editor.MouseButtonDblClick.connect(self.cambio_di_selezione_testo)        
+        #self.selection_lock = False
+        #self.SELECTION_INDICATOR = 4    
             
         # imposto il font dell'editor in base alle preferenze 
         if o_global_preferences.font_editor != '':
@@ -3629,10 +3608,6 @@ class My_MSql_Lexer(QsciLexerSQL):
             if len(v_split) > 2 and v_split[2] == ' BOLD':
                 v_font.setBold(True)
             self.setFont(v_font)   
-
-        # se siamo sulla minimappa allora imposto uno zoom 
-        if p_mini_map:  
-            self.p_editor.zoomTo(-10)
         
         # se è stato scelto il tema colori scuro --> reimposto i colori della sezione qscintilla
         # non sono riuscito a trovare altre strade per fare questa cosa
@@ -3648,8 +3623,7 @@ class My_MSql_Lexer(QsciLexerSQL):
             self.setColor(QColor('#608B4E'), QsciLexerSQL.Comment)
             self.setColor(QColor('#608B4E'), QsciLexerSQL.CommentLine)
             self.setColor(QColor('#608B4E'), QsciLexerSQL.CommentDoc) 
-            self.setColor(QColor('#b5cea8'), QsciLexerSQL.Number)
-            #self.setColor(QColor('#BA231E'), QsciLexerSQL.Keyword)            
+            self.setColor(QColor('#b5cea8'), QsciLexerSQL.Number)            
             self.setColor(QColor('#00cb62'), QsciLexerSQL.Keyword)
             self.setColor(QColor('#00aaff'), QsciLexerSQL.DoubleQuotedString) 
             self.setColor(QColor('#ECBB76'), QsciLexerSQL.SingleQuotedString) 
@@ -3661,12 +3635,20 @@ class My_MSql_Lexer(QsciLexerSQL):
             self.setColor(QColor('green'), QsciLexerSQL.CommentLineHash) 
             self.setColor(QColor('green'), QsciLexerSQL.CommentDocKeyword)
             self.setColor(QColor('green'), QsciLexerSQL.CommentDocKeywordError) 
-            self.setColor(QColor('#ac98ca'), QsciLexerSQL.KeywordSet5) 
+            #self.setColor(QColor('#ac98ca'), QsciLexerSQL.KeywordSet5) 
             self.setColor(QColor('#ac98ca'), QsciLexerSQL.KeywordSet6)
             self.setColor(QColor('#ac98ca'), QsciLexerSQL.KeywordSet7) 
             self.setColor(QColor('#ac98ca'), QsciLexerSQL.KeywordSet8) 
             self.setColor(QColor('green'), QsciLexerSQL.QuotedIdentifier)
             self.setColor(QColor('green'), QsciLexerSQL.QuotedOperator)     
+            
+            # colora le parole PROCEDURE, FUNCTION e CREATE (che sono state isolate nell'index 5) con un colore specifico (v. metodo keywords)
+            self.setColor(QColor("#00cb62"), QsciLexerSQL.KeywordSet5)
+        
+        # imposta a sottolineato  le parole PROCEDURE, FUNCTION e CREATE (che sono state isolate nell'index 5) con un colore specifico (v. metodo keywords)
+        v_font = self.font(QsciLexerSQL.KeywordSet5)
+        v_font.setUnderline(True)        
+        self.setFont(v_font, QsciLexerSQL.KeywordSet5)
     
     def keywords(self, index):
         """
@@ -3675,10 +3657,20 @@ class My_MSql_Lexer(QsciLexerSQL):
         """
         global v_global_my_lexer_keywords        
 
+        # Recupero le parole predefinite fornite da QsciLexerSQL per questo specifico indice
         keywords = QsciLexerSQL.keywords(self, index) or ''        
         
-        # l'indice 6 è stato messo dopo che sono iniziati gli esperimenti per evidenziare la parola selezionata con doppio click...prima era 8
-        # anche se non compreso il significato di questa posizione!
+        # Rimuovo PROCEDURE, FUNCTION e CREATE dall'index 1 (Keyword primarie)
+        if index == 1:            
+            for parola_da_rimuovere in ["procedure", "function", "create"]:
+                keywords = keywords.replace(parola_da_rimuovere, "")
+            return keywords
+
+        # Isolo PROCEDURE, FUNCTION e CREATE nell'index 2 (Keyword secondarie). Sopra nella init ci sarà personalizzazione del colore e del font per questo index KeywordSet5
+        if index == 5:
+            return "procedure function create"
+
+        # DOPPIO CLICK --> evidenzia tutte le parole uguali presenti nel testo (questo è l'index 6)
         if index == 6:            
             if len(v_global_my_lexer_keywords) > 0:                                            
                 v_new_keywords = ''
@@ -3788,14 +3780,10 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             self.setting_utf8 = False
         # attivo il lexer per evidenziare il codice del linguaggio SQL. Notare come faccia riferimento ad un oggetto che a sua volta personalizza il 
         # dizionario del lexer SQL, aggiungendo (se sono state caricate) le parole chiave di: tabelle, viste, package, ecc.
-        self.v_lexer = My_MSql_Lexer(self.e_sql, False)                
+        self.v_lexer = My_MSql_Lexer(self.e_sql)                
         # attivo il lexer sull'editor
         self.e_sql.setLexer(self.v_lexer)
-        
-        # attivo il lexer sulla mini mappa 
-        self.v_lexer_mini_map = My_MSql_Lexer(self.e_sql_mini_map, True)                
-        self.e_sql_mini_map.setLexer(self.v_lexer_mini_map)
-                
+                        
         # visualizzo o meno il carattere di end of line in base alla preferenza
         self.set_show_end_of_line()      
         # imposto la var della indentation guide
@@ -3852,11 +3840,6 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # mi posiziono sulla prima riga (la posizione X viene al momento forzata a zero!)
         self.e_sql.setCursorPosition(v_cur_y,0)
 
-        # lego il documento principale con la minimappa in modo che quest'ultima sia sempre sincronizzata con l'editor e mi posiziono alla stessa posizione del cursore dell'editor
-        self.e_sql_mini_map.setDocument(self.e_sql.document())
-        self.e_sql_mini_map.setCursorPosition(v_cur_y,0)
-        self.v_mini_map_visible = True
-
         # var che indica che il testo è stato modificato
         #self.e_sql.insert("begin dbms_output.put_line('ciao'); end;")
         self.v_testo_modificato = False         
@@ -3911,13 +3894,6 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # attivo slot che dal margine, segna i segnalibri
         self.e_sql.setMarginSensitivity(1, True)
         self.e_sql.marginClicked.connect(self.slot_add_bookmark)
-        # attivo slot che tiene sincronizzato l'editor con la mini mappa tramite le scrollbar
-        self.e_sql.verticalScrollBar().valueChanged.connect(self.slot_mini_map_sync_scrollbars) 
-        self.e_sql_mini_map.verticalScrollBar().valueChanged.connect(self.slot_mini_map_sync_scrollbars) 
-        # attivo slot che quando viene cliccata la mini mappa riposiziona il testo 
-        self.e_sql_mini_map.selectionChanged.connect(self.slot_mini_map_click)   
-        # variabile per controllare il loop sulle scrollbar tra editor e minimappa
-        self.v_scrollbar_loop = False        
 
         # imposto il ritorno a capo in formato Windows (CR-LF) o Unix (LF)
         # Attenzione! Nel caso di nuovo file il formato è Windows, mentre se viene aperto un file, va analizzata la prima riga
@@ -3938,53 +3914,9 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             self.e_sql.setEolMode(QsciScintilla.EolMode.EolUnix)                
         # aggiorno la statusbar 
         self.aggiorna_statusbar()        
-
-    def slot_mini_map_click(self):
-        """
-           Quando viene cliccato il testo sulla mini mappa riposiziona il cursore sull'editor
-           Attenzione! Se il testo cliccato in mini mappa è già visualizzato nell'editor, non si sposta nulla
-        """
-        if self.v_mini_map_visible:
-            # prendo coordinate cursore della mini mappa
-            v_line, v_pos = self.e_sql_mini_map.getCursorPosition()        
-            # riposiziono cursore nell'editor
-            self.e_sql.setCursorPosition(v_line,v_pos)
-            # blocco i segnali sulla mini mappa
-            self.e_sql_mini_map.blockSignals(True)                        
-            # pulisco eventuale selezione sulla mini mappa
-            self.e_sql_mini_map.setSelection(v_line,0,v_line,1)
-            # posiziono il focus sull'editor
-            self.e_sql.setFocus()
-            # riattivo i segnali sulla mini mappa
-            self.e_sql_mini_map.blockSignals(False)                        
-            
-    def slot_mini_map_sync_scrollbars(self, value): 
-        """
-           Quando si agisce sulla scrollbar dell'editor o della mini mappa, sposta il testo.           
-           Da notare che è stato adottato un meccanismo per impedire che ci sia il ping-pong tra le due scrollbar
-        """            
-        if self.v_mini_map_visible:                   
-            if self.sender() == self.e_sql.verticalScrollBar():                                             
-                if not self.v_scrollbar_loop:
-                    self.v_scrollbar_loop = True                 
-                    self.e_sql_mini_map.verticalScrollBar().setValue(value)
-                    self.v_scrollbar_loop = False
-            elif self.sender() == self.e_sql_mini_map.verticalScrollBar():                                                         
-                if not self.v_scrollbar_loop:
-                    self.v_scrollbar_loop = True                 
-                    self.e_sql.verticalScrollBar().setValue(value)                                                        
-                    self.v_scrollbar_loop = False
-        
-    def slot_mini_map_visible(self):
-        """
-           Attiva o disattiva la mini mappa
-        """
-        if self.v_mini_map_visible:
-            self.v_mini_map_visible = False            
-            self.e_sql_mini_map.setVisible(False)
-        else:
-            self.v_mini_map_visible = True            
-            self.e_sql_mini_map.setVisible(True)
+        # se richiesto dalle preferenze, visualizzo la mappa delle procedure/funzioni
+        if o_global_preferences.show_map_proc_func:
+            self.slot_map(False)
 
     def eventFilter(self, source, event):
         """
@@ -6073,7 +6005,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # creazione della riga intestazioni. La lista max_len serve per tenere lunghezza massima di ogni colonna
         v_intestazioni = ''        
         tot_colonne = 0
-        list_max_len = []
+        list_max_len = []        
         for nome_colonna in self.nomi_intestazioni:                        
             worksheet.write(0, tot_colonne, nome_colonna, workbook.add_format({'bold': True}))
             tot_colonne += 1
@@ -6083,15 +6015,58 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         for riga in range(v_model.rowCount()):                        
             for colonna in range(v_model.columnCount()):
                 v_index = v_model.index(riga, colonna)                
-                v_campo = v_model.data(v_index)                                
-                worksheet.write(riga+1, colonna, v_campo)                
+                v_campo = v_model.data(v_index)                                                
+                # Siamo di fronte ad una cella numerica
+                if self.tipi_intestazioni[colonna][1] in (oracledb.NUMBER, oracledb.DB_TYPE_LONG):
+                    # 1. Recupera il numero di decimali (es. 0, 2, 4)
+                    num_decimali = self.tipi_intestazioni[colonna][5]                
+                    # 2. Gestisci i casi in cui i decimali siano None o non definiti
+                    if num_decimali is None:
+                        num_decimali = 0                         
+                    # 3. Costruisci la stringa di formato dinamicamente
+                    if num_decimali > 0:
+                        # Se num_decimali è 2, genera: '#,##0.' + '00' -> '#,##0.00'
+                        stringa_formato = '#,##0.' + ('0' * num_decimali)
+                    else:
+                        # Se non ci sono decimali, mostra solo il numero intero con separatore migliaia
+                        stringa_formato = '#,##0'                        
+                    # 4. Crea il formato e scrivi nella cella assicurandoti che v_campo sia un numero (float o int)
+                    formato_dinamico = workbook.add_format({'num_format': stringa_formato})                    
+                    # Converti il valore per evitare che Excel lo veda come testo se arriva come stringa                                        
+                    if v_campo is not None and v_campo != '':
+                        valore_numerico = float(str(v_campo).strip().replace(',', '.')) 
+                    else:
+                        valore_numerico = 0
+                    worksheet.write(riga + 1, colonna, valore_numerico, formato_dinamico)
+                # Siamo di fronte ad una cella di tipo data
+                elif self.tipi_intestazioni[colonna][1] == oracledb.DATETIME:                    
+                    # 1. Definisci il formato visivo che avrà la cella in Excel
+                    formato_data = workbook.add_format({'num_format': 'dd/mm/yyyy hh:mm:ss'})
+                        
+                    if v_campo is not None and v_campo != '': 
+                        from datetime import datetime
+                        try:
+                            # 2. Converte la stringa "gg/mm/yyyy" in un oggetto datetime di Python
+                            data_oggetto = datetime.strptime(str(v_campo).strip(), '%d/%m/%Y  %H:%M:%S')
+                                
+                            # 3. Scrive l'oggetto data in Excel con il formato corretto
+                            worksheet.write_datetime(riga + 1, colonna, data_oggetto, formato_data)
+                        except ValueError:
+                            # Se la stringa è malformata o non rispetta il formato, la scrive come testo normale per evitare crash
+                            worksheet.write(riga + 1, colonna, v_campo)
+                    else:
+                        # Se il campo è Null/vuoto sul DB, lascia la cella vuota
+                        worksheet.write(riga + 1, colonna, "")
+                # tutti gli altri formati di dati li considero come testo! da qui il num_format --> @
+                else:                        
+                    worksheet.write(riga+1, colonna, v_campo, workbook.add_format({'num_format': '@'}))                
+                
                 v_campo_len = len(str(v_campo))
                 if v_campo_len > list_max_len[colonna]:
                     list_max_len[colonna] = v_campo_len
 
         # Trova la stringa più lunga nella colonna
-        # Aggiungi un piccolo margine (+2) per evitare che il testo tocchi i bordi        
-        print(list_max_len)
+        # Aggiungi un piccolo margine (+2) per evitare che il testo tocchi i bordi                
         for col_idx in range(tot_colonne):
             worksheet.set_column(col_idx, col_idx, list_max_len[col_idx] + 2)
 
@@ -6658,7 +6633,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # nascondo la window di posizionamento cursore
         self.dialog_goto_line.close()
 
-    def slot_map(self):
+    def slot_map(self, p_focus = True):
         """
            Apre la window che visualizza la mappa di procedure-funzioni all'interno dell'editor
            Da li, l'utente, può navigare facendo click sugli elementi della lista
@@ -6670,7 +6645,8 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         self.slot_refresh_map()
 
         # posiziono il focus nel campo di ricerca
-        self.e_map_search.setFocus()
+        if p_focus:
+            self.e_map_search.setFocus()
 
     def slot_refresh_map(self):
         """
@@ -6927,9 +6903,6 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         if v_new_pos != -1:
             # posiziono il cursore sulla riga indicata
             self.e_sql.setCursorPosition(v_new_pos,0)        
-            # se la mimimappa è visualizzata, devo sincronizzare anche quella
-            if self.v_mini_map_visible:
-                self.e_sql_mini_map.setCursorPosition(v_new_pos,0)        
 
     def scrive_output(self, p_messaggio, p_tipo_messaggio):
         """
@@ -7178,7 +7151,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         self.e_sql_view = QsciScintilla(parent=self.view_splitter)
         self.e_sql_view.setObjectName("e_sql_view")
         # attivo il lexer sulla view        
-        self.v_lexer_view = My_MSql_Lexer(self.e_sql_view, False)                
+        self.v_lexer_view = My_MSql_Lexer(self.e_sql_view)                
         self.e_sql_view.setLexer(self.v_lexer_view)
         # imposto la view come sola lettura
         self.e_sql_view.setReadOnly(True)        

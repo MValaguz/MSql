@@ -228,7 +228,6 @@
     <addaction name="actionFold_All"/>
     <addaction name="actionShow_end_of_line"/>
     <addaction name="actionIndentation_guide"/>
-    <addaction name="actionMini_map"/>
     <addaction name="actionEditor_view"/>
     <addaction name="separator"/>
     <addaction name="actionFont_editor_selector"/>
@@ -1461,15 +1460,6 @@
    </property>
    <property name="shortcutContext">
     <enum>Qt::WidgetShortcut</enum>
-   </property>
-  </action>
-  <action name="actionMini_map">
-   <property name="icon">
-    <iconset resource="resource.qrc">
-     <normaloff>:/icons/icons/mini_map.png</normaloff>:/icons/icons/mini_map.png</iconset>
-   </property>
-   <property name="text">
-    <string>Mini map</string>
    </property>
   </action>
   <action name="actionLine_cut">

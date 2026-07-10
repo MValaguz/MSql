@@ -50,7 +50,6 @@
         <enum>Qt::Horizontal</enum>
        </property>
        <widget class="MyCustomQsciScintilla" name="e_sql"/>
-       <widget class="QsciScintilla" name="e_sql_mini_map"/>
       </widget>
       <widget class="QTabWidget" name="o_tab_widget">
        <property name="currentIndex">
@@ -657,11 +656,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QsciScintilla</class>
-   <extends>QPlainTextEdit</extends>
-   <header>qsciscintilla.h</header>
-  </customwidget>
-  <customwidget>
    <class>MyCustomQsciScintilla</class>
    <extends>QPlainTextEdit</extends>
    <header>custom_widget</header>
@@ -707,7 +701,6 @@
   <tabstop>b_output_find_all</tabstop>
   <tabstop>o_output_lst_result</tabstop>
   <tabstop>o_bind</tabstop>
-  <tabstop>e_sql_mini_map</tabstop>
   <tabstop>o_plan</tabstop>
  </tabstops>
  <resources>
