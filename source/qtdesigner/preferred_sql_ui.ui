@@ -144,8 +144,8 @@
    <slot>slot_start()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>621</x>
-     <y>50</y>
+     <x>665</x>
+     <y>33</y>
     </hint>
     <hint type="destinationlabel">
      <x>432</x>
@@ -160,8 +160,8 @@
    <slot>slot_insert_row()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>153</x>
-     <y>87</y>
+     <x>163</x>
+     <y>65</y>
     </hint>
     <hint type="destinationlabel">
      <x>167</x>
@@ -176,8 +176,8 @@
    <slot>slot_delete_row()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>282</x>
-     <y>90</y>
+     <x>334</x>
+     <y>65</y>
     </hint>
     <hint type="destinationlabel">
      <x>250</x>
@@ -192,8 +192,8 @@
    <slot>slot_save()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>532</x>
-     <y>94</y>
+     <x>665</x>
+     <y>65</y>
     </hint>
     <hint type="destinationlabel">
      <x>553</x>
@@ -224,12 +224,28 @@
    <slot>slot_debug()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>434</x>
-     <y>87</y>
+     <x>500</x>
+     <y>65</y>
     </hint>
     <hint type="destinationlabel">
      <x>302</x>
      <y>-6</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>e_where_cond</sender>
+   <signal>returnPressed()</signal>
+   <receiver>preferred_sql_window</receiver>
+   <slot>slot_start()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>126</x>
+     <y>27</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>121</x>
+     <y>1</y>
     </hint>
    </hints>
   </connection>

@@ -88,29 +88,37 @@ class preferred_sql_class(QMainWindow, Ui_preferred_sql_window):
         # eseguo la query
         self.v_curs.execute("SELECT ROWID, NOME as NAME, SQL as SQL, DATA as DATE FROM SQL_PREFERRED"+v_where)            
 
-        # pulisco graficamente la tabella
+        # Recupero tutti i record della query
+        v_records = self.v_curs.fetchall()
+
+        # Pulisco graficamente il testo della tabella
         self.o_tabella.clear()
-        # creo una tabella con due colonne
+
+        # Configuro la griglia e configuro le colonne
+        self.o_tabella.setShowGrid(True)
         self.o_tabella.setColumnCount(3)
-        # titoli delle colonne
         self.o_tabella.setHorizontalHeaderLabels(['ROWID','NAME','SQL'])                   
-        # la colonna con l'id è nascosta
         self.o_tabella.setColumnHidden(0, True)
-        # imposto larghezza delle colonne
-        #self.o_tabella.setColumnWidth(0, 100)        
         self.o_tabella.setColumnWidth(1, 130)
         self.o_tabella.setColumnWidth(2, 480)                
+
+        # Se non trovo nulla, azzero le righe e nascondo la griglia
+        if len(v_records) == 0:
+            self.o_tabella.setRowCount(0)
+            self.o_tabella.setShowGrid(False)
+            self.loading = False
+            return  # Esco anticipatamente senza creare colonne vuote
+
         v_rig = 1                
-        for record in self.v_curs.fetchall():                                    
+        for record in v_records:                                    
             self.o_tabella.setRowCount(v_rig)             
-            self.o_tabella.setItem(v_rig-1,0,QTableWidgetItem(str(record[0])))       
-            self.o_tabella.setItem(v_rig-1,1,QTableWidgetItem(record[1]))       
-            self.o_tabella.setItem(v_rig-1,2,QTableWidgetItem(record[2]))                                           
+            self.o_tabella.setItem(v_rig-1, 0, QTableWidgetItem(str(record[0])))       
+            self.o_tabella.setItem(v_rig-1, 1, QTableWidgetItem(record[1]))       
+            self.o_tabella.setItem(v_rig-1, 2, QTableWidgetItem(record[2]))                                           
             # se il testo sql contiene dei ritorni a capo, allora alzo l'altezza della riga...
             if record[2].find('\n') != -1 or record[2].find('\r') != -1:
                 self.o_tabella.setRowHeight(v_rig-1, 75)
             v_rig += 1
-        #self.o_tabella.resizeColumnsToContents()
 
         # fine caricamento dati
         self.loading = False
@@ -144,8 +152,15 @@ class preferred_sql_class(QMainWindow, Ui_preferred_sql_window):
         """               
         v_new_row = self.o_tabella.rowCount()+1
         self.o_tabella.setRowCount(v_new_row)                
-        # mi posiziono sulla cella
-        self.o_tabella.setCurrentCell(v_new_row-1,0)
+        
+        # Mi posiziono sulla prima cella della nuova riga (NAME)
+        self.o_tabella.setCurrentCell(v_new_row-1, 1)
+        
+        # FORZA LO SCROLL: Seleziona l'oggetto della cella e forza la vista a scorre fino a lì
+        v_item = self.o_tabella.item(v_new_row-1, 1)
+        if v_item:
+            self.o_tabella.scrollToItem(v_item, QAbstractItemView.ScrollHint.EnsureVisible)
+            
         # creo elemento in tabella ombra
         self.matrice.append(['INS',v_new_row-1,'','',''])
 
@@ -185,15 +200,20 @@ class preferred_sql_class(QMainWindow, Ui_preferred_sql_window):
         try:                                               
             v_count = 0
             for v_riga in self.matrice:
+                # Genero la data corrente come stringa standard SQLite (YYYY-MM-DD HH:MM:SS)
+                v_data_str = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
                 if v_riga[0] == 'INS':
                     v_count += 1
-                    self.v_curs.execute("INSERT INTO SQL_PREFERRED (NOME, SQL, DATA) VALUES (?,?,?)",(v_riga[3], v_riga[4], datetime.datetime.now()))
+                    # CORRETTO: Passiamo v_data_str invece dell'oggetto datetime
+                    self.v_curs.execute("INSERT INTO SQL_PREFERRED (NOME, SQL, DATA) VALUES (?,?,?)",(v_riga[3], v_riga[4], v_data_str))
                 elif v_riga[0] == 'DEL':
                     v_count += 1                
                     self.v_curs.execute("DELETE FROM SQL_PREFERRED WHERE ROWID=?",(v_riga[2],))
                 elif v_riga[0] == 'UPD':
                     v_count += 1
-                    self.v_curs.execute("UPDATE SQL_PREFERRED SET NOME=?, SQL=?, DATA=? WHERE ROWID=?", (v_riga[3], v_riga[4], datetime.datetime.now(),v_riga[2]))
+                    # CORRETTO: Passiamo v_data_str invece dell'oggetto datetime
+                    self.v_curs.execute("UPDATE SQL_PREFERRED SET NOME=?, SQL=?, DATA=? WHERE ROWID=?", (v_riga[3], v_riga[4], v_data_str, v_riga[2]))
             # committo        
             self.v_conn.commit()            
             if v_count > 0:

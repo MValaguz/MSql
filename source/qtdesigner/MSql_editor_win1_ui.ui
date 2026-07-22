@@ -126,6 +126,7 @@
     <addaction name="actionDelete_start_of_line"/>
     <addaction name="actionDelete_end_of_line"/>
     <addaction name="separator"/>
+    <addaction name="actionText_to_index"/>
     <addaction name="actionFormat_SQL_instruction"/>
     <addaction name="actionExtract_primary_key"/>
     <addaction name="actionNextF4"/>
@@ -514,6 +515,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="oggetti_db_refresh">
+            <property name="toolTip">
+             <string>Refresh</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -784,7 +788,7 @@
           <string>Start search (you can use regular expression)</string>
          </property>
          <property name="text">
-          <string>Refresh</string>
+          <string/>
          </property>
          <property name="icon">
           <iconset resource="resource.qrc">
@@ -1108,7 +1112,7 @@
     <string>Undo</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Z</string>
+    <string notr="true">Ctrl+Z</string>
    </property>
   </action>
   <action name="actionRedo">
@@ -1120,7 +1124,7 @@
     <string>Redo</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Y</string>
+    <string notr="true">Ctrl+Y</string>
    </property>
   </action>
   <action name="actionCopy">
@@ -1159,7 +1163,7 @@
     <string>Cut</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+X</string>
+    <string notr="true">Ctrl+X</string>
    </property>
   </action>
   <action name="actionSelectAll">
@@ -1203,6 +1207,9 @@
    <property name="text">
     <string>Rect selection</string>
    </property>
+   <property name="shortcut">
+    <string notr="true"/>
+   </property>
   </action>
   <action name="actionConnect">
    <property name="icon">
@@ -1222,7 +1229,7 @@
     <string>Uppercase</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Shift+Up</string>
+    <string notr="true">Ctrl+Shift+Up</string>
    </property>
   </action>
   <action name="actionLowercase">
@@ -1234,7 +1241,7 @@
     <string>Lowercase</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Shift+Down</string>
+    <string notr="true">Ctrl+Shift+Down</string>
    </property>
   </action>
   <action name="actionFind_object">
@@ -1306,7 +1313,7 @@
     <string>Format SQL statement</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+P</string>
+    <string notr="true">Ctrl+P</string>
    </property>
   </action>
   <action name="actionComment_selection">
@@ -1318,7 +1325,7 @@
     <string>Comment selection</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Alt+C</string>
+    <string notr="true">Ctrl+Alt+C</string>
    </property>
   </action>
   <action name="actionUncomment_selection">
@@ -1330,7 +1337,7 @@
     <string>Uncomment selection</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Alt+U</string>
+    <string notr="true">Ctrl+Alt+U</string>
    </property>
   </action>
   <action name="actionQuick_query">
@@ -1426,7 +1433,7 @@
     <string>Extract primary key</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+K</string>
+    <string notr="true">Ctrl+K</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::WidgetShortcut</enum>
@@ -1441,7 +1448,7 @@
     <string>Find next =</string>
    </property>
    <property name="shortcut">
-    <string>F4</string>
+    <string notr="true">F4</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::WidgetShortcut</enum>
@@ -1501,7 +1508,7 @@
     <string>Line/Selection duplicate</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+D</string>
+    <string notr="true">Ctrl+D</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::WidgetShortcut</enum>
@@ -1516,7 +1523,7 @@
     <string>Delete start of word</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Backspace</string>
+    <string notr="true">Ctrl+Backspace</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::WidgetShortcut</enum>
@@ -1531,7 +1538,7 @@
     <string>Delete end of word</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Del</string>
+    <string notr="true">Ctrl+Del</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::WidgetShortcut</enum>
@@ -1546,7 +1553,7 @@
     <string>Delete start of line</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Shift+Backspace</string>
+    <string notr="true">Ctrl+Shift+Backspace</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::WidgetShortcut</enum>
@@ -1561,7 +1568,7 @@
     <string>Delete end of line</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Shift+Del</string>
+    <string notr="true">Ctrl+Shift+Del</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::WidgetShortcut</enum>
@@ -1606,7 +1613,7 @@
     <string>Indent to cursor</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+I</string>
+    <string notr="true">Ctrl+I</string>
    </property>
   </action>
   <action name="actionDisconnect">
@@ -1728,6 +1735,9 @@
    <property name="text">
     <string>Ascii art font selector</string>
    </property>
+   <property name="shortcut">
+    <string notr="true"/>
+   </property>
   </action>
   <action name="actionFull_screen">
    <property name="icon">
@@ -1759,7 +1769,7 @@
     <string>Highlight selection</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Shift+H</string>
+    <string notr="true">Ctrl+Shift+H</string>
    </property>
   </action>
   <action name="actionComment_from_function">
@@ -1771,7 +1781,7 @@
     <string>Comment from function</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Alt+F</string>
+    <string notr="true">Ctrl+Alt+F</string>
    </property>
   </action>
   <action name="actionText_functions">
@@ -1783,7 +1793,7 @@
     <string>Text functions</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Alt+T</string>
+    <string notr="true">Ctrl+Alt+T</string>
    </property>
   </action>
   <action name="actionFile_system">
@@ -1880,6 +1890,18 @@
    </property>
    <property name="text">
     <string>Clear recent file list</string>
+   </property>
+  </action>
+  <action name="actionText_to_index">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/index.png</normaloff>:/icons/icons/index.png</iconset>
+   </property>
+   <property name="text">
+    <string>Text to index</string>
+   </property>
+   <property name="shortcut">
+    <string notr="true">Ctrl+Alt+L</string>
    </property>
   </action>
  </widget>

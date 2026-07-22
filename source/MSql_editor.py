@@ -9,7 +9,7 @@
 #  Creato da.....: Marco Valaguzza
 #  Piattaforma...: Python3.13 con libreria pyqt6
 #  Data inizio...: 01/01/2023
-#  Descrizione...: Questo programma ha la "pretesa" di essere editor SQL per ambiente Oracle....                             
+#  Descrizione...: Questo programma ha la "pretesa" di essere un editor SQL/PL-SQL per ambiente Oracle....                             
 #                  In questo programma sono state sperimentate diverse tecniche per la soluzione di particolari problemi...e quindi è di fatto una sorta
 #                  di super esercizio....
                  
@@ -133,12 +133,15 @@ def nome_file_backup(p_nome_file):
        Il nome riporta la pathname della dir di backup il PID (process ID) di MSql attualmente in esecuzione e il nome del file di origine
        Siccome non sono ammessi nel nome del file i caratteri : slash backslash, vengono sostituiti usando il punto
     """
+    from pathlib import Path
+
     p_nome_file = p_nome_file.replace('/', '..')
     p_nome_file = p_nome_file.replace('\\', '..')
     p_nome_file = p_nome_file.replace(':','...')
     p_nome_file = v_global_work_dir + 'backup\\' + 'PID-'+ str(os.getpid()) + 'PID-' + p_nome_file
+    p_nome_file = Path(p_nome_file).resolve()
 
-    return p_nome_file
+    return f"\\\\?\\{p_nome_file}"
 
 def prossimo_export_file(v_directory, v_nome_base, v_estensione='csv'):
     """
@@ -740,7 +743,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         if os.path.exists(v_global_work_dir + 'backup\\'):
             for v_nome_file_backup in os.listdir(v_global_work_dir + 'backup\\'):
                 # estraggo dal nome del file il PID di processo
-                v_pid = v_nome_file_backup.split('PID-')[1]
+                v_pid = v_nome_file_backup.split('PID-')[1]                
                 # controllo se questo PID corrisponde ad un processo ancora attivo (vuol dire che lo snapshoot è creato da un'altra sessione di MSql ancora attiva!)
                 if not psutil.pid_exists(int(v_pid)):  
                     # ricavo il nome del file originario
@@ -1108,7 +1111,10 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 o_MSql_win2.slot_highligth_selection()            
             # Indenta la riga alla posizione del cursore
             elif p_slot.objectName() == 'actionIndent_to_cursor':
-                o_MSql_win2.slot_indent_to_cursor()            
+                o_MSql_win2.slot_indent_to_cursor() 
+            # Prende il testo selezionato e lo trasforma in un elenco
+            elif p_slot.objectName() == 'actionText_to_index':           
+                o_MSql_win2.slot_text_to_index()
             # Prende il testo selezionato e lo trasforma in ASCII art testo
             elif p_slot.objectName() == 'actionText_to_Ascii_Art':
                 o_MSql_win2.slot_text_to_ascii_art()
@@ -3925,16 +3931,17 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         """      
         global v_global_connection
         
-        # controllo se l'autocompletamento è aperto (poplist con i suggerimenti...)
-        if event.type() == QEvent.Type.KeyPress and source is self.e_sql and self.e_sql.SendScintilla(QsciScintilla.SCI_AUTOCGETCURRENT) != -1:  
-            # se premuto invio, non lo accetto come conferma della voce proposta e chiudo l'autocompletamento
-            if event.key() == Qt.Key.Key_Return:                                                
-                self.e_sql.SendScintilla(QsciScintilla.SCI_AUTOCCANCEL)
-                return True
-            # altrimenti se premuto il tab, accetto quanto proposto da autocompletamento
-            elif event.key() == Qt.Key.Key_Tab:                
-                self.e_sql.SendScintilla(QsciScintilla.SCI_AUTOCCOMPLETE)
-                return True
+        # funzione disattivata il 20/07/2026 
+        # # controllo se l'autocompletamento è aperto (poplist con i suggerimenti...)
+        # if event.type() == QEvent.Type.KeyPress and source is self.e_sql and self.e_sql.SendScintilla(QsciScintilla.SCI_AUTOCGETCURRENT) != -1:  
+        #     # se premuto invio, non lo accetto come conferma della voce proposta e chiudo l'autocompletamento
+        #     if event.key() == Qt.Key.Key_Return:                                                
+        #         self.e_sql.SendScintilla(QsciScintilla.SCI_AUTOCCANCEL)
+        #         return True
+        #     # altrimenti se premuto il tab, accetto quanto proposto da autocompletamento
+        #     elif event.key() == Qt.Key.Key_Tab:                
+        #         self.e_sql.SendScintilla(QsciScintilla.SCI_AUTOCCOMPLETE)
+        #         return True
 
         # individuo la disattivazione della window e disattivo il drop sulla parte di editor in modo possa gestire 
         # i drop di un file che viene trascinato sull'app. Il drop del file viene gestito tramite il controllo dell'evento sulla window principale
@@ -5891,9 +5898,9 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
 
     def slot_save_modified_data(self):
         """
-           Prende tutti gli item modificati nella tabella e crea lo script per l'aggiornamento
+           Prende tutti gli item modificati nella tabella e crea lo script per l'aggiornamento, raggruppando per modifiche di riga
         """
-        # Siccome questa funzione viene richiamta da menu, può essere che il focus sia rimasto nella cella e non sia scattato il relativo change che 
+        # siccome questa funzione viene richiamta da menu, può essere che il focus sia rimasto nella cella e non sia scattato il relativo change che 
         # ha caricato la matrice dei dati modificati (di quella cella); per questo motivo si valuta se caricare anche la cella dove era il focus        
         focused_widget = QApplication.focusWidget()                
         # se l'elemento su cui era il focus era un item...
@@ -5908,19 +5915,41 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             if v_elementi[i].upper()=='FROM':
                 v_table_name = v_elementi[i+1]
                 break
-                
-        # gli item modificati sono all'interno della matrice
-        for yx in self.v_matrice_dati_modificati:            
-            # creo l'update (nella matrice ho la riga e la colonna corrispondente (ricordarsi che le righe partono da 0 e che la colonna 0 contiene il rowid))            
-            v_valore_cella = self.o_table.item(yx[0],yx[1]).text()
-            v_rowid = self.o_table.item(yx[0],0).text()
+        
+        # prendo la matrice dei dati modificati e la ordino per il campo y, cioè la riga; questo perché poi raggruperò le select per riga
+        matrice_ordinata = sorted(self.v_matrice_dati_modificati)                
+        riga_precedente = None        
+        v_pezzi_update = []  # Lista temporanea per accumulare i "SET COLONNA = VALORE"
+        v_rowid_corrente = None  # Tiene traccia del ROWID della riga che stiamo elaborando        
+        for yx in matrice_ordinata:                        
+            # controllo cambio riga
+            if riga_precedente is not None and yx[0] != riga_precedente:
+                # la riga è cambiata, scrivo l'UPDATE cumulativo della riga appena finita
+                if v_pezzi_update:
+                    v_campi_set = ", ".join(v_pezzi_update)
+                    v_update = f"UPDATE {v_table_name} SET {v_campi_set} WHERE ROWID = '{v_rowid_corrente}';"
+                    self.e_sql.append(chr(10) + v_update)                
+                # resetto la lista per la nuova riga
+                v_pezzi_update = []                            
+            # aggiorno i riferimenti della riga attuale
+            riga_precedente = yx[0]                        
+            # prendo valori di cella e rowid
+            v_valore_cella = self.o_table.item(yx[0], yx[1]).text()
+            v_rowid_corrente = self.o_table.item(yx[0], 0).text()                                    
             if self.tipi_intestazioni[yx[1]][1] == oracledb.DATETIME:                                     
                 v_valore_cella = "TO_DATE('" + v_valore_cella + "','" + da_qt_a_formato_data_oracle(o_global_preferences.date_format) + "')"            
             else:
-                v_valore_cella = "'" + v_valore_cella.replace("'", "''") + "'"
-            v_update = "UPDATE " + v_table_name + " SET " + self.nomi_intestazioni[yx[1]] + "=" + v_valore_cella + " WHERE ROWID = '" + v_rowid + "'"
-            self.e_sql.append(chr(10) + v_update + ';')                
+                v_valore_cella = "'" + v_valore_cella.replace("'", "''") + "'"                            
+            # creo solo la stringa "NOME_COLONNA = VALORE"
+            v_singolo_campo = self.nomi_intestazioni[yx[1]] + "=" + v_valore_cella
+            v_pezzi_update.append(v_singolo_campo)
 
+        # scrivo il risultato dentro l'editor (in fondo)
+        if v_pezzi_update:
+            v_campi_set = ", ".join(v_pezzi_update)
+            v_update = f"UPDATE {v_table_name} SET {v_campi_set} WHERE ROWID = '{v_rowid_corrente}';"
+            self.e_sql.append(chr(10) + v_update)
+              
     def slot_export_to_csv(self):
         """
            Prende i dati presenti in tabella e li esporta in csv
@@ -6745,16 +6774,18 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
 
         # elimino il testo selezionato 
         self.e_sql.cut()
-        # devo capire quali carattersi sono stati usati per il ritorno a capo                
+        # devo capire quali caratteri sono stati usati per il ritorno a capo                
         if self.setting_eol == 'W':                        
             v_eol = '\r\n'
         else:
             v_eol = '\n'
         v_new_text = ''
+        v_split = v_testo_sel.split(v_eol)
         # prendo il testo selezionato e ne estraggo le righe in base al ritorno a capo
-        for v_line in v_testo_sel.split(v_eol):                                    
-            v_new_text += '--' + v_line + v_eol
-        
+        for v_indice,v_line in enumerate(v_split):                                    
+            v_new_text += '--' + v_line
+            if v_indice != len(v_split) - 1:
+                v_new_text += v_eol
         # inserisco il nuovo testo al posto di quello eliminato
         self.e_sql.insert(v_new_text)        
 
@@ -6770,18 +6801,21 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # vedere di sostituire la cut con altra istruzione perché la cut la segna nell'undo e quindi se successivamente utente fa
         # ctrl-z si vede che c'è stata la cut
         self.e_sql.cut()
-        # devo capire quali carattersi sono stati usati per il ritorno a capo
+        # devo capire quali caratteri sono stati usati per il ritorno a capo
         if self.setting_eol == 'W':                        
             v_eol = '\r\n'
         else:
             v_eol = '\n'
         v_new_text = ''
+        v_split = v_testo_sel.split(v_eol)
         # prendo il testo selezionato e ne estraggo le righe in base al ritorno a capo
-        for v_line in v_testo_sel.split(v_eol):                                                
-            if v_line[0:2]=='--':                
-                v_new_text += v_line[2:] + v_eol
+        for v_indice, v_line in enumerate(v_split):
+            if v_line.lstrip()[0:2]=='--':                
+                v_new_text += v_line.lstrip()[2:]
             else:
-                v_new_text += v_line + v_eol
+                v_new_text += v_line
+            if v_indice != len(v_split) - 1:
+                v_new_text += v_eol
         
         # inserisco il nuovo testo al posto di quello eliminato
         self.e_sql.insert(v_new_text)        
@@ -6842,6 +6876,34 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             self.e_sql.insert(v_line)
             # posiziono il cursore
             self.e_sql.setCursorPosition(v_num_line,v_pos)
+
+    def slot_text_to_index(self):
+        """
+           Prende il testo selezionato e lo trasforma in un elenco
+        """
+        # estraggo il testo selezionato        
+        v_text = self.e_sql.selectedText()
+        # se non è stato selezionato alcun testo --> errore
+        if v_text == '':
+            message_error(QCoreApplication.translate('MSql_win1','No text selected!'))
+            return 'ko'
+        # chiedo se fare elenco numerato o normale
+        v_risposta = message_question_yes_no_cancel(QCoreApplication.translate('MSql_win1','Do you want to create a numbered list? (No=Normal list)'))
+        if v_risposta == 'Yes':
+            v_numerato = True
+        elif v_risposta == 'No':
+            v_numerato = False
+        else:
+            return 'ko'
+        # elimino il testo selezionato
+        self.e_sql.removeSelectedText()
+        # trasformo il testo in elenco (tenendo conto dei caratteri di ritorno a capo)
+        if self.setting_eol == 'W':
+            v_eol = '\r\n'
+        else:         
+            v_eol = '\n'
+        # fissato a 80 caratteri la larghezza della riga
+        self.e_sql.insert(trasforma_testo_in_elenco_formattato(v_text, 80, v_eol, v_numerato))                
 
     def slot_text_to_ascii_art(self):
         """

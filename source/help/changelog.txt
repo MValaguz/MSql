@@ -2,6 +2,8 @@
 MSql TODO!!!
 -------------
 
+Da Marco V. Va rivista la parte delle preferenze di connessione nel senso che vanno gestite in modo diverso le impostazioni relative alle connessioni automatiche all'avvio; con una maggiore integrazione con la connessione manuale da menù.
+
 - Provato a passare alla nuova versione di Oracledb 4.0.1 che però non funziona con i driver installati sul PC..perché si deve avere almeno Oracle 19! Tornato indietro alla versione 3!
 - Il concetto di posizionamento nell'editor con calcolo lunghezza carattere da 2byte lato Scintilla va provato a fare anche per quando c'è errore nel comando SQL o PL-SQL che deve adottare lo stesso meccanismo usato per CTRL+Invio
 - Se apro nell'object viewer SM_SMYIOT_PKG, nella prima funzione non riesce a ricavare la var p_user_handle, anche in GET_MATRICOLE_DA_VERIFICARE
@@ -12,6 +14,16 @@ MSql TODO!!!
 ---------------
 MSql Changelog!
 ---------------
+
+Versione del 22/07/2026
+OK! Da Alek     --> In update da tabella, raggruppare su singola riga se modificate colonne della stessa riga.
+OK! Da Marianna --> Nei suggerimenti togliere la questione del tasto invio...tornare al comportamento standard; quando esce il suggerimento, fare in invio per accettarlo, oppure continuare a scrivere.
+
+Versione del 16/07/2026
+OK! Marco T. --> Nei preferiti se faccio ricerca e non trova nulla, propone una griglia vuota. Inoltre fare in modo che premendo Invio svolga subito la ricerca. Fare in modo che quando creo nuova riga si posizioni sulla riga stessa.
+OK! Marco T. --> Se commento le righe con apposita funzione, aggiunge una riga
+OK! Marco T. --> Se il file ha percorso-nome molto lungo, quando fa il backup in windows dà errore!
+OK! Marco V. --> Fare comandi per creare una lista di punti, con pallino o con numerazione
 
 Versione del 08/07/2026
 Le parole PROCEDURE, FUNCTION e CREATE nell'editor vengono evidenziate, con carattere sottolineato

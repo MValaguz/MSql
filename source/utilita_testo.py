@@ -737,6 +737,56 @@ def extract_section_under_cursor(text: str, cursor_pos: int):
 
     return start, end
 
+def trasforma_testo_in_elenco_formattato(testo_input: str, max_lunghezza: int = 80, eol: str = "\n", numerato: bool = False) -> str:
+    """
+        Trasforma un testo in un elenco puntato formattato.
+        Ogni frase del testo diventa un elemento dell'elenco, con un punto elenco "•" e un rientro di due spazi per le righe successive.
+        Se passato numerato=True, l'elenco sarà numerato invece di puntato.
+        max_lunghezza definisce la lunghezza massima di ogni riga dell'elenco
+    """
+    # 1. Dividiamo il testo basandoci sui ritorni a capo dell'utente
+    blocchi_input = testo_input.splitlines()    
+    righe_finali = []
+    
+    # Contatore per l'elenco numerato
+    indice_numero = 1
+    
+    for blocco in blocchi_input:
+        testo_pulito = " ".join(blocco.split())
+        if not testo_pulito:
+            continue
+            
+        parole = testo_pulito.split()
+        if not parole:
+            continue
+            
+        # 2. Definiamo il prefisso in base al tipo di elenco richiesto
+        if numerato:
+            prefisso = f"{indice_numero}. "
+            indice_numero += 1
+        else:
+            prefisso = "• "
+            
+        # Calcoliamo dinamicamente l'indentazione per le righe che vanno a capo
+        # così da allinearsi esattamente sotto la prima lettera dopo il prefisso
+        spazi_indentazione = " " * len(prefisso)
+            
+        # Inizia il nuovo punto elenco con la prima parola
+        riga_corrente = prefisso + parole[0]
+        
+        # Gestisce il wrap a max_lunghezza per questo specifico punto
+        for parola in parole[1:]:
+            if len(riga_corrente) + 1 + len(parola) <= max_lunghezza:
+                riga_corrente += " " + parola
+            else:
+                righe_finali.append(riga_corrente)
+                riga_corrente = spazi_indentazione + parola
+                
+        # Aggiunge l'ultima riga di questo specifico punto elenco
+        righe_finali.append(riga_corrente)
+        
+    return eol.join(righe_finali)
+
 ######################################################################################################################
 # TEST DELLA FUNZIONE CHE PARTENDO DA CODICE PL-SQL, RESTITUISCE UN OGGETTO CHE CONTIENE TUTTE LE DEFINIZIONI TROVATE
 ######################################################################################################################
@@ -774,11 +824,18 @@ if __name__ == "__main__":
     # print(v_lista)
 
     # lettura del file dove presente problema di CTRL+INVIO 
-    v_testo = v_file = open('C:/Users/mvalaguz/Desktop/Test per CTRL INVIO Estrazione_richiesta_41304.sql','r', encoding='utf-8',newline='').read()
-    print('-'*100)
-    print(repr(v_testo))
-    print('-'*100)
-    v_start, v_end = extract_section_under_cursor(v_testo, 1100)    
-    print(f"v_start: {v_start}, v_end: {v_end}")
-    print('-'*100)
-    print(v_testo[v_start:v_end])
+    # v_testo = v_file = open('C:/Users/mvalaguz/Desktop/Test per CTRL INVIO Estrazione_richiesta_41304.sql','r', encoding='utf-8',newline='').read()
+    # print('-'*100)
+    # print(repr(v_testo))
+    # print('-'*100)
+    # v_start, v_end = extract_section_under_cursor(v_testo, 1100)    
+    # print(f"v_start: {v_start}, v_end: {v_end}")
+    # print('-'*100)
+    # print(v_testo[v_start:v_end])
+
+    v_testo = """questo è il primo punto del mio programma
+questo è il secondo punto del mio programma
+questo è il terzo punto del mio programma"""
+    print(trasforma_testo_in_elenco_formattato(v_testo, 30, "\n"))
+    print('Elenco numerato:')
+    print(trasforma_testo_in_elenco_formattato(v_testo, 30, "\n", True))

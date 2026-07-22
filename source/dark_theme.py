@@ -25,6 +25,15 @@
 
 def dark_theme_definition():
     return """
+
+/*-----QStatusBar---------------------------------------------------------*/
+QStatusBar {
+        border: none;
+    }
+    QStatusBar::item {
+        border: 0px solid transparent;
+    }
+
 /*-----QWidget------------------------------------------------------------*/
 QWidget
 {
@@ -344,8 +353,8 @@ QTableView::disabled
 
 QTableView::item:hover 
 {
-    background-color: #484c58;
-    color: #f0f0f0;
+    background-color: #007ACC;
+    color: white;
 }
 
 QTableView::item:selected 
