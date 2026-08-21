@@ -19,7 +19,8 @@
         <source>Cancel</source>
         <translation type="vanished">Annulla</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>GitHubWidget</name>
     <message>
         <source>Search repository...</source>
@@ -86,8 +87,8 @@
         <translation type="vanished">La cartella selezionata non è un repository di tipo Git</translation>
     </message>
     <message>
-        <source>Remote 'origin' not found</source>
-        <translation type="vanished">L'origine remota non è stata trovata</translation>
+        <source>Remote &apos;origin&apos; not found</source>
+        <translation type="vanished">L&apos;origine remota non è stata trovata</translation>
     </message>
     <message>
         <source>Upload blocked</source>
@@ -105,133 +106,140 @@
         <source>Upload completed</source>
         <translation type="vanished">Upload completato</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>GotoLineWindow</name>
     <message>
-        <location filename="..\qtdesigner\goto_line_ui.ui" line="0" />
+        <location filename="../qtdesigner/goto_line_ui.ui" line="0"/>
         <source>Go To Line</source>
         <translation>Vai alla riga</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\goto_line_ui.ui" line="0" />
+        <location filename="../qtdesigner/goto_line_ui.ui" line="0"/>
         <source>Enter line number:</source>
         <translation>Inserire un numero di riga:</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>MSql_win1</name>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>MSql Editor</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>&amp;File</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>&amp;Connection</source>
         <translation>&amp;Connessione</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>&amp;Edit</source>
         <translation>&amp;Modifica</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Sc&amp;ript</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>&amp;Table</source>
         <translation>&amp;Tabella</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>&amp;Output</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>&amp;Window</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>&amp;Help</source>
         <translation>&amp;Aiuto</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>T&amp;ools</source>
         <translation>Str&amp;umenti</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>&amp;View</source>
         <translation>&amp;Vista</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>&amp;Search</source>
         <translation>&amp;Ricerca</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Import-E&amp;xport</source>
         <translation>&amp;Importa-Esporta</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1902" />
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../MSql_editor.py" line="1566"/>
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Objects Navigator</source>
         <translation>Navigatore oggetti</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Select a schema</source>
         <translation>Selezione schema</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load object description&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Carica le descrizioni degli oggetti&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
+        <source>Refresh</source>
+        <translation>Aggiorna</translation>
+    </message>
+    <message>
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Object Viewer</source>
         <translation>Visualizzatore oggetto</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Like</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>toolBar</source>
         <translation>Barra strumenti</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>File system</source>
         <translation>File system</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Filter:</source>
         <translation>Filtro:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
-        <source>&lt;table border="1" cellspacing="0" cellpadding="4" style="border-collapse:collapse; font-family: Consolas, monospace; font-size: 10pt;"&gt;
-  &lt;thead style="background-color:#f0f0f0; font-weight:bold;"&gt;
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
+        <source>&lt;table border=&quot;1&quot; cellspacing=&quot;0&quot; cellpadding=&quot;4&quot; style=&quot;border-collapse:collapse; font-family: Consolas, monospace; font-size: 10pt;&quot;&gt;
+  &lt;thead style=&quot;background-color:#f0f0f0; font-weight:bold;&quot;&gt;
     &lt;tr&gt;
       &lt;th&gt;Search field text&lt;/th&gt;
       &lt;th&gt;Actual matches&lt;/th&gt;
@@ -239,1010 +247,1020 @@
     &lt;/tr&gt;
   &lt;/thead&gt;
   &lt;tbody&gt;
-    &lt;tr&gt;&lt;td&gt;.sql&lt;/td&gt;&lt;td&gt;file.sql, test.msql&lt;/td&gt;&lt;td&gt;Contains ".sql" anywhere in the name&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;.sql$&lt;/td&gt;&lt;td&gt;file.sql&lt;/td&gt;&lt;td&gt;Ends with ".sql"&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;\.sql$&lt;/td&gt;&lt;td&gt;file.sql&lt;/td&gt;&lt;td&gt;Ends exactly with ".sql" (dot treated literally)&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;(?i)\.sql$&lt;/td&gt;&lt;td&gt;file.sql, report.SQL&lt;/td&gt;&lt;td&gt;Ends with ".sql" or ".SQL" (case-insensitive)&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;^a.*\.txt$&lt;/td&gt;&lt;td&gt;appunti.txt&lt;/td&gt;&lt;td&gt;Starts with "a" and ends with ".txt"&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;report&lt;/td&gt;&lt;td&gt;report_finale.txt, myreport.sql&lt;/td&gt;&lt;td&gt;Contains "report" anywhere in the name&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;.*2025.*&lt;/td&gt;&lt;td&gt;bilancio_2025.xlsx&lt;/td&gt;&lt;td&gt;Contains "2025" in the name&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;^test_&lt;/td&gt;&lt;td&gt;test_log.txt&lt;/td&gt;&lt;td&gt;Starts with "test_"&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;.sql&lt;/td&gt;&lt;td&gt;file.sql, test.msql&lt;/td&gt;&lt;td&gt;Contains &quot;.sql&quot; anywhere in the name&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;.sql$&lt;/td&gt;&lt;td&gt;file.sql&lt;/td&gt;&lt;td&gt;Ends with &quot;.sql&quot;&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;\.sql$&lt;/td&gt;&lt;td&gt;file.sql&lt;/td&gt;&lt;td&gt;Ends exactly with &quot;.sql&quot; (dot treated literally)&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;(?i)\.sql$&lt;/td&gt;&lt;td&gt;file.sql, report.SQL&lt;/td&gt;&lt;td&gt;Ends with &quot;.sql&quot; or &quot;.SQL&quot; (case-insensitive)&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;^a.*\.txt$&lt;/td&gt;&lt;td&gt;appunti.txt&lt;/td&gt;&lt;td&gt;Starts with &quot;a&quot; and ends with &quot;.txt&quot;&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;report&lt;/td&gt;&lt;td&gt;report_finale.txt, myreport.sql&lt;/td&gt;&lt;td&gt;Contains &quot;report&quot; anywhere in the name&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;.*2025.*&lt;/td&gt;&lt;td&gt;bilancio_2025.xlsx&lt;/td&gt;&lt;td&gt;Contains &quot;2025&quot; in the name&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;^test_&lt;/td&gt;&lt;td&gt;test_log.txt&lt;/td&gt;&lt;td&gt;Starts with &quot;test_&quot;&lt;/td&gt;&lt;/tr&gt;
     &lt;tr&gt;&lt;td&gt;^[a-z0-9_]+\.csv$&lt;/td&gt;&lt;td&gt;dati1.csv&lt;/td&gt;&lt;td&gt;CSV file with lowercase/numeric/underscore name&lt;/td&gt;&lt;/tr&gt;
     &lt;tr&gt;&lt;td&gt;^.*\.(py|sql|csv)$&lt;/td&gt;&lt;td&gt;main.py, query.sql, export.csv&lt;/td&gt;&lt;td&gt;Ends with one of several extensions&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;(?i)^readme(\.txt)?$&lt;/td&gt;&lt;td&gt;README, readme.txt&lt;/td&gt;&lt;td&gt;"readme" or "readme.txt" (case-insensitive)&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;(?i)^readme(\.txt)?$&lt;/td&gt;&lt;td&gt;README, readme.txt&lt;/td&gt;&lt;td&gt;&quot;readme&quot; or &quot;readme.txt&quot; (case-insensitive)&lt;/td&gt;&lt;/tr&gt;
   &lt;/tbody&gt;
 &lt;/table&gt;
 
 </source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Start search (you can use regular expression)</source>
         <translation>Avvia la ricerca (puoi usare anche le espressioni regolari)</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
-        <source>Refresh</source>
-        <translation>Aggiorna</translation>
-    </message>
-    <message>
-        <location filename="..\MSql_editor.py" line="887" />
-        <location filename="..\MSql_editor.py" line="878" />
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../MSql_editor.py" line="540"/>
+        <location filename="../MSql_editor.py" line="531"/>
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Open</source>
         <translation>Apri</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Ctrl+O</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Save</source>
         <translation>Salva</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Ctrl+S</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Exit</source>
         <translation>Esci</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Find</source>
         <translation>Trova</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Ctrl+F</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Find and Replace</source>
         <translation>Trova e sostituisci</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Ctrl+H</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Execute</source>
         <translation>Esegui</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>F5</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Make table editable</source>
-        <translation>Rendi la sezione "Risultato" editabile</translation>
+        <translation>Rendi la sezione &quot;Risultato&quot; editabile</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>F10</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Script the changed data</source>
         <translation>Crea lo script dei dati modificati</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Go to Top</source>
         <translation>Vai in cima alla tabella</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>F7</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Go to End</source>
         <translation>Vai in fondo alla tabella</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>F6</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Export to CSV</source>
         <translation>Esporta nel formato CSV</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Auto Column Resize</source>
         <translation>Adatta larghezza colonne al contenuto</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Save as</source>
         <translation>Salva come</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Ctrl+Shift+S</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Font editor selector</source>
-        <translation>Seleziona il font dell'editor</translation>
+        <translation>Seleziona il font dell&apos;editor</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Font output selector</source>
-        <translation>Seleziona il font dell'output</translation>
+        <translation>Seleziona il font dell&apos;output</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Cascade</source>
         <translation>Cascata</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Tile</source>
         <translation>Affianca</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Arrange windows in tiles</source>
         <translation>Disponi le window affiancate</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="878" />
-        <location filename="..\MSql_editor.py" line="729" />
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../MSql_editor.py" line="531"/>
+        <location filename="../MSql_editor.py" line="382"/>
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>New</source>
         <translation>Nuovo</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Ctrl+N</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Program info</source>
         <translation>Informazioni di programma</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Commit</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>F8</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Rollback</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Clear result,output</source>
         <translation>Pulisci area risultato e output</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>History</source>
         <translation>Cronologia</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Help</source>
         <translation>Aiuto</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Zoom In</source>
         <translation>Aumenta ingrandimento</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Ctrl++</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Zoom Out</source>
         <translation>Diminuisci ingrandimento</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Ctrl+-</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Undo</source>
         <translation>Annulla</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Redo</source>
         <translation>Ripristina</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Copy</source>
         <translation>Copia</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Ctrl+C</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Paste</source>
         <translation>Incolla</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Ctrl+V</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Cut</source>
         <translation>Taglia</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Select All</source>
         <translation>Seleziona tutto</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Ctrl+A</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Go to line</source>
         <translation>Vai alla riga</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Ctrl+G</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Fold/Unfold All</source>
         <translation>Ripiega/Dispiega tutto</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Rect selection</source>
         <translation>Selezione rettangolare</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Connect to specific database</source>
         <translation>Connessione a database specifica</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Uppercase</source>
         <translation>Maiuscolo</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Lowercase</source>
         <translation>Minuscolo</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Find object</source>
         <translation>Cerca oggetto</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>F12</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Preferences</source>
         <translation>Preferenze</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Autocomplete dictionary</source>
-        <translation>Dizionario dell'autocompletamento</translation>
+        <translation>Dizionario dell&apos;autocompletamento</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Show end of line</source>
         <translation>Mostra i caratteri di fine riga</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Map procedures/functions</source>
         <translation>Mappa le procedure/funzioni</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Ctrl+M</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Format SQL statement</source>
-        <translation>Formatta l'sql selezionato</translation>
+        <translation>Formatta l&apos;sql selezionato</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Comment selection</source>
         <translation>Commenta il testo selezionato</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Uncomment selection</source>
         <translation>Decommenta il testo selezionato</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Quick query</source>
         <translation>Crea una query</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>F11</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>My preferred SQL</source>
         <translation>Apri window degli SQL preferiti</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Close</source>
         <translation>Chiudi</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Ctrl+W</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Close all</source>
         <translation>Chiudi tutto</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Explain plan</source>
         <translation>Calcola il piano di esecuzione</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>F9</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Tabbed</source>
         <translation>Schede</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Auto clear output</source>
         <translation>Pulisci output automaticamente</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Extract sql from output</source>
-        <translation>Estrai istruzione SQL dell'output</translation>
+        <translation>Estrai istruzione SQL dell&apos;output</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Compare last two text editor</source>
         <translation>Compara gli ultimi due editor</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Extract primary key</source>
         <translation>Estrai la chiave primaria</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Find next =</source>
         <translation>Cerca il prossimo =</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Execute current</source>
-        <translation>Esegui l'istruzione corrente</translation>
+        <translation>Esegui l&apos;istruzione corrente</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Ctrl+Return</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Line cut</source>
         <translation>Elimina la riga</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Ctrl+L</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Line transpose</source>
         <translation>Trasponi la riga</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Ctrl+T</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Line/Selection duplicate</source>
         <translation>Duplica la riga/selezione</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Delete start of word</source>
         <translation>Cancella la parola a sinistra</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Delete end of word</source>
         <translation>Cancella la parola a destra</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Delete start of line</source>
-        <translation>Cancella fino all'inizio della riga</translation>
+        <translation>Cancella fino all&apos;inizio della riga</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Delete end of line</source>
         <translation>Cancella fino alla fine della riga</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Go to start</source>
-        <translation>Vai all'inizio dell'editor</translation>
+        <translation>Vai all&apos;inizio dell&apos;editor</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Ctrl+Home</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Go to end</source>
-        <translation>Vai alla fine dell'editor</translation>
+        <translation>Vai alla fine dell&apos;editor</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Ctrl+End</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Indent to cursor</source>
         <translation>Indenta il testo partendo sotto al cursore</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Disconnect</source>
         <translation>Disconnetti</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Add Bookmark</source>
         <translation>Aggiungi segnalibro</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Remove Bookmark</source>
         <translation>Rimuovi segnalibro</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>SearchNext Bookmark</source>
         <translation>Ricerca il prossimo segnalibro</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Indentation guide</source>
         <translation>Evidenzia le indentazioni</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Changelog</source>
         <translation>Cronologia delle modifiche</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Oracle to SQLite</source>
         <translation>Da Oracle a SQLite</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>SQLite to Excel</source>
         <translation>Da SQLite a Excel</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Excel to Oracle</source>
         <translation>Da Excel a Oracle</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>SQLite to Oracle</source>
         <translation>Da SQLite a Oracle</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>SQLite viewer</source>
         <translation>Visualizzatore SQLite</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Text to Ascii Art</source>
         <translation>Trasforma il testo in Ascii Art</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Ascii art font selector</source>
         <translation>Seleziona il font per Ascii Art</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Full screen</source>
         <translation>Schermo intero</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Ctrl+F11</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Explore database link</source>
         <translation>Esplora i link di database</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Highlight selection</source>
         <translation>Evidenzia la selezione</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Comment from function</source>
         <translation>Commenta partendo da funzione</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Text functions</source>
         <translation>Funzioni manipolazione testo</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Editor view</source>
         <translation>Vista laterale</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="566" />
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../MSql_editor.py" line="219"/>
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Calculator</source>
         <translation>Calcolatrice</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Export to Insert format</source>
-        <translation>Esporta nel formato "Insert into"</translation>
+        <translation>Esporta nel formato &quot;Insert into&quot;</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Query Designer</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Export to JSON format</source>
         <translation>Esporta nel formato JSON</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Export to Excel</source>
         <translation>Esporta nel formato Excel</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Go to GitHub project</source>
         <translation>Apri il progetto in GitHub</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Save all</source>
         <translation>Salva tutto</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Open workspace</source>
         <translation>Apri spazio di lavoro</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Save workspace</source>
         <translation>Salva spazio di lavoro</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Clear recent file list</source>
         <translation>Pulisci elenco dei file recenti</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win1_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
         <source>Text to index</source>
         <translation>Trasforma il testo in lista</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="320" />
-        <source>Double-click to select the font</source>
-        <translation>Fare doppio click per selezionare il font</translation>
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
+        <source>Insert form on current table</source>
+        <translation>Apre form per creare INSERT tabella corrente</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="560" />
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
+        <source>Where form on current table</source>
+        <translation>Apre form per creare WHERE tabella corrente</translation>
+    </message>
+    <message>
+        <location filename="../qtdesigner/MSql_editor_win1_ui.ui" line="0"/>
+        <source>Center</source>
+        <translation>Centra</translation>
+    </message>
+    <message>
+        <location filename="../MSql_editor.py" line="213"/>
         <source>Open file system dock</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="7393" />
-        <location filename="..\MSql_editor.py" line="574" />
+        <location filename="../MSql_editor.py" line="7148"/>
+        <location filename="../MSql_editor.py" line="227"/>
         <source>Last execution time:</source>
         <translation>Tempo ultima esecuzione:</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="578" />
+        <location filename="../MSql_editor.py" line="231"/>
         <source>Connection:</source>
         <translation>Connesso a:</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="7348" />
-        <location filename="..\MSql_editor.py" line="596" />
+        <location filename="../MSql_editor.py" line="7103"/>
+        <location filename="../MSql_editor.py" line="249"/>
         <source>Lines:</source>
         <translation>Righe:</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="7348" />
-        <location filename="..\MSql_editor.py" line="596" />
+        <location filename="../MSql_editor.py" line="7103"/>
+        <location filename="../MSql_editor.py" line="249"/>
         <source>Length:</source>
         <translation>Caratteri:</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1364" />
-        <location filename="..\MSql_editor.py" line="610" />
+        <location filename="../MSql_editor.py" line="1028"/>
+        <location filename="../MSql_editor.py" line="263"/>
         <source>Editable table: Disabled</source>
         <translation>Risultato editabile: Disattivato</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="738" />
+        <location filename="../MSql_editor.py" line="391"/>
         <source>The dictionary is more than</source>
         <translation>Il dizionario è più vecchio di</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="738" />
+        <location filename="../MSql_editor.py" line="391"/>
         <source> days old!</source>
         <translation> giorni!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="738" />
+        <location filename="../MSql_editor.py" line="391"/>
         <source>Remember to regenerate it!</source>
         <translation>Ricardati di rigenerarlo!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="738" />
+        <location filename="../MSql_editor.py" line="391"/>
         <source>See the menu Tools/Autocomplete dictionary ;-)</source>
         <translation>Vai nella sezione Strumenti ed avvia il Dizionario di autocompletamento</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="754" />
+        <location filename="../MSql_editor.py" line="407"/>
         <source>Found file</source>
         <translation>Trovato file</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="754" />
+        <location filename="../MSql_editor.py" line="407"/>
         <source>from interrupted session! Do you want to restore it?</source>
         <translation>da sessione interrotta! Vuoi ripristinarlo?</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="901" />
-        <location filename="..\MSql_editor.py" line="878" />
+        <location filename="../MSql_editor.py" line="554"/>
+        <location filename="../MSql_editor.py" line="531"/>
         <source>Open_db_obj</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1082" />
+        <location filename="../MSql_editor.py" line="741"/>
         <source>There are 2 ways to switch to rectangular selection mode</source>
         <translation>Ci sono due strade per passare alla selezione rettangolare</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1082" />
+        <location filename="../MSql_editor.py" line="741"/>
         <source>1. (Keyboard and mouse) Hold down ALT while left clicking, then dragging</source>
         <translation>1. (Tastiera e mouse) Premi il tasto ALT mentre tieni premuto il tasto sinistro del mouse e svolgi la selezione</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1082" />
+        <location filename="../MSql_editor.py" line="741"/>
         <source>2. (Keyboard only) Hold down ALT+Shift while using the arrow keys</source>
         <translation>2 (Solo tastiera) Premi il tasto ALT+Maiuscolo e usa i tasti freccia</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1085" />
+        <location filename="../MSql_editor.py" line="744"/>
         <source>To extract the primary key, position yourself on a table name and press CTRL+K. Otherwise, to join two tables, write the two tables separated by commas, select the text and press CTRL+K.</source>
-        <translation>Per estrarre la chiave primaria, posizionati sul nome della tabella nell'editor, premi la combinazione CTRL+K. Oppure, nel caso di due tabelle separata da virgola, selezionale e premi la combinazione CTRL+K.</translation>
+        <translation>Per estrarre la chiave primaria, posizionati sul nome della tabella nell&apos;editor, premi la combinazione CTRL+K. Oppure, nel caso di due tabelle separata da virgola, selezionale e premi la combinazione CTRL+K.</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1088" />
+        <location filename="../MSql_editor.py" line="747"/>
         <source>To search next = press F4</source>
         <translation>Per ricercare il prossimo = premi F4</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1090" />
+        <location filename="../MSql_editor.py" line="749"/>
         <source>Click on the left margins of the editor and the bookmark will be highlighted with a green circle.</source>
-        <translation>Cliccando sul margine di sinistra dell'editor verrà inserito un pallino verde che indica l'attivazione del segnalibro sulla riga.</translation>
+        <translation>Cliccando sul margine di sinistra dell&apos;editor verrà inserito un pallino verde che indica l&apos;attivazione del segnalibro sulla riga.</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1092" />
+        <location filename="../MSql_editor.py" line="751"/>
         <source>Click on the left margins of the editor, select a bookmark, and hold down the CTRL key.</source>
         <translation>Seleziona il pallino verde sul margine di sinistra che identifica il segnalibro che vuoi cancellare, tenendo premuto il tasto CTRL.</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1094" />
+        <location filename="../MSql_editor.py" line="753"/>
         <source>With CTRL+B you can jump from one bookmark to another! When you reach the end, the search starts again from the beginning of the text.</source>
-        <translation>Con la combinazione CTRL+B puoi passare da un segnalibro all'altro. Arrivato alla, fine il programma ritorna automaticamente all'inizio del testo.</translation>
+        <translation>Con la combinazione CTRL+B puoi passare da un segnalibro all&apos;altro. Arrivato alla, fine il programma ritorna automaticamente all&apos;inizio del testo.</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1200" />
+        <location filename="../MSql_editor.py" line="858"/>
         <source>Script stopped for error!</source>
         <translation>Lo script si è interroto per un errore!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1203" />
+        <location filename="../MSql_editor.py" line="861"/>
         <source>Position yourself on the instruction you want to execute and press CTRL+Enter</source>
-        <translation>Posizionati sull'istruzioni che vuoi eseguire e premi la combinazione CTRL+Invio</translation>
+        <translation>Posizionati sull&apos;istruzioni che vuoi eseguire e premi la combinazione CTRL+Invio</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1208" />
+        <location filename="../MSql_editor.py" line="866"/>
         <source>Error to analyze query!</source>
-        <translation>Si è verificato un errore nell'analizzare la query!</translation>
+        <translation>Si è verificato un errore nell&apos;analizzare la query!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1217" />
+        <location filename="../MSql_editor.py" line="875"/>
         <source>Position yourself in the text-editor on the object and press F12</source>
-        <translation>Posizionati con il cursore sul nome di un oggetto dell'editor e premi il tasto F12</translation>
+        <translation>Posizionati con il cursore sul nome di un oggetto dell&apos;editor e premi il tasto F12</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1220" />
+        <location filename="../MSql_editor.py" line="878"/>
         <source>Position yourself in the text-editor on the table and press F11</source>
         <translation>Posizionati con il cursore sul nome di una tabella e premi il tasto F11 per eseguire la query</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1292" />
+        <location filename="../MSql_editor.py" line="956"/>
         <source>Save Workspace</source>
         <translation>Salva spazio di lavoro</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1326" />
-        <location filename="..\MSql_editor.py" line="1292" />
+        <location filename="../MSql_editor.py" line="990"/>
+        <location filename="../MSql_editor.py" line="956"/>
         <source>Workspace file (*.mws)</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1340" />
-        <location filename="..\MSql_editor.py" line="1307" />
+        <location filename="../MSql_editor.py" line="1004"/>
+        <location filename="../MSql_editor.py" line="971"/>
         <source>Workspace: </source>
         <translation>Spazio di lavoro: </translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1310" />
+        <location filename="../MSql_editor.py" line="974"/>
         <source>Workspace saved!</source>
         <translation>Spazio di lavoro salvato!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1319" />
+        <location filename="../MSql_editor.py" line="983"/>
         <source>Please close all the open editors before opening a workspace!</source>
         <translation>Devi chiudere tutti gli editor aperti prima di aprire un spazio di lavoro!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1323" />
+        <location filename="../MSql_editor.py" line="987"/>
         <source>A workspace is already open!</source>
         <translation>Uno spazio di lavoro risulta già aperto!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1326" />
+        <location filename="../MSql_editor.py" line="990"/>
         <source>Open Workspace</source>
         <translation>Apri spazio di lavoro</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1360" />
+        <location filename="../MSql_editor.py" line="1024"/>
         <source>Editable table: Enabled</source>
         <translation>Risultato editabile: Attivato</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1390" />
+        <location filename="../MSql_editor.py" line="1054"/>
         <source>Are you sure you want to clear your recent files history?</source>
         <translation>Sei sicuro di pulire la lista dei file recenti?</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="2614" />
-        <location filename="..\MSql_editor.py" line="2030" />
-        <location filename="..\MSql_editor.py" line="1824" />
-        <location filename="..\MSql_editor.py" line="1618" />
+        <location filename="../MSql_editor.py" line="2278"/>
+        <location filename="../MSql_editor.py" line="1694"/>
+        <location filename="../MSql_editor.py" line="1488"/>
+        <location filename="../MSql_editor.py" line="1282"/>
         <source>Error:</source>
         <translation>Errore:</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1625" />
+        <location filename="../MSql_editor.py" line="1289"/>
         <source>MSql detected that the current session has an open transaction. Do you want to perform commit before closing the session?</source>
         <translation>Sono presenti dei dati non salvati per la sessione corrente! Vuoi eseguire la commit prima di chiudere la sessione?</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1738" />
-        <location filename="..\MSql_editor.py" line="1733" />
+        <location filename="../MSql_editor.py" line="1402"/>
+        <location filename="../MSql_editor.py" line="1397"/>
         <source>Error to oracle connection!</source>
         <translation>Errore di connessione a Oracle!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1735" />
+        <location filename="../MSql_editor.py" line="1399"/>
         <source>For via proxy connection remember to activate this using command</source>
         <translation>Ricordarsi che per una connessione via proxy è necessario fare abilitazione con il comando</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1735" />
+        <location filename="../MSql_editor.py" line="1399"/>
         <source>using user SYS!</source>
         <translation>usando utente SYS!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1747" />
+        <location filename="../MSql_editor.py" line="1411"/>
         <source>Connected to:</source>
         <translation>Connesso a:</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1868" />
+        <location filename="../MSql_editor.py" line="1532"/>
         <source>Error to oracle disconnection!</source>
         <translation>Errore di disconnessione da Oracle!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="2088" />
+        <location filename="../MSql_editor.py" line="1752"/>
         <source>Error to create popupmenu!</source>
         <translation>Errore nella creazione del popup menu!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="2528" />
-        <location filename="..\MSql_editor.py" line="2503" />
-        <location filename="..\MSql_editor.py" line="2484" />
-        <location filename="..\MSql_editor.py" line="2309" />
-        <location filename="..\MSql_editor.py" line="2305" />
+        <location filename="../MSql_editor.py" line="2192"/>
+        <location filename="../MSql_editor.py" line="2167"/>
+        <location filename="../MSql_editor.py" line="2148"/>
+        <location filename="../MSql_editor.py" line="1973"/>
+        <location filename="../MSql_editor.py" line="1969"/>
         <source>Invalid object!</source>
         <translation>Oggetto invalido!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="2323" />
+        <location filename="../MSql_editor.py" line="1987"/>
         <source>Error to retrive metadata information!</source>
-        <translation>Errore restituito durante la richiesta dei "metadata information"!</translation>
+        <translation>Errore restituito durante la richiesta dei &quot;metadata information&quot;!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="2421" />
+        <location filename="../MSql_editor.py" line="2085"/>
         <source>No valid object!</source>
         <translation>Oggetto non valido!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="2451" />
+        <location filename="../MSql_editor.py" line="2115"/>
         <source>Open a editor!</source>
         <translation>Prima apri un editor!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="2500" />
-        <location filename="..\MSql_editor.py" line="2479" />
-        <location filename="..\MSql_editor.py" line="2471" />
+        <location filename="../MSql_editor.py" line="2164"/>
+        <location filename="../MSql_editor.py" line="2143"/>
+        <location filename="../MSql_editor.py" line="2135"/>
         <source>Error to retrive referenced table name!</source>
         <translation>Errore nel recupero del nome della tabella referenziata!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="2519" />
+        <location filename="../MSql_editor.py" line="2183"/>
         <source>Invalid field!</source>
         <translation>Campo non valido!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="3028" />
+        <location filename="../MSql_editor.py" line="2692"/>
         <source>Error during decode object type!</source>
         <translation>Errore durante la decodifica del tipo di oggetto!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="3087" />
+        <location filename="../MSql_editor.py" line="2751"/>
         <source>Not all the requested data has been entered!</source>
         <translation>Non tutti i dati richiesti sono stati inseriti!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="3187" />
+        <location filename="../MSql_editor.py" line="2851"/>
         <source>Select a row!</source>
         <translation>Seleziona una riga!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="3253" />
+        <location filename="../MSql_editor.py" line="2917"/>
         <source>For compare you must have two editor open or more!</source>
         <translation>Per eseguire il confronto è necessario avere almeno due editor aperti!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="3292" />
+        <location filename="../MSql_editor.py" line="2956"/>
         <source>Editor Compare</source>
         <translation>Comparatore delle differenze</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="3374" />
-        <location filename="..\MSql_editor.py" line="3347" />
-        <location filename="..\MSql_editor.py" line="3331" />
-        <location filename="..\MSql_editor.py" line="3304" />
+        <location filename="../MSql_editor.py" line="3038"/>
+        <location filename="../MSql_editor.py" line="3011"/>
+        <location filename="../MSql_editor.py" line="2995"/>
+        <location filename="../MSql_editor.py" line="2968"/>
         <source>No connection!</source>
         <translation>Nessuna connessione al database!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="6808" />
+        <location filename="../MSql_editor.py" line="6549"/>
         <source>Select the text that includes the declaration of a PL-SQL function-procedure to obtain a comment reporting: Author, Creation date, Description and input-output parameters</source>
         <translation>Selezionare il testo che comprende la dichiarazione di una funzione-procedura PL-SQL per ottenere un commento riportante: Autore, Data creazione, Descrizione e parametri input-output</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="6895" />
-        <location filename="..\MSql_editor.py" line="6865" />
+        <location filename="../MSql_editor.py" line="6653"/>
+        <location filename="../MSql_editor.py" line="6606"/>
         <source>No text selected!</source>
         <translation>Nessun testo selezionato!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="6868" />
+        <location filename="../MSql_editor.py" line="6609"/>
         <source>Do you want to create a numbered list? (No=Normal list)</source>
         <translation>Vuoi creare una lista numerata? (No=Lista normale)</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="7356" />
+        <location filename="../MSql_editor.py" line="7111"/>
         <source>Overwrite</source>
         <translation>Sovrascrittura</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="7358" />
+        <location filename="../MSql_editor.py" line="7113"/>
         <source>Insert</source>
         <translation>Inserimento</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="7423" />
+        <location filename="../MSql_editor.py" line="7178"/>
         <source>OPEN_FROM_SIM</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="7544" />
+        <location filename="../MSql_editor.py" line="7299"/>
         <source>A new version of MSql Editor is aviable!
 Do you want to install it?</source>
-        <translation>E' disponibile una nuova versione di MSql!
+        <translation>E&apos; disponibile una nuova versione di MSql!
 Vuoi installarla?</translation>
+    </message>
+    <message>
+        <location filename="../utilita_classi.py" line="92"/>
+        <source>Double-click to select the font</source>
+        <translation>Fare doppio click per selezionare il font</translation>
     </message>
     <message>
         <source>Mini map</source>
@@ -1257,15 +1275,15 @@ Vuoi installarla?</translation>
         <translation type="vanished">Manca il Client ID nelle preferenze!</translation>
     </message>
     <message>
-        <source>A new version of MSql Editor is aviable! Please go to O:\Install\MSql_setup and install it! Once installed, don't forget to check the changelog to see what's new!</source>
-        <translation type="vanished">E' disponibile una nuova versione di MSql! Vai in O:\Install\MSql_setup e procedi con l'installazione. Una volta avviato MSql, non dimenticarti di leggere gli aggiornamenti dal menu di Aiuto!</translation>
+        <source>A new version of MSql Editor is aviable! Please go to O:\Install\MSql_setup and install it! Once installed, don&apos;t forget to check the changelog to see what&apos;s new!</source>
+        <translation type="vanished">E&apos; disponibile una nuova versione di MSql! Vai in O:\Install\MSql_setup e procedi con l&apos;installazione. Una volta avviato MSql, non dimenticarti di leggere gli aggiornamenti dal menu di Aiuto!</translation>
     </message>
     <message>
         <source>Set font Ascii Art</source>
         <translation type="vanished">Selettore font per Ascii Art</translation>
     </message>
     <message>
-        <source>A new versione of MSql Editor is aviable! Please go to O:\Install\MSql_setup and install it! Once installed, don't forget to check the changelog to see what's new!</source>
+        <source>A new versione of MSql Editor is aviable! Please go to O:\Install\MSql_setup and install it! Once installed, don&apos;t forget to check the changelog to see what&apos;s new!</source>
         <translation type="vanished">È disponibile una nuova versione di SQL Editor! Vai a O:\Install\MSql setup e installala! Una volta installata, non dimenticare di controllare il changelog per scoprire le novità!</translation>
     </message>
     <message>
@@ -1278,7 +1296,7 @@ Vuoi installarla?</translation>
     </message>
     <message>
         <source>A new versione of MSql Editor is aviable! Please go to O:\Install\MSql_setup and install it!</source>
-        <translation type="vanished">Una nuova versione di MSql Editor è disponibile in O:\Install\MSql_setup! Vai in quella cartella e procedi con l'installazione!</translation>
+        <translation type="vanished">Una nuova versione di MSql Editor è disponibile in O:\Install\MSql_setup! Vai in quella cartella e procedi con l&apos;installazione!</translation>
     </message>
     <message>
         <source>Start with</source>
@@ -1296,234 +1314,248 @@ Vuoi installarla?</translation>
         <source>Tables</source>
         <translation type="vanished">Tables</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>MSql_win2</name>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
         <source>Result</source>
         <translation>Risultato</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
         <source>Output</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
         <source>Text to find</source>
         <translation>Testo da cercare</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
         <source>Find next (F3)</source>
         <translation>Trova prossimo</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
         <source>Find all</source>
         <translation>Trova tutto</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
         <source>Search result</source>
         <translation>Risultati di ricerca</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
         <source>:Binds</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
         <source>Plan</source>
         <translation>Pianificatore</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
         <source>Map procedure/function</source>
         <translation>Mappa procedure/funzioni</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
         <source>Refresh map</source>
         <translation>Aggiorna mappa</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
         <source>Search</source>
         <translation>Trova</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
         <source>Find string</source>
         <translation>Trova stringa</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
         <source>Find into view</source>
         <translation>Trova nella vista</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
         <source>Execute the find into the view</source>
         <translation>Esegui trova dentro la vista</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
         <source>Highlight</source>
         <translation>Evidenziatore</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
         <source>Clear all highlights</source>
         <translation>Pulisci gli evidenziatori</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
         <source>F3</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
         <source>Replace</source>
         <translation>Sostituisci</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
         <source>Text to replace</source>
         <translation>Testo da sostituire</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
         <source>Find next</source>
         <translation>Trova il prossimo</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\MSql_editor_win2_ui.ui" line="0" />
+        <location filename="../qtdesigner/MSql_editor_win2_ui.ui" line="0"/>
         <source>Replace all</source>
         <translation>Sostituisci tutto</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="4316" />
-        <location filename="..\MSql_editor.py" line="4305" />
+        <location filename="../MSql_editor.py" line="3981"/>
+        <location filename="../MSql_editor.py" line="3970"/>
         <source>Error blob fetching using the statement:</source>
-        <translation>Errore nel recuperare il campo di tipo blob usanto l'istruzione:</translation>
+        <translation>Errore nel recuperare il campo di tipo blob usanto l&apos;istruzione:</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="4325" />
+        <location filename="../MSql_editor.py" line="3990"/>
         <source>You must select a blob cell!</source>
         <translation>Devi selezionare una cella con un dato di tipo blob!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="4337" />
+        <location filename="../MSql_editor.py" line="4002"/>
         <source>Blob downloaded in Downloads directory of your PC!</source>
         <translation>Il blob è stato scaricato nella cartella Downloads del tuo PC!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="4340" />
+        <location filename="../MSql_editor.py" line="4005"/>
         <source>Error downloading blob!</source>
         <translation>Errore durante il download del blob!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="4681" />
+        <location filename="../MSql_editor.py" line="4348"/>
         <source>No PK found!</source>
         <translation>Non trovato la PK!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="4752" />
+        <location filename="../MSql_editor.py" line="4419"/>
         <source>No FK found!</source>
         <translation>Non trovata la FK!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="5114" />
+        <location filename="../MSql_editor.py" line="4781"/>
         <source>No instruction!</source>
         <translation>Nessuna istruzione!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="5308" />
+        <location filename="../MSql_editor.py" line="4975"/>
         <source>No statement found!</source>
         <translation>Nessun blocco istruzioni trovato!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="5401" />
+        <location filename="../MSql_editor.py" line="5068"/>
         <source>No script!</source>
         <translation>Nessuno script!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="5416" />
+        <location filename="../MSql_editor.py" line="5083"/>
         <source>Are you sure to confirm this command?</source>
         <translation>Sei sicuro di confermare questo comando?</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="5710" />
+        <location filename="../MSql_editor.py" line="5377"/>
         <source>Error to fetch data:</source>
         <translation>Errore nel recuperare i dati:</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="6224" />
-        <location filename="..\MSql_editor.py" line="6160" />
-        <location filename="..\MSql_editor.py" line="6092" />
-        <location filename="..\MSql_editor.py" line="5988" />
+        <location filename="../MSql_editor.py" line="5629"/>
+        <source>The cursor is not positioned on a valid table!</source>
+        <translation>Il cursore non è posizionato su un nome di tabella!</translation>
+    </message>
+    <message>
+        <location filename="../MSql_editor.py" line="5915"/>
+        <location filename="../MSql_editor.py" line="5846"/>
+        <location filename="../MSql_editor.py" line="5740"/>
+        <location filename="../MSql_editor.py" line="5680"/>
+        <source>No data to export!</source>
+        <translation>Nessun dato da esportare!</translation>
+    </message>
+    <message>
+        <location filename="../MSql_editor.py" line="5965"/>
+        <location filename="../MSql_editor.py" line="5900"/>
+        <location filename="../MSql_editor.py" line="5831"/>
+        <location filename="../MSql_editor.py" line="5726"/>
         <source>Error in file creation!</source>
         <translation>Errore durante la creazione del file!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="6221" />
+        <location filename="../MSql_editor.py" line="5962"/>
         <source>Error to open folder!</source>
-        <translation>Errore nell'aprire la cartella!</translation>
+        <translation>Errore nell&apos;aprire la cartella!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="6274" />
+        <location filename="../MSql_editor.py" line="6015"/>
         <source>The document</source>
         <translation>Il documento</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="6274" />
+        <location filename="../MSql_editor.py" line="6015"/>
         <source>was modified.</source>
         <translation>è stato modificato.</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="6274" />
+        <location filename="../MSql_editor.py" line="6015"/>
         <source>Do you want to save changes?</source>
         <translation>Vuoi salvare le modifiche?</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="6574" />
-        <location filename="..\MSql_editor.py" line="6545" />
-        <location filename="..\MSql_editor.py" line="6514" />
+        <location filename="../MSql_editor.py" line="6315"/>
+        <location filename="../MSql_editor.py" line="6286"/>
+        <location filename="../MSql_editor.py" line="6255"/>
         <source>Passed the end of file!</source>
         <translation>Arrivati alla fine del file!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="6574" />
-        <location filename="..\MSql_editor.py" line="6545" />
-        <location filename="..\MSql_editor.py" line="6514" />
+        <location filename="../MSql_editor.py" line="6315"/>
+        <location filename="../MSql_editor.py" line="6286"/>
+        <location filename="../MSql_editor.py" line="6255"/>
         <source>Move to the beginnig?</source>
-        <translation>Vuoi andare all'inizio del file?</translation>
+        <translation>Vuoi andare all&apos;inizio del file?</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="6625" />
+        <location filename="../MSql_editor.py" line="6366"/>
         <source>Insert a valid number!</source>
         <translation>Inserisci un numero valido!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="6727" />
+        <location filename="../MSql_editor.py" line="6468"/>
         <source>Please select a text with SQL statement!</source>
-        <translation>Seleziona un testo che contiene un'istruzione di SQL valida!</translation>
+        <translation>Seleziona un testo che contiene un&apos;istruzione di SQL valida!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="7088" />
+        <location filename="../MSql_editor.py" line="6843"/>
         <source>End of file! Move to beginning!</source>
-        <translation>Fine del file! La ricerca riparte dall'inizio!</translation>
+        <translation>Fine del file! La ricerca riparte dall&apos;inizio!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="7252" />
+        <location filename="../MSql_editor.py" line="7007"/>
         <source>Unrecognized type</source>
         <translation>Tipo non riconosciuto</translation>
     </message>
@@ -1537,170 +1569,177 @@ Vuoi installarla?</translation>
     </message>
     <message>
         <source>No statement found as SELECT, INSERT, UPDATE, DELETE!</source>
-        <translation type="vanished">Non trovata un'istruzione di SELECT, INSERT, UPDATE, DELETE!</translation>
+        <translation type="vanished">Non trovata un&apos;istruzione di SELECT, INSERT, UPDATE, DELETE!</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>Open</name>
     <message>
-        <location filename="..\MSql_editor.py" line="1518" />
+        <location filename="../MSql_editor.py" line="1182"/>
         <source>This file is already open!</source>
         <translation>Questo file è già aperto!</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="1537" />
+        <location filename="../MSql_editor.py" line="1201"/>
         <source>Error to opened the file:</source>
-        <translation>Errore nell'aprire il file:</translation>
+        <translation>Errore nell&apos;aprire il file:</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>Preferences</name>
     <message>
-        <location filename="..\preferences.py" line="463" />
+        <location filename="../preferences.py" line="463"/>
         <source>Do you want to restore default preferences?</source>
         <translation>Vuoi ripristinare le preferenze di fabbrica?</translation>
     </message>
     <message>
-        <location filename="..\preferences.py" line="468" />
+        <location filename="../preferences.py" line="468"/>
         <source>Do you want to delete connections preferences too?</source>
         <translation>Vuoi rispristinare anche le preferenze riferite ai server agli utenti a quelle di fabbrica?</translation>
     </message>
     <message>
-        <location filename="..\preferences.py" line="474" />
+        <location filename="../preferences.py" line="474"/>
         <source>Preferences restored! Restart MSql to see the changes ;-)</source>
         <translation>Preferenze ripristinate. Riavvia MSql perché le modifiche abbiano effetto ;-)</translation>
     </message>
     <message>
-        <location filename="..\preferences.py" line="761" />
+        <location filename="../preferences.py" line="761"/>
         <source>Preferences saved! Restart MSql to see the changes ;-)</source>
         <translation>Le preferenze sono state salvate. Riavvia MSql perché le modifiche abbiano effetto ;-)</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>Save</name>
     <message>
-        <location filename="..\MSql_editor.py" line="195" />
+        <location filename="../utilita.py" line="231"/>
         <source>Error saving</source>
         <translation>Errore di salvataggio</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="211" />
+        <location filename="../utilita.py" line="247"/>
         <source>The file has been modified by another program since it was opened. Do you want to overwrite it?</source>
         <translation>Il file è stato modificato da un altro utente/programma! Vuoi procedere con la sovrascrittura?</translation>
     </message>
     <message>
-        <location filename="..\MSql_editor.py" line="237" />
+        <location filename="../utilita.py" line="273"/>
         <source>Error to write the file:</source>
         <translation>Errore nella scrittura del file:</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>connect_window</name>
     <message>
-        <location filename="..\qtdesigner\connect_ui.ui" line="0" />
-        <location filename="..\qtdesigner\connect_ui.ui" line="0" />
+        <location filename="../qtdesigner/connect_ui.ui" line="0"/>
+        <location filename="../qtdesigner/connect_ui.ui" line="0"/>
         <source>Connect</source>
         <translation>Connessione</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\connect_ui.ui" line="0" />
+        <location filename="../qtdesigner/connect_ui.ui" line="0"/>
         <source>User:</source>
         <translation>Utente:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\connect_ui.ui" line="0" />
+        <location filename="../qtdesigner/connect_ui.ui" line="0"/>
         <source>TNS:</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\connect_ui.ui" line="0" />
+        <location filename="../qtdesigner/connect_ui.ui" line="0"/>
         <source>Password:</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\connect_ui.ui" line="0" />
+        <location filename="../qtdesigner/connect_ui.ui" line="0"/>
         <source>Normal</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\connect_ui.ui" line="0" />
+        <location filename="../qtdesigner/connect_ui.ui" line="0"/>
         <source>SYSDBA</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\connect_ui.ui" line="0" />
+        <location filename="../qtdesigner/connect_ui.ui" line="0"/>
         <source>SYSOPER</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\connect_ui.ui" line="0" />
+        <location filename="../qtdesigner/connect_ui.ui" line="0"/>
         <source>Mode:</source>
         <translation>Modalità:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\connect_ui.ui" line="0" />
+        <location filename="../qtdesigner/connect_ui.ui" line="0"/>
         <source>As proxy:</source>
         <translation>Come proxy:</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>crate_autocomplete</name>
     <message>
-        <location filename="..\create_autocomplete_dic.py" line="164" />
+        <location filename="../create_autocomplete_dic.py" line="164"/>
         <source>The autocompletion dictionary has been created! Restart MSql to see the changes ;-)</source>
         <translation>Il dizionario di autocompletamento è stato creato! Riavvia MSql per applicare i cambiamenti ;-)</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>create_autocomplete</name>
     <message>
-        <location filename="..\create_autocomplete_dic.py" line="56" />
+        <location filename="../create_autocomplete_dic.py" line="56"/>
         <source>You must to connect to Oracle!</source>
         <translation>Devi connetterti ad Oracle!</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>create_autocomplete_dic_window</name>
     <message>
-        <location filename="..\qtdesigner\create_autocomplete_dic_ui.ui" line="0" />
+        <location filename="../qtdesigner/create_autocomplete_dic_ui.ui" line="0"/>
         <source>Create autocomplete dictionary</source>
         <translation>Crea il dizionario di autocompletamento</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\create_autocomplete_dic_ui.ui" line="0" />
+        <location filename="../qtdesigner/create_autocomplete_dic_ui.ui" line="0"/>
         <source>Schema that will be analyzed:</source>
         <translation>Schema che verrà analizzato:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\create_autocomplete_dic_ui.ui" line="0" />
+        <location filename="../qtdesigner/create_autocomplete_dic_ui.ui" line="0"/>
         <source>Objects selector:</source>
         <translation>Selezione oggetti:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\create_autocomplete_dic_ui.ui" line="0" />
+        <location filename="../qtdesigner/create_autocomplete_dic_ui.ui" line="0"/>
         <source>Analyze function, procedures and packages</source>
         <translation>Analizza funzioni,procedure e package</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\create_autocomplete_dic_ui.ui" line="0" />
+        <location filename="../qtdesigner/create_autocomplete_dic_ui.ui" line="0"/>
         <source>Analyze tables and views</source>
         <translation>Analizza tabelle e viste</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\create_autocomplete_dic_ui.ui" line="0" />
+        <location filename="../qtdesigner/create_autocomplete_dic_ui.ui" line="0"/>
         <source>Add table and views columns</source>
         <translation>Includi  anche i nomi di colonna</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\create_autocomplete_dic_ui.ui" line="0" />
+        <location filename="../qtdesigner/create_autocomplete_dic_ui.ui" line="0"/>
         <source>Analyze Apex objects</source>
         <translation>Analizza oggetti Apex</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\create_autocomplete_dic_ui.ui" line="0" />
+        <location filename="../qtdesigner/create_autocomplete_dic_ui.ui" line="0"/>
         <source>Create dictionary</source>
         <translation>Crea dizionario</translation>
     </message>
     <message>
         <source>Clear the actual dictionary</source>
-        <translation type="vanished">Pulisci il contenuto dell'attuale dizionario</translation>
+        <translation type="vanished">Pulisci il contenuto dell&apos;attuale dizionario</translation>
     </message>
     <message>
         <source>Public objects visible from the user profile but belonging to other schemas (e.g. Apex) will also be analyzed.</source>
-        <translation type="vanished">Verranno analizzati anche gli oggetti pubblici visibili dall'utente e che appartengono ad altri schemi (es. Apex)</translation>
+        <translation type="vanished">Verranno analizzati anche gli oggetti pubblici visibili dall&apos;utente e che appartengono ad altri schemi (es. Apex)</translation>
     </message>
     <message>
         <source>Analyze public objects</source>
@@ -1710,45 +1749,48 @@ Vuoi installarla?</translation>
         <source>Analyse public objects that do not belong to the connecting user</source>
         <translation type="vanished">Analizza anche gli oggetti pubblici visibili dal profilo utente di connessione</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>dblink_viewer</name>
     <message>
-        <location filename="..\dblink_viewer.py" line="45" />
+        <location filename="../dblink_viewer.py" line="45"/>
         <source>Find objects..</source>
         <translation>Cerca oggetti..</translation>
     </message>
     <message>
-        <location filename="..\dblink_viewer.py" line="57" />
+        <location filename="../dblink_viewer.py" line="57"/>
         <source>Double-click to insert the item into the editor</source>
-        <translation>Fai doppio click sulla riga per inserirla nell'editor</translation>
+        <translation>Fai doppio click sulla riga per inserirla nell&apos;editor</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>diffviewer</name>
     <message>
-        <location filename="..\diff_viewer.py" line="128" />
+        <location filename="../diff_viewer.py" line="128"/>
         <source>Previous Difference</source>
         <translation>Differenza precedente</translation>
     </message>
     <message>
-        <location filename="..\diff_viewer.py" line="130" />
+        <location filename="../diff_viewer.py" line="130"/>
         <source>Next Difference</source>
         <translation>Differenza successiva</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>history</name>
     <message>
-        <location filename="..\history.py" line="87" />
+        <location filename="../history.py" line="87"/>
         <source>Error to open history database</source>
-        <translation>Errore nell'aprire il database che contiene la cronologia</translation>
+        <translation>Errore nell&apos;aprire il database che contiene la cronologia</translation>
     </message>
     <message>
-        <location filename="..\history.py" line="159" />
+        <location filename="../history.py" line="159"/>
         <source>History purged!</source>
         <translation>La cronologia è stata pulita e ottimizzata!</translation>
     </message>
     <message>
         <source>Error to open database</source>
-        <translation type="vanished">Errore nell'aprire il database</translation>
+        <translation type="vanished">Errore nell&apos;aprire il database</translation>
     </message>
     <message>
         <source>Are you sure you want to delete your history?</source>
@@ -1758,40 +1800,41 @@ Vuoi installarla?</translation>
         <source>History deleted!</source>
         <translation type="vanished">Cronologia cancellata!</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>history_window</name>
     <message>
-        <location filename="..\qtdesigner\history_ui.ui" line="0" />
+        <location filename="../qtdesigner/history_ui.ui" line="0"/>
         <source>History</source>
         <translation>Cronologia</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\history_ui.ui" line="0" />
+        <location filename="../qtdesigner/history_ui.ui" line="0"/>
         <source>Purge history</source>
         <translation>Pulizia della cronologia</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\history_ui.ui" line="0" />
+        <location filename="../qtdesigner/history_ui.ui" line="0"/>
         <source>Insert SQL in editor</source>
-        <translation>Inserisci la riga di SQL nell'editor</translation>
+        <translation>Inserisci la riga di SQL nell&apos;editor</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\history_ui.ui" line="0" />
+        <location filename="../qtdesigner/history_ui.ui" line="0"/>
         <source>Date to search:</source>
         <translation>Data da ricercare:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\history_ui.ui" line="0" />
+        <location filename="../qtdesigner/history_ui.ui" line="0"/>
         <source>Instruction to search:</source>
         <translation>Istruzione da ricercare:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\history_ui.ui" line="0" />
+        <location filename="../qtdesigner/history_ui.ui" line="0"/>
         <source>Connection to search:</source>
         <translation>Info connessione da ricercare:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\history_ui.ui" line="0" />
+        <location filename="../qtdesigner/history_ui.ui" line="0"/>
         <source>Search</source>
         <translation>Ricerca</translation>
     </message>
@@ -1803,749 +1846,760 @@ Vuoi installarla?</translation>
         <source>Text to find</source>
         <translation type="vanished">Cerca nel testo</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>import_export</name>
     <message>
-        <location filename="..\sqlite_viewer.py" line="40" />
+        <location filename="../sqlite_viewer.py" line="40"/>
         <source>Invalid SQLite DB!</source>
         <translation>DB SQLite non valido!</translation>
     </message>
     <message>
-        <location filename="..\sqlite_viewer.py" line="52" />
+        <location filename="../sqlite_viewer.py" line="52"/>
         <source>Choose a file</source>
         <translation>Selezionare un file</translation>
     </message>
     <message>
-        <location filename="..\import_export_sqlite_to_excel.py" line="67" />
-        <location filename="..\import_export_sqlite_to_oracle.py" line="74" />
-        <location filename="..\sqlite_viewer.py" line="61" />
+        <location filename="../import_export_sqlite_to_excel.py" line="67"/>
+        <location filename="../import_export_sqlite_to_oracle.py" line="74"/>
+        <location filename="../sqlite_viewer.py" line="61"/>
         <source>Please enter a SQLite DB</source>
         <translation>Inserire un file DB SQLite</translation>
     </message>
     <message>
-        <location filename="..\import_export_oracle_to_sqlite.py" line="62" />
-        <location filename="..\import_export_sqlite_to_excel.py" line="70" />
-        <location filename="..\import_export_excel_to_oracle.py" line="97" />
-        <location filename="..\import_export_sqlite_to_oracle.py" line="83" />
-        <location filename="..\sqlite_viewer.py" line="64" />
+        <location filename="../import_export_oracle_to_sqlite.py" line="62"/>
+        <location filename="../import_export_sqlite_to_excel.py" line="70"/>
+        <location filename="../import_export_excel_to_oracle.py" line="97"/>
+        <location filename="../import_export_sqlite_to_oracle.py" line="83"/>
+        <location filename="../sqlite_viewer.py" line="64"/>
         <source>Please enter a Table Name</source>
         <translation>Inserire un nome di tabella</translation>
     </message>
     <message>
-        <location filename="..\sqlite_viewer.py" line="74" />
+        <location filename="../sqlite_viewer.py" line="74"/>
         <source>Error to open database</source>
-        <translation>Errore nell'aprire il database</translation>
+        <translation>Errore nell&apos;aprire il database</translation>
     </message>
     <message>
-        <location filename="..\copy_from_sqlite_to_oracle.py" line="73" />
-        <location filename="..\copy_from_oracle_to_sqlite.py" line="82" />
+        <location filename="../copy_from_sqlite_to_oracle.py" line="73"/>
+        <location filename="../copy_from_oracle_to_sqlite.py" line="82"/>
         <source>Collecting data...</source>
         <translation>Ricerca dei dati...</translation>
     </message>
     <message>
-        <location filename="..\import_export_sqlite_to_oracle.py" line="144" />
-        <location filename="..\copy_from_sqlite_to_oracle.py" line="78" />
-        <location filename="..\copy_from_oracle_to_sqlite.py" line="86" />
+        <location filename="../import_export_sqlite_to_oracle.py" line="144"/>
+        <location filename="../copy_from_sqlite_to_oracle.py" line="78"/>
+        <location filename="../copy_from_oracle_to_sqlite.py" line="86"/>
         <source>Table copy completed!</source>
         <translation>Copia della tabella terminato!</translation>
     </message>
     <message>
-        <location filename="..\import_export_excel_to_oracle.py" line="177" />
-        <location filename="..\import_export_sqlite_to_oracle.py" line="175" />
-        <location filename="..\copy_from_sqlite_to_oracle.py" line="108" />
-        <location filename="..\copy_from_oracle_to_sqlite.py" line="105" />
+        <location filename="../import_export_excel_to_oracle.py" line="177"/>
+        <location filename="../import_export_sqlite_to_oracle.py" line="175"/>
+        <location filename="../copy_from_sqlite_to_oracle.py" line="108"/>
+        <location filename="../copy_from_oracle_to_sqlite.py" line="105"/>
         <source>Connecting problems to Oracle DB!</source>
         <translation>Problemi di connessione ad DB Oracle!</translation>
     </message>
     <message>
-        <location filename="..\copy_from_oracle_to_sqlite.py" line="119" />
+        <location filename="../copy_from_oracle_to_sqlite.py" line="119"/>
         <source>Table in SQLite DB already exist! Do you want overwrite it?</source>
         <translation>Nel DB SQLite esiste già una tabella con lo stesso nome! Procedere con la sovrascrittura?</translation>
     </message>
     <message>
-        <location filename="..\copy_from_oracle_to_sqlite.py" line="135" />
-        <source>Oracle table do not exists or errors in 'where' condition!</source>
+        <location filename="../copy_from_oracle_to_sqlite.py" line="135"/>
+        <source>Oracle table do not exists or errors in &apos;where&apos; condition!</source>
         <translation>La tabella Oracle non esiste oppure la condizione where contiene errori!</translation>
     </message>
     <message>
-        <location filename="..\copy_from_oracle_to_sqlite.py" line="169" />
+        <location filename="../copy_from_oracle_to_sqlite.py" line="169"/>
         <source>Table contains blob data! It will be copied in </source>
         <translation>La tabella contiene colonne di tipo BLOB! Il contenuto verrà copiato in </translation>
     </message>
     <message>
-        <location filename="..\copy_from_oracle_to_sqlite.py" line="173" />
+        <location filename="../copy_from_oracle_to_sqlite.py" line="173"/>
         <source>The table contains blob fields! The copy must create the directory</source>
         <translation>La tabella contiene colonne di tipo BLOB! Il contenuto verrà copiato nella cartella</translation>
     </message>
     <message>
-        <location filename="..\copy_from_oracle_to_sqlite.py" line="173" />
+        <location filename="../copy_from_oracle_to_sqlite.py" line="173"/>
         <source>but this already exists!</source>
         <translation>ma questa esiste già!</translation>
     </message>
     <message>
-        <location filename="..\copy_from_sqlite_to_oracle.py" line="210" />
-        <location filename="..\copy_from_oracle_to_sqlite.py" line="225" />
+        <location filename="../copy_from_sqlite_to_oracle.py" line="210"/>
+        <location filename="../copy_from_oracle_to_sqlite.py" line="225"/>
         <source>Total records to copy:</source>
         <translation>Numero totale di record da compiare:</translation>
     </message>
     <message>
-        <location filename="..\import_export_sqlite_to_oracle.py" line="189" />
-        <location filename="..\copy_from_sqlite_to_oracle.py" line="122" />
+        <location filename="../import_export_sqlite_to_oracle.py" line="189"/>
+        <location filename="../copy_from_sqlite_to_oracle.py" line="122"/>
         <source>Table in Oracle DB not exists!</source>
         <translation>La tabella nel DB Oracle non esiste!</translation>
     </message>
     <message>
-        <location filename="..\import_export_sqlite_to_oracle.py" line="194" />
-        <location filename="..\copy_from_sqlite_to_oracle.py" line="127" />
+        <location filename="../import_export_sqlite_to_oracle.py" line="194"/>
+        <location filename="../copy_from_sqlite_to_oracle.py" line="127"/>
         <source>Table in Oracle DB already exist!</source>
         <translation>La tabella nel DB Oracle è già esistente!</translation>
     </message>
     <message>
-        <location filename="..\import_export_sqlite_to_oracle.py" line="204" />
-        <location filename="..\copy_from_sqlite_to_oracle.py" line="137" />
+        <location filename="../import_export_sqlite_to_oracle.py" line="204"/>
+        <location filename="../copy_from_sqlite_to_oracle.py" line="137"/>
         <source>SQLite table do not exists!</source>
         <translation>La tabella DB SQLite non esiste!</translation>
     </message>
     <message>
-        <location filename="..\import_export_sqlite_to_oracle.py" line="77" />
+        <location filename="../import_export_sqlite_to_oracle.py" line="77"/>
         <source>Please enter a SQLite Table</source>
         <translation>Inserire una tabella SQLite</translation>
     </message>
     <message>
-        <location filename="..\import_export_oracle_to_sqlite.py" line="59" />
-        <location filename="..\import_export_sqlite_to_oracle.py" line="80" />
+        <location filename="../import_export_oracle_to_sqlite.py" line="59"/>
+        <location filename="../import_export_sqlite_to_oracle.py" line="80"/>
         <source>Please enter a SQLite DB destination</source>
         <translation>Inserire un DB SQLite</translation>
     </message>
     <message>
-        <location filename="..\import_export_excel_to_oracle.py" line="94" />
+        <location filename="../import_export_excel_to_oracle.py" line="94"/>
         <source>Please enter a Excel file</source>
         <translation>Inserire un file di Excel</translation>
     </message>
     <message>
-        <location filename="..\import_export_excel_to_oracle.py" line="149" />
+        <location filename="../import_export_excel_to_oracle.py" line="149"/>
         <source>Oracle table name is required!</source>
         <translation>Inserire una tabella Oracle!</translation>
     </message>
     <message>
-        <location filename="..\import_export_excel_to_oracle.py" line="156" />
+        <location filename="../import_export_excel_to_oracle.py" line="156"/>
         <source>Format file invalid. Only xls file format!</source>
         <translation>Formato del file non valido. Sono ammessi solo file .xls!</translation>
     </message>
     <message>
-        <location filename="..\import_export_excel_to_oracle.py" line="162" />
+        <location filename="../import_export_excel_to_oracle.py" line="162"/>
         <source>This file contains more than one sheet. It will be taken the first</source>
         <translation>Questo file contiene più di un foglio! Verrà preso il primo foglio</translation>
     </message>
     <message>
-        <location filename="..\import_export_excel_to_oracle.py" line="187" />
+        <location filename="../import_export_excel_to_oracle.py" line="187"/>
         <source>Action completed with</source>
         <translation>Azione completata con</translation>
     </message>
     <message>
-        <location filename="..\import_export_excel_to_oracle.py" line="187" />
+        <location filename="../import_export_excel_to_oracle.py" line="187"/>
         <source>records imported!</source>
         <translation>righe importate!</translation>
     </message>
     <message>
-        <location filename="..\import_export_excel_to_oracle.py" line="330" />
+        <location filename="../import_export_excel_to_oracle.py" line="330"/>
         <source>Problem during create Oracle table!</source>
-        <translation>C'è stato un problema durante la creazione della tabella in Oracle!</translation>
+        <translation>C&apos;è stato un problema durante la creazione della tabella in Oracle!</translation>
     </message>
     <message>
-        <location filename="..\import_export_excel_to_oracle.py" line="330" />
+        <location filename="../import_export_excel_to_oracle.py" line="330"/>
         <source>The table</source>
         <translation>La tabella</translation>
     </message>
     <message>
-        <location filename="..\import_export_excel_to_oracle.py" line="330" />
+        <location filename="../import_export_excel_to_oracle.py" line="330"/>
         <source>already exists?</source>
         <translation>è già presente?</translation>
     </message>
     <message>
-        <location filename="..\import_export_excel_to_oracle.py" line="330" />
-        <source>Remember that the excel file must be haven't formatting and filters activated!</source>
+        <location filename="../import_export_excel_to_oracle.py" line="330"/>
+        <source>Remember that the excel file must be haven&apos;t formatting and filters activated!</source>
         <translation>Ricordati che il file Excel non deve avere formattazioni visive e alcun filtro attivato!</translation>
     </message>
     <message>
-        <location filename="..\import_export_sqlite_to_excel.py" line="73" />
+        <location filename="../import_export_sqlite_to_excel.py" line="73"/>
         <source>Please enter a Excel file name</source>
         <translation>Inserire un nome per il file Excel</translation>
     </message>
     <message>
-        <location filename="..\import_export_sqlite_to_excel.py" line="77" />
+        <location filename="../import_export_sqlite_to_excel.py" line="77"/>
         <source>Destination file already exists. Do you to replace it?</source>
         <translation>Il file di destinazione è già presente. Vuoi sovrascriverlo?</translation>
     </message>
     <message>
-        <location filename="..\import_export_sqlite_to_excel.py" line="121" />
+        <location filename="../import_export_sqlite_to_excel.py" line="121"/>
         <source>Table export completed!</source>
         <translation>Esportazione della tabella completato!</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>import_export_window</name>
     <message>
-        <location filename="..\qtdesigner\import_export_sqlite_to_oracle_ui.ui" line="0" />
+        <location filename="../qtdesigner/import_export_sqlite_to_oracle_ui.ui" line="0"/>
         <source>Copy data from SQLite to Oracle</source>
         <translation>Copia dati da SQLite a Oracle</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\import_export_sqlite_to_excel_ui.ui" line="0" />
-        <location filename="..\qtdesigner\import_export_sqlite_to_oracle_ui.ui" line="0" />
+        <location filename="../qtdesigner/import_export_sqlite_to_excel_ui.ui" line="0"/>
+        <location filename="../qtdesigner/import_export_sqlite_to_oracle_ui.ui" line="0"/>
         <source>Where condition:</source>
         <translation>Condizione WHERE:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\import_export_oracle_to_sqlite_ui.ui" line="0" />
-        <location filename="..\qtdesigner\import_export_sqlite_to_excel_ui.ui" line="0" />
-        <location filename="..\qtdesigner\import_export_sqlite_to_oracle_ui.ui" line="0" />
+        <location filename="../qtdesigner/import_export_oracle_to_sqlite_ui.ui" line="0"/>
+        <location filename="../qtdesigner/import_export_sqlite_to_excel_ui.ui" line="0"/>
+        <location filename="../qtdesigner/import_export_sqlite_to_oracle_ui.ui" line="0"/>
         <source>SQLite DB:</source>
         <translation>DB SQLite:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\import_export_excel_to_oracle_ui.ui" line="0" />
-        <location filename="..\qtdesigner\import_export_sqlite_to_oracle_ui.ui" line="0" />
+        <location filename="../qtdesigner/import_export_excel_to_oracle_ui.ui" line="0"/>
+        <location filename="../qtdesigner/import_export_sqlite_to_oracle_ui.ui" line="0"/>
         <source>Oracle table name:</source>
         <translation>Nome tabella Oracle:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\import_export_sqlite_to_oracle_ui.ui" line="0" />
+        <location filename="../qtdesigner/import_export_sqlite_to_oracle_ui.ui" line="0"/>
         <source>SQLite table:</source>
         <translation>Tabella SQLite:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\import_export_oracle_to_sqlite_ui.ui" line="0" />
-        <location filename="..\qtdesigner\import_export_sqlite_to_excel_ui.ui" line="0" />
-        <location filename="..\qtdesigner\import_export_excel_to_oracle_ui.ui" line="0" />
-        <location filename="..\qtdesigner\import_export_sqlite_to_oracle_ui.ui" line="0" />
+        <location filename="../qtdesigner/import_export_oracle_to_sqlite_ui.ui" line="0"/>
+        <location filename="../qtdesigner/import_export_sqlite_to_excel_ui.ui" line="0"/>
+        <location filename="../qtdesigner/import_export_excel_to_oracle_ui.ui" line="0"/>
+        <location filename="../qtdesigner/import_export_sqlite_to_oracle_ui.ui" line="0"/>
         <source>Start</source>
         <translation>Avvia</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\import_export_excel_to_oracle_ui.ui" line="0" />
+        <location filename="../qtdesigner/import_export_excel_to_oracle_ui.ui" line="0"/>
         <source>Copy data from Excel to Oracle</source>
         <translation>Copia i dati da Excel a Oracle</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\import_export_excel_to_oracle_ui.ui" line="0" />
+        <location filename="../qtdesigner/import_export_excel_to_oracle_ui.ui" line="0"/>
         <source>Excel file:</source>
         <translation>File Excel:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\import_export_sqlite_to_excel_ui.ui" line="0" />
+        <location filename="../qtdesigner/import_export_sqlite_to_excel_ui.ui" line="0"/>
         <source>Create Excel file from SQLite data</source>
         <translation>Crea un file Excel partendo da dati di un DB SQLite</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\import_export_sqlite_to_excel_ui.ui" line="0" />
+        <location filename="../qtdesigner/import_export_sqlite_to_excel_ui.ui" line="0"/>
         <source>Destination file:</source>
         <translation>File di destinazione:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\import_export_sqlite_to_excel_ui.ui" line="0" />
+        <location filename="../qtdesigner/import_export_sqlite_to_excel_ui.ui" line="0"/>
         <source>Table name:</source>
         <translation>Nome tabella:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\import_export_oracle_to_sqlite_ui.ui" line="0" />
+        <location filename="../qtdesigner/import_export_oracle_to_sqlite_ui.ui" line="0"/>
         <source>Copy data from Oracle to db SQLite</source>
         <translation>Copia i dati da Oracle verso un file DB SQLite</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\import_export_oracle_to_sqlite_ui.ui" line="0" />
+        <location filename="../qtdesigner/import_export_oracle_to_sqlite_ui.ui" line="0"/>
         <source>Oracle Table name</source>
         <translation>Nome tabella Oracle</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\import_export_oracle_to_sqlite_ui.ui" line="0" />
+        <location filename="../qtdesigner/import_export_oracle_to_sqlite_ui.ui" line="0"/>
         <source>Where condition</source>
         <translation>Condizione WHERE</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>oracle_executer</name>
     <message>
-        <location filename="..\oracle_executer.py" line="262" />
+        <location filename="../oracle_executer.py" line="262"/>
         <source>Rendering...</source>
         <translation>Caricamento...</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>preferences_window</name>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Preferences</source>
         <translation>Preferenze</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>General</source>
         <translation>Generale</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Author name:</source>
         <translation>Nome utilizzatore MSql:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Remember window position:</source>
         <translation>Ricorda la posizione della window:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Default Save Directory:</source>
         <translation>Cartella di default per il salvataggio:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Default Open Directory:</source>
         <translation>Cartella di default di apertura files:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Dark theme:</source>
         <translation>Seleziona tema scuro:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Language:</source>
         <translation>Lingua:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>General zoom:</source>
         <translation>Zoom generale applicazione:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Open new editor at open:</source>
-        <translation>Apri un nuovo editor all'avvio:</translation>
+        <translation>Apri un nuovo editor all&apos;avvio:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>or Clear theme:</source>
         <translation>oppure tema chiaro di sistema:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Editor</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Default font editor:</source>
-        <translation>Carattere di default per l'editor:</translation>
+        <translation>Carattere di default per l&apos;editor:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Tab size:</source>
         <translation>Dimensione del tab:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set 0 if you don't want refresh&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set 0 if you don&apos;t want refresh&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Imposta 0 se non vuoi fare aggiornamento&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>9</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Indent guides are vertical dotted lines that indicate the indent level of text in the edit window </source>
         <translation>Le guide di rientro sono linee tratteggiate verticali che indicano il livello di rientro del testo nella finestra di modifica </translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Autocompletation:</source>
         <translation>Attiva autocompletamento:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Show end of line:</source>
         <translation>Mostra i caratteri nascosti di fine riga:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>secs</source>
         <translation>secondi</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Remember text position:</source>
-        <translation>Ricorda la posizione del cursore dentro l'editor:</translation>
+        <translation>Ricorda la posizione del cursore dentro l&apos;editor:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Indentation guide:</source>
         <translation>Mostra le guide di indentazione:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>days</source>
         <translation>giorni</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Autosave snapshoot (0 for never):&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Salva automaticamente il testo in cartella backup (0 per mai):&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Highlight color:</source>
         <translation>Colore evidenziatore:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Refresh dictionary (0 for never):</source>
         <translation>Ricorda di aggiornare il dizionario di autocompletamento (0 per mai):</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Show map procedures/function:</source>
         <translation>Mostra la mappa procedure/funzioni:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Result/Output</source>
         <translation>Risultato/Output</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>CSV column separator:</source>
         <translation>Carattere di separazione per i file CSV:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Auto Column Resize:</source>
         <translation>Dimensiona automaticamente le colonne in base al contenuto:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Default font result:</source>
         <translation>Carattere di default per area risultato:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Date format:</source>
         <translation>Formato delle date:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Animated gif while running:</source>
         <translation>Gif animata di esecuzione:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Change the animated gif that appears when the sql command is executed</source>
-        <translation>Cambia la gif animata che viene visualizzata in attesa dell'esecuzione dei comandi sql</translation>
+        <translation>Cambia la gif animata che viene visualizzata in attesa dell&apos;esecuzione dei comandi sql</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Auto-Clear output:</source>
-        <translation>Pulisci automaticamente l'output:</translation>
+        <translation>Pulisci automaticamente l&apos;output:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>%d/%m/%Y %H:%M:%S</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>%Y/%m/%d %H:%M:%S</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>%d/%m/%Y</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>%Y/%m/%d</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Preview della gif</source>
         <translation>Anteprima della gif</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Connections</source>
         <translation>Connessioni</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>OracleClient dll dir.(*):</source>
         <translation>Cartella dove presenti librerie OracleClient (*):</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Connection mode:</source>
         <translation>Modalità di connessione:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Thin mode (no need OracleClient)</source>
         <translation>Modalità diretta (senza usare librerie OracleCliente)</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Thick mode (OracleClient dll are needed)</source>
         <translation>Tramite librerie OracleClient (che vanno specificate)</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Servers</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Servers:</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Add a server</source>
         <translation>Aggiungi un server</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Remove selected server</source>
         <translation>Rimuovi il server selezionato</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Users</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Users:</source>
         <translation>Utenti:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Add user</source>
         <translation>Aggiungi utente</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Remove selected user</source>
         <translation>Rimuovi utente selezionato</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Restore default</source>
         <translation>Riporta preferenze di fabbrica</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Open pref. dir</source>
         <translation>Apri la dir delle preferenze</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferences_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferences_ui.ui" line="0"/>
         <source>Save</source>
         <translation>Salva</translation>
     </message>
     <message>
         <source>Make table editable:</source>
-        <translation type="vanished">Rendi la sezione "Risultato" editabile:</translation>
+        <translation type="vanished">Rendi la sezione &quot;Risultato&quot; editabile:</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>preferred</name>
     <message>
-        <location filename="..\preferred_sql.py" line="65" />
+        <location filename="../preferred_sql.py" line="65"/>
         <source>Save the records?</source>
         <translation>Salvare i records?</translation>
     </message>
     <message>
-        <location filename="..\preferred_sql.py" line="220" />
+        <location filename="../preferred_sql.py" line="220"/>
         <source>Processed</source>
         <translation>Processati</translation>
     </message>
     <message>
-        <location filename="..\preferred_sql.py" line="220" />
+        <location filename="../preferred_sql.py" line="220"/>
         <source>record!</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\preferred_sql.py" line="222" />
+        <location filename="../preferred_sql.py" line="222"/>
         <source>Nothing to save!</source>
         <translation>Niente da salvare!</translation>
     </message>
     <message>
-        <location filename="..\preferred_sql.py" line="227" />
+        <location filename="../preferred_sql.py" line="227"/>
         <source>Unique key error! Check NAME column!</source>
         <translation>Errore di chiave univoca! Controlla i valori della colonna NAME!</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>preferred_sql_window</name>
     <message>
-        <location filename="..\qtdesigner\preferred_sql_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferred_sql_ui.ui" line="0"/>
         <source>Preferred SQL</source>
         <translation>SQL preferiti</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferred_sql_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferred_sql_ui.ui" line="0"/>
         <source>Text to find</source>
         <translation>Testo da ricercare</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferred_sql_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferred_sql_ui.ui" line="0"/>
         <source>Search</source>
         <translation>Ricerca</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferred_sql_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferred_sql_ui.ui" line="0"/>
         <source>Insert row</source>
         <translation>Inserisci riga</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferred_sql_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferred_sql_ui.ui" line="0"/>
         <source>Delete row</source>
         <translation>Cancella riga</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferred_sql_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferred_sql_ui.ui" line="0"/>
         <source>Debug</source>
-        <translation />
+        <translation></translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferred_sql_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferred_sql_ui.ui" line="0"/>
         <source>Save</source>
         <translation>Salva</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\preferred_sql_ui.ui" line="0" />
+        <location filename="../qtdesigner/preferred_sql_ui.ui" line="0"/>
         <source>Insert SQL in editor</source>
-        <translation>Inserisci la riga indicata nell'editor</translation>
+        <translation>Inserisci la riga indicata nell&apos;editor</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>program_info</name>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="center"&gt;&lt;span style=" font-size:14pt; font-weight:600;"&gt;MSql Editor&lt;/span&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;span style=" font-size:12pt;"&gt;MSql Editor is a SQL text editor for ORACLE environment.&lt;/span&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;span style=" font-size:12pt;"&gt;Developed by &lt;/span&gt;&lt;span style=" font-size:12pt; font-weight:600;"&gt;Marco Valaguzza&lt;/span&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;span style=" font-size:12pt;"&gt;with Python 3.13, PyQt6 and Scintilla&lt;/span&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;span style=" font-size:10pt;"&gt;Version 1.0 (2023-2025)&lt;/span&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;span style=" font-size:12pt;"&gt;A special thanks to Filippo Damiani and Marco Traini &lt;/span&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;span style=" font-size:12pt;"&gt;for improvements and tests&lt;/span&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;br/&gt;&lt;/p&gt;&lt;p align="center"&gt;This program is free software: you can redistribute it and/or modify it under the terms &lt;/p&gt;&lt;p align="center"&gt;of the GNU General Public License as published by the Free Software Foundation, &lt;/p&gt;&lt;p align="center"&gt;either version 3 of the License, or (at your option) any later version.&lt;/p&gt;&lt;p align="center"&gt;This program is distributed in the hope that it will be useful, &lt;/p&gt;&lt;p align="center"&gt;but WITHOUT ANY WARRANTY!!! Without even the implied warranty of &lt;/p&gt;&lt;p align="center"&gt;MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. &lt;/p&gt;&lt;p align="center"&gt;See the GNU General Public License for more details at www.gnu.org/licenses/&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="center"&gt;&lt;span style=" font-size:14pt; font-weight:600;"&gt;MSql Editor&lt;/span&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;span style=" font-size:12pt;"&gt;MSql Editor è un editor SQL per ambiente ORACLE.&lt;/span&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;span style=" font-size:12pt;"&gt;Sviluppato da &lt;/span&gt;&lt;span style=" font-size:12pt; font-weight:600;"&gt;Marco Valaguzza&lt;/span&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;span style=" font-size:12pt;"&gt;usando Python 3.13, PyQt6 e Scintilla&lt;/span&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;span style=" font-size:10pt;"&gt;Versione 1.0 (2023-2025)&lt;/span&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;span style=" font-size:12pt;"&gt;Un ringraziamento speciale a Filippo Damiani e Marco Traini &lt;/span&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;span style=" font-size:12pt;"&gt;per la parte di test e suggerimenti&lt;/span&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;br/&gt;&lt;/p&gt;&lt;p align="center"&gt;This program is free software: you can redistribute it and/or modify it under the terms &lt;/p&gt;&lt;p align="center"&gt;of the GNU General Public License as published by the Free Software Foundation, &lt;/p&gt;&lt;p align="center"&gt;either version 3 of the License, or (at your option) any later version.&lt;/p&gt;&lt;p align="center"&gt;This program is distributed in the hope that it will be useful, &lt;/p&gt;&lt;p align="center"&gt;but WITHOUT ANY WARRANTY!!! Without even the implied warranty of &lt;/p&gt;&lt;p align="center"&gt;MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. &lt;/p&gt;&lt;p align="center"&gt;See the GNU General Public License for more details at www.gnu.org/licenses/&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;MSql Editor&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;MSql Editor is a SQL text editor for ORACLE environment.&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Developed by &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;Marco Valaguzza&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;with Python 3.13, PyQt6 and Scintilla&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Version 1.0 (2023-2025)&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;A special thanks to Filippo Damiani and Marco Traini &lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;for improvements and tests&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;br/&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;This program is free software: you can redistribute it and/or modify it under the terms &lt;/p&gt;&lt;p align=&quot;center&quot;&gt;of the GNU General Public License as published by the Free Software Foundation, &lt;/p&gt;&lt;p align=&quot;center&quot;&gt;either version 3 of the License, or (at your option) any later version.&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;This program is distributed in the hope that it will be useful, &lt;/p&gt;&lt;p align=&quot;center&quot;&gt;but WITHOUT ANY WARRANTY!!! Without even the implied warranty of &lt;/p&gt;&lt;p align=&quot;center&quot;&gt;MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. &lt;/p&gt;&lt;p align=&quot;center&quot;&gt;See the GNU General Public License for more details at www.gnu.org/licenses/&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;MSql Editor&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;MSql Editor è un editor SQL per ambiente ORACLE.&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Sviluppato da &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;Marco Valaguzza&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;usando Python 3.13, PyQt6 e Scintilla&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Versione 1.0 (2023-2025)&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Un ringraziamento speciale a Filippo Damiani e Marco Traini &lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;per la parte di test e suggerimenti&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;br/&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;This program is free software: you can redistribute it and/or modify it under the terms &lt;/p&gt;&lt;p align=&quot;center&quot;&gt;of the GNU General Public License as published by the Free Software Foundation, &lt;/p&gt;&lt;p align=&quot;center&quot;&gt;either version 3 of the License, or (at your option) any later version.&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;This program is distributed in the hope that it will be useful, &lt;/p&gt;&lt;p align=&quot;center&quot;&gt;but WITHOUT ANY WARRANTY!!! Without even the implied warranty of &lt;/p&gt;&lt;p align=&quot;center&quot;&gt;MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. &lt;/p&gt;&lt;p align=&quot;center&quot;&gt;See the GNU General Public License for more details at www.gnu.org/licenses/&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>query_designer</name>
     <message>
-        <location filename="..\query_designer.py" line="468" />
+        <location filename="../query_designer.py" line="468"/>
         <source>Save</source>
         <translation>Salva</translation>
     </message>
     <message>
-        <location filename="..\query_designer.py" line="469" />
+        <location filename="../query_designer.py" line="469"/>
         <source>Load</source>
         <translation>Carica</translation>
     </message>
     <message>
-        <location filename="..\query_designer.py" line="470" />
+        <location filename="../query_designer.py" line="470"/>
         <source>Preview</source>
         <translation>Anteprima</translation>
     </message>
     <message>
-        <location filename="..\query_designer.py" line="471" />
+        <location filename="../query_designer.py" line="471"/>
         <source>Copy SQL</source>
         <translation>Copia SQL</translation>
     </message>
     <message>
-        <location filename="..\query_designer.py" line="502" />
+        <location filename="../query_designer.py" line="502"/>
         <source>SQL copiato nella clipboard</source>
         <translation>SQL copiato negli appunti</translation>
     </message>
     <message>
-        <location filename="..\query_designer.py" line="613" />
+        <location filename="../query_designer.py" line="613"/>
         <source>Save diagram</source>
         <translation>Salva il diagramma</translation>
     </message>
     <message>
-        <location filename="..\query_designer.py" line="648" />
+        <location filename="../query_designer.py" line="648"/>
         <source>Open diagram</source>
         <translation>Apri il diagramma</translation>
     </message>
     <message>
-        <location filename="..\query_designer.py" line="694" />
-        <source>Errore durante l'esecuzione della query:</source>
-        <translation>Errore durante l'esecuzione della query:</translation>
+        <location filename="../query_designer.py" line="694"/>
+        <source>Errore durante l&apos;esecuzione della query:</source>
+        <translation>Errore durante l&apos;esecuzione della query:</translation>
     </message>
     <message>
-        <location filename="..\query_designer.py" line="695" />
+        <location filename="../query_designer.py" line="695"/>
         <source>SQL Error</source>
         <translation>Errore SQL</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>select_schema_window</name>
     <message>
-        <location filename="..\qtdesigner\select_schema_ui.ui" line="0" />
-        <location filename="..\qtdesigner\select_schema_ui.ui" line="0" />
+        <location filename="../qtdesigner/select_schema_ui.ui" line="0"/>
+        <location filename="../qtdesigner/select_schema_ui.ui" line="0"/>
         <source>Select schema</source>
         <translation>Selezione dello schema</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>sqlite_viewer_window</name>
     <message>
-        <location filename="..\qtdesigner\sqlite_viewer_ui.ui" line="0" />
+        <location filename="../qtdesigner/sqlite_viewer_ui.ui" line="0"/>
         <source>SQLite viewer</source>
         <translation>Visualizzatore SQLite</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\sqlite_viewer_ui.ui" line="0" />
+        <location filename="../qtdesigner/sqlite_viewer_ui.ui" line="0"/>
         <source>Result:</source>
         <translation>Risultati:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\sqlite_viewer_ui.ui" line="0" />
+        <location filename="../qtdesigner/sqlite_viewer_ui.ui" line="0"/>
         <source>Table name:</source>
         <translation>Nome tabella:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\sqlite_viewer_ui.ui" line="0" />
+        <location filename="../qtdesigner/sqlite_viewer_ui.ui" line="0"/>
         <source>SQLite DB:</source>
         <translation>DB SQLite:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\sqlite_viewer_ui.ui" line="0" />
+        <location filename="../qtdesigner/sqlite_viewer_ui.ui" line="0"/>
         <source>Where condition:</source>
         <translation>Condizione WHERE:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\sqlite_viewer_ui.ui" line="0" />
+        <location filename="../qtdesigner/sqlite_viewer_ui.ui" line="0"/>
         <source>Start</source>
         <translation>Avvia</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>text_functions</name>
     <message>
-        <location filename="..\text_functions.py" line="64" />
+        <location filename="../text_functions.py" line="64"/>
         <source>Takes the selected text and splits it into multiple lines using the comma as the identifier</source>
         <translation>Prende il testo e lo separa laddove presente il delimitatore (di default la virgola) portandolo su una nuova riga</translation>
     </message>
     <message>
-        <location filename="..\text_functions.py" line="65" />
+        <location filename="../text_functions.py" line="65"/>
         <source>input:  indicate the delimiter char (default comma)</source>
         <translation>input: indica il carattere da controllare come delimitatore (default spazio)</translation>
     </message>
     <message>
-        <location filename="..\text_functions.py" line="85" />
-        <location filename="..\text_functions.py" line="66" />
+        <location filename="../text_functions.py" line="85"/>
+        <location filename="../text_functions.py" line="66"/>
         <source>effect: char to add at end of line</source>
         <translation>effetto: carattere da aggiungere alla fine di ogni linea</translation>
     </message>
     <message>
-        <location filename="..\text_functions.py" line="70" />
+        <location filename="../text_functions.py" line="70"/>
         <source>Takes the selected text, which must span multiple lines, and creates a single line with the starting lines, where the line break is a comma. Any commas preceding the line break in the starting text will be ignored</source>
         <translation>Prende il testo e lo comprime in unica riga</translation>
     </message>
     <message>
-        <location filename="..\text_functions.py" line="71" />
+        <location filename="../text_functions.py" line="71"/>
         <source>input: indicate the separator char (ex. comma)</source>
         <translation>input: indicare il carattere usato come saparatore (es. virgola)</translation>
     </message>
     <message>
-        <location filename="..\text_functions.py" line="76" />
+        <location filename="../text_functions.py" line="76"/>
         <source>Takes the selected text, which must have a columnar format and sorts its structure both visually and by row sorting. Ex. 
  7 8 9 
  6 7 8 
@@ -2556,28 +2610,28 @@ Vuoi installarla?</translation>
  5 6 7</translation>
     </message>
     <message>
-        <location filename="..\text_functions.py" line="83" />
-        <location filename="..\text_functions.py" line="77" />
+        <location filename="../text_functions.py" line="83"/>
+        <location filename="../text_functions.py" line="77"/>
         <source>input:  column delimeter (blank space as default)</source>
         <translation>input: indicare il carattere che delimita le colonna (default spazio)</translation>
     </message>
     <message>
-        <location filename="..\text_functions.py" line="78" />
+        <location filename="../text_functions.py" line="78"/>
         <source>effect: column width</source>
         <translation>effetto: larghezza da attribuire alle colonne (default 15)</translation>
     </message>
     <message>
-        <location filename="..\text_functions.py" line="79" />
+        <location filename="../text_functions.py" line="79"/>
         <source>effect: add column separator (blank space as default)</source>
         <translation>effetto: carattere da aggiungere come separatore di colonna (di default spazio)</translation>
     </message>
     <message>
-        <location filename="..\text_functions.py" line="80" />
+        <location filename="../text_functions.py" line="80"/>
         <source>effect: number sort column (none for default)</source>
         <translation>effetto: eventuale numero di colonna su cui fare ordinamento (di default nessun ordinamento)</translation>
     </message>
     <message>
-        <location filename="..\text_functions.py" line="82" />
+        <location filename="../text_functions.py" line="82"/>
         <source>Takes the selected text, which must contain a text array. Adds the specified decorator to each cell element.. Ex. 
  7 8 9 
  6 7 8 
@@ -2587,17 +2641,17 @@ Vuoi installarla?</translation>
  5 6 7</translation>
     </message>
     <message>
-        <location filename="..\text_functions.py" line="84" />
+        <location filename="../text_functions.py" line="84"/>
         <source>effect: char decorator</source>
         <translation>effetto: carattere da usare per decorare ogni cella</translation>
     </message>
     <message>
-        <location filename="..\text_functions.py" line="88" />
+        <location filename="../text_functions.py" line="88"/>
         <source>Add the specified decorator to each line of the selected text.</source>
         <translation>Aggiunge alla fine di ogni riga il decoratore indicato.</translation>
     </message>
     <message>
-        <location filename="..\text_functions.py" line="89" />
+        <location filename="../text_functions.py" line="89"/>
         <source>effect: line char decorator</source>
         <translation>effetto: decoratore di riga</translation>
     </message>
@@ -2645,79 +2699,82 @@ Vuoi installarla?</translation>
         <source>T --&gt; clear comma from result</source>
         <translation type="vanished">T --&gt; il delimitatore NON verrà riportato nel risultato</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>text_functions_window</name>
     <message>
-        <location filename="..\qtdesigner\text_functions_ui.ui" line="0" />
+        <location filename="../qtdesigner/text_functions_ui.ui" line="0"/>
         <source>Text functions</source>
         <translation>Funzioni di manipolazione del testo</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\text_functions_ui.ui" line="0" />
+        <location filename="../qtdesigner/text_functions_ui.ui" line="0"/>
         <source>List functions:</source>
         <translation>Lista funzioni:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\text_functions_ui.ui" line="0" />
+        <location filename="../qtdesigner/text_functions_ui.ui" line="0"/>
         <source>Description:</source>
         <translation>Descrizione della funzione:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\text_functions_ui.ui" line="0" />
+        <location filename="../qtdesigner/text_functions_ui.ui" line="0"/>
         <source>Input:</source>
         <translation>Testo di partenza:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\text_functions_ui.ui" line="0" />
+        <location filename="../qtdesigner/text_functions_ui.ui" line="0"/>
         <source>Parameters:</source>
         <translation>Eventuali parametri:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\text_functions_ui.ui" line="0" />
+        <location filename="../qtdesigner/text_functions_ui.ui" line="0"/>
         <source>Execute function</source>
         <translation>Esegui funzione</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\text_functions_ui.ui" line="0" />
+        <location filename="../qtdesigner/text_functions_ui.ui" line="0"/>
         <source>Output:</source>
         <translation>Testo di risultato:</translation>
     </message>
     <message>
-        <location filename="..\qtdesigner\text_functions_ui.ui" line="0" />
+        <location filename="../qtdesigner/text_functions_ui.ui" line="0"/>
         <source>Copy to clipboard</source>
         <translation>Copia testo negli appunti</translation>
     </message>
-</context><context>
+</context>
+<context>
     <name>utilita_database</name>
     <message>
-        <location filename="..\utilita_database.py" line="268" />
+        <location filename="../utilita_database.py" line="268"/>
         <source>Do you want to kill the selected session?</source>
         <translation>Sei sicuro di killare la sessione selezionata?</translation>
     </message>
     <message>
-        <location filename="..\utilita_database.py" line="275" />
+        <location filename="../utilita_database.py" line="275"/>
         <source>Connection to oracle rejected. Please control login information.</source>
         <translation>Connessione a Oracle rifiutata. Controlla le informazioni di login.</translation>
     </message>
     <message>
-        <location filename="..\utilita_database.py" line="283" />
+        <location filename="../utilita_database.py" line="283"/>
         <source>The session is being closed.</source>
         <translation>La sessione è stata chiusa.</translation>
     </message>
     <message>
-        <location filename="..\utilita_database.py" line="503" />
+        <location filename="../utilita_database.py" line="503"/>
         <source>Error while writing in history log!</source>
         <translation>Errore nello scrivere la cronologia delle istruzioni SQL!</translation>
     </message>
     <message>
-        <location filename="..\utilita_database.py" line="551" />
-        <location filename="..\utilita_database.py" line="503" />
+        <location filename="../utilita_database.py" line="551"/>
+        <location filename="../utilita_database.py" line="503"/>
         <source>Probably the file MSql.db is locked!</source>
         <translation>Probabilmente il file MSql.db è bloccato!</translation>
     </message>
     <message>
-        <location filename="..\utilita_database.py" line="551" />
+        <location filename="../utilita_database.py" line="551"/>
         <source>Error while writing in file history log!</source>
         <translation>Errore nello scrivere la cronologia delle istruzioni SQL!</translation>
     </message>
-</context></TS>
+</context>
+</TS>

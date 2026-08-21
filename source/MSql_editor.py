@@ -47,10 +47,6 @@ from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 # Librerie QScintilla
 from PyQt6.Qsci import *
-# Libreria network usata per capire se MSql è già in esecuzione
-from PyQt6.QtNetwork import *
-# Libreria che permette di creare arte ascii grafica
-from art import text2art, FONT_NAMES
 # Libreria che permette di ottenere i nomi delle cartelle speciali di sistema
 from platformdirs import user_downloads_dir
 # Classe per la gestione delle preferenze
@@ -74,8 +70,8 @@ from avanzamento import avanzamento_infinito_class
 # Utilità varie
 from utilita import *
 from utilita_database import *
-import utilita_database
 from utilita_testo import *
+from utilita_classi import classChangeLog, classSingleInstanceManager, CompactListDelegate, classFontArtViewer, return_ascii_art_text, OracleTableDialog
 # Libreria che permette, selezionata un'istruzione sql nell'editor di indentarla automaticamente
 from sql_formatter.core import format_sql
 # Visualizzatore delle differenze tra due testi
@@ -127,349 +123,6 @@ v_global_create_confirm = False
 # Indica il font di ascii art selezionato
 v_global_font_ascii_art = ''
 
-def nome_file_backup(p_nome_file):
-    """
-       Calcola il nome file di backup
-       Il nome riporta la pathname della dir di backup il PID (process ID) di MSql attualmente in esecuzione e il nome del file di origine
-       Siccome non sono ammessi nel nome del file i caratteri : slash backslash, vengono sostituiti usando il punto
-    """
-    from pathlib import Path
-
-    p_nome_file = p_nome_file.replace('/', '..')
-    p_nome_file = p_nome_file.replace('\\', '..')
-    p_nome_file = p_nome_file.replace(':','...')
-    p_nome_file = v_global_work_dir + 'backup\\' + 'PID-'+ str(os.getpid()) + 'PID-' + p_nome_file
-    p_nome_file = Path(p_nome_file).resolve()
-
-    return f"\\\\?\\{p_nome_file}"
-
-def prossimo_export_file(v_directory, v_nome_base, v_estensione='csv'):
-    """
-       Genera un percorso file unico. Se il file esiste, aggiunge un progressivo (es. _1, _2).
-    """
-    # Rimuove il punto dall'estensione se presente, per gestirlo uniformemente
-    v_estensione = v_estensione.lstrip('.')
-    
-    # Costruisce il percorso iniziale: /cartella/Export_data.csv
-    v_percorso_completo = os.path.join(v_directory, f"{v_nome_base}.{v_estensione}")
-    
-    v_contatore = 1
-    # Ciclo finché non trova un nome di file non ancora esistente
-    while os.path.exists(v_percorso_completo):
-        v_nuovo_nome = f"{v_nome_base}_{v_contatore}.{v_estensione}"
-        v_percorso_completo = os.path.join(v_directory, v_nuovo_nome)
-        v_contatore += 1
-        
-    return v_percorso_completo
-
-def salvataggio_editor(p_save_as, p_nome, p_testo, p_codifica_utf8, p_timestamp_ultima_modifica=None):
-    """
-        Salvataggio di p_testo dentro il file p_nome        
-        Se p_save_as è True oppure il titolo dell'editor inizia con "!" --> viene richiesto di salvarlo come nuovo file
-        Viene restituita la nuova data di ultima modifica del file
-    """
-    global o_global_preferences
-
-    # salvo in var temporanea il nome ricevuto in input (lo userò per eliminare il vecchio backup)
-    p_nome_originario = p_nome
-
-    # se il primo carattere del titolo inizia con un punto esclamativo, significa che il file è stato creato partendo dall'object navigator
-    # e quindi l'operazione di salva deve chiedere il nome del file e la posizione dove salvare
-    if p_nome[0:1] == '!':
-        p_save_as = True
-        p_nome = p_nome.lstrip('!')
-
-    # se indicato il save as, oppure il file è nuovo e non è mai stato salvato --> richiedo un nuovo nome di file    
-    if p_save_as or (not p_save_as and p_nome[0:8]=='Untitled'):
-        # la dir di default è quella richiesta dall'utente o la Documenti        
-        if o_global_preferences.save_dir == '':
-            v_default_save_dir = QDir.homePath() + "\\Documents\\"
-        else:
-            v_default_save_dir = o_global_preferences.save_dir
-
-        # propongo un nuovo nome di file dato dalla dir di default + il titolo ricevuto in input
-        v_file_save_as = v_default_save_dir + '\\' + p_nome        
-     
-        p_nome = QFileDialog.getSaveFileName(None, "Save a SQL file",v_file_save_as,"MSql files (*.msql);;SQL files (*.sql *.pls *.plb *.trg);;All files (*.*)") [0]                                  
-        if not p_nome:
-            message_error(QCoreApplication.translate('Save','Error saving'))
-            return 'ko', None, None
-        # se nel nome del file non è presente un suffisso --> imposto .msql            
-        if p_nome.find('.') == -1:
-            p_nome += '.msql'
-        # reimposto la dir di default in modo che in questa sessione del programma rimanga quella che l'utente ha scelto per salvare il file
-        o_global_preferences.save_dir = os.path.split( p_nome )[0]
-
-    # procedo con il salvataggio
-    try:
-        # controllo se il file è stato modificato da un altro programma
-        try:
-            v_timestamp_ultima_modifica = os.path.getmtime(p_nome)
-        except:
-            v_timestamp_ultima_modifica = None
-        if p_timestamp_ultima_modifica is not None and v_timestamp_ultima_modifica is not None and p_timestamp_ultima_modifica != v_timestamp_ultima_modifica:
-            if message_warning_yes_no(QCoreApplication.translate('Save','The file has been modified by another program since it was opened. Do you want to overwrite it?')) == 'Yes':
-                pass
-            else:
-                return 'ko', None
-        # scrittura usando utf-8 (il newline come parametro è molto importante per la gestione corretta degli end of line)                                                            
-        if p_codifica_utf8:            
-            v_file = open(p_nome,'w',encoding='utf-8', newline='')
-        # scrittura usando ansi (il newline come parametro è molto importante per la gestione corretta degli end of line)                                        
-        else:            
-            v_file = open(p_nome,'w', newline='')
-        v_file.write(p_testo)
-        v_file.close()            
-        # procedo con il cancellare eventuale file di backup precedente (si ripartirà con un nuovo salvataggio che conterrà il nuovo nome di file)                
-        v_nome_file_backup = nome_file_backup(p_nome_originario)                
-        if os.path.exists(v_nome_file_backup):
-            os.remove(v_nome_file_backup)		
-            print('Remove old backup --> ' + v_nome_file_backup)
-        # ricavo la data di ultima modifica del file e la restituisco (serve per il controllo di modifiche da parte di altri programmi)
-        try:
-            v_timestamp_ultima_modifica = os.path.getmtime(p_nome)
-        except:
-            v_timestamp_ultima_modifica = None
-        # esco con tutto ok
-        return 'ok', p_nome, v_timestamp_ultima_modifica
-    except Exception as err:
-        # esco con errore
-        message_error(QCoreApplication.translate('Save','Error to write the file:') + ' ' + str(err))
-        return 'ko', None
-
-def titolo_window(p_titolo_file):
-    """
-       Partendo da p_titolo_file restituisce solo la parte di nome file da mettere come titolo della window
-    """                       
-    v_solo_nome_file = os.path.split(p_titolo_file)[1]
-    v_solo_nome_file_senza_suffisso = os.path.splitext(v_solo_nome_file)[0]
-
-    return v_solo_nome_file_senza_suffisso
-
-class classChangeLog(QWidget):
-    """
-       Visualizza in una window specifica, il file di changelog
-    """
-    def __init__(self,p_window_padre):
-        super().__init__()
-        self.setWindowTitle("MSql-Changelog")
-        v_icon = QIcon()
-        v_icon.addPixmap(QPixmap("icons:MSql.ico"), QIcon.Mode.Normal, QIcon.State.Off)
-        self.setWindowIcon(v_icon)
-        self.setGeometry(0, 0, 600, 500)
-
-        layout = QVBoxLayout()
-        # creo un text edit di sola lettura dove visualizzo il contenuto del changelog
-        self.text_edit = QTextEdit()
-        self.text_edit.setLineWrapMode(QTextEdit.LineWrapMode.NoWrap)
-        self.text_edit.setReadOnly(True)  
-        # imposto font a larghezza fissa per migliore visualizzazione
-        v_font = QFont()
-        v_font.setFamily("Courier New")
-        v_font.setPointSize(10)
-        self.text_edit.setFont(v_font)
-
-        # se sto eseguendo il programma da pyinstaller, vado in apposita cartella
-        v_nome_file = "help/changelog.txt"
-        if getattr(sys, 'frozen', False): 
-            v_nome_file = "_internal/" + v_nome_file               
-        elif os.name == "posix":
-            v_nome_file = os.getcwd() + '/source/' + v_nome_file
-        else:
-            v_nome_file = os.getcwd() + '/' + v_nome_file
-
-        # leggo il file di changelog
-        try:            
-            with open(v_nome_file, "r", encoding='UTF-8') as file:
-                self.text_edit.setText(file.read())
-        except:
-            pass
-
-        # imposto il layout
-        layout.addWidget(self.text_edit)
-        self.setLayout(layout)
-        # centro la window rispetto alla window padre
-        centra_window_figlia(p_window_padre, self)
-
-class classFontArtViewer(QWidget):
-    """
-       Visualizza in una window specifica, elenco dei font che mette a disposizione la libreria ascii art 
-    """
-    def __init__(self, p_window_padre):
-        global v_global_font_ascii_art
-        global o_global_preferences
-
-        super().__init__()        
-        self.setWindowTitle("Ascii art Font Selector")
-        v_icon = QIcon()
-        v_icon.addPixmap(QPixmap("icons:MSql.ico"), QIcon.Mode.Normal, QIcon.State.Off)
-        self.setWindowIcon(v_icon)
-        self.setGeometry(0, 0, 400, 450)
-
-        layout = QVBoxLayout()
-        self.list_widget = QListWidget()
-        # creo la lista dei font dove il primo elemento è il vuoto che corrisponde al default
-        v_lista = []
-        v_lista.append('')
-        for i in FONT_NAMES:            
-            v_lista.append(i)
-        self.list_widget.addItems(v_lista)
-        layout.addWidget(self.list_widget)        
-            
-        # Label informativa
-        info_label = QLabel(QCoreApplication.translate('MSql_win1',"Double-click to select the font"))
-        info_label.setAlignment(Qt.AlignmentFlag.AlignCenter)  
-        layout.addWidget(info_label)
-        
-        # Area di anteprima dove il font è lo stesso impostato come preferenza dell'editor
-        self.preview = QTextEdit()
-        self.preview.setReadOnly(True)        
-        v_split = o_global_preferences.font_editor.split(',')                        
-        v_font = QFont(str(v_split[0]),int(v_split[1]))
-        self.preview.setFont(v_font)  
-        layout.addWidget(self.preview)
-
-        # Compongo il layout
-        self.setLayout(layout)
-
-        # mi posiziono sul font attualmente attivo 
-        if v_global_font_ascii_art != '' and v_global_font_ascii_art in FONT_NAMES:
-            index = self.list_widget.findItems(v_global_font_ascii_art, Qt.MatchFlag.MatchExactly)
-            if index:
-                self.list_widget.setCurrentItem(index[0])
-                self.list_widget.scrollToItem(index[0])
-
-        # Evento click per anteprima e doppio click per la scelta
-        self.list_widget.currentItemChanged.connect(lambda item: self.update_preview(item.text()))
-        self.list_widget.itemDoubleClicked.connect(self.show_font_name)
-
-        # centro la window rispetto alla window padre
-        centra_window_figlia(p_window_padre, self)
-
-    def update_preview(self, font_name):        
-        """
-           Visualizza anteprima del font
-        """
-        art_text = text2art("art", font=font_name)
-        self.preview.setPlainText(art_text)
-        
-    def show_font_name(self, item):
-        """
-            Il font selezionato viene caricato nella variabile globale
-        """
-        global v_global_font_ascii_art
-
-        v_global_font_ascii_art = item.text()        
-        self.close()
-
-class classSingleInstanceManager(QObject):
-    """
-       Classe che avvia un server che controlla all'avvio di MSql, se ci sono altre istanze di MSql in esecuzione
-       Questa classe è utilizzata per permettere di aprire un file, facendo doppio click da desktop, nella stessa
-       istanza già in esecuzione di MSql. Il codice di chiamata è tutto concentrato nella sezione di Start.
-    """
-    # Adesso emettiamo un singolo percorso (str), non più lista
-    messageReceived = pyqtSignal(str)    
-
-    def __init__(self, server_name: str):
-        super().__init__()
-        self.server_name = server_name
-        self.server = None
-
-    def try_send_to_running_instance(self, file_path: str) -> bool:
-        socket = QLocalSocket()
-        socket.connectToServer(self.server_name)
-        if not socket.waitForConnected(200):
-            socket.abort()
-            return False
-
-        try:
-            # Invia il percorso come stringa UTF-8
-            data = file_path.encode("utf-8")
-            socket.write(data)
-            socket.flush()
-            socket.waitForBytesWritten(200)
-        finally:
-            socket.disconnectFromServer()
-            socket.close()
-
-        return True
-
-    def start_listening(self) -> bool:
-        QLocalServer.removeServer(self.server_name)
-        self.server = QLocalServer(self)
-        if not self.server.listen(self.server_name):
-            return False
-        self.server.newConnection.connect(self._handle_new_connection)
-        return True
-
-    def _handle_new_connection(self):
-        while self.server.hasPendingConnections():
-            sock = self.server.nextPendingConnection()
-            sock.readyRead.connect(lambda s=sock: self._read_message(s))
-
-    def _read_message(self, socket: QLocalSocket):
-        raw = socket.readAll().data()
-        try:
-            # Decodifica semplice del path
-            path = raw.decode("utf-8")            
-            self.messageReceived.emit(path)
-        except Exception as e:
-            print(f"Errore da clasInstanceManager gestore SIM! Messaggio non valido: {e}")
-        finally:
-            socket.disconnectFromServer()
-            socket.close()
-
-class MyFileExtensionFilterProxyModel(QSortFilterProxyModel):
-    """
-       Filtra i file mostrati nel file system tree view:
-        - Esclude file e cartelle nascoste
-        - Mostra tutte le cartelle visibili per navigare
-        - Mostra solo i file che NON hanno estensioni vietate
-        - (Opzionale) Applica un filtro regex sui nomi dei file
-    """
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.not_allowed_extensions = ['.dat', '.rnd', '.dll', '.bat', '.exe', '.rhk']
-        self.setRecursiveFilteringEnabled(True)
-
-    def filterAcceptsRow(self, source_row, source_parent):
-        model = self.sourceModel()
-        index = model.index(source_row, 0, source_parent)
-        if not index.isValid():
-            return False
-
-        file_info = QFileInfo(model.filePath(index))
-
-        # Escludi file e cartelle nascoste
-        if file_info.isHidden() or file_info.fileName().startswith('.'):
-            return False
-
-        # Le cartelle visibili devono sempre comparire per la navigazione
-        if file_info.isDir():
-            return True
-
-        # Escludi file con estensioni vietate
-        file_name = file_info.fileName().lower()
-        if any(file_name.endswith(ext) for ext in self.not_allowed_extensions):
-            return False
-
-        # Applica filtro regex (solo ai file)
-        regex = self.filterRegularExpression()
-        if regex and regex.pattern():
-            return regex.match(file_name).hasMatch()
-
-        return True
-
-class CompactListDelegate(QStyledItemDelegate):
-    """
-       Dopo essere passati alla versione 6.10 delle librerie PyQt, l'altezza delle righe di alcuni oggetti non era più corretta
-       Tramite questa classe si forza l'altezza desiderata
-    """
-    def sizeHint(self, option, index):
-        size = super().sizeHint(option, index)
-        size.setHeight(18)   # ← imposta qui l’altezza desiderata
-        return size
 #
 #  __  __    _    ___ _   _  __        _____ _   _ ____   _____        __
 # |  \/  |  / \  |_ _| \ | | \ \      / /_ _| \ | |  _ \ / _ \ \      / /
@@ -952,6 +605,12 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # Riorganizzo le window in modalità tab
         elif p_slot.objectName() == 'actionTabbed':
             self.mdiArea.setViewMode(QMdiArea.ViewMode.TabbedView)            
+        # Centra la window
+        elif p_slot.objectName() == 'actionCenter':
+            window_geometry = self.frameGeometry()                 
+            screen = self.screen().availableGeometry()
+            window_geometry.moveCenter(screen.center()) 
+            self.move(window_geometry.topLeft())
         # Apro file di help 
         elif p_slot.objectName() == 'actionHelp':                          
             if getattr(sys, 'frozen', False): 
@@ -1028,7 +687,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         if o_MSql_win2 is not None:
             # Salvataggio del file
             if p_slot.objectName() == 'actionSave':
-                v_ok, v_nome_file, o_MSql_win2.v_timestamp_ultima_modifica = salvataggio_editor(False, o_MSql_win2.objectName(), o_MSql_win2.e_sql.text(), o_MSql_win2.setting_utf8, o_MSql_win2.v_timestamp_ultima_modifica)
+                v_ok, v_nome_file, o_MSql_win2.v_timestamp_ultima_modifica = salvataggio_editor(o_global_preferences, v_global_work_dir, False, o_MSql_win2.objectName(), o_MSql_win2.e_sql.text(), o_MSql_win2.setting_utf8, o_MSql_win2.v_timestamp_ultima_modifica)
                 if v_ok == 'ok':
                     o_MSql_win2.v_testo_modificato = False
                     o_MSql_win2.setObjectName(v_nome_file)
@@ -1037,7 +696,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                     self.window_attiva.setObjectName(v_nome_file) # notare come il nome della window va forzato anche sulla window attiva
             # Salvataggio del file come... (semplicemente non gli passo il titolo)
             elif p_slot.objectName() == 'actionSave_as':
-                v_ok, v_nome_file, o_MSql_win2.v_timestamp_ultima_modifica = salvataggio_editor(True, o_MSql_win2.objectName(), o_MSql_win2.e_sql.text(), o_MSql_win2.setting_utf8, o_MSql_win2.v_timestamp_ultima_modifica)
+                v_ok, v_nome_file, o_MSql_win2.v_timestamp_ultima_modifica = salvataggio_editor(o_global_preferences, v_global_work_dir, True, o_MSql_win2.objectName(), o_MSql_win2.e_sql.text(), o_MSql_win2.setting_utf8, o_MSql_win2.v_timestamp_ultima_modifica)
                 if v_ok == 'ok':                    
                     o_MSql_win2.v_testo_modificato = False                    
                     o_MSql_win2.setObjectName(v_nome_file)                    
@@ -1120,8 +779,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 o_MSql_win2.slot_text_to_ascii_art()
             # Apro la window per la selezione del font da utilizzare con ASCII art testo
             elif p_slot.objectName() == 'actionSet_font_Ascii_Art':                                
-                self.o_fontartviewer = classFontArtViewer(self)
-                self.o_fontartviewer.show()      
+                o_MSql_win2.slot_set_font_ascii_art()
             # Apro la window con la gestione delle funzioni di testo
             elif p_slot.objectName() == 'actionText_functions':
                 self.slot_text_functions(o_MSql_win2.e_sql.selectedText())
@@ -1255,6 +913,12 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             # Creo lo script per la modifica dei dati
             elif p_slot.objectName() == 'actionSave_modified_data':
                 o_MSql_win2.slot_save_modified_data()
+            # Creo un form per creare una istruzione di insert
+            elif p_slot.objectName() == 'actionInsert_form_on_current_table':
+                o_MSql_win2.slot_create_insert_form()
+            # Creo un form per creare una istruzione di where
+            elif p_slot.objectName() == 'actionWhere_form_on_current_table':
+                o_MSql_win2.slot_create_where_form()
             # Prendo il testo selezionato e lo riformatto (esempio istruzione SQL che viene reindentata)
             elif p_slot.objectName() == 'actionFormat_SQL_instruction':
                 o_MSql_win2.slot_format_sql_statement()
@@ -1276,7 +940,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         for i in range(0,len(self.o_lst_window2)):
             if not self.o_lst_window2[i].v_editor_chiuso:
                 if self.o_lst_window2[i].v_testo_modificato:                            
-                    v_ok, v_nome_file, self.o_lst_window2[i].v_timestamp_ultima_modifica = salvataggio_editor(False, self.o_lst_window2[i].objectName(), self.o_lst_window2[i].e_sql.text(), self.o_lst_window2[i].setting_utf8, self.o_lst_window2[i].v_timestamp_ultima_modifica)
+                    v_ok, v_nome_file, self.o_lst_window2[i].v_timestamp_ultima_modifica = salvataggio_editor(o_global_preferences, v_global_work_dir, False, self.o_lst_window2[i].objectName(), self.o_lst_window2[i].e_sql.text(), self.o_lst_window2[i].setting_utf8, self.o_lst_window2[i].v_timestamp_ultima_modifica)
                     if v_ok == 'ok':
                         self.o_lst_window2[i].v_testo_modificato = False
                         self.o_lst_window2[i].setObjectName(v_nome_file)
@@ -4450,7 +4114,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             os.mkdir(v_global_work_dir + 'backup')
         
         # ricavo il nome del file da scrivere nella cartella di backup...i caratteri che identificano il disco e la cartella vengono rimpiazzati con .. e ...
-        v_nome_file = nome_file_backup(self.objectName())        
+        v_nome_file = nome_file_backup(self.objectName(), v_global_work_dir)        
         # creo il backup dell'editor corrente (Attenzione! Ogni editor aperto avrà il suo timer di salvataggio!)
         if self.setting_utf8:
             # scrittura usando utf-8 (il newline come parametro è molto importante per la gestione corretta degli end of line)                                                            
@@ -4487,7 +4151,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
            Premendo F11 viene estratto dalla posizione del cursore dell'editor, il nome dell'oggetto
            e da li viene eseguita una query. Per semplicità viene usata la funzione per f12 dicendo di restituire solo il nome dell'oggetto
         """
-        v_nome_oggetto = self.slot_f12(p_f11=True)
+        v_nome_oggetto, v_tipo_oggetto = self.slot_f12(p_f11=True)
         if v_nome_oggetto != 'ko':
             # messaggio di debug
             print('F11-Quick query on --> ' + v_nome_oggetto)      
@@ -4499,6 +4163,8 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
            Premendo F12 viene estratto dalla posizione del cursore dell'editor, il nome dell'oggetto
            e da li viene aperto l'object viewer
 
+           Se richiamata attivando il parametro p_11=True, allora non viene aperto l'object viewer ma viene restituito il nome dell'oggetto e il tipo di oggetto
+
            Note: Ho provato a vedere se esiste possibilità di chiedere a qscintilla se mi può dare la parola su cui il cursore è posizionato
                  ma no trovato. Quindi fatto una cosa semiinterna creando una funzione in package utilita
         """
@@ -4508,7 +4174,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         self.e_sql.setSelection(v_num_line, 0, v_num_line+1, -1)
         v_line = self.e_sql.selectedText()
         # riposiziono il cursore allo stato originario
-        self.e_sql.setSelection(v_num_line, v_num_pos, v_num_line, v_num_pos)
+        self.e_sql.setSelection(v_num_line, v_num_pos, v_num_line, v_num_pos)        
         # utilizzando la posizione del cursore sulla riga, estraggo il nome dell'oggetto che sta sotto il cursore (es. TA_AZIEN oppure SMILE.TA_AZIEN)
         v_owner, v_oggetto = extract_object_name_from_cursor_pos(v_line.upper(), v_num_pos-1)                        
         if v_oggetto != '':
@@ -4539,7 +4205,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 v_tipo_oggetto = v_record[1]                                   
                 # carico l'object viewer passando come parametro iniziale il puntatore all'oggetto main
                 if p_f11:
-                    return v_owner+'.'+v_nome_oggetto
+                    return v_owner+'.'+v_nome_oggetto, v_tipo_oggetto
                 else:
                     MSql_win1_class.carica_object_viewer(self.link_to_MSql_win1_class, v_owner, v_tipo_oggetto, v_nome_oggetto, v_link)                                        
             else:
@@ -4558,7 +4224,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                     v_owner = v_record[2]
                     # carico l'object viewer passando come parametro iniziale il puntatore all'oggetto main e anche l'owner che ho trovato
                     if p_f11:
-                        return v_owner+'.'+v_nome_oggetto
+                        return v_owner+'.'+v_nome_oggetto, v_tipo_oggetto
                     else:
                         MSql_win1_class.carica_object_viewer(self.link_to_MSql_win1_class, v_owner, v_tipo_oggetto, v_nome_oggetto, v_link)                                        
                 else:
@@ -5950,6 +5616,54 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             v_update = f"UPDATE {v_table_name} SET {v_campi_set} WHERE ROWID = '{v_rowid_corrente}';"
             self.e_sql.append(chr(10) + v_update)
               
+    def dynamic_table_form(self, mode='I'):
+        """
+           Apre il form (Insert o Where/Select) in base alla tabella su cui è posizionato il cursore.
+           Parametro 'mode': 'I' per Inserimento, 'S' per Selezione/Where.
+        """
+        # Estraggo il nome e il tipo oggetto dove è posizionato il cursore dell'editor
+        v_nome_oggetto, v_tipo_oggetto = self.slot_f12(p_f11=True)   
+        
+        # Se il nome oggetto non è stato calcolato o non è una tabella, emetto errore ed esco
+        if v_nome_oggetto == 'ko' or v_tipo_oggetto != 'TABLE':
+            message_error(QCoreApplication.translate('MSql_win2', 'The cursor is not positioned on a valid table!'))
+            return
+            
+        # Apro il cursore temporaneo utilizzando la connessione globale
+        v_temp_cursor = v_global_connection.cursor()       
+        
+        # Creo una semplice select
+        v_temp_cursor.execute("SELECT * FROM " + v_nome_oggetto + " WHERE ROWNUM = 1")
+        
+        # Estraggo l'elenco delle colonne e i relativi tipi
+        v_temp_nomi_intestazioni = nomi_colonne_istruzione_sql(v_temp_cursor)                                                    
+        v_temp_tipi_intestazioni = v_temp_cursor.description           
+        
+        # Chiudo il cursore temporaneo
+        v_temp_cursor.close()
+        
+        # Creo la nuova classe dialog passandogli il parametro mode ('I' o 'S')
+        dialog = OracleTableDialog(self, v_nome_oggetto, v_temp_nomi_intestazioni, v_temp_tipi_intestazioni, mode)    
+        
+        # Mostro il dialog in modo modale e controllo l'accettazione dell'utente
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            # Recupero la stringa SQL generata e la appendo all'editor
+            if dialog.sql_generata:
+                self.e_sql.append(dialog.sql_generata)    
+                self.e_sql.setCursorPosition(self.e_sql.lines() - 1, 0)
+
+    def slot_create_insert_form(self):
+        """
+           Apre form di inserimento record in base alla tabella su cui posizionato il cursore
+        """
+        self.dynamic_table_form(mode='I')
+              
+    def slot_create_where_form(self):
+        """
+           Apre form di creazione istruzione WHERE in base alla tabella su cui posizionato il cursore
+        """
+        self.dynamic_table_form(mode='S')
+
     def slot_export_to_csv(self):
         """
            Prende i dati presenti in tabella e li esporta in csv
@@ -5962,7 +5676,8 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
 
         # estraggo i dati dalla tableview (se errore la tabella è vuota e quindi esco)        
         v_model = self.o_table.model()
-        if v_model == None:
+        if v_model is None or v_model.rowCount() == 0:
+            message_error(QCoreApplication.translate('MSql_win2','No data to export!'))                
             return None        
 
         # creo file fisso in directory di lavoro                
@@ -6021,7 +5736,8 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
 
         # estraggo i dati dalla tableview (se errore la tabella è vuota e quindi esco)        
         v_model = self.o_table.model()
-        if v_model == None:
+        if v_model is None or v_model.rowCount() == 0:
+            message_error(QCoreApplication.translate('MSql_win2','No data to export!'))                
             return None        
 
         # creo file fisso in directory di lavoro                
@@ -6126,7 +5842,8 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
 
         # estraggo i dati dalla tableview (se errore la tabella è vuota e quindi esco)        
         v_model = self.o_table.model()
-        if v_model == None:
+        if v_model is None or v_model.rowCount() == 0:
+            message_error(QCoreApplication.translate('MSql_win2','No data to export!'))                
             return None        
 
         # creo file fisso in directory di lavoro                
@@ -6194,7 +5911,8 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
 
         # Estraggo il modello dalla tableview
         v_model = self.o_table.model()
-        if v_model is None:
+        if v_model is None or v_model.rowCount() == 0:
+            message_error(QCoreApplication.translate('MSql_win2','No data to export!'))                
             return None        
 
         # Genero il percorso del file (cambiando l'estensione in 'json')
@@ -6259,7 +5977,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                Cancello il file di backup
             """
             # ricavo il nome del file da scrivere nella cartella di backup...i caratteri che identificano il disco e la cartella vengono rimpiazzati con .. e ...
-            v_nome_file = nome_file_backup(self.objectName())            
+            v_nome_file = nome_file_backup(self.objectName(), v_global_work_dir)            
             if os.path.exists(v_nome_file):
                 os.remove(v_nome_file)				
                 print('Removed backup of --> ' + v_nome_file)
@@ -6301,14 +6019,14 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # utente chiede di salvare
         elif v_scelta == 'Yes':            
             if self.objectName() == "":                
-                v_ok, v_nome_file, self.v_timestamp_ultima_modifica = salvataggio_editor(True, self.objectName(), self.e_sql.text(), self.setting_utf8, self.v_timestamp_ultima_modifica)
+                v_ok, v_nome_file, self.v_timestamp_ultima_modifica = salvataggio_editor(o_global_preferences, v_global_work_dir, True, self.objectName(), self.e_sql.text(), self.setting_utf8, self.v_timestamp_ultima_modifica)
                 if v_ok != 'ok':
                     return 'Cancel'
                 else:
                     self.v_testo_modificato = False
                     return 'Yes'
             else:                      
-                v_ok, v_nome_file, self.v_timestamp_ultima_modifica = salvataggio_editor(False, self.objectName(), self.e_sql.text(), self.setting_utf8, self.v_timestamp_ultima_modifica)                          
+                v_ok, v_nome_file, self.v_timestamp_ultima_modifica = salvataggio_editor(o_global_preferences, v_global_work_dir, False, self.objectName(), self.e_sql.text(), self.setting_utf8, self.v_timestamp_ultima_modifica)                          
                 if v_ok != 'ok':
                     return 'Cancel'
                 else:
@@ -6905,6 +6623,23 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # fissato a 80 caratteri la larghezza della riga
         self.e_sql.insert(trasforma_testo_in_elenco_formattato(v_text, 80, v_eol, v_numerato))                
 
+    def slot_set_font_ascii_art(self):
+        """
+           Seleziona il font da usare per la trasformazione del testo in arte grafica ascii
+        """
+        self.o_fontartviewer = classFontArtViewer(self, o_global_preferences, v_global_font_ascii_art)
+        self.o_fontartviewer.list_widget.itemDoubleClicked.connect(self.slot_get_font_name_ascii_art_font)
+        self.o_fontartviewer.show()      
+
+    def slot_get_font_name_ascii_art_font(self, p_item):
+        """
+           Recupera il font selezionato e lo memorizza in variabile globale
+        """
+        global v_global_font_ascii_art
+
+        v_global_font_ascii_art = p_item.text()
+        self.o_fontartviewer.close()
+
     def slot_text_to_ascii_art(self):
         """
            Trasforma il testo selezionato in arte grafica ascii
@@ -6920,10 +6655,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # elimino il testo selezionato
         self.e_sql.removeSelectedText()
         # trasformo il testo in formato grafico ascii e lo inserisco nell'editor
-        if v_global_font_ascii_art == '':
-            self.e_sql.insert(text2art(v_text))        
-        else:
-            self.e_sql.insert(text2art(v_text, v_global_font_ascii_art))        
+        self.e_sql.insert(return_ascii_art_text(v_text, v_global_font_ascii_art))        
     
     def slot_indentation_guide(self):
         """

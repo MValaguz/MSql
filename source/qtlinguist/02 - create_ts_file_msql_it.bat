@@ -25,6 +25,7 @@ pylupdate6 --verbose ^
 	..\query_designer.py ^
   ..\utilita.py ^
   ..\utilita_database.py ^
+	..\utilita_classi.py ^
   ..\diff_viewer.py ^
 	..\dblink_viewer.py ^
   ..\sqlite_viewer.py ^

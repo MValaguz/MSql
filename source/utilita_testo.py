@@ -86,9 +86,12 @@ def extract_word_from_cursor_pos(p_string, p_pos, p_period=True):
     elif p_pos == len(p_string):
         p_pos -= 1
 
-    # se il cursore è su uno spazio, se riesco lo sposto verso destra (modifica inserita in data 10/04/2025)
-    if p_string[p_pos] == ' ' and p_string[p_pos+1] != None:
-        p_pos += 1
+    # se il cursore è su uno spazio, se riesco lo sposto verso destra (modifica inserita in data 10/04/2025)    
+    try:
+        if p_string[p_pos] == ' ' and p_string[p_pos+1] != None:
+            p_pos += 1
+    except:
+        pass
 
     # inizio a comporre la parola partendo dalla posizione del cursore (se non trovo nulla esco)
     v_word=p_string[p_pos]
@@ -802,8 +805,8 @@ if __name__ == "__main__":
     #scrivi_lista_in_output(['ciao\n','marco\r\n'])
     
     # test funzione che restituisce owner e object    
-    #v_owner, v_object = extract_object_name_from_cursor_pos('select smile.oc_ortes.azien_co ',19)    
-    #print(f"{v_owner} {v_object}")    
+    v_owner, v_object = extract_object_name_from_cursor_pos('                                      ',19)    
+    print(f"{v_owner} {v_object}")    
     #v_owner, v_object = extract_object_name_from_cursor_pos('select * from smi.op_com ',20)    
     #print(f"{v_owner} {v_object}")    
     
@@ -833,9 +836,9 @@ if __name__ == "__main__":
     # print('-'*100)
     # print(v_testo[v_start:v_end])
 
-    v_testo = """questo è il primo punto del mio programma
-questo è il secondo punto del mio programma
-questo è il terzo punto del mio programma"""
-    print(trasforma_testo_in_elenco_formattato(v_testo, 30, "\n"))
-    print('Elenco numerato:')
-    print(trasforma_testo_in_elenco_formattato(v_testo, 30, "\n", True))
+    #     v_testo = """questo è il primo punto del mio programma
+    # questo è il secondo punto del mio programma
+    # questo è il terzo punto del mio programma"""
+    #     print(trasforma_testo_in_elenco_formattato(v_testo, 30, "\n"))
+    #     print('Elenco numerato:')
+    #     print(trasforma_testo_in_elenco_formattato(v_testo, 30, "\n", True))

@@ -157,6 +157,8 @@
     </property>
     <addaction name="actionMake_table_editable"/>
     <addaction name="actionSave_modified_data"/>
+    <addaction name="actionInsert_form_on_current_table"/>
+    <addaction name="actionWhere_form_on_current_table"/>
    </widget>
    <widget class="QMenu" name="menuSql">
     <property name="title">
@@ -188,6 +190,7 @@
     <addaction name="separator"/>
     <addaction name="actionTabbed"/>
     <addaction name="separator"/>
+    <addaction name="actionCenter"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -724,7 +727,7 @@
    <addaction name="actionTile"/>
    <addaction name="separator"/>
    <addaction name="actionAutoColumnResize"/>
-   <addaction name="actionExport_to_CSV"/>
+   <addaction name="actionExport_to_Excel"/>
    <addaction name="separator"/>
    <addaction name="actionClear_output"/>
    <addaction name="actionMake_table_editable"/>
@@ -1902,6 +1905,33 @@
    </property>
    <property name="shortcut">
     <string notr="true">Ctrl+Alt+L</string>
+   </property>
+  </action>
+  <action name="actionInsert_form_on_current_table">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/table.png</normaloff>:/icons/icons/table.png</iconset>
+   </property>
+   <property name="text">
+    <string>Insert form on current table</string>
+   </property>
+  </action>
+  <action name="actionWhere_form_on_current_table">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/where.png</normaloff>:/icons/icons/where.png</iconset>
+   </property>
+   <property name="text">
+    <string>Where form on current table</string>
+   </property>
+  </action>
+  <action name="actionCenter">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/center.png</normaloff>:/icons/icons/center.png</iconset>
+   </property>
+   <property name="text">
+    <string>Center</string>
    </property>
   </action>
  </widget>
