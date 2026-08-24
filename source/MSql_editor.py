@@ -3228,8 +3228,9 @@ class My_MSql_Lexer(QsciLexerSQL):
         self.p_editor.setBraceMatching(QsciScintilla.BraceMatch.SloppyBraceMatch)            
         self.p_editor.setMatchedBraceBackgroundColor(QColor("#80ff9900"))
     
-        # attivo il multiediting (cioè la possibilità, una volta fatta una selezione verticale, di fare un edit multiplo)        
-        self.p_editor.SendScintilla(self.p_editor.SCI_SETADDITIONALSELECTIONTYPING, 1)        
+        # attivo il multiediting (cioè la possibilità, una volta fatta una selezione rettangolare, di fare un edit multiplo)        
+        self.p_editor.SendScintilla(self.p_editor.SCI_SETADDITIONALSELECTIONTYPING, 1)                        
+        self.p_editor.SendScintilla(self.p_editor.SCI_SETMULTIPASTE, 1) # ABILITA IL PASTE MULTIPLO (Da Diego B. Copio una parola, poi eseguo una selezione rettangolare di riga singola e faccio ctrl+v non mi svolge la copia di multipla)
         v_offset = self.p_editor.positionFromLineIndex(0, 7) 
         self.p_editor.SendScintilla(self.p_editor.SCI_SETSELECTION, v_offset, v_offset)        
         v_offset = self.p_editor.positionFromLineIndex(1, 5)
@@ -5033,8 +5034,8 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             if p_plsql[-1] == '\r' or p_plsql[-1] == '\n':            
                 p_plsql = p_plsql[0:-1]                                    
             if p_plsql[-1] == ';':            
-                p_plsql = p_plsql[0:-1]                                    
-    
+                p_plsql = p_plsql[0:-1]        
+
         def get_dbms_output_flow():
             """
                Funzione interna che restituisce il flusso generato dal package dbms_output, durante l'esecuzione dello script pl-sql
@@ -5126,11 +5127,12 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                 # per posizionarmi alla riga in errore ho solo la variabile offset che riporta il numero di carattere a cui l'errore si è verificato                
                 v_riga, v_colonna = x_y_from_offset_text(p_plsql, v_oracle_error.offset)                                                                
                 v_riga += self.v_offset_numero_di_riga
-                self.e_sql.setCursorPosition(v_riga,v_colonna)                
+                self.e_sql.setCursorPosition(v_riga,v_colonna)                        
                 # esco con errore
                 return 'ko'
 
             if self.v_oracle_executer.get_status() == 'END_JOB_OK':                   
+                print('Comando terminato con successo')
                 # calcolo tempo esecuzione e aggiorno a video            
                 v_global_exec_time = (datetime.datetime.now() - v_start_time).total_seconds()
                 self.aggiorna_statusbar()                
@@ -5191,13 +5193,12 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                     if v_errori:
                         v_1a_volta = True
                         for info in v_errori:
-                            # emetto gli errori riscontrati
-                            self.scrive_output(f"Error at line {info[0] + v_other_offset} position {info[1]} {info[2]}", 'E')                                                
-                            # solo per il primo errore mi posiziono sull'editor alle coordinate indicate
-                            if v_1a_volta:                                                            
-                                v_riga = info[0]-1 + self.v_offset_numero_di_riga + v_other_offset
-                                v_colonna = info[1]-1                                                        
-                                self.e_sql.setCursorPosition(v_riga,v_colonna)                            
+                            v_riga = info[0]-1 + self.v_offset_numero_di_riga + v_other_offset
+                            v_colonna = info[1]                                                                                                                   
+                            self.scrive_output(f"Error at line {v_riga} column {v_colonna} {info[2]}", 'E')                                                
+                            # solo per il primo errore mi posiziono sull'editor alle coordinate indicate (tolgo un offset di 1 perchè la riga inizia da 0 e non da 1)
+                            if v_1a_volta:                                                                                                                            
+                                self.e_sql.setCursorPosition(v_riga-1,v_colonna-1)                                                                                            
                                 v_1a_volta = False
                         # esco con errore
                         return 'ko'

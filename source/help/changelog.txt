@@ -2,19 +2,30 @@
 MSql TODO!!!
 -------------
 
-- Da Diego B. Copio una parola, poi eseguo una selezione rettangolare di riga singola e faccio ctrl+v non mi svolge la copia di multipla
 - Ancora persiste il problema che esce messaggio errore "dpy...." dopo che compilo pkg che va in errore, e poi lancio delle select; il problema è dovuto al fatto che non capisce che quella passata è una select e pensa sia ancora pl-sql o qualcosa del genere; infatti ad esempio succede dopo aver fatto delle select e delle update
 - Da Marco V. Va rivista la parte delle preferenze di connessione nel senso che vanno gestite in modo diverso le impostazioni relative alle connessioni automatiche all'avvio; con una maggiore integrazione con la connessione manuale da menù.
 - Segnalato da Diego; vado in ricerca-e-sostituisci; inserisco una stringa di ricerca e una di sostituzione, prima di fare la "ricerca" della prima ricorrenza, faccio subito la replace! In pratica non fa nulla e non si capisce il suo comportamento!
 - Provato a passare alla nuova versione di Oracledb 4.0.1 che però non funziona con i driver installati sul PC..perché si deve avere almeno Oracle 19! Tornato indietro alla versione 3!
-- Il concetto di posizionamento nell'editor con calcolo lunghezza carattere da 2byte lato Scintilla va provato a fare anche per quando c'è errore nel comando SQL o PL-SQL che deve adottare lo stesso meccanismo usato per CTRL+Invio
 - Se apro nell'object viewer SM_SMYIOT_PKG, nella prima funzione non riesce a ricavare la var p_user_handle, anche in GET_MATRICOLE_DA_VERIFICARE
   Se interrogo nell'object viewer una funzione sarebbe bello capire tipologia del parametro (input-output)
 - Lato linux creare lo script per pacchettizzare tutto il programma
 
+Utilizzatori a cui inviare mail di aggiornamento:
+- Alek
+- Alessandra
+- Marco T.
+- Diego
+- Marianna
+- Pietro
+
 ---------------
 MSql Changelog!
 ---------------
+
+Versione del 24/08/2026
+- Da Diego B. Copio una parola, poi eseguo una selezione rettangolare di riga singola e faccio ctrl+v non mi svolge la copia di multipla
+- Il concetto di posizionamento nell'editor con calcolo lunghezza carattere da 2byte lato Scintilla va provato a fare anche per quando c'è errore nel comando SQL o PL-SQL che deve adottare lo stesso meccanismo usato per CTRL+Invio
+  In data 24/08/2026 rivista questa parte ma senza il concetto applicato per CTRL+INVIO perché qui il posizionamento è su riga e colonna!
 
 Versione del 11/08/2026
 Nel menu "Tabella" inserite le nuove funzioni:
