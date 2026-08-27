@@ -181,9 +181,6 @@ def estrai_procedure_function(p_testo):
        Il risultato è una lista formata dalla classe "class_definizione" che contiene 
        in prima battuta il nome della definizione e secondariamente una lista dei paramatri       
     """
-    # importo la libreria delle regular expression
-    import re
-
     # controllo se il testo che mi è stato passato ha sia il package specification che il body
     # se esistono entrambi andrò ad analizzare solo la parte di body
     # se non esistono perché siamo in presenza solo di una singola procedura-funzione, considero

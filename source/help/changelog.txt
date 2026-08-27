@@ -6,8 +6,6 @@ MSql TODO!!!
 - Da Marco V. Va rivista la parte delle preferenze di connessione nel senso che vanno gestite in modo diverso le impostazioni relative alle connessioni automatiche all'avvio; con una maggiore integrazione con la connessione manuale da menù.
 - Segnalato da Diego; vado in ricerca-e-sostituisci; inserisco una stringa di ricerca e una di sostituzione, prima di fare la "ricerca" della prima ricorrenza, faccio subito la replace! In pratica non fa nulla e non si capisce il suo comportamento!
 - Provato a passare alla nuova versione di Oracledb 4.0.1 che però non funziona con i driver installati sul PC..perché si deve avere almeno Oracle 19! Tornato indietro alla versione 3!
-- Se apro nell'object viewer SM_SMYIOT_PKG, nella prima funzione non riesce a ricavare la var p_user_handle, anche in GET_MATRICOLE_DA_VERIFICARE
-  Se interrogo nell'object viewer una funzione sarebbe bello capire tipologia del parametro (input-output)
 - Lato linux creare lo script per pacchettizzare tutto il programma
 
 Utilizzatori a cui inviare mail di aggiornamento:
@@ -21,6 +19,12 @@ Utilizzatori a cui inviare mail di aggiornamento:
 ---------------
 MSql Changelog!
 ---------------
+
+Versione del 25/08/2026
+- Inserito nella statusbar lo slider per effettuare lo zoom sulla parte di editor, risultati e output
+KO! Se apro nell'object viewer SM_SMYIOT_PKG, nella prima funzione non riesce a ricavare la var p_user_handle, anche in GET_MATRICOLE_DA_VERIFICARE
+    Se interrogo nell'object viewer una funzione sarebbe bello capire tipologia del parametro (input-output)
+		Putroppo anche rivedendo con AI questo problema, non sono riuscito a correggerlo!
 
 Versione del 24/08/2026
 - Da Diego B. Copio una parola, poi eseguo una selezione rettangolare di riga singola e faccio ctrl+v non mi svolge la copia di multipla

@@ -223,6 +223,17 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         h.addWidget(self.calc_button)
         # Aggiungo il container alla status bar
         self.statusBar.addWidget(container)
+        # Slider per lo zoom
+        self.l_zoom_text = QLabel(QCoreApplication.translate('MSql_win1', 'Zoom:'))
+        self.l_zoom_text.setFrameStyle(QFrame.Shape.NoFrame)        
+        self.zoom_slider = QSlider(Qt.Orientation.Horizontal) # Imposta l'orientamento orizzontale
+        self.zoom_slider.setMinimum(-5)                       # Esempio: Zoom minimo  -5 livelli
+        self.zoom_slider.setMaximum(8)                        # Esempio: Zoom massimo +8 livelli
+        self.zoom_slider.setValue(0)                          # Valore iniziale (zoom normale)
+        self.zoom_slider.setFixedWidth(100)                   # Blocca la larghezza dello slider per non farlo allungare troppo        
+        self.zoom_slider.valueChanged.connect(self.slot_zoom_changed)         
+        self.statusBar.addWidget(self.l_zoom_text)
+        self.statusBar.addWidget(self.zoom_slider)
         # Informazioni sul tempo di esecuzione dell'ultima istruzione
         self.l_exec_time = QLabel(QCoreApplication.translate('MSql_win1','Last execution time:'))
         self.l_exec_time.setFrameStyle(QFrame.Shape.NoFrame)        
@@ -932,6 +943,39 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             elif p_slot.objectName() == 'actionEditor_view':                
                 o_MSql_win2.slot_editor_view()            
 
+    def slot_zoom_changed(self, p_zoom):
+        """
+           Evento che si attiva quando si agisce sullo slider "zoom" presente nella statubar e che modifica il valore di zoom dell'editor attivo
+        """                
+        # Carico l'oggetto di classe MSql_win2_class attivo in questo momento         
+        o_MSql_win2 = self.oggetto_win2_attivo()
+        # Se finestra editor è attiva, allora modifico il valore di zoom dell'editor attivo
+        if o_MSql_win2 is not None:      
+            # Se il valore di zoom precedente era diverso da zero, riporto l'editor al valore di zoom 0
+            if o_MSql_win2.zoom_slider_old_value > 0:
+                for i in range(0,o_MSql_win2.zoom_slider_old_value):
+                    o_MSql_win2.e_sql.zoomOut()
+                    o_MSql_win2.o_table.zoomOut()
+                    o_MSql_win2.o_output.zoomOut()
+            elif o_MSql_win2.zoom_slider_old_value < 0:
+                for i in range(o_MSql_win2.zoom_slider_old_value,0):
+                    o_MSql_win2.e_sql.zoomIn()
+                    o_MSql_win2.o_table.zoomIn()
+                    o_MSql_win2.o_output.zoomIn()
+            # Ora imposto il nuovo valore di zoom
+            if p_zoom > 0:
+                for i in range(0,p_zoom):
+                    o_MSql_win2.e_sql.zoomIn()
+                    o_MSql_win2.o_table.zoomIn()
+                    o_MSql_win2.o_output.zoomIn()
+            elif p_zoom < 0:
+                for i in range(p_zoom,0):
+                    o_MSql_win2.e_sql.zoomOut()
+                    o_MSql_win2.o_table.zoomOut()
+                    o_MSql_win2.o_output.zoomOut()
+            # Infine salvo il valore di zoom corrente per il prossimo evento
+            o_MSql_win2.zoom_slider_old_value = p_zoom
+
     def slot_save_all(self):
         """ 
            salvataggio di tutti i file aperti (quelli che hanno il testo modificato)
@@ -1006,12 +1050,17 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
     def slot_mdiArea_subwindow_activated(self, subwindow):
         """
            Evento che si attiva quando viene selezionata una subwindow all'interno del mdi area
-           e che modifica il titolo della window principale
+           - modifica il titolo della window principale
+           - reimposta lo slider dello zoom in base al valore dell'editor attivo
         """        
+        # se subwindow è None, significa che non c'è nessuna window attiva (tutte chiuse) e quindi non devo fare nulla
         if subwindow is None:
             return ''
-        
+        # imposto il titolo generale di MSql
         self.setWindowTitle(subwindow.windowTitle())
+        # carico l'oggetto di classe MSql_win2_class attivo in questo momento         
+        o_MSql_win2 = self.oggetto_win2_attivo()
+        self.zoom_slider.setValue(o_MSql_win2.zoom_slider_old_value) 
     
     def slot_editable(self):
         """
@@ -3230,7 +3279,7 @@ class My_MSql_Lexer(QsciLexerSQL):
     
         # attivo il multiediting (cioè la possibilità, una volta fatta una selezione rettangolare, di fare un edit multiplo)        
         self.p_editor.SendScintilla(self.p_editor.SCI_SETADDITIONALSELECTIONTYPING, 1)                        
-        self.p_editor.SendScintilla(self.p_editor.SCI_SETMULTIPASTE, 1) # ABILITA IL PASTE MULTIPLO (Da Diego B. Copio una parola, poi eseguo una selezione rettangolare di riga singola e faccio ctrl+v non mi svolge la copia di multipla)
+        self.p_editor.SendScintilla(self.p_editor.SCI_SETMULTIPASTE, 1) # ABILITA IL PASTE MULTIPLO (24/08/2026 - Da Diego B. Copio una parola, poi eseguo una selezione rettangolare di riga singola e faccio ctrl+v non mi svolge la copia di multipla)
         v_offset = self.p_editor.positionFromLineIndex(0, 7) 
         self.p_editor.SendScintilla(self.p_editor.SCI_SETSELECTION, v_offset, v_offset)        
         v_offset = self.p_editor.positionFromLineIndex(1, 5)
@@ -3517,6 +3566,9 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
 
         # evidenzio i colori se richiesto
         self.set_emphasis()
+
+        # imposto il valore dello zoom
+        self.zoom_slider_old_value = 0
        
         ###
         # Definizione di eventi aggiuntivi
@@ -6416,7 +6468,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # partendo dalla lista che contiene il testo, creo un oggetto che contiene la lista di tutte le procedure-funzioni!
         v_lista_def = estrai_procedure_function(v_lista_testo)
         # controllo se inserito un testo di ricerca
-        v_ricerca = self.e_map_search.text().upper()
+        v_ricerca = self.e_map_search.text().upper().lstrip().rstrip()
         # leggo l'oggetto che contiene procedure-funzioni e lo carico nel modello da visualizzare a video
         v_y = 0        
         for ele in v_lista_def:          

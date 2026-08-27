@@ -204,15 +204,23 @@ class MyCustomTableWidget(QTableWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.carattere_di_separazione = '|'
-    """
-       Imposta il carattere di separazione da usare quando si copia negli appunti i dati selezionati nella tabella dei risultati
-    """
+
+        # --- Variabili necessarie per la gestione dello zoom ---
+        self._base_font_size = self.font().pointSize()
+        if self._base_font_size <= 0:
+            self._base_font_size = 10  # Fallback se la dimensione è definita in pixel            
+        self._current_zoom = 0  # Livello di zoom iniziale (corrisponde a 0 step)
+
     def set_carattere_di_separazione(self, p_carattere):
+        """
+           Imposta il carattere di separazione da usare quando si copia negli appunti i dati selezionati nella tabella dei risultati
+        """
         self.carattere_di_separazione = p_carattere
-    """
-       Gestione movimento della rotella del mouse sulla parte dei risultati e se combinata con il tasto shift allora effettuo lo scroll orizzontale destra-sinistra
-    """
+    
     def wheelEvent(self, event: QWheelEvent):
+        """
+           Gestione movimento della rotella del mouse sulla parte dei risultati e se combinata con il tasto shift allora effettuo lo scroll orizzontale destra-sinistra
+        """
         if event.type() == QEvent.Type.Wheel:
             wheel_event: QWheelEvent = event
             if wheel_event.modifiers() == Qt.KeyboardModifier.ShiftModifier:                
@@ -223,20 +231,22 @@ class MyCustomTableWidget(QTableWidget):
                     event.accept()  # Indica che l'evento è stato gestito
                     return
         super().wheelEvent(event)    
-    """
-       Gestione del ctrl+c per copiare i dati selezionati nella tabella dei risultati
-    """
+
     def keyPressEvent(self, event: QKeyEvent):
+        """
+           Gestione del ctrl+c per copiare i dati selezionati nella tabella dei risultati
+        """
         # Rileva CTRL + C
         if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_C:
             self.copia_selezione_in_clipboard()
             event.accept()
         else:
             super().keyPressEvent(event)
-    """
-        Copia i dati selezionati nella tabella dei risultati negli appunti usando il carattere di separazione specificato        
-    """
+    
     def copia_selezione_in_clipboard(self):
+        """
+           Copia i dati selezionati nella tabella dei risultati negli appunti usando il carattere di separazione specificato        
+        """
         ranges = self.selectedRanges()
         if not ranges:
             return
@@ -260,23 +270,58 @@ class MyCustomTableWidget(QTableWidget):
         # Unisce tutto con INVIO
         full_text = "\n".join(all_copied_rows)
         QApplication.clipboard().setText(full_text)        
-    """
-        Se il click avviene nell'area dell'header (tramite coordinate o controllo focus)
-        ma vogliamo gestire il comportamento standard delle celle, lasciamo il super()
-    """
+    
     def mousePressEvent(self, event: QMouseEvent):       
+        """
+           Se il click avviene nell'area dell'header (tramite coordinate o controllo focus)
+           ma vogliamo gestire il comportamento standard delle celle, lasciamo il super()
+        """
         super().mousePressEvent(event)    
-    """
-       Se l'evento è scatenato dall'header (tipicamente non ha un 'event' o 
-       ha flag specifici), possiamo istruire la tabella a ignorare la selezione 
-       totale della colonna ma permettere quella delle celle.
-    """ 
+    
     def selectionCommand(self, index, event=None):        
+        """
+           Se l'evento è scatenato dall'header (tipicamente non ha un 'event' o 
+           ha flag specifici), possiamo istruire la tabella a ignorare la selezione 
+           totale della colonna ma permettere quella delle celle.
+        """ 
         # Se vuoi bloccare SOLO la selezione cliccando sulle intestazioni:
         if event is None and index.isValid():
             return QItemSelectionModel.SelectionFlag.NoUpdate
         
         return super().selectionCommand(index, event)
+
+    def zoomTo(self, level: int):
+        """ 
+           Imposta lo zoom a un livello specifico, replicando QsciScintilla 
+        """
+        self._current_zoom = level
+        nuova_dimensione = self._base_font_size + self._current_zoom
+        
+        # Applica il font a celle e intestazioni
+        nuovo_font = self.font()
+        nuovo_font.setPointSize(nuova_dimensione)
+        self.setFont(nuovo_font)
+        self.horizontalHeader().setFont(nuovo_font)
+        self.verticalHeader().setFont(nuovo_font)
+        
+        # Calcola l'altezza proporzionale delle righe
+        altezza_riga = int(nuova_dimensione * 2.2)
+        self.verticalHeader().setDefaultSectionSize(altezza_riga)
+        
+        # Adatta la larghezza delle colonne al nuovo font
+        self.resizeColumnsToContents()
+
+    def zoomIn(self):
+        """ 
+           Incrementa lo zoom di 1 step 
+        """
+        self.zoomTo(self._current_zoom + 1)
+
+    def zoomOut(self):
+        """ 
+           Decrementa lo zoom di 1 step 
+        """
+        self.zoomTo(self._current_zoom - 1)
 
 ###
 # Questa classe personalizza il widget QPlainTextEdit aggiungendo a sinistra la barra con i numeri di riga
@@ -297,13 +342,50 @@ class MyCustomPlainTextWithNumber(QPlainTextEdit):
         super().__init__(parent)
         self.lineNumberArea = LineNumberArea(self)
 
+        # --- LOGICA ZOOM ---
+        # Memorizziamo la dimensione iniziale del font (es. 8 o 9 punti)
+        self._base_font_size = self.font().pointSize()
+        if self._base_font_size <= 0:
+            self._base_font_size = 10
+        self._current_zoom = 0  # Livello di zoom iniziale
+
         self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
         self.updateRequest.connect(self.updateLineNumberArea)
 
         self.updateLineNumberAreaWidth(0)
 
+    def zoomTo(self, level: int):
+        """ 
+            Imposta lo zoom a un livello specifico, aggiornando testo e numeri 
+        """
+        # Calcoliamo lo scostamento rispetto allo zoom attuale per usare il metodo nativo di Qt
+        # Esempio: se sono a zoom +2 e voglio andare a +5, devo fare un salto nativo di +3
+        diff = level - self._current_zoom
+        self._current_zoom = level
+        
+        # Sfruttiamo il motore di zoom nativo di QPlainTextEdit
+        if diff > 0:
+            super().zoomIn(diff)
+        elif diff < 0:
+            super().zoomOut(abs(diff))
+            
+        # Forziamo il ricalcolo degli spazi dell'area numerica e ridisegnamo
+        self.updateLineNumberAreaWidth(0)
+        self.lineNumberArea.update()
+
+    def zoomIn(self, range: int = 1):
+        """ 
+           Incrementa lo zoom di N step (default 1) 
+        """
+        self.zoomTo(self._current_zoom + range)
+
+    def zoomOut(self, range: int = 1):
+        """ 
+        Decrementa lo zoom di N step (default 1) """
+        self.zoomTo(self._current_zoom - range)    
+
     def lineNumberAreaWidth(self):
-        digits = len(str(self.blockCount()))
+        digits = len(str(self.blockCount()))        
         space = self.fontMetrics().horizontalAdvance('9') * digits
         return space + 10
 
@@ -326,19 +408,21 @@ class MyCustomPlainTextWithNumber(QPlainTextEdit):
 
     def lineNumberAreaPaintEvent(self, event):
         painter = QPainter(self.lineNumberArea)
-        #painter.fillRect(event.rect(), QColor(240, 240, 240))
-        #painter.fillRect(event.rect(), QColor(50, 50, 50))  # Sfondo scuro
-        #painter.fillRect(event.rect())  # Sfondo scuro
 
         block = self.firstVisibleBlock()
         blockNumber = block.blockNumber()
         top = self.blockBoundingGeometry(block).translated(self.contentOffset()).top()
         bottom = top + self.blockBoundingRect(block).height()
 
+        dimensione_numeri = self._base_font_size + self._current_zoom
+        font_numeri = QFont("Segoe UI", dimensione_numeri)
+        painter.setFont(font_numeri)
+
         while block.isValid() and top <= event.rect().bottom():
             if block.isVisible() and bottom >= event.rect().top():
                 number = str(blockNumber + 1)
-                painter.setFont(QFont("Segoe UI", 8))
+                
+                # Usiamo il fontMetrics corrente (che è già zoomato) per posizionare correttamente il testo verticalmente
                 painter.drawText(0, int(top), self.lineNumberArea.width(), int(self.fontMetrics().height()),
                                  1, number)
 
