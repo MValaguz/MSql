@@ -71,7 +71,9 @@ from avanzamento import avanzamento_infinito_class
 from utilita import *
 from utilita_database import *
 from utilita_testo import *
-from utilita_classi import classChangeLog, classSingleInstanceManager, CompactListDelegate, classFontArtViewer, return_ascii_art_text, OracleTableDialog
+from utilita_classi import classChangeLog, classSingleInstanceManager, CompactListDelegate, classFontArtViewer, return_ascii_art_text, OracleTableDialog, classDBLinkExplorer     
+from utilita_classi import MyFileExtensionFilterProxyModel
+from query_designer import QueryDesigner
 # Libreria che permette, selezionata un'istruzione sql nell'editor di indentarla automaticamente
 from sql_formatter.core import format_sql
 # Visualizzatore delle differenze tra due testi
@@ -195,7 +197,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         if o_global_preferences.dark_theme:
             self.mdiArea.setBackground(QColor('#242424'))      
         # Sull'area MDI attivo evento di cambio titolo finestre figlie in modo da poterlo aggiornare nella window principale
-        self.mdiArea.subWindowActivated.connect(self.slot_mdiArea_subwindow_activated)                                                      
+        self.mdiArea.subWindowActivated.connect(self.slot_mdiArea_subwindow_activated)                                                              
 
         ###
         # Aggiunta di windget alla statusbar con: flag editabilità, numero di caratteri, indicatore di overwrite, ecc..
@@ -539,7 +541,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         elif p_slot.objectName() == 'actionExplore_database_link':
             self.slot_explore_database_link()
         # Apertura di un nuovo editor o di un file recente o di una chiamata esterna da parte di altra istanza MSql
-        elif p_slot.text() in (QCoreApplication.translate('MSql_win1','New'),QCoreApplication.translate('MSql_win1','Open'),QCoreApplication.translate('MSql_win1','Open_db_obj')) or p_slot.text() in ('OPEN_FROM_SIM') or str(p_slot.data()) == 'FILE_RECENTI':            
+        elif p_slot.text() in (QCoreApplication.translate('MSql_win1','New'),QCoreApplication.translate('MSql_win1','Open'),QCoreApplication.translate('MSql_win1','Open_db_obj')) or p_slot.text() in ('OPEN_FROM_SIM') or str(p_slot.data()) == 'FILE_RECENTI':                        
             # se richiesto un file recente
             if str(p_slot.data()) == 'FILE_RECENTI':
                 # apro il file richiesto
@@ -548,21 +550,21 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 if v_titolo is None:
                     return None
             # se richiesto Open...
-            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Open'):
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Open'):                
                 # apro un file tramite dialog box
                 v_titolo, v_contenuto_file, v_codifica_utf8 = self.openfile(None)                
                 # se non è stato scelto alcun file --> esco da tutto!
                 if v_titolo is None:
                     return None
             # se richiesto Open da altra istanza MSql...il nome del file da aprire è nella proprietà objectname dell'azione ricevuta in input
-            elif p_slot.text() in 'OPEN_FROM_SIM':
+            elif p_slot.text() in 'OPEN_FROM_SIM':                
                 # apro il file il cui nome trovo nell'object name (v. funzione slot_open_file_from_SIM dove è stato caricato)
                 v_titolo, v_contenuto_file, v_codifica_utf8 = self.openfile(p_slot.objectName())                
                 # se non è stato scelto alcun file --> esco da tutto!
                 if v_titolo is None:
                     return None
             # se richiesto Open_db_obj...
-            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Open_db_obj'):
+            elif p_slot.text() == QCoreApplication.translate('MSql_win1','Open_db_obj'):                
                 # apro un file
                 v_titolo = p_oggetto_titolo_db
                 v_contenuto_file = p_oggetto_testo_db 
@@ -576,20 +578,28 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 v_titolo = 'Untitled' + str(self.v_num_window2)
                 v_contenuto_file = None
                 v_codifica_utf8 = True
-            # creo una nuovo oggetto editor (gli passo il titolo, eventuale contenuto del file e relativa codifica e gli oggetti della statusbar)
-            o_MSql_win2 = MSql_win2_class(v_titolo, 
-                                          v_contenuto_file, 
-                                          v_codifica_utf8,
-                                          self)
-            # l'oggetto editor lo salvo all'interno di una lista in modo sia reperibile quando necessario
-            self.o_lst_window2.append(o_MSql_win2)        
-            # collego l'oggetto editor ad una nuova finestra del gestore mdi e la visualizzo, massimizzandola (imposto icona vuota!)
-            # da notare come il nome di file completo di fatto viaggia all'interno del nome degli oggetti
-            sub_window = self.mdiArea.addSubWindow(o_MSql_win2)                  
-            sub_window.setObjectName(o_MSql_win2.objectName())
-            sub_window.setWindowIcon(QIcon("icons:database.png"))                              
-            sub_window.show()  
-            sub_window.showMaximized()  
+            ##
+            # a questo punto ho il titolo del file da aprire, il contenuto e la codifica. Se il titolo contiene la parola .msql_qd allora apro il file con il query designer, altrimenti apro un editor di testo
+            ##
+            # Apro file di query designer .msql_qd
+            if '.msql_qd' in v_titolo:                
+                self.slot_query_designer(v_titolo)
+            # Apro file di editor di testo .msql
+            else:
+                # creo una nuovo oggetto editor (gli passo il titolo, eventuale contenuto del file e relativa codifica e gli oggetti della statusbar)            
+                o_MSql_win2 = MSql_win2_class(v_titolo, 
+                                            v_contenuto_file, 
+                                            v_codifica_utf8,
+                                            self)
+                # l'oggetto editor lo salvo all'interno di una lista in modo sia reperibile quando necessario
+                self.o_lst_window2.append(o_MSql_win2)        
+                # collego l'oggetto editor ad una nuova finestra del gestore mdi e la visualizzo, massimizzandola (imposto icona vuota!)
+                # da notare come il nome di file completo di fatto viaggia all'interno del nome degli oggetti
+                sub_window = self.mdiArea.addSubWindow(o_MSql_win2)                  
+                sub_window.setObjectName(o_MSql_win2.objectName())
+                sub_window.setWindowIcon(QIcon("icons:database.png"))                              
+                sub_window.show()  
+                sub_window.showMaximized()  
         # Gestione preferenze
         elif p_slot.objectName() == 'actionPreferences':
             self.slot_preferences()
@@ -1053,15 +1063,16 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
            - modifica il titolo della window principale
            - reimposta lo slider dello zoom in base al valore dell'editor attivo
         """        
-        # se subwindow è None, significa che non c'è nessuna window attiva (tutte chiuse) e quindi non devo fare nulla
+        # se subwindow è None, significa che non c'è nessuna window attiva (tutte chiuse) e quindi torno al titolo originale
         if subwindow is None:
-            return ''
-        # imposto il titolo generale di MSql
-        self.setWindowTitle(subwindow.windowTitle())
-        # carico l'oggetto di classe MSql_win2_class attivo in questo momento         
-        o_MSql_win2 = self.oggetto_win2_attivo()
-        self.zoom_slider.setValue(o_MSql_win2.zoom_slider_old_value) 
-    
+           self.setWindowTitle('MSql Editor')
+        else:
+            # imposto il titolo generale di MSql
+            self.setWindowTitle(subwindow.windowTitle())
+            # carico l'oggetto di classe MSql_win2_class attivo in questo momento         
+            o_MSql_win2 = self.oggetto_win2_attivo()
+            self.zoom_slider.setValue(o_MSql_win2.zoom_slider_old_value) 
+
     def slot_editable(self):
         """
            Gestione della modifica dei risultati di una query
@@ -1443,12 +1454,13 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             self.set_current_schema()     
         except oracledb.DatabaseError as e:
             error_obj, = e.args 
-            message_error(QCoreApplication.translate('MSql_win1','Error to oracle connection!')+'\n'+error_obj.message)    
+            message_error(QCoreApplication.translate('MSql_win1','Error to oracle connection!')+'\n'+error_obj.message)                
             if self.e_user_proxy != '':
                 message_error(QCoreApplication.translate('MSql_win1','For via proxy connection remember to activate this using command')+chr(10)+'"ALTER USER proxy_user GRANT CONNECT THROUGH main_user;"'+chr(10)+QCoreApplication.translate('MSql_win1','using user SYS!'))    
-            v_global_connected = False        
+            v_global_connected = False                    
         except Exception as e:
             message_error(QCoreApplication.translate('MSql_win1','Error to oracle connection!'))    
+            v_global_connected = False            
 
         # Se mi collego come SYSDBA coloro di rosso
         if self.e_user_mode == 'SYSDBA':
@@ -3081,7 +3093,6 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
            Apre la window per esplorare i database link           
         """
         global v_global_connected, v_global_connection
-        from dblink_viewer import classDBLinkExplorer
 
         if not v_global_connected:
             message_error(QCoreApplication.translate('MSql_win1','No connection!'))
@@ -3210,16 +3221,14 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         """        
         self.win_calculator = None
 
-    def slot_query_designer(self):
+    def slot_query_designer(self, file_to_load=None):
         """
            Apre il query designer
         """   
         global v_global_connection     
-        
-        from query_designer import QueryDesigner
 
-        self.win_query_designer = QueryDesigner(v_global_connection, self.current_schema)        
-        self.win_query_designer.show()        
+        self.win_query_designer = QueryDesigner(v_global_connection, self.current_schema, file_to_load=file_to_load, parent=self)
+        self.win_query_designer.show()
         centra_window_figlia(self, self.win_query_designer)
         
 #  _     _______  _______ ____  
@@ -3247,8 +3256,11 @@ class My_MSql_Lexer(QsciLexerSQL):
         self.p_editor.setIndentationGuides(o_global_preferences.indentation_guide)                            
     
         # attivo i margini con + e - 
-        self.p_editor.setFolding(p_editor.FoldStyle.BoxedTreeFoldStyle, 2) 
-    
+        self.p_editor.setFolding(p_editor.FoldStyle.BoxedTreeFoldStyle, 2)         
+        self.setFoldCompact(False)
+        self.setFoldComments(True)
+        self.setFoldAtElse(True)     
+
         # indentazione
         self.p_editor.setIndentationWidth(int(o_global_preferences.tab_size))
         self.p_editor.setAutoIndent(True)
@@ -3304,11 +3316,6 @@ class My_MSql_Lexer(QsciLexerSQL):
             self.p_editor.setAutoCompletionThreshold(1000)  
         # attivo autocompletamento sia per la parte del contenuto del documento che per la parte di parole chiave specifiche
         self.p_editor.autoCompleteFromAll()                        
-
-        # attivo il folding (+ e - sul margine sinistro)
-        self.setFoldCompact(False)
-        self.setFoldComments(True)
-        self.setFoldAtElse(True)     
 
         # attivo i segnalibri dentro il margine tra i numeri di riga e il folding (scalo la dimensione dell'icona a 16px)                    
         # riferirsi eventualmente alla documentazione https://qscintilla.com/#margins/margin_basics/symbol_margin
@@ -4048,7 +4055,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                         v_file_download = user_downloads_dir() + '\\' + v_nome_tabella.upper() + '_' + v_nome_file[0:20].replace('.','_')                        
                         # rispetto al vecchio metodo, viene richiamata la funzione che ricevendo in ingresso il blob e il nome del file, lo spezza in blocchi e lo scarica
                         # se infatti il blob superava i 2,5gb la procedura tradizionale andava in errore
-                        if utilita_database.download_blob(column, v_file_download) == 'ok':
+                        if download_blob(column, v_file_download) == 'ok':
                             # sostituisce la freccia del mouse con icona "clessidra"
                             Freccia_Mouse(False)
                             # messaggio di fine
@@ -4204,6 +4211,13 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
            Premendo F11 viene estratto dalla posizione del cursore dell'editor, il nome dell'oggetto
            e da li viene eseguita una query. Per semplicità viene usata la funzione per f12 dicendo di restituire solo il nome dell'oggetto
         """
+        global v_global_connected
+
+        # se non collegato --> esco
+        if not v_global_connected:
+            message_error(QCoreApplication.translate('MSql_win1','No connection!'))
+            return 'ko'
+
         v_nome_oggetto, v_tipo_oggetto = self.slot_f12(p_f11=True)
         if v_nome_oggetto != 'ko':
             # messaggio di debug
@@ -4221,6 +4235,13 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
            Note: Ho provato a vedere se esiste possibilità di chiedere a qscintilla se mi può dare la parola su cui il cursore è posizionato
                  ma no trovato. Quindi fatto una cosa semiinterna creando una funzione in package utilita
         """
+        global v_global_connected
+
+        # se non collegato --> esco
+        if not v_global_connected:
+            message_error(QCoreApplication.translate('MSql_win1','No connection!'))
+            return 'ko'
+        
         # ricavo numero riga e posizione del cursore
         v_num_line, v_num_pos = self.e_sql.getCursorPosition()                
         # estraggo l'intera riga dove è posizionato il cursore
@@ -4292,6 +4313,13 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
            A quel punto viene cercata la chiave primaria, e viene creata una select con il nome della tabella e con i campi
            della chiave primaria
         """    
+        global v_global_connected
+
+        # se non collegato --> esco
+        if not v_global_connected:
+            message_error(QCoreApplication.translate('MSql_win1','No connection!'))
+            return 'ko'
+
         # imposto end of line
         if self.setting_eol == 'W':                        
             v_eol = '\r\n'
@@ -4798,6 +4826,12 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
            Se si attiva p_explain la select verrà eseguita come se fosse uno script che crea il "piano di esecuzione"
         """
         global o_global_preferences  
+        global v_global_connected
+
+        # se non collegato --> esco
+        if not v_global_connected:
+            message_error(QCoreApplication.translate('MSql_win1','No connection!'))
+            return 'ko'
 
         def fine_istruzione(p_stringa):
             """
@@ -6965,12 +6999,17 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         global o_global_preferences
 
         # viene usato indicatore fisso numero 5!
-        v_indicator = 5
+        v_indicator = 5        
         # definisco lo stile “straight box” per evidenziare la parola 
-        self.e_sql.indicatorDefine(QsciScintilla.IndicatorStyle.StraightBoxIndicator,v_indicator)
-        self.e_sql.setIndicatorDrawUnder(True, v_indicator)        
-        # come colore utilizzo quello impostato nell'apposita preferenza
-        self.e_sql.setIndicatorForegroundColor(QColor(o_global_preferences.highlight_color_hex), v_indicator)        
+        self.e_sql.indicatorDefine(QsciScintilla.IndicatorStyle.StraightBoxIndicator, v_indicator)        
+        # Fondamentale: True dice a Scintilla di disegnare lo sfondo SOTTO il testo.
+        self.e_sql.setIndicatorDrawUnder(True, v_indicator)                        
+        # Recuperiamo il colore dalle preferenze
+        colore_base = QColor(o_global_preferences.highlight_color_hex)
+        # Impostiamo l'Alpha (opacità): 255 è solido, 0 è invisibile. 100/120 è perfetto per un evidenziatore.
+        colore_base.setAlpha(100)         
+        # Passiamo il colore semi-trasparente all'indicatore
+        self.e_sql.setIndicatorForegroundColor(colore_base, v_indicator)                
         # prendo la selezione
         sl, si, el, ei = self.e_sql.getSelection()
         # converto in offset assoluti
@@ -6978,8 +7017,8 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         end    = self.e_sql.positionFromLineIndex(el, ei)
         length = end - start
         # applico l’indicatore 
-        self.e_sql.SendScintilla(self.e_sql.SCI_SETINDICATORCURRENT,v_indicator)
-        self.e_sql.SendScintilla(self.e_sql.SCI_INDICATORFILLRANGE,start, length)
+        self.e_sql.SendScintilla(self.e_sql.SCI_SETINDICATORCURRENT, v_indicator)
+        self.e_sql.SendScintilla(self.e_sql.SCI_INDICATORFILLRANGE, start, length)
     
     def slot_editor_view(self):
         """

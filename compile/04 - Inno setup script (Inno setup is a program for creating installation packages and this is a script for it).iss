@@ -46,11 +46,18 @@ Source: "font\FiraCode-SemiBold.ttf"; DestDir: "{fonts}"; Flags: onlyifdoesntexi
 
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 [Registry]
+; ---- ASSOCIAZIONE .msql ----
 Root: HKA; Subkey: "Software\Classes\.msql\OpenWithProgids"; ValueType: string; ValueName: "MSqlFile.msql"; ValueData: ""; Flags: uninsdeletevalue
 Root: HKA; Subkey: "Software\Classes\MSqlFile.msql"; ValueType: string; ValueName: ""; ValueData: "MSql File"; Flags: uninsdeletekey
 Root: HKA; Subkey: "Software\Classes\MSqlFile.msql\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\MSql.exe,0"
 Root: HKA; Subkey: "Software\Classes\MSqlFile.msql\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\MSql.exe"" ""%1"""
 Root: HKA; Subkey: "Software\Classes\Applications\MSql.exe\SupportedTypes"; ValueType: string; ValueName: ".msql"; ValueData: ""
+; ---- .msql_qd (Query Designer Diagram) ----
+Root: HKA; Subkey: "Software\Classes\.msql_qd\OpenWithProgids"; ValueType: string; ValueName: "MSqlFile.msql_qd"; ValueData: ""; Flags: uninsdeletevalue
+Root: HKA; Subkey: "Software\Classes\MSqlFile.msql_qd"; ValueType: string; ValueName: ""; ValueData: "MSql Query Designer Diagram"; Flags: uninsdeletekey
+Root: HKA; Subkey: "Software\Classes\MSqlFile.msql_qd\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\_internal\icons\MSql_qd.ico"
+Root: HKA; Subkey: "Software\Classes\MSqlFile.msql_qd\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\MSql.exe"" ""%1"""
+Root: HKA; Subkey: "Software\Classes\Applications\MSql.exe\SupportedTypes"; ValueType: string; ValueName: ".msql_qd"; ValueData: ""
 ; NOTE: Questi istruzioni caricano il font Fira nel registry
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"; ValueType: string; ValueName: "Fira Code (TrueType)"; ValueData: "FiraCode-Bold.ttf"; Flags: uninsdeletevalue
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"; ValueType: string; ValueName: "Fira Code (TrueType)"; ValueData: "FiraCode-Light.ttf"; Flags: uninsdeletevalue

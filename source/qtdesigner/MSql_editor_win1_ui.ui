@@ -128,7 +128,6 @@
     <addaction name="separator"/>
     <addaction name="actionText_to_index"/>
     <addaction name="actionFormat_SQL_instruction"/>
-    <addaction name="actionExtract_primary_key"/>
     <addaction name="actionNextF4"/>
     <addaction name="separator"/>
     <addaction name="actionText_to_Ascii_Art"/>
@@ -150,6 +149,7 @@
     <addaction name="separator"/>
     <addaction name="actionFind_object"/>
     <addaction name="actionQuick_query"/>
+    <addaction name="actionExtract_primary_key"/>
    </widget>
    <widget class="QMenu" name="menuAdvanced">
     <property name="title">

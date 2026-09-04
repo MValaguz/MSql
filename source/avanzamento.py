@@ -87,4 +87,4 @@ if __name__ == "__main__":
     ui = Ui_Test()
     ui.setupUi(TestWindow)
     TestWindow.show()
-    sys.exit(app.exec_())        
+    sys.exit(app.exec())        

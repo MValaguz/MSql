@@ -64,24 +64,6 @@ class OracleMetadata:
         Freccia_Mouse(False)
         return {r[0] for r in cur}
 
-    def fk(self, table):
-        Freccia_Mouse(True)
-        cur = self.conn.cursor()
-        cur.execute("""
-            SELECT a.column_name, c_pk.table_name, b.column_name
-            FROM all_constraints c
-            JOIN all_cons_columns a ON c.constraint_name = a.constraint_name
-            JOIN all_constraints c_pk ON c.r_constraint_name = c_pk.constraint_name
-            JOIN all_cons_columns b
-              ON c_pk.constraint_name = b.constraint_name
-             AND a.position = b.position
-            WHERE c.constraint_type = 'R'
-              AND c.owner = :s
-              AND c.table_name = :t
-        """, s=self.schema, t=table)
-        Freccia_Mouse(False)
-        return [(r[0], r[1], r[2]) for r in cur]
-
 # ============================================================
 # GRAPHICS ITEMS
 # ============================================================
@@ -189,20 +171,56 @@ class FieldItem(QGraphicsRectItem):
         self.setPen(QPen(Qt.PenStyle.NoPen))
         self.setBrush(QBrush(Qt.BrushStyle.NoBrush))
 
+        # Testo del campo
         self.text = QGraphicsSimpleTextItem(name, self)
         self.text.setPos(18, 0)
 
-        if is_pk or is_fk:
+        # Icona per Chiave Primaria (PK)
+        if is_pk:
             self.icon = QGraphicsEllipseItem(4, 4, 8, 8, self)
-            self.icon.setBrush(QBrush(QColor("gold") if is_pk else QColor("orange")))
+            self.icon.setBrush(QBrush(QColor("gold")))
             self.icon.setPen(QPen(Qt.GlobalColor.black))
         else:
-            self.icon = None
+            # Creiamo un elemento di testo per la spunta verde (sarà nascosto all'inizio)
+            self.icon = QGraphicsSimpleTextItem("", self)
+            self.icon.setPos(4, -2)
+            font_v = QFont()
+            font_v.setBold(True)
+            self.icon.setFont(font_v)
+            self.icon.setBrush(QBrush(QColor("green")))
+
+    def update_visual_state(self):
+        """Aggiorna la grafica del campo se è selezionato nella query o meno"""
+        font = QFont()
+        if self.view.parent_widget and self in self.view.parent_widget.selected_fields:
+            # ---- STATO SELEZIONATO ----
+            font.setBold(True)
+            self.text.setFont(font)
+            self.text.setBrush(QBrush(QColor("#1A5276"))) # Blu scuro nei campi attivi
+            
+            if not self.is_pk:
+                self.icon.setText("✓") # Mostra la spunta se non è PK
+        else:
+            # ---- STATO NORMALE ----
+            font.setBold(False)
+            self.text.setFont(font)
+            self.text.setBrush(QBrush(Qt.GlobalColor.black))
+            
+            if not self.is_pk:
+                self.icon.setText("") # Nasconde la spunta
 
     def mouseDoubleClickEvent(self, event):
         if self.view.parent_widget:
             if self not in self.view.parent_widget.selected_fields:
                 self.view.parent_widget.selected_fields.append(self)
+            else:
+                # il doppio clic consecutivo ora lo rimuove anche!
+                self.view.parent_widget.selected_fields.remove(self)
+                self.filter = ""
+                self.order = ""
+            
+            # Aggiorna la grafica di questo campo e la preview SQL
+            self.update_visual_state()
             self.view.parent_widget.update_sql_preview()
         event.accept()
 
@@ -212,28 +230,42 @@ class FieldItem(QGraphicsRectItem):
         order_action = menu.addAction("Set Order By")
         remove_action = menu.addAction("Remove field from SELECT")
         action = menu.exec(event.screenPos())
+        
+        if not action:
+            return
+
         if action == filter_action:
             text, ok = QInputDialog.getText(None, "Filter", f"Filter for {self.name}:", text=self.filter)
             if ok:
                 self.filter = text
+                if self.view.parent_widget and self not in self.view.parent_widget.selected_fields:
+                    self.view.parent_widget.selected_fields.append(self)
         elif action == order_action:
             items = ["ASC", "DESC"]
             text, ok = QInputDialog.getItem(None, "Order", f"Order {self.name}:", items, editable=False)
             if ok:
                 self.order = text
+                if self.view.parent_widget and self not in self.view.parent_widget.selected_fields:
+                    self.view.parent_widget.selected_fields.append(self)
         elif action == remove_action:
             if self.view.parent_widget and self in self.view.parent_widget.selected_fields:
                 self.view.parent_widget.selected_fields.remove(self)
+                self.filter = ""
+                self.order = ""
+
+        # Aggiorna sia l'aspetto visivo del campo che la preview SQL
+        self.update_visual_state()
         if self.view.parent_widget:
             self.view.parent_widget.update_sql_preview()
 
 class TableItem(QGraphicsRectItem):
-    def __init__(self, name, comment, fields, view):
+    def __init__(self, name, comment, fields, view, alias=""):
         # dimensione totale
         super().__init__(0, 0, 190, 30 + len(fields) * 18)
         self.name = name
         self.comment = comment
         self.view = view
+        self.alias = alias  # ✅ Memorizza l'alias (es. "T1")
         self.field_items = []
 
         # flags per drag, selezione, aggiornamenti
@@ -241,8 +273,8 @@ class TableItem(QGraphicsRectItem):
         self.setFlag(QGraphicsRectItem.GraphicsItemFlag.ItemSendsGeometryChanges)
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable)
         
-        # titolo integrato: testo (1 riga con ...)
-        full_title = f"{name}" + (f" - {comment}" if comment else "")
+        # Titolo integrato con Alias: Nome (Alias) - Commento
+        full_title = f"{name} ({alias})" + (f" - {comment}" if comment else "")
 
         font = QFont()
         font.setBold(True)
@@ -407,9 +439,13 @@ class DesignerView(QGraphicsView):
 # ============================================================
 # QUERY DESIGNER MAIN WINDOW
 # ============================================================
-class QueryDesigner(QMainWindow):
-    def __init__(self, conn, schema):
-        super().__init__()
+class QueryDesigner(QMainWindow):         
+    def __init__(self, conn, schema, file_to_load=None, parent=None):
+        # Passiamo il parent al costruttore di QMainWindow
+        super().__init__(parent)         
+        # Aggiungiamo un flag per renderla una finestra indipendente ma legata al parent
+        self.setWindowFlags(Qt.WindowType.Window)
+        
         self.setWindowTitle("Query Designer")
         self.resize(1600, 850)
         icon = QIcon()
@@ -436,13 +472,12 @@ class QueryDesigner(QMainWindow):
         self.search_field = QLineEdit()
         self.search_field.textChanged.connect(self.filter_tree)
         
-        # Definizione tree
         self.tree = QTreeWidget()
         self.tree.setColumnCount(2)
         self.tree.setHeaderLabels(["Table", "Comment"])
-        self.tree.setIndentation(0) # elimina indentazione
-        self.tree.setColumnWidth(0, 180)  # Table
-        self.tree.setColumnWidth(1, 200)  # Comment     
+        self.tree.setIndentation(0)
+        self.tree.setColumnWidth(0, 180)
+        self.tree.setColumnWidth(1, 200)
         self.tree.setFont(font)
         self.tree.setAlternatingRowColors(True)
         
@@ -457,7 +492,6 @@ class QueryDesigner(QMainWindow):
 
         # RIGHT
         right_splitter = QSplitter(Qt.Orientation.Vertical)
-
         self.sql_preview = QTextEdit()
 
         # ---- BUTTON BAR ----
@@ -497,6 +531,59 @@ class QueryDesigner(QMainWindow):
         self.load_metadata()
         self.tree.itemDoubleClicked.connect(self.add_table)
 
+        # ✅ Se è stato passato un file all'avvio, lo carica immediatamente
+        if file_to_load:
+            self.apri_file_diagramma(file_to_load)
+
+    def apri_file_diagramma(self, fn):
+        """Metodo centralizzato per leggere il file JSON/MSQL_QD ed inserirlo nella scena"""
+        try:
+            with open(fn) as f:
+                data = json.load(f)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Impossibile leggere il file:\n{str(e)}")
+            return
+            
+        self.scene.clear()
+        self.view.joins.clear()
+        self.selected_fields = []
+        tables_map = {}
+        
+        # 1. Ripristino delle tabelle
+        for idx, t in enumerate(data["tables"]):
+            alias = t.get("alias", f"T{idx+1}")             
+            pk = self.meta.pk(t["name"])
+            fields = [{"name": c, "is_pk": c in pk, "is_fk": False} for c in self.meta.columns(t["name"])]
+            comment = next((c for n, c in self.meta.tables() if n == t["name"]), "")            
+            
+            ti = TableItem(t["name"], comment, fields, self.view, alias=alias)
+            ti.setPos(QPointF(t["x"], t["y"]))
+            self.scene.addItem(ti)            
+            tables_map[alias] = ti
+            
+        # 2. Ripristino dei campi
+        for f in data.get("fields", []):
+            t = tables_map.get(f["table"])
+            if t:
+                fi = next((x for x in t.field_items if x.name == f["name"]), None)
+                if fi:
+                    fi.filter = f.get("filter", "")
+                    fi.order = f.get("order", "")
+                    self.selected_fields.append(fi)                
+                    fi.update_visual_state() 
+                    
+        # 3. Ripristino delle linee di Join
+        for j in data.get("joins", []):
+            t1 = tables_map.get(j["t1"])
+            t2 = tables_map.get(j["t2"])
+            if t1 and t2:
+                f1 = next((f for f in t1.field_items if f.name == j["f1"]), None)
+                f2 = next((f for f in t2.field_items if f.name == j["f2"]), None)
+                if f1 and f2:
+                    self.view.create_join(f1, f2, j["type"])
+                    
+        self.update_sql_preview()
+
     def copy_sql_to_clipboard(self):
         QApplication.clipboard().setText(self.sql_preview.toPlainText())
         QToolTip.showText(QCursor.pos(),QCoreApplication.translate('query_designer','SQL copiato nella clipboard'),self)
@@ -511,20 +598,30 @@ class QueryDesigner(QMainWindow):
         text = text.lower()
         for i in range(self.tree.topLevelItemCount()):
             item = self.tree.topLevelItem(i)
-            name, _ = item.data(0, Qt.ItemDataRole.UserRole)
-            item.setHidden(text not in name.lower())
+            name, comment = item.data(0, Qt.ItemDataRole.UserRole)
+            match_name = text in name.lower()
+            match_comment = text in comment.lower() if comment else False            
+            # Mostra l'elemento se c'è una corrispondenza in uno dei due campi, altrimenti nascondilo
+            item.setHidden(not (match_name or match_comment))
 
     def add_table(self, item):
         name, comment = item.data(0, Qt.ItemDataRole.UserRole)
-        if any(isinstance(o, TableItem) and o.name == name for o in self.scene.items()):
-            return
+        existing_tables = [i for i in self.scene.items() if isinstance(i, TableItem)]
+        
+        # Permettiamo di inserire la stessa tabella più volte usando gli alias!
+        # Rimuoviamo il blocco 'if any(...): return' precedente.
+
+        # Genera alias progressivo (T1, T2, T3...)
+        alias_num = len(existing_tables) + 1
+        alias = f"T{alias_num}"
+
         pk = self.meta.pk(name)
-        fk = {f[0] for f in self.meta.fk(name)}
-        fields = [{"name": c, "is_pk": c in pk, "is_fk": c in fk} for c in self.meta.columns(name)]
-        t = TableItem(name, comment, fields, self.view)
+        fields = [{"name": c, "is_pk": c in pk, "is_fk": False} for c in self.meta.columns(name)]
+        
+        # Passiamo l'alias al costruttore
+        t = TableItem(name, comment, fields, self.view, alias=alias)
 
         # posizione
-        existing_tables = [i for i in self.scene.items() if isinstance(i, TableItem)]
         x = max([i.pos().x() + i.rect().width() + 40 for i in existing_tables], default=60)
         y = 60
         t.setPos(QPointF(x, y))
@@ -532,18 +629,15 @@ class QueryDesigner(QMainWindow):
         self.update_sql_preview()
 
     def update_sql_preview(self):
-        # =========================
-        # raccogli tutte le tabelle nella scena
-        # =========================
         tables = [item for item in self.scene.items() if isinstance(item, TableItem)]
         if not tables:
             self.sql_preview.setPlainText("-- nessuna tabella")
             return
 
         # =========================
-        # SELECT
+        # SELECT (usa gli alias dei parent_table)
         # =========================
-        select = [f"{f.parent_table.name}.{f.name}" for f in self.selected_fields]
+        select = [f"{f.parent_table.alias}.{f.name}" for f in self.selected_fields]
         if not select:
             select.append("*")
         sql = "SELECT " + ", ".join(select)
@@ -552,54 +646,60 @@ class QueryDesigner(QMainWindow):
         # FROM + JOIN
         # =========================
         joins = self.view.joins
-        used_tables = set()
+        used_tables = set()  # memorizziamo gli alias usati
 
         if joins:
             # --- prima join ---
             first = joins[0]
-            t1 = first.f1.parent_table.name
-            t2 = first.f2.parent_table.name
-            cond = f"{t1}.{first.f1.name} = {t2}.{first.f2.name}"
-            join_type = first.join_type.upper()  # deve essere solo INNER / LEFT / RIGHT
-            sql += f"\nFROM {t1} {join_type} JOIN {t2} ON {cond}"
-            used_tables.update([t1, t2])
+            t1_name, t1_alias = first.f1.parent_table.name, first.f1.parent_table.alias
+            t2_name, t2_alias = first.f2.parent_table.name, first.f2.parent_table.alias
+            
+            cond = f"{t1_alias}.{first.f1.name} = {t2_alias}.{first.f2.name}"
+            join_type = first.join_type.upper()
+            
+            # Sintassi: FROM TABELLA1 T1 INNER JOIN TABELLA2 T2 ON T1.CAMPO = T2.CAMPO
+            sql += f"\nFROM {t1_name} {t1_alias} {join_type} JOIN {t2_name} {t2_alias} ON {cond}"
+            used_tables.update([t1_alias, t2_alias])
 
             # --- join successive ---
             for j in joins[1:]:
-                t1 = j.f1.parent_table.name
-                t2 = j.f2.parent_table.name
-                cond = f"{t1}.{j.f1.name} = {t2}.{j.f2.name}"
+                t1_name, t1_alias = j.f1.parent_table.name, j.f1.parent_table.alias
+                t2_name, t2_alias = j.f2.parent_table.name, j.f2.parent_table.alias
+                cond = f"{t1_alias}.{j.f1.name} = {t2_alias}.{j.f2.name}"
                 join_type = j.join_type.upper()
 
-                # determino quale tabella è nuova
-                new_table = None
-                if t2 not in used_tables:
-                    new_table = t2
-                elif t1 not in used_tables:
-                    new_table = t1
+                # determino quale tabella (alias) è nuova
+                new_table_name = None
+                new_table_alias = None
+                if t2_alias not in used_tables:
+                    new_table_name = t2_name
+                    new_table_alias = t2_alias
+                elif t1_alias not in used_tables:
+                    new_table_name = t1_name
+                    new_table_alias = t1_alias
 
-                if new_table:
-                    sql += f"\n{join_type} JOIN {new_table} ON {cond}"
-                    used_tables.add(new_table)
+                if new_table_alias:
+                    sql += f"\n{join_type} JOIN {new_table_name} {new_table_alias} ON {cond}"
+                    used_tables.add(new_table_alias)
                 else:
                     # entrambe già incluse → solo condizione AND
                     sql += f"\nAND {cond}"
         else:
-            # nessuna join grafica → FROM semplice
-            sql += "\nFROM " + ", ".join(t.name for t in tables)
+            # nessuna join grafica → FROM semplice con alias (es: FROM CLIENTI T1, FATTURE T2)
+            sql += "\nFROM " + ", ".join(f"{t.name} {t.alias}" for t in tables)
 
         # =========================
-        # FILTRI (WHERE / AND)
+        # FILTRI (WHERE / AND usando alias)
         # =========================
-        filters = [f"{f.parent_table.name}.{f.name} {f.filter}" 
+        filters = [f"{f.parent_table.alias}.{f.name} {f.filter}" 
                 for f in self.selected_fields if f.filter]
         if filters:
             sql += ("\nWHERE " if not joins else "\nAND ") + " AND ".join(filters)
 
         # =========================
-        # ORDINI (ORDER BY)
+        # ORDINI (ORDER BY usando alias)
         # =========================
-        orders = [f"{f.parent_table.name}.{f.name} {f.order}" 
+        orders = [f"{f.parent_table.alias}.{f.name} {f.order}" 
                 for f in self.selected_fields if f.order]
         if orders:
             sql += "\nORDER BY " + ", ".join(orders)
@@ -610,7 +710,7 @@ class QueryDesigner(QMainWindow):
         self.sql_preview.setPlainText(sql)
 
     def save_json(self):
-        fn, _ = QFileDialog.getSaveFileName(self, QCoreApplication.translate('query_designer','Save diagram'), "", "JSON (*.json)")
+        fn, _ = QFileDialog.getSaveFileName(self, QCoreApplication.translate('query_designer','Save diagram'), "", "MSql Query Designer (*.msql_qd)")
         if not fn:
             return
 
@@ -620,23 +720,26 @@ class QueryDesigner(QMainWindow):
             if isinstance(item, TableItem):
                 data["tables"].append({
                     "name": item.name,
+                    "alias": item.alias, # Salva l'alias univoco della tabella
                     "x": item.pos().x(),
                     "y": item.pos().y()
                 })
 
                 for f in item.field_items:
-                    data["fields"].append({
-                        "table": item.name,   # ✅ FIX
-                        "name": f.name,
-                        "filter": f.filter,
-                        "order": f.order
-                    })
+                    # Salviamo solo i campi che hanno filtri o ordinamenti attivi o sono in SELECT
+                    if f.filter or f.order or (f in self.selected_fields):
+                        data["fields"].append({
+                            "table": item.alias, # colleghiamo il campo all'alias, non al nome
+                            "name": f.name,
+                            "filter": f.filter,
+                            "order": f.order
+                        })
 
         for j in self.view.joins:
             data["joins"].append({
-                "t1": j.f1.parent_table.name,
+                "t1": j.f1.parent_table.alias, # salviamo l'alias di partenza
                 "f1": j.f1.name,
-                "t2": j.f2.parent_table.name,
+                "t2": j.f2.parent_table.alias, # salviamo l'alias di arrivo
                 "f2": j.f2.name,
                 "type": j.join_type
             })
@@ -645,35 +748,10 @@ class QueryDesigner(QMainWindow):
             json.dump(data, f, indent=2)
 
     def load_json(self):
-        fn, _ = QFileDialog.getOpenFileName(self, QCoreApplication.translate('query_designer','Open diagram'), "", "JSON (*.json)")
-        if not fn: return
-        with open(fn) as f:
-            data = json.load(f)
-        self.scene.clear()
-        self.view.joins.clear()
-        self.selected_fields = []
-        tables_map = {}
-        for t in data["tables"]:
-            pk = self.meta.pk(t["name"])
-            fk = {f[0] for f in self.meta.fk(t["name"])}
-            fields = [{"name": c, "is_pk": c in pk, "is_fk": c in fk} for c in self.meta.columns(t["name"])]
-            comment = next((c for n, c in self.meta.tables() if n == t["name"]), "")
-            ti = TableItem(t["name"], comment, fields, self.view)
-            ti.setPos(QPointF(t["x"], t["y"]))
-            self.scene.addItem(ti)
-            tables_map[t["name"]] = ti
-        for f in data.get("fields", []):
-            t = tables_map[f["table"]]
-            fi = next((x for x in t.field_items if x.name == f["name"]), None)
-            if fi:
-                fi.filter = f.get("filter", "")
-                fi.order = f.get("order", "")
-                self.selected_fields.append(fi)
-        for j in data.get("joins", []):
-            f1 = next(f for f in tables_map[j["t1"]].field_items if f.name == j["f1"])
-            f2 = next(f for f in tables_map[j["t2"]].field_items if f.name == j["f2"])
-            self.view.create_join(f1, f2, j["type"])
-        self.update_sql_preview()
+        """Apertura tramite pulsante grafico della toolbar"""
+        fn, _ = QFileDialog.getOpenFileName(self, QCoreApplication.translate('query_designer','Open diagram'), "", "MSql Query Designer (*.msql_qd)")
+        if fn:
+            self.apri_file_diagramma(fn)
 
     def run_query(self):
         sql = self.sql_preview.toPlainText()

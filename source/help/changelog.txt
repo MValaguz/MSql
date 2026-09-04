@@ -2,23 +2,25 @@
 MSql TODO!!!
 -------------
 
-- Ancora persiste il problema che esce messaggio errore "dpy...." dopo che compilo pkg che va in errore, e poi lancio delle select; il problema è dovuto al fatto che non capisce che quella passata è una select e pensa sia ancora pl-sql o qualcosa del genere; infatti ad esempio succede dopo aver fatto delle select e delle update
 - Da Marco V. Va rivista la parte delle preferenze di connessione nel senso che vanno gestite in modo diverso le impostazioni relative alle connessioni automatiche all'avvio; con una maggiore integrazione con la connessione manuale da menù.
+- Ancora persiste il problema che esce messaggio errore "dpy...." dopo che compilo pkg che va in errore, e poi lancio delle select; il problema è dovuto al fatto che non capisce che quella passata è una select e pensa sia ancora pl-sql o qualcosa del genere; infatti ad esempio succede dopo aver fatto delle select e delle update
 - Segnalato da Diego; vado in ricerca-e-sostituisci; inserisco una stringa di ricerca e una di sostituzione, prima di fare la "ricerca" della prima ricorrenza, faccio subito la replace! In pratica non fa nulla e non si capisce il suo comportamento!
 - Provato a passare alla nuova versione di Oracledb 4.0.1 che però non funziona con i driver installati sul PC..perché si deve avere almeno Oracle 19! Tornato indietro alla versione 3!
 - Lato linux creare lo script per pacchettizzare tutto il programma
 
-Utilizzatori a cui inviare mail di aggiornamento:
-- Alek
-- Alessandra
-- Marco T.
-- Diego
-- Marianna
-- Pietro
-
 ---------------
 MSql Changelog!
 ---------------
+
+Versione del 04/09/2026
+OK! Nel Query Designer:
+     - migliorata velocità
+		 - inserita ricerca anche sulla descrizione della tabella
+		 - risolto bug per cui dopo aver applicato un filtro non si aggiornava la select testuale
+		 - ora i file di Query Designer avranno suffisso .msql_qd! Fatto in modo che facendo doppio click sul file da esplora risorse di Windows, MSql si apra in modalità Query Designer
+OK! Migliorata la gestione degli errori quando non si è connessi a Oracle 
+OK! Quando usavo l'evidenziatore il testo diventava illeggibile 
+OK! Quando chiudevo ultimo editor aperto il titolo della window principale rimaneva con il titolo della subwindow appena chiusa
 
 Versione del 25/08/2026
 - Inserito nella statusbar lo slider per effettuare lo zoom sulla parte di editor, risultati e output
