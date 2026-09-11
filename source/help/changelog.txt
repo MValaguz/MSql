@@ -12,7 +12,8 @@ MSql TODO!!!
 MSql Changelog!
 ---------------
 
-Versione del 04/09/2026
+Versione del 10/09/2026
+OK! Da Marco V. Mi collego come SYS, la scritta nella statusbar diventa rossa; quando poi torno a SMILE la scritta rimane rossa e invece deve tornare nera
 OK! Nel Query Designer:
      - migliorata velocità
 		 - inserita ricerca anche sulla descrizione della tabella

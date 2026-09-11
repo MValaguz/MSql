@@ -1467,9 +1467,11 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
             v_global_background = 'red'
         elif self.e_user_mode == 'SYSOPER':
             v_global_background = 'orange'
+        else:
+            v_global_background = 'black'
 
         # sulla statusbar, aggiorno la label della connessione (notare come se possibile venga mostrato il titolo dato dall'utente al server nella sezione preferiti)
-        self.l_connection.setText(QCoreApplication.translate('MSql_win1','Connected to:') + ' ' + v_server_title + "/" + v_user_connect)     
+        self.l_connection.setText(QCoreApplication.translate('MSql_win1','Connected to:') + ' ' + v_server_title.upper() + "/" + v_user_connect.upper())     
         self.l_connection.setStyleSheet('background-color: ' + v_global_color + ';color: "' + v_global_background + '";')              
 
         # se la connessione è andata a buon fine, richiedo elenco degli oggetti in modo da aggiornare il dizionario dell'editor con nuove parole chiave
