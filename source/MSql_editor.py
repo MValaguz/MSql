@@ -603,6 +603,8 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         # Gestione preferenze
         elif p_slot.objectName() == 'actionPreferences':
             self.slot_preferences()
+        elif p_slot.objectName() == 'actionConnections_preferences':
+            self.slot_connections_preferences()
         # Rendo l'output dell'sql editabile
         elif p_slot.objectName() == 'actionMake_table_editable':
             if self.actionMake_table_editable.isChecked():
@@ -2839,6 +2841,16 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
         centra_window_figlia(self, self.my_app)
         self.my_app.show()   
 
+    def slot_connections_preferences(self):
+        """
+           Apre la window di gestione delle preferenze delle connessioni        
+        """   
+        global v_global_work_dir         
+        from connections_pref import win_connections_class
+        self.my_app = win_connections_class(v_global_work_dir + 'MSql.ini', v_global_work_dir + 'MSql_connections.ini')        
+        centra_window_figlia(self, self.my_app)
+        self.my_app.show()           
+
     def slot_info(self):
         """
            Apre la window delle info
@@ -3657,18 +3669,6 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         """      
         global v_global_connection
         
-        # funzione disattivata il 20/07/2026 
-        # # controllo se l'autocompletamento è aperto (poplist con i suggerimenti...)
-        # if event.type() == QEvent.Type.KeyPress and source is self.e_sql and self.e_sql.SendScintilla(QsciScintilla.SCI_AUTOCGETCURRENT) != -1:  
-        #     # se premuto invio, non lo accetto come conferma della voce proposta e chiudo l'autocompletamento
-        #     if event.key() == Qt.Key.Key_Return:                                                
-        #         self.e_sql.SendScintilla(QsciScintilla.SCI_AUTOCCANCEL)
-        #         return True
-        #     # altrimenti se premuto il tab, accetto quanto proposto da autocompletamento
-        #     elif event.key() == Qt.Key.Key_Tab:                
-        #         self.e_sql.SendScintilla(QsciScintilla.SCI_AUTOCCOMPLETE)
-        #         return True
-
         # individuo la disattivazione della window e disattivo il drop sulla parte di editor in modo possa gestire 
         # i drop di un file che viene trascinato sull'app. Il drop del file viene gestito tramite il controllo dell'evento sulla window principale
         if event.type() == QEvent.Type.WindowDeactivate:
@@ -3723,6 +3723,47 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             if event.modifiers() & Qt.KeyboardModifier.ControlModifier and (event.key() == Qt.Key.Key_Enter or event.key() == Qt.Key.Key_Return):                
                 self.slot_ctrl_invio()
                 return True
+            # # premuta combinazione CTRL+Freccia destra o CTRL+Freccia sinistra (salto logico basato sugli spazi bianchi)
+            # if (event.modifiers() & Qt.KeyboardModifier.ControlModifier) and not (event.modifiers() & Qt.KeyboardModifier.ShiftModifier):
+            #     if event.key() == Qt.Key.Key_Right or event.key() == Qt.Key.Key_Left:                    
+            #         current_pos = self.e_sql.SendScintilla(QsciScintilla.SCI_GETCURRENTPOS)
+            #         text_length = self.e_sql.SendScintilla(QsciScintilla.SCI_GETLENGTH)                                        
+            #         new_pos = current_pos                                        
+            #         if event.key() == Qt.Key.Key_Right:
+            #             found_space = False
+            #             for i in range(current_pos, text_length):
+            #                 # Chiediamo a Scintilla il codice ASCII/UTF-8 del singolo carattere alla posizione i
+            #                 char_code = self.e_sql.SendScintilla(QsciScintilla.SCI_GETCHARAT, i)
+            #                 # 32=spazio, 9=tab, 10=line feed (\n), 13=carriage return (\r)
+            #                 if char_code in (32, 9, 10, 13):
+            #                     found_space = True
+            #                 elif found_space:
+            #                     new_pos = i
+            #                     break
+            #             else:
+            #                 new_pos = text_length
+            #         else:
+            #             found_word = False
+            #             for i in range(current_pos - 1, -1, -1):
+            #                 char_code = self.e_sql.SendScintilla(QsciScintilla.SCI_GETCHARAT, i)
+            #                 if char_code not in (32, 9, 10, 13):
+            #                     found_word = True
+            #                 elif found_word:
+            #                     new_pos = i + 1
+            #                     break
+            #             else:
+            #                 new_pos = 0
+
+            #         if new_pos == current_pos:
+            #             if event.key() == Qt.Key.Key_Right:
+            #                 new_pos = min(current_pos + 1, text_length)
+            #             else:
+            #                 new_pos = max(current_pos - 1, 0)                                            
+            #         self.e_sql.SendScintilla(QsciScintilla.SCI_SETCURRENTPOS, new_pos)
+            #         self.e_sql.SendScintilla(QsciScintilla.SCI_SETANCHOR, new_pos)
+            #         self.e_sql.SendScintilla(QsciScintilla.SCI_CHOOSECARETX)
+            #         self.e_sql.SendScintilla(QsciScintilla.SCI_SCROLLCARET)                    
+            #         return True
             # tasto Insert premuto da parte dell'utente --> cambio la label sulla statusbar
             if event.key() == Qt.Key.Key_Insert:
                 if self.v_overwrite_enabled:
@@ -3748,35 +3789,6 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             if event.key() == Qt.Key.Key_F3:                                 
                 self.slot_find_next()   
                 return True
-            
-        # if event.type() == QEvent.Type.DragEnter and source is self.e_sql:                                          
-        #     # il drag contiene elenco di item...
-        #     # se il drag non contiene elenco di item, quindi ad esempio del semplice testo, lascio le cose cosi come sono            
-        #     if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):                
-        #         # estraggo gli item e li trasformo in stringa
-        #         v_mime_data = event.mimeData()
-        #         source_item = QStandardItemModel()
-        #         source_item.dropMimeData(v_mime_data, Qt.DropAction.CopyAction, 0,0, QModelIndex())                                                
-        #         v_stringa = ''
-        #         for v_indice in range(0,source_item.rowCount()):
-        #             if v_stringa != '':
-        #                 v_stringa += ',' + source_item.item(v_indice, 0).text()
-        #             else:
-        #                 v_stringa = source_item.item(v_indice, 0).text()                                
-        #         # reimposto la stringa dentro l'oggetto mimedata
-        #         # da notare come l'oggetto v_mime_data punta direttamente all'oggetto event.mimeData!
-        #         v_mime_data.setText(v_stringa)                
-        #     # accetto il drag
-        #     event.accept()                        
-        #     return True                                            
-        
-        # # individuo il drop sull'editor               
-        # if event.type() == QEvent.Type.Drop and source is self.e_sql:                                                    
-        #     # e richiamo direttamente la funzione che accetta il drop di QScintilla
-        #     # da notare come durante il drag sia stato cambiato il contenuto dei dati nel caso 
-        #     # la sorgente fossero degli item (in questo caso l'object viewer)
-        #     self.e_sql.dropEvent(event)                
-        #     return True        
         
         # individuo l'attivazione della subwindow dell'editor...
         if event.type() == QEvent.Type.FocusIn:                  

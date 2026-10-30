@@ -91,6 +91,8 @@
     <property name="title">
      <string>&amp;Connection</string>
     </property>
+    <addaction name="actionConnections_preferences"/>
+    <addaction name="separator"/>
     <addaction name="actionConnect"/>
     <addaction name="actionDisconnect"/>
     <addaction name="separator"/>
@@ -1932,6 +1934,15 @@
    </property>
    <property name="text">
     <string>Center</string>
+   </property>
+  </action>
+  <action name="actionConnections_preferences">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons/gears.png</normaloff>:/icons/icons/gears.png</iconset>
+   </property>
+   <property name="text">
+    <string>Connections preferences</string>
    </property>
   </action>
  </widget>

@@ -2,7 +2,15 @@
 MSql TODO!!!
 -------------
 
-- Da Marco V. Va rivista la parte delle preferenze di connessione nel senso che vanno gestite in modo diverso le impostazioni relative alle connessioni automatiche all'avvio; con una maggiore integrazione con la connessione manuale da menù.
+Da Diego B.
+	Mentre cercavo una stringa in un package, mi sono accorto che la funzionalità "Find all" mi localizzava correttamente la stringa, ma mi visualizzava erroneamente la funzione/procedura nella quale era contenuta.
+	Esempio:
+	Package: OC_OFFERTE_MACCHINA
+	Stringa di ricerca: <BANCA>
+	Risultato: 9171 - [VELOCITA_MACCHINA_IN_LINEA] .......
+
+  In realtà, la riga 9171 è parte della funzione FRASE_OC_MACCHINA, la VELOCITA_MACCHINA_IN_LINEA è una funzione privata della FRASE_OC_MACCHINA che non contiene la stringa ricercata.
+
 - Ancora persiste il problema che esce messaggio errore "dpy...." dopo che compilo pkg che va in errore, e poi lancio delle select; il problema è dovuto al fatto che non capisce che quella passata è una select e pensa sia ancora pl-sql o qualcosa del genere; infatti ad esempio succede dopo aver fatto delle select e delle update
 - Segnalato da Diego; vado in ricerca-e-sostituisci; inserisco una stringa di ricerca e una di sostituzione, prima di fare la "ricerca" della prima ricorrenza, faccio subito la replace! In pratica non fa nulla e non si capisce il suo comportamento!
 - Provato a passare alla nuova versione di Oracledb 4.0.1 che però non funziona con i driver installati sul PC..perché si deve avere almeno Oracle 19! Tornato indietro alla versione 3!
@@ -11,6 +19,13 @@ MSql TODO!!!
 ---------------
 MSql Changelog!
 ---------------
+
+Versione del 23/10/2026
+- Rivista la gestione delle preferenze: ora ci sono le preferenze classiche di programma e le preferenze specifiche per le connessioni.
+
+Versione del 15/10/2026
+- Rivista la logica di funzionamento del comando CTRL+Freccia destra e CTRL+Freccia sinistra; in pratica ora il saltatore fa salti più lunghi considerando gli spazi e tab e non le parole
+  KO! Dopo la messa in linea e il funzionamento sul campo, questa modifica è stata bocciata e si è tornati al comportamento standard!
 
 Versione del 10/09/2026
 OK! Da Marco V. Mi collego come SYS, la scritta nella statusbar diventa rossa; quando poi torno a SMILE la scritta rimane rossa e invece deve tornare nera

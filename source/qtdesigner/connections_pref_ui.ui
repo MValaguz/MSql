@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>connections_window</class>
+ <widget class="QMainWindow" name="connections_window">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>815</width>
+    <height>590</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Connections</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="resource.qrc">
+    <normaloff>:/icons/icons/MSql.gif</normaloff>:/icons/icons/MSql.gif</iconset>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <item>
+       <widget class="QLabel" name="label_26">
+        <property name="text">
+         <string>Connection mode:</string>
+        </property>
+        <property name="buddy">
+         <cstring>e_connection_mode</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="e_connection_mode">
+        <item>
+         <property name="text">
+          <string>Thin mode (no need OracleClient)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Thick mode (OracleClient dll are needed)</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout_7">
+      <item>
+       <widget class="QLabel" name="l_oracleclient_path">
+        <property name="text">
+         <string>OracleClient dll dir.(*):</string>
+        </property>
+        <property name="buddy">
+         <cstring>e_oracleclient_path</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="e_oracleclient_path"/>
+      </item>
+      <item>
+       <widget class="QPushButton" name="b_oracleclient_path">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="resource.qrc">
+          <normaloff>:/icons/icons/folder.png</normaloff>:/icons/icons/folder.png</iconset>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="2" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QLabel" name="label_13">
+        <property name="text">
+         <string>Servers:</string>
+        </property>
+        <property name="buddy">
+         <cstring>o_server</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="b_server_add">
+        <property name="toolTip">
+         <string>Add a server</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="resource.qrc">
+          <normaloff>:/icons/icons/add.png</normaloff>:/icons/icons/add.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="b_server_remove">
+        <property name="toolTip">
+         <string>Remove selected server</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="resource.qrc">
+          <normaloff>:/icons/icons/failed.png</normaloff>:/icons/icons/failed.png</iconset>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="3" column="0">
+     <widget class="QTableWidget" name="o_server">
+      <property name="selectionMode">
+       <enum>QAbstractItemView::SingleSelection</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QLabel" name="label_14">
+        <property name="text">
+         <string>Users:</string>
+        </property>
+        <property name="buddy">
+         <cstring>o_users</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="b_user_add">
+        <property name="toolTip">
+         <string>Add user</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="resource.qrc">
+          <normaloff>:/icons/icons/add.png</normaloff>:/icons/icons/add.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="b_user_remove">
+        <property name="toolTip">
+         <string>Remove selected user</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="resource.qrc">
+          <normaloff>:/icons/icons/failed.png</normaloff>:/icons/icons/failed.png</iconset>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="5" column="0">
+     <widget class="QTableWidget" name="o_users">
+      <property name="selectionMode">
+       <enum>QAbstractItemView::SingleSelection</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QPushButton" name="b_restore">
+        <property name="text">
+         <string>Restore default</string>
+        </property>
+        <property name="icon">
+         <iconset resource="resource.qrc">
+          <normaloff>:/icons/icons/undo.png</normaloff>:/icons/icons/undo.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="b_save">
+        <property name="text">
+         <string>Save</string>
+        </property>
+        <property name="icon">
+         <iconset resource="resource.qrc">
+          <normaloff>:/icons/icons/disk.png</normaloff>:/icons/icons/disk.png</iconset>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>e_connection_mode</tabstop>
+  <tabstop>e_oracleclient_path</tabstop>
+  <tabstop>b_oracleclient_path</tabstop>
+  <tabstop>b_server_add</tabstop>
+  <tabstop>b_server_remove</tabstop>
+  <tabstop>o_server</tabstop>
+  <tabstop>b_user_add</tabstop>
+  <tabstop>b_user_remove</tabstop>
+  <tabstop>o_users</tabstop>
+  <tabstop>b_restore</tabstop>
+  <tabstop>b_save</tabstop>
+ </tabstops>
+ <resources>
+  <include location="resource.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>b_save</sender>
+   <signal>clicked()</signal>
+   <receiver>connections_window</receiver>
+   <slot>slot_b_save()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>886</x>
+     <y>553</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>47</x>
+     <y>272</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>b_restore</sender>
+   <signal>clicked()</signal>
+   <receiver>connections_window</receiver>
+   <slot>slot_b_restore()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>168</x>
+     <y>553</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>91</x>
+     <y>22</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>b_user_add</sender>
+   <signal>clicked()</signal>
+   <receiver>connections_window</receiver>
+   <slot>slot_b_user_add()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>852</x>
+     <y>323</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>445</x>
+     <y>261</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>b_user_remove</sender>
+   <signal>clicked()</signal>
+   <receiver>connections_window</receiver>
+   <slot>slot_b_user_remove()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>886</x>
+     <y>323</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>443</x>
+     <y>294</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>b_oracleclient_path</sender>
+   <signal>clicked()</signal>
+   <receiver>connections_window</receiver>
+   <slot>slot_b_oracleclient_path()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>886</x>
+     <y>61</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>583</x>
+     <y>58</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>e_connection_mode</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>connections_window</receiver>
+   <slot>slot_e_connection_mode()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>886</x>
+     <y>29</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>583</x>
+     <y>22</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>b_server_remove</sender>
+   <signal>clicked()</signal>
+   <receiver>connections_window</receiver>
+   <slot>slot_b_server_remove()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>886</x>
+     <y>93</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>442</x>
+     <y>73</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>b_server_add</sender>
+   <signal>clicked()</signal>
+   <receiver>connections_window</receiver>
+   <slot>slot_b_server_add()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>852</x>
+     <y>93</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>445</x>
+     <y>43</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>slot_b_save()</slot>
+  <slot>slot_b_restore()</slot>
+  <slot>slot_b_server_add()</slot>
+  <slot>slot_b_server_remove()</slot>
+  <slot>slot_b_user_add()</slot>
+  <slot>slot_b_user_remove()</slot>
+  <slot>slot_b_oracleclient_path()</slot>
+  <slot>slot_e_connection_mode()</slot>
+ </slots>
+</ui>

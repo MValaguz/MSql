@@ -799,6 +799,9 @@ class Ui_MSql_win1(object):
         icon96.addPixmap(QtGui.QPixmap("icons:center.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         self.actionCenter.setIcon(icon96)
         self.actionCenter.setObjectName("actionCenter")
+        self.actionConnections_preferences = QtGui.QAction(parent=MSql_win1)
+        self.actionConnections_preferences.setIcon(icon54)
+        self.actionConnections_preferences.setObjectName("actionConnections_preferences")
         self.menuFiles.addAction(self.actionNew)
         self.menuFiles.addAction(self.actionOpen)
         self.menuFiles.addSeparator()
@@ -817,6 +820,8 @@ class Ui_MSql_win1(object):
         self.menuFiles.addAction(self.actionClear_recent_file_list)
         self.menuFiles.addSeparator()
         self.menuFiles.addAction(self.actionExit)
+        self.menuServer.addAction(self.actionConnections_preferences)
+        self.menuServer.addSeparator()
         self.menuServer.addAction(self.actionConnect)
         self.menuServer.addAction(self.actionDisconnect)
         self.menuServer.addSeparator()
@@ -1187,6 +1192,7 @@ class Ui_MSql_win1(object):
         self.actionInsert_form_on_current_table.setText(_translate("MSql_win1", "Insert form on current table"))
         self.actionWhere_form_on_current_table.setText(_translate("MSql_win1", "Where form on current table"))
         self.actionCenter.setText(_translate("MSql_win1", "Center"))
+        self.actionConnections_preferences.setText(_translate("MSql_win1", "Connections preferences"))
 from custom_widget import MyCustomTreeView
 
 

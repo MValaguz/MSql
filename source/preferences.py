@@ -212,6 +212,63 @@ class preferences_class():
             # elenco users è composto da Titolo, User, Password, Flag per la connessione di default (es. ('USER_SMILE','SMILE','SMILE','1') )
             self.elenco_user = []
        
+    def restore_default_preferences(self, p_nome_file_preferences, p_nome_file_connections):
+        """
+            Ripristina tutte preferenze di default
+        """
+        if message_question_yes_no(QCoreApplication.translate('Preferences','Do you want to restore default preferences?')) == 'Yes':
+            # cancello il file delle preferenze
+            if os.path.isfile(p_nome_file_preferences):
+                os.remove(p_nome_file_preferences)
+
+            if message_question_yes_no(QCoreApplication.translate('Preferences','Do you want to delete connections preferences too?')) == 'Yes':
+                # cancello il file delle preferenze
+                if os.path.isfile(p_nome_file_connections):
+                    os.remove(p_nome_file_connections)
+
+            # emetto messaggio di fine
+            message_info(QCoreApplication.translate('Preferences','Preferences restored! Restart MSql to see the changes ;-)'))
+    
+    def save_preferences(self, p_nome_file_preferences):
+        """
+           Salvataggio di tutte le preferenze in un file json
+        """		
+		# scrivo primo file delle preferenze generiche 
+        v_json ={'remember_window_pos': self.remember_window_pos,
+                 'remember_text_pos': self.remember_text_pos,
+                 'dark_theme': self.dark_theme,
+                 'open_dir': self.open_dir,
+		         'save_dir': self.save_dir,                 
+                 'eol': self.end_of_line,
+                 'autosave_snapshoot_interval':self.autosave_snapshoot_interval,
+		         'font_editor' :self.font_editor,
+		         'font_result' : self.font_result,                 
+                 'auto_column_resize': self.auto_column_resize,
+                 'indentation_guide': self.indentation_guide,
+                 'csv_separator': self.csv_separator,
+                 'tab_size': self.tab_size,
+                 'auto_clear_output': self.auto_clear_output,
+                 'date_format': self.date_format,
+                 'general_zoom': self.general_zoom,
+                 'autocompletation': self.autocompletation,
+                 'open_new_editor': self.open_new_editor,
+                 'refresh_dictionary': self.refresh_dictionary,
+                 'app_language': self.app_language,
+                 'animated_gif': self.animated_gif,
+                 'highlight_color': self.highlight_color,
+                 'highlight_color_hex': self.highlight_color_hex,
+                 'author_name': self.author_name,
+                 'connection_mode': self.connection_mode,
+                 'oracleclient_path': self.oracleclient_path,
+                 'clear_theme': self.clear_theme,
+                 'show_map_proc_func': self.show_map_proc_func               
+                }
+
+		# scrittura nel file dell'oggetto json (notare come venga usata la funzione dump senza la s finale in quanto scrive byte)
+        with open(p_nome_file_preferences, 'w') as outfile:json.dump(v_json, outfile)
+        
+        message_info(QCoreApplication.translate('Preferences','Preferences saved! Restart MSql to see the changes ;-)'))
+
 class win_preferences_class(QMainWindow, Ui_preferences_window):
     """
         Gestione delle preferenze di MSql
@@ -256,44 +313,11 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         self.e_default_animated_gif.setText(self.preferences.animated_gif)
         self.e_highlight_color.setCurrentText(self.preferences.highlight_color)
         self.e_author_name.setText(self.preferences.author_name)
-        self.e_connection_mode.setCurrentIndex(self.preferences.connection_mode)
-        self.e_oracleclient_path.setText(self.preferences.oracleclient_path)                
         self.e_clear_theme.setCurrentText(self.preferences.clear_theme)
         self.e_default_map_proc_func.setChecked(self.preferences.show_map_proc_func)
 
-        ###
-        # preparo elenco server        
-        ###
-        self.o_server.setColumnCount(7)
-        self.o_server.setHorizontalHeaderLabels(['Server title (*)','TNS Name (*)','Color','','AutoConnection'+chr(10)+'at startup','Emphasis','CREATE'+chr(10)+'confirm'])           
-        v_rig = 1                
-        for record in self.preferences.elenco_server:                                    
-            self.o_server.setRowCount(v_rig) 
-            self.carico_riga_server(v_rig,record)
-
-            # passo alla prossima riga
-            v_rig += 1
-        self.o_server.resizeColumnsToContents()
-
-        ###
-        # preparo elenco user        
-        ###
-        self.o_users.setColumnCount(7)
-        self.o_users.setHorizontalHeaderLabels(['User title (*)','User name (*)','Password (*)','AutoConnection'+chr(10)+'at startup','As Proxy','As Schema','Mode'])   
-        v_rig = 1                
-        for record in self.preferences.elenco_user:                                    
-            self.o_users.setRowCount(v_rig) 
-            self.carico_riga_user(v_rig, record)
-
-            # passo alla prossima riga
-            v_rig += 1
-        self.o_users.resizeColumnsToContents()
-
         # Carico anteprima gif animata
         self.preview_gif_animata()
-
-        # Attivo/disattivo la connection mode
-        self.slot_e_connection_mode()
 
     def preview_gif_animata(self):
         """
@@ -317,163 +341,19 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
         scaled_frame = frame.scaled(70, 70, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation) 
         self.l_default_animated_gif.setPixmap(QPixmap.fromImage(scaled_frame.toImage()))
     
-    def carico_riga_server(self, v_rig, record):
-        """
-           Carica una nuova riga nella tabella server
-        """
-        self.o_server.setItem(v_rig-1,0,QTableWidgetItem(record[0]))       
-        self.o_server.setItem(v_rig-1,1,QTableWidgetItem(record[1]))                               
-        self.o_server.setItem(v_rig-1,2,QTableWidgetItem(record[2]))                                           
-        # come quarta colonna metto il pulsante per la scelta del colore
-        v_color_button = QPushButton()            
-        v_icon = QIcon()
-        v_icon.addPixmap(QPixmap("icons:color.png"), QIcon.Mode.Normal, QIcon.State.Off)
-        v_color_button.setIcon(v_icon)
-        v_color_button.clicked.connect(self.slot_set_color_server)
-        self.o_server.setCellWidget(v_rig-1,3,v_color_button)                 
-        # la quinta colonna è una check-box per la selezione del server di default
-        # da notare come la checkbox viene inserita in un widget di layout in modo che si possa
-        # attivare la centratura 
-        v_checkbox = QCheckBox()          
-        v_checkbox.setToolTip('When this flag is set, MSql automatically connects to this server at startup. Warning! Select only one preference!')
-        v_widget = QWidget()      
-        v_layout = QHBoxLayout(v_widget)
-        v_layout.addWidget(v_checkbox)
-        v_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        v_layout.setContentsMargins(0,0,0,0)
-        v_widget.setLayout(v_layout)
-        try:
-            if record[3] == '1':
-                v_checkbox.setChecked(True)                                            
-            else:
-                v_checkbox.setChecked(False)                                                        
-        except:
-            v_checkbox.setChecked(False)                                                        
-        self.o_server.setCellWidget(v_rig-1,4,v_widget)                                                      
-        # la sesta colonna è una check-box per indicare che quando si è connessi a questo server deve essere attiva evidenziazione
-        # da notare come la checkbox viene inserita in un widget di layout in modo che si possa
-        # attivare la centratura 
-        v_checkbox_e = QCheckBox()          
-        v_checkbox_e.setToolTip('When this flag is set, the chosen color is also used for the data and results output sections.')
-        v_widget_e = QWidget()      
-        v_layout_e = QHBoxLayout(v_widget_e)
-        v_layout_e.addWidget(v_checkbox_e)
-        v_layout_e.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        v_layout_e.setContentsMargins(0,0,0,0)
-        v_widget_e.setLayout(v_layout_e)
-        try:
-            if record[4] == '1':
-                v_checkbox_e.setChecked(True)                                            
-            else:
-                v_checkbox_e.setChecked(False)                                                        
-        except:
-            v_checkbox_e.setChecked(False)                                                        
-        self.o_server.setCellWidget(v_rig-1,5,v_widget_e)                                                      
-        # la settima colonna è una check-box per indicare che quando si esegue un'istruzione di CREATE, prima di eseguirla viene richiesta una conferma
-        # da notare come la checkbox viene inserita in un widget di layout in modo che si possa
-        # attivare la centratura 
-        v_checkbox_c = QCheckBox()          
-        v_checkbox_c.setToolTip('When this flag is set, each CREATE statement requires confirmation.')
-        v_widget_c = QWidget()      
-        v_layout_c = QHBoxLayout(v_widget_c)
-        v_layout_c.addWidget(v_checkbox_c)
-        v_layout_c.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        v_layout_c.setContentsMargins(0,0,0,0)
-        v_widget_c.setLayout(v_layout_c)
-        try:
-            if record[5] == '1':
-                v_checkbox_c.setChecked(True)                                            
-            else:
-                v_checkbox_c.setChecked(False)                                                        
-        except:
-            v_checkbox_c.setChecked(False)                                                        
-        self.o_server.setCellWidget(v_rig-1,6,v_widget_c)                                                      
-    
-    def carico_riga_user(self, v_rig, record):
-        """
-           Carica una nuova riga nella tabella user
-        """
-        self.o_users.setItem(v_rig-1,0,QTableWidgetItem(record[0]))       
-        self.o_users.setItem(v_rig-1,1,QTableWidgetItem(record[1]))                               
-        v_password = QLineEdit(record[2])
-        v_password.setEchoMode(QLineEdit.EchoMode.Password) 
-        self.o_users.setCellWidget(v_rig-1,2,v_password)                               
-        # la quarta colonna è una check-box per la selezione dell'utente di default
-        # da notare come la checkbox viene inserita in un widget di layout in modo che si possa
-        # attivare la centratura 
-        v_checkbox = QCheckBox() 
-        v_checkbox.setToolTip('When this flag is set, MSql automatically connects with this user at startup. Warning! Select only one preference!')         
-        v_widget = QWidget()      
-        v_layout = QHBoxLayout(v_widget)
-        v_layout.addWidget(v_checkbox)
-        v_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        v_layout.setContentsMargins(0,0,0,0)
-        v_widget.setLayout(v_layout)
-        try:
-            if record[3] == '1':
-                v_checkbox.setChecked(True)                                            
-            else:
-                v_checkbox.setChecked(False)                                                        
-        except:
-            v_checkbox.setChecked(False)                                                        
-        self.o_users.setCellWidget(v_rig-1,3,v_widget)                                                      
-        # As proxy
-        if len(record) > 4:
-            self.o_users.setItem(v_rig-1,4,QTableWidgetItem(record[4]))                               
-        else:
-            self.o_users.setItem(v_rig-1,4,QTableWidgetItem())                               
-        # Schema
-        if len(record) > 5:
-            self.o_users.setItem(v_rig-1,5,QTableWidgetItem(record[5]))                               
-        else:
-            self.o_users.setItem(v_rig-1,5,QTableWidgetItem())                               
-        # Mode (normal, SYSDBA, SYSOPER)
-        e_mode = QComboBox()        
-        e_mode.addItems(["Normal", "SYSDBA", "SYSOPER"])        
-        self.o_users.setCellWidget(v_rig-1,6,e_mode)                               
-        if len(record) > 6:
-            e_mode.setCurrentText(record[6])    
-        else:
-            e_mode.setCurrentText('Normal')    
-
     def slot_e_default_animated_gif(self):
         """
            Aggiorna la preview della gif animata
         """        
         self.preview_gif_animata()
-    
-    def slot_set_color_server(self):
-        """
-           Gestione della scelta dei colori sull'elenco dei server
-        """
-        # ottengo un oggetto index-qt della riga selezionata
-        index = self.o_server.currentIndex()           
-        # prendo la cella che contiene il colore in modo da aprire la selezione partendo dal colore corrente
-        v_color_corrente = self.o_server.item( index.row(), 2).text()                        
-        # apro la dialog color
-        color = QColorDialog.getColor(QColor(v_color_corrente))                
-        # imposto il colore
-        if color.isValid():
-            self.o_server.setItem( index.row(), 2, QTableWidgetItem(color.name()) )            
-    
+        
     def slot_b_restore(self):
         """
            Ripristina tutte preferenze di default
         """
-        if message_question_yes_no(QCoreApplication.translate('Preferences','Do you want to restore default preferences?')) == 'Yes':
-            # cancello il file delle preferenze
-            if os.path.isfile(self.nome_file_preferences):
-                os.remove(self.nome_file_preferences)
-
-            if message_question_yes_no(QCoreApplication.translate('Preferences','Do you want to delete connections preferences too?')) == 'Yes':
-                # cancello il file delle preferenze
-                if os.path.isfile(self.nome_file_connections):
-                    os.remove(self.nome_file_connections)
-
-            # emetto messaggio di fine
-            message_info(QCoreApplication.translate('Preferences','Preferences restored! Restart MSql to see the changes ;-)'))
-            # esco dal programma delle preferenze
-            self.close()
+        self.preferences.restore_default_preferences(self.nome_file_preferences, self.nome_file_connections)
+        # esco dal programma delle preferenze
+        self.close()
 
     def slot_b_open_pref_dir(self):
         """
@@ -537,228 +417,97 @@ class win_preferences_class(QMainWindow, Ui_preferences_window):
             if font.bold():
                 v_text += ', BOLD'
             self.e_default_font_result.setText(v_text)            
-
-    def slot_e_connection_mode(self):
-        """
-           Gestione della modalità di editazione delle tabelle
-        """
-        if self.e_connection_mode.currentIndex() == 0:
-           self.l_oracleclient_path.setVisible(False)
-           self.e_oracleclient_path.setVisible(False)
-           self.b_oracleclient_path.setVisible(False)
-        else:         
-           self.l_oracleclient_path.setVisible(True)
-           self.e_oracleclient_path.setVisible(True)
-           self.b_oracleclient_path.setVisible(True)
-    
-    def slot_b_oracleclient_path(self):
-        """
-           Scelta della dir di Oracle Client
-        """
-        dirName = QFileDialog.getExistingDirectory(self, "Choose Oracle Client directory")                  
-        if dirName != "":
-            self.e_oracleclient_path.setText( dirName )
-    
-    def slot_b_server_add(self):
-        """
-           Crea una riga vuota dove poter inserire informazioni connessioni al server
-        """
-        v_rig = self.o_server.rowCount()+1
-        self.o_server.setRowCount(v_rig)
-        self.carico_riga_server(v_rig, ['','','',0,0,0])
-
-    def slot_b_server_remove(self):
-        """
-           Toglie la riga selezionata, da elenco server
-        """
-        self.o_server.removeRow(self.o_server.currentRow())
-
-    def slot_b_user_add(self):
-        """
-           Crea una riga vuota dove poter inserire informazioni utente di connessione al server
-        """
-        v_rig = self.o_users.rowCount()+1
-        self.o_users.setRowCount(v_rig)
-        self.carico_riga_user(v_rig, ['','','',0,'','','Normal'])
-
-    def slot_b_user_remove(self):
-        """
-           Toglie la riga selezionata, da elenco user
-        """
-        self.o_users.removeRow(self.o_users.currentRow())
-
+            
     def slot_b_save(self):
         """
            Salvataggio
         """	
         # il default per ricordare posizione della window
         if self.e_remember_window_pos.isChecked():
-            v_remember_window_pos = 1
+            self.preferences.remember_window_pos = 1
         else:
-            v_remember_window_pos = 0
+            self.preferences.remember_window_pos = 0
 
         # il default per ricordare posizione del testo nei file
         if self.e_remember_text_pos.isChecked():
-            v_remember_text_pos = 1
-        else:
-            v_remember_text_pos = 0
+            self.preferences.remember_text_pos = 1
+        else:   
+            self.preferences.remember_text_pos = 0
 
         # tema dei colori scuro
         if self.e_dark_theme.isChecked():
-            v_dark_theme = 1
+            self.preferences.dark_theme = 1
         else:
-            v_dark_theme = 0
+            self.preferences.dark_theme = 0
 
         # il default per end of line va convertito
         if self.e_default_end_of_line.isChecked():
-            v_eol = 1
+            self.preferences.end_of_line = 1
         else:
-            v_eol = 0
-            
+            self.preferences.end_of_line = 0
+
         # il default per auto column resize va convertito
         if self.e_default_auto_column_resize.isChecked():
-            v_auto_column_resize = 1
+            self.preferences.auto_column_resize = 1
         else:
-            v_auto_column_resize = 0
+            self.preferences.auto_column_resize = 0
 
         # il default per indentation guide va convertito
         if self.e_default_indentation_guide.isChecked():
-            v_indentation_guide = 1
+            self.preferences.indentation_guide = 1
         else:
-            v_indentation_guide = 0
+            self.preferences.indentation_guide = 0
         
         # il default per clear output va convertito
         if self.e_default_auto_clear_output.isChecked():
-            v_auto_clear_output = 1
+            self.preferences.auto_clear_output = 1
         else:
-            v_auto_clear_output = 0
+            self.preferences.auto_clear_output = 0
                 
         # il default per autocompletamento va convertito
         if self.e_default_autocompletation.isChecked():
-            v_autocompletation = 1
+            self.preferences.autocompletation = 1
         else:
-            v_autocompletation = 0
+            self.preferences.autocompletation = 0
                         
         # il default per apertura automatica di un nuovo editor all'apertura del programma, va convertito
         if self.e_open_new_editor.isChecked():
-            v_open_new_editor = 1
+            self.preferences.open_new_editor = 1
         else:
-            v_open_new_editor = 0
+            self.preferences.open_new_editor = 0
 
         # il default per attivare la mappa di procedure/funzioni dentro l'editor
         if self.e_default_map_proc_func.isChecked():
-            v_show_map_proc_func = 1
+            self.preferences.show_map_proc_func = 1
         else:
-            v_show_map_proc_func = 0
-
-        ###
-        # elenco dei server
-        ###
-        v_server = []
-        for i in range(0,self.o_server.rowCount()):
-            # controllo la checkbox del default (da notare come la checkbox è annegata in un oggetto di layout 
-            # e quindi prima prendo l'oggetto che c'è annegato nella cella della tabella, poi in quell'oggetto
-            # prendo tutti gli oggetti di tipo checkbox e poi prendo il primo checkbox (che è anche l'unico)
-            # e da li prendo il suo stato!
-            v_widget = self.o_server.cellWidget(i,4)
-            v_checkbox = v_widget.findChildren(QCheckBox)
-            if v_checkbox[0].isChecked():                
-                v_default = '1'
-            else:
-                v_default = '0'
-            # controllo la checkbox dell'evidenziare (da notare come la checkbox è annegata in un oggetto di layout 
-            # e quindi prima prendo l'oggetto che c'è annegato nella cella della tabella, poi in quell'oggetto
-            # prendo tutti gli oggetti di tipo checkbox e poi prendo il primo checkbox (che è anche l'unico)
-            # e da li prendo il suo stato!
-            v_widget = self.o_server.cellWidget(i,5)
-            v_checkbox = v_widget.findChildren(QCheckBox)
-            if v_checkbox[0].isChecked():                
-                v_emphasis = '1'
-            else:
-                v_emphasis = '0'
-            # controllo la checkbox della conferma su comandi di CREATE (da notare come la checkbox è annegata in un oggetto di layout 
-            # e quindi prima prendo l'oggetto che c'è annegato nella cella della tabella, poi in quell'oggetto
-            # prendo tutti gli oggetti di tipo checkbox e poi prendo il primo checkbox (che è anche l'unico)
-            # e da li prendo il suo stato!
-            v_widget = self.o_server.cellWidget(i,6)
-            v_checkbox = v_widget.findChildren(QCheckBox)
-            if v_checkbox[0].isChecked():                
-                v_create_confirm = '1'
-            else:
-                v_create_confirm = '0'
-            v_server.append( ( self.o_server.item(i,0).text(), self.o_server.item(i,1).text(), self.o_server.item(i,2).text(), v_default, v_emphasis, v_create_confirm ) )            
-
-        ###
-        # elenco degli users
-        ###
-        v_users = []
-        for i in range(0,self.o_users.rowCount()):
-            # controllo il campo della password che è annegato in un widget
-            v_password = self.o_users.cellWidget(i,2)            
-            # controllo la checkbox di autoconnection: da notare come la checkbox è annegata in un oggetto di layout 
-            # e quindi prima prendo l'oggetto che c'è annegato nella cella della tabella, poi in quell'oggetto
-            # prendo tutti gli oggetti di tipo checkbox e poi prendo il primo checkbox (che è anche l'unico)
-            # e da li prendo il suo stato!
-            v_widget = self.o_users.cellWidget(i,3)
-            v_checkbox = v_widget.findChildren(QCheckBox)
-            if v_checkbox[0].isChecked():                
-                v_default = '1'
-            else:
-                v_default = '0'
-            # dalla cella 6 prendo la combo box per prendere la modalità di connessione (normal, sysdba, sysoper)
-            v_widget = self.o_users.cellWidget(i,6)            
-            v_e_mode = v_widget.currentText()            
-            v_users.append( ( self.o_users.item(i,0).text(), self.o_users.item(i,1).text() , v_password.text(), v_default, self.o_users.item(i,4).text(), self.o_users.item(i,5).text(), v_e_mode ) )            
-
+            self.preferences.show_map_proc_func = 0
+        
         # se il tabsize è vuoto --> imposto 2
         if self.e_tab_size.text() == '':
             self.e_tab_size.setText('2')
+
+        # imposto tutte le altre preferenze
+        self.preferences.open_dir = self.e_default_open_dir.text()
+        self.preferences.save_dir = self.e_default_save_dir.text()                                  
+        self.preferences.autosave_snapshoot_interval = self.e_autosave_snapshoot_interval.value()
+        self.preferences.font_editor = self.e_default_font_editor.text()
+        self.preferences.font_result = self.e_default_font_result.text()                 
+        self.preferences.csv_separator = self.e_default_csv_separator.text()
+        self.preferences.tab_size = self.e_tab_size.text()                 
+        self.preferences.date_format = self.e_default_date_format.currentText()
+        self.preferences.general_zoom = self.e_general_zoom.value()                 
+        self.preferences.refresh_dictionary = self.e_refresh_dictionary.value()
+        self.preferences.app_language = self.e_language.currentText()
+        self.preferences.animated_gif = self.e_default_animated_gif.text()
+        self.preferences.highlight_color = self.e_highlight_color.currentText()
+        self.preferences.highlight_color_hex = self.e_highlight_color.currentData().name()
+        self.preferences.author_name = self.e_author_name.text()
+        self.preferences.connection_mode = self.preferences.connection_mode
+        self.preferences.oracleclient_path = self.preferences.oracleclient_path
+        self.preferences.clear_theme = self.e_clear_theme.currentText()
 	
-		# scrivo primo file delle preferenze generiche 
-        v_json ={'remember_window_pos': v_remember_window_pos,
-                 'remember_text_pos': v_remember_text_pos,
-                 'dark_theme': v_dark_theme,
-                 'open_dir': self.e_default_open_dir.text(),
-		         'save_dir': self.e_default_save_dir.text(),                 
-                 'eol': v_eol,
-                 'autosave_snapshoot_interval':self.e_autosave_snapshoot_interval.value(),
-		         'font_editor' :self.e_default_font_editor.text(),
-		         'font_result' : self.e_default_font_result.text(),                 
-                 'auto_column_resize': v_auto_column_resize,
-                 'indentation_guide': v_indentation_guide,
-                 'csv_separator': self.e_default_csv_separator.text(),
-                 'tab_size': self.e_tab_size.text(),
-                 'auto_clear_output': v_auto_clear_output,
-                 'date_format': self.e_default_date_format.currentText(),
-                 'general_zoom':self.e_general_zoom.value(),
-                 'autocompletation':v_autocompletation,
-                 'open_new_editor':v_open_new_editor,
-                 'refresh_dictionary':self.e_refresh_dictionary.value(),
-                 'app_language': self.e_language.currentText(),
-                 'animated_gif': self.e_default_animated_gif.text(),
-                 'highlight_color': self.e_highlight_color.currentText(),
-                 'highlight_color_hex': self.e_highlight_color.currentData().name(),
-                 'author_name': self.e_author_name.text(),
-                 'connection_mode': self.e_connection_mode.currentIndex(),
-                 'oracleclient_path': self.e_oracleclient_path.text(),
-                 'clear_theme': self.e_clear_theme.currentText(),
-                 'show_map_proc_func': v_show_map_proc_func               
-                }
-
-		# scrittura nel file dell'oggetto json (notare come venga usata la funzione dump senza la s finale in quanto scrive byte)
-        with open(self.nome_file_preferences, 'w') as outfile:json.dump(v_json, outfile)
-
-        # scrivo secondo file con i dati user e server (separato in quanto nelle versione per GitHub non viene riportato!)
-        v_json ={'server': v_server,
-                 'users': v_users                 
-                }
-
-		# scrittura nel file dell'oggetto json (che viene criptato e notare come venga usata la funzione dumps con la s finale in quanto scrive stringhe)
-        v_dump = cripta_messaggio(json.dumps(v_json))
-        with open(self.nome_file_connections, 'wb') as outfile:
-            outfile.write(v_dump)
-        
-        message_info(QCoreApplication.translate('Preferences','Preferences saved! Restart MSql to see the changes ;-)'))
+		# scrivo file delle preferenze generiche 
+        self.preferences.save_preferences(self.nome_file_preferences)
 
 # ----------------------------------------
 # TEST APPLICAZIONE

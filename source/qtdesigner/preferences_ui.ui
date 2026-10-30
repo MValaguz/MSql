@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>631</width>
-    <height>476</height>
+    <width>553</width>
+    <height>396</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,7 +22,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="o_tab_widget">
       <property name="currentIndex">
-       <number>3</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="general">
        <attribute name="title">
@@ -587,230 +587,6 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="connections">
-       <attribute name="title">
-        <string>Connections</string>
-       </attribute>
-       <layout class="QGridLayout" name="gridLayout">
-        <item row="1" column="0">
-         <layout class="QHBoxLayout" name="horizontalLayout_7">
-          <item>
-           <widget class="QLabel" name="l_oracleclient_path">
-            <property name="text">
-             <string>OracleClient dll dir.(*):</string>
-            </property>
-            <property name="buddy">
-             <cstring>e_oracleclient_path</cstring>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="e_oracleclient_path"/>
-          </item>
-          <item>
-           <widget class="QPushButton" name="b_oracleclient_path">
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset resource="resource.qrc">
-              <normaloff>:/icons/icons/folder.png</normaloff>:/icons/icons/folder.png</iconset>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item row="0" column="0">
-         <layout class="QHBoxLayout" name="horizontalLayout_6">
-          <item>
-           <widget class="QLabel" name="label_26">
-            <property name="text">
-             <string>Connection mode:</string>
-            </property>
-            <property name="buddy">
-             <cstring>e_connection_mode</cstring>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="e_connection_mode">
-            <item>
-             <property name="text">
-              <string>Thin mode (no need OracleClient)</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Thick mode (OracleClient dll are needed)</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item row="2" column="0">
-         <widget class="QTabWidget" name="tabWidget">
-          <property name="currentIndex">
-           <number>0</number>
-          </property>
-          <widget class="QWidget" name="tab">
-           <attribute name="title">
-            <string>Servers</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_12">
-            <item row="0" column="0">
-             <layout class="QVBoxLayout" name="verticalLayout">
-              <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_3">
-                <item>
-                 <widget class="QLabel" name="label_13">
-                  <property name="text">
-                   <string>Servers:</string>
-                  </property>
-                  <property name="buddy">
-                   <cstring>o_server</cstring>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <spacer name="horizontalSpacer">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>158</width>
-                    <height>18</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_2">
-                  <item>
-                   <widget class="QPushButton" name="b_server_add">
-                    <property name="toolTip">
-                     <string>Add a server</string>
-                    </property>
-                    <property name="text">
-                     <string/>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="resource.qrc">
-                      <normaloff>:/icons/icons/add.png</normaloff>:/icons/icons/add.png</iconset>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="b_server_remove">
-                    <property name="toolTip">
-                     <string>Remove selected server</string>
-                    </property>
-                    <property name="text">
-                     <string/>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="resource.qrc">
-                      <normaloff>:/icons/icons/failed.png</normaloff>:/icons/icons/failed.png</iconset>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-               </layout>
-              </item>
-              <item>
-               <widget class="QTableWidget" name="o_server">
-                <property name="selectionMode">
-                 <enum>QAbstractItemView::SingleSelection</enum>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </widget>
-          <widget class="QWidget" name="tab_2">
-           <attribute name="title">
-            <string>Users</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_11">
-            <item row="0" column="0">
-             <layout class="QGridLayout" name="gridLayout_9">
-              <item row="0" column="0">
-               <layout class="QGridLayout" name="gridLayout_10">
-                <item row="0" column="0">
-                 <widget class="QLabel" name="label_14">
-                  <property name="text">
-                   <string>Users:</string>
-                  </property>
-                  <property name="buddy">
-                   <cstring>o_users</cstring>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1">
-                 <spacer name="horizontalSpacer_2">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>258</width>
-                    <height>17</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-                <item row="0" column="2">
-                 <layout class="QHBoxLayout" name="horizontalLayout_8">
-                  <item>
-                   <widget class="QPushButton" name="b_user_add">
-                    <property name="toolTip">
-                     <string>Add user</string>
-                    </property>
-                    <property name="text">
-                     <string/>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="resource.qrc">
-                      <normaloff>:/icons/icons/add.png</normaloff>:/icons/icons/add.png</iconset>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="b_user_remove">
-                    <property name="toolTip">
-                     <string>Remove selected user</string>
-                    </property>
-                    <property name="text">
-                     <string/>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="resource.qrc">
-                      <normaloff>:/icons/icons/failed.png</normaloff>:/icons/icons/failed.png</iconset>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-               </layout>
-              </item>
-              <item row="1" column="0">
-               <widget class="QTableWidget" name="o_users">
-                <property name="selectionMode">
-                 <enum>QAbstractItemView::SingleSelection</enum>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </widget>
-         </widget>
-        </item>
-       </layout>
-      </widget>
      </widget>
     </item>
     <item row="1" column="0">
@@ -891,9 +667,6 @@
   <tabstop>e_default_auto_clear_output</tabstop>
   <tabstop>e_default_animated_gif</tabstop>
   <tabstop>b_default_animated_gif</tabstop>
-  <tabstop>e_connection_mode</tabstop>
-  <tabstop>e_oracleclient_path</tabstop>
-  <tabstop>b_oracleclient_path</tabstop>
   <tabstop>b_restore</tabstop>
   <tabstop>b_open_pref_dir</tabstop>
   <tabstop>b_save</tabstop>
@@ -910,8 +683,8 @@
    <slot>slot_b_default_open_dir()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>377</x>
-     <y>227</y>
+     <x>357</x>
+     <y>222</y>
     </hint>
     <hint type="destinationlabel">
      <x>410</x>
@@ -926,8 +699,8 @@
    <slot>slot_b_default_save_dir()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>377</x>
-     <y>269</y>
+     <x>357</x>
+     <y>272</y>
     </hint>
     <hint type="destinationlabel">
      <x>413</x>
@@ -942,8 +715,8 @@
    <slot>slot_b_save()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>579</x>
-     <y>488</y>
+     <x>620</x>
+     <y>465</y>
     </hint>
     <hint type="destinationlabel">
      <x>47</x>
@@ -958,44 +731,12 @@
    <slot>slot_b_restore()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>158</x>
-     <y>488</y>
+     <x>168</x>
+     <y>465</y>
     </hint>
     <hint type="destinationlabel">
      <x>91</x>
      <y>22</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>b_user_add</sender>
-   <signal>clicked()</signal>
-   <receiver>preferences_window</receiver>
-   <slot>slot_b_user_add()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>530</x>
-     <y>302</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>445</x>
-     <y>261</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>b_user_remove</sender>
-   <signal>clicked()</signal>
-   <receiver>preferences_window</receiver>
-   <slot>slot_b_user_remove()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>564</x>
-     <y>302</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>443</x>
-     <y>294</y>
     </hint>
    </hints>
   </connection>
@@ -1006,8 +747,8 @@
    <slot>slot_b_open_pref_dir()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>387</x>
-     <y>488</y>
+     <x>414</x>
+     <y>465</y>
     </hint>
     <hint type="destinationlabel">
      <x>441</x>
@@ -1038,8 +779,8 @@
    <slot>slot_b_default_font_editor()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>397</x>
-     <y>83</y>
+     <x>418</x>
+     <y>77</y>
     </hint>
     <hint type="destinationlabel">
      <x>452</x>
@@ -1054,8 +795,8 @@
    <slot>slot_b_default_animated_gif()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>363</x>
-     <y>398</y>
+     <x>399</x>
+     <y>383</y>
     </hint>
     <hint type="destinationlabel">
      <x>583</x>
@@ -1070,76 +811,12 @@
    <slot>slot_e_default_animated_gif()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>228</x>
-     <y>407</y>
+     <x>365</x>
+     <y>381</y>
     </hint>
     <hint type="destinationlabel">
      <x>589</x>
      <y>393</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>b_oracleclient_path</sender>
-   <signal>clicked()</signal>
-   <receiver>preferences_window</receiver>
-   <slot>slot_b_oracleclient_path()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>544</x>
-     <y>83</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>583</x>
-     <y>58</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>e_connection_mode</sender>
-   <signal>currentIndexChanged(int)</signal>
-   <receiver>preferences_window</receiver>
-   <slot>slot_e_connection_mode()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>504</x>
-     <y>52</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>583</x>
-     <y>22</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>b_server_remove</sender>
-   <signal>clicked()</signal>
-   <receiver>preferences_window</receiver>
-   <slot>slot_b_server_remove()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>564</x>
-     <y>128</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>442</x>
-     <y>73</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>b_server_add</sender>
-   <signal>clicked()</signal>
-   <receiver>preferences_window</receiver>
-   <slot>slot_b_server_add()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>530</x>
-     <y>128</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>445</x>
-     <y>43</y>
     </hint>
    </hints>
   </connection>
@@ -1153,14 +830,8 @@
   <slot>slot_b_default_color_prod()</slot>
   <slot>slot_b_default_color_dev()</slot>
   <slot>slot_b_restore()</slot>
-  <slot>slot_b_server_add()</slot>
-  <slot>slot_b_server_remove()</slot>
-  <slot>slot_b_user_add()</slot>
-  <slot>slot_b_user_remove()</slot>
   <slot>slot_b_open_pref_dir()</slot>
   <slot>slot_b_default_animated_gif()</slot>
   <slot>slot_e_default_animated_gif()</slot>
-  <slot>slot_b_oracleclient_path()</slot>
-  <slot>slot_e_connection_mode()</slot>
  </slots>
 </ui>
