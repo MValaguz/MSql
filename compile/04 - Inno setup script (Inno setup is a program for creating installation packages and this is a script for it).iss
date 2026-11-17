@@ -12,6 +12,8 @@ AppPublisher=Marco Valaguzza
 DefaultDirName={autopf}\MSql
 ChangesAssociations=yes
 DisableProgramGroupPage=yes
+; Mostra la schermata di accettazione della licenza prima dell'installazione
+LicenseFile="C:\MSql_exe\_internal\help\license.rtf"
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 OutputDir=C:\MSql_setup

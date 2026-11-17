@@ -5348,10 +5348,10 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         self.v_flag_testo_corrente = p_corrente        
                 
         if v_global_connected:                                    
-            # pulisco elenco            
-            self.slot_clear('RES')            
+            # pulisco elenco                 
+            self.slot_clear('RES')                     
             # pulisco la matrice che conterrà elenco delle celle modificate
-            self.v_matrice_dati_modificati = []
+            self.v_matrice_dati_modificati = []            
             
             # sostituisce la freccia del mouse con icona "clessidra"
             Freccia_Mouse(True)
@@ -5378,7 +5378,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             
             # esegue comando sql in modo asincrono!!! Al termine viene invocato un segnale e richiamata la funzione endSelectCommandToOracle
             self.bind_variable(p_function='DIC',p_testo_sql=v_select)                                                        
-            v_start_time = datetime.datetime.now()
+            v_start_time = datetime.datetime.now()            
             self.v_oracle_executer = oracle_executer.SendCommandToOracle(v_global_connection, self.v_cursor, v_select, self.v_variabili_bind_dizionario, self.link_to_MSql_win1_class.frameGeometry(), o_global_preferences.animated_gif)                                                                        
             self.v_oracle_executer.start()
 
@@ -5457,16 +5457,21 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         global v_global_connected
         global o_global_preferences
 
-        # prerequisiti
+        # prerequisiti e protezione da chiamate sovrapposte
         if not (v_global_connected and self.v_esecuzione_ok):
             return 'ko'
 
+        if getattr(self, 'v_in_caricamento', False):
+            return 'ko'
+
+        self.v_in_caricamento = True
         v_ok = 'ok'          # valore di ritorno predefinito
         v_local_loop = None  # variabile che conterrà il QEventLoop locale
+        v_finito = False     # flag per evitare che il loop parta se _do_load ha già finito
 
         # funzione interna che esegue il caricamento vero e proprio
         def _do_load():
-            nonlocal v_ok, v_local_loop
+            nonlocal v_ok, v_local_loop, v_finito
             try:
                 self.o_table.setUpdatesEnabled(False)
                 self.o_table.blockSignals(True)
@@ -5563,7 +5568,10 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                     self.v_wait_window.close()
                     self.v_wait_window = None
 
-                # 🔓 sblocca il loop locale se attivo
+                # segna come completato e sblocca il loop locale se attivo
+                v_finito = True
+                self.v_in_caricamento = False
+
                 if v_local_loop is not None and v_local_loop.isRunning():
                     v_local_loop.quit()
 
@@ -5573,12 +5581,13 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             self.v_wait_window.show()
             QApplication.processEvents(QEventLoop.ProcessEventsFlag.AllEvents)
 
-            # Crea e avvia il loop di attesa locale
+            # Crea il loop di attesa locale e pianifica l'esecuzione
             v_local_loop = QEventLoop()
             QTimer.singleShot(50, _do_load)
 
-            # blocca fino al completamento di _do_load()
-            v_local_loop.exec()
+            # blocca fino al completamento di _do_load() solo se non ha già finito
+            if not v_finito:
+                v_local_loop.exec()
         else:
             _do_load()
 
