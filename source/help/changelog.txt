@@ -20,10 +20,8 @@ MSql Changelog!
 
 Versione del 17/11/2026
 OK! Durante installazione viene riportata la licenza del programma
-OK??? Problema che esce messaggio errore "dpy...." che si è scoperto collegato all'evento di "salta all'ultimo record".
-      Il bug di programma era sul caricamento della pagina dove rimaneva in canna il richiamo alla funzione di caricamento precedente.
-			Ho segnato OK??? perché bisogna vedere se la modifica ha risolto definitivamente questa casistica.
-
+OK! Problema che esce messaggio errore "dpy...." che si è scoperto collegato all'evento di sulla scrollbar della tabella risultati
+   
 Versione del 23/10/2026
 - Rivista la gestione delle preferenze: ora ci sono le preferenze classiche di programma e le preferenze specifiche per le connessioni.
 

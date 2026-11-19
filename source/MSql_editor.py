@@ -919,7 +919,7 @@ class MSql_win1_class(QMainWindow, Ui_MSql_win1):
                 o_MSql_win2.slot_export_to_json_format()
             # Pulizia di tutto l'output
             elif p_slot.objectName() == 'actionClear_output':                 
-                o_MSql_win2.slot_clear('ALL')    
+                o_MSql_win2.slot_clear_res_out('ALL')    
             # Attiva l'auto pulizia ad ogni esecuzione di codice pl-sql
             elif p_slot.objectName() == 'actionAuto_clear_output':
                 # riporto la preferenza di menu dentro l'oggetto delle preferenze 
@@ -4806,19 +4806,25 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         # chiudo il menu popup
         self.o_table_popup.close()
 
-    def slot_clear(self, p_type):
+    def slot_clear_res_out(self, p_type):
         """
            Pulisce risultati e output se p_type = 'ALL'
            altrimenti solo risultati se p_type = 'RES'
            o output se p_type = 'OUT'
         """        
         if p_type == 'ALL' or p_type == 'RES':
+            self.o_table.blockSignals(True)
+            self.o_table.verticalScrollBar().blockSignals(True)
+            self.o_table.horizontalScrollBar().blockSignals(True)
             self.o_table.clear()
             self.o_table.setColumnCount(0)                                                                
-            self.o_table.setRowCount(0)                        
+            self.o_table.setRowCount(0)    
+            self.o_table.blockSignals(False)                    
+            self.o_table.verticalScrollBar().blockSignals(False)
+            self.o_table.horizontalScrollBar().blockSignals(False)
         
-        if p_type == 'ALL' or p_type == 'OUT':
-            self.o_output.clear()
+        if p_type == 'ALL' or p_type == 'OUT':            
+            self.o_output.clear()            
             self.v_output_lista_posizioni = []
             self.v_output_posizione_corrente = 0
     
@@ -4884,7 +4890,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
 
         # se indicato dalla preferenza, prima di partire ad eseguire, pulisco l'output
         if o_global_preferences.auto_clear_output:
-            self.slot_clear('OUT')
+            self.slot_clear_res_out('OUT')
         
         # prendo il testo e inizio ad eseguire le istruzioni
         # divido il testo ricevuto in input riga per riga (ritorno a capo è il divisore)
@@ -5048,7 +5054,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
 
         # se indicato dalla preferenza, prima di partire ad eseguire, pulisco l'output
         if o_global_preferences.auto_clear_output:
-            self.slot_clear('OUT')
+            self.slot_clear_res_out('OUT')
         
         # controllo se utente ha selezionato del testo specifico che vuole eseguire
         v_istruzione = self.e_sql.selectedText()                
@@ -5083,12 +5089,12 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         """
         v_ok = ''              
         # esecuzione normale...
-        if not p_explain:    
+        if not p_explain:                
             # se trovo select eseguo select            
-            if p_istruzione[0:6].upper() == 'SELECT' or p_istruzione[0:4].upper() == 'WITH':                                
+            if p_istruzione[0:6].upper() == 'SELECT' or p_istruzione[0:4].upper() == 'WITH':                                                
                 v_ok = self.esegui_select(p_istruzione, True)
             # ..altrimenti esegue come script
-            else:                 
+            else:                                 
                 v_ok = self.esegui_plsql(p_istruzione, True)        
 
         # è stato richiesto di fare l'analisi del piano di esecuzione
@@ -5346,10 +5352,10 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         global v_global_exec_time        
 
         self.v_flag_testo_corrente = p_corrente        
-                
+
         if v_global_connected:                                    
-            # pulisco elenco                 
-            self.slot_clear('RES')                     
+            # pulisco elenco                         
+            self.slot_clear_res_out('RES')                                 
             # pulisco la matrice che conterrà elenco delle celle modificate
             self.v_matrice_dati_modificati = []            
             
@@ -5432,7 +5438,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
                             v_new_header_item.setText(nome_colonna)
                             self.o_table.setHorizontalHeaderItem(v_pos,v_new_header_item)
                                 
-                # se tutto ok, posso procedere con il caricare la prima pagina                                            
+                # se tutto ok, posso procedere con il caricare la prima pagina                                                            
                 self.carica_pagina(p_wait_window=True)                   
 
                 # refresh della sezione variabili bind
@@ -5606,7 +5612,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # sostituisce la freccia del mouse con icona "clessidra"
             Freccia_Mouse(True)
 
-            # carico prossima pagina            
+            # carico prossima pagina    
             self.carica_pagina()
                         
             # Ripristino icona freccia del mouse
@@ -5624,7 +5630,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
         v_progress = avanzamento_infinito_class("MSql.gif")
 
         # carico tutte le pagine fino ad arrivare in fondo (siccome vengono caricati 100 record per pagina....)
-        v_counter = 0         
+        v_counter = 0                 
         while self.carica_pagina() != 'ko':
             v_counter += 1            
             # visualizzo barra di avanzamento e se richiesto interrompo
@@ -6974,7 +6980,7 @@ class MSql_win2_class(QMainWindow, Ui_MSql_win2):
             # attivo le modifiche sulla tabella
             self.o_table.setEditTriggers(QAbstractItemView.EditTrigger.AllEditTriggers)
             # pulisco la tabella costringendo l'utente a ricaricare la query in quanto deve comparire il rowid
-            self.slot_clear('RES')      
+            self.slot_clear_res_out('RES')      
         # ...
         else:
             # disattivo le modifiche sulla tabella
